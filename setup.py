@@ -30,7 +30,11 @@ setuptools.setup(
     packages=setuptools.find_packages(where=packagedir),
     python_requires=">=3.9",
     install_requires=[
+        "appdirs>=1.4.0",
     ],
     entry_points={
+        "console_scripts": [
+            "tomato=tomato:run_daemon"
+        ]
     },
 )
