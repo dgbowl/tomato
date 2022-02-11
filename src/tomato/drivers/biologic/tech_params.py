@@ -87,6 +87,21 @@ datatypes = {
     }
 }
 
+techfiles = {
+    "VMP3": {
+        "OCV": "ocv.ecc",
+        "CPLIMIT": "cplimit.ecc",
+        "CALIMIT": "cplimit.ecc",
+        "LOOP": "loop.ecc"
+    },
+    "SP-300": {
+        "OCV": "ocv4.ecc",
+        "CPLIMIT": "cplimit4.ecc",
+        "CALIMIT": "calimit4.ecc",
+        "LOOP": "loop4.ecc"
+    }
+}
+
 @dataclass
 class cplimit_step:
     current: float

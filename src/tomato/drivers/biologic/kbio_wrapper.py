@@ -1,8 +1,15 @@
+import os
+
 import logging
 log = logging.getLogger(__name__)
 
-from .kbio.kbio_types import PROG_STATE
+from .kbio.kbio_api import KBIO_api
+from .kbio.kbio_types import PROG_STATE, EccParams
 from .kbio.tech_types import TECH_ID
+from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms
+from .kbio.c_utils import c_is_64b
+
+from .tech_params import params, named_params, techfiles
 
 def get_test_magic(
     variable: str, 
@@ -98,8 +105,19 @@ def payload_to_dsl(payload: list[dict]) -> list[dict]:
     translated = []
     for technique in payload:
         translated.append(translate(technique))
-    
     return translated
+
+
+def dsl_to_ecc(api, dsl: list[dict]) -> list[EccParams]:
+    eccpars = []
+    for tech in dsl:
+        eccs = []
+        for k, v in params[tech["name"]].items():
+            ecc = make_ecc_parm(api, named_params[k], tech["k"])
+            eccs.append(ecc)
+        eccpar = make_ecc_parms(api, *eccs)
+        eccpars.append(eccpar)
+    return eccpars
 
 
 def parse_raw_data(api, data):
@@ -109,3 +127,14 @@ def parse_raw_data(api, data):
     tech_name = TECH_ID(data_info.TechniqueID).name
     
     return current_values, data_info, data_record
+
+
+def get_kbio_api(dllpath):
+    if c_is_64b:
+        dllfile = "EClib64.dll"
+    else:
+        dllfile = "EClib.dll"
+    apipath = os.path.join(dllpath, dllfile)
+    log.debug(f"biologic library path is '{apipath}'")
+    api = KBIO_api(apipath)
+    return api
