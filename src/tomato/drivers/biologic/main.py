@@ -1,8 +1,15 @@
 
 import logging
+import time
 log = logging.getLogger(__name__)
 
-from .kbio_wrapper import payload_to_dsl, parse_raw_data, get_kbio_api
+from .kbio_wrapper import (
+    get_kbio_techpath,
+    payload_to_dsl, 
+    parse_raw_data, 
+    get_kbio_api, 
+    dsl_to_ecc,
+)
 
 
 def get_status(address: str, channel: int, dllpath: str) -> tuple:
@@ -35,7 +42,23 @@ def start_job(
     dllpath: str,
     payload: list[dict]
 ) -> None:
-    print(payload)
+    api = get_kbio_api(dllpath)
+    dsl = payload_to_dsl(payload)
+    eccpars = dsl_to_ecc(api, dsl)
+    ntechs = len(eccpars)
+    first = True
+    last = False
+    ti = 1
+    id_, device_info = api.connect(address)
+    for tech, eccpars in zip(dsl, eccpars):
+        if ti == ntechs:
+            last = True
+        techfile = get_kbio_techpath(dllpath, tech["name"], device_info.model)
+        api.LoadTechnique(id_, channel, techfile, eccpars, first=first, last=last)
+        ti += 1
+        first = False
+    api.StartChannel(id_, channel)
+    api.Disconnect(id_)
 
 
 def stop_job(address: str, channel: int, dllpath: str) -> None:
@@ -51,8 +74,17 @@ def stop_job(address: str, channel: int, dllpath: str) -> None:
 
 pl = [
     {
-        "name": "OCV", "time": 3600, "record_every_dt": 10
+        "name": "OCV", "time": 60, "record_every_dt": 10
     }
 ]
 
-#print(payload_to_dsl(pl))
+address = "192.109.209.6"
+channel = 1
+dllpath = "C:\\EC-Lab Development Package\\EC-Lab Development Package\\"
+
+get_status(address, channel, dllpath)
+start_job(address, channel, dllpath, pl)
+time.sleep(10)
+get_data(address, channel, dllpath)
+time.sleep(20)
+get_data(address, channel, dllpath)
