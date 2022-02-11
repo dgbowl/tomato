@@ -134,17 +134,22 @@ def parse_raw_data(api, data, devname):
 
     dtypes = datatypes["VMP3" if vmp3 else "SP-300"][techname]
     
-    parsed_data = {}
-    t_rel = 0
-    for k, v in zip(dtypes, data):
-        if k == "t_low":
-            t_rel += v
-        elif k == "t_high":
-            t_rel += v << 32
-        else:
-            parsed_data[k] = api.ConvertNumericIntoSingle(v)
-    parsed_data["time"] = t_rel * current_values.TimeBase
-
+    parsed_data = []
+    ix = 0
+    for _ in range(data_info.NbRows):
+        inx = ix + data_info.NbCols
+        point = {}
+        t_rel = 0
+        for k, v in zip(dtypes, data_record[ix:inx]):
+            if k == "t_low":
+                t_rel += v
+            elif k == "t_high":
+                t_rel += v << 32
+            else:
+                point[k] = api.ConvertNumericIntoSingle(v)
+        point["time"] = t_rel * current_values.TimeBase
+        parsed_data.append(point)
+        ix = inx
     return parsed_data
 
 
