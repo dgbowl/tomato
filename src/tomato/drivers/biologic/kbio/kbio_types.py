@@ -16,7 +16,7 @@ from math import nan
 from enum import Enum, EnumMeta
 from dataclasses import dataclass
 
-from kbio.c_utils import *
+from .c_utils import *
 
 #==============================================================================#
 
