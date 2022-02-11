@@ -4,7 +4,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from .kbio.kbio_api import KBIO_api
-from .kbio.kbio_types import PROG_STATE, EccParams
+from .kbio.kbio_types import PROG_STATE, VMP3_FAMILY, EccParams
 from .kbio.tech_types import TECH_ID
 from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms
 from .kbio.c_utils import c_is_64b
@@ -138,3 +138,12 @@ def get_kbio_api(dllpath):
     log.debug(f"biologic library path is '{apipath}'")
     api = KBIO_api(apipath)
     return api
+
+def get_kbio_techpath(
+    dllpath, 
+    techname, 
+    devname,
+) -> str:
+    vmp3 = devname in VMP3_FAMILY
+    techfile = techfiles["VMP3" if vmp3 else "SP-300"][techname]
+    return os.path.join(dllpath, techfile)
