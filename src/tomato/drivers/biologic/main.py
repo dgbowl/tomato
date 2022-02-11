@@ -49,7 +49,7 @@ def start_job(
     first = True
     last = False
     ti = 1
-    id_, device_info = api.connect(address)
+    id_, device_info = api.Connect(address)
     for tech, eccpars in zip(dsl, eccpars):
         if ti == ntechs:
             last = True
@@ -71,20 +71,3 @@ def stop_job(address: str, channel: int, dllpath: str) -> None:
     api.Disconnect(id_)
 
 
-
-pl = [
-    {
-        "name": "OCV", "time": 60, "record_every_dt": 10
-    }
-]
-
-address = "192.109.209.6"
-channel = 1
-dllpath = "C:\\EC-Lab Development Package\\EC-Lab Development Package\\"
-
-get_status(address, channel, dllpath)
-start_job(address, channel, dllpath, pl)
-time.sleep(10)
-get_data(address, channel, dllpath)
-time.sleep(20)
-get_data(address, channel, dllpath)
