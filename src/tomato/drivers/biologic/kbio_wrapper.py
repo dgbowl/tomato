@@ -113,7 +113,10 @@ def dsl_to_ecc(api, dsl: list[dict]) -> list[EccParams]:
     for tech in dsl:
         eccs = []
         for k, v in params[tech["name"]].items():
-            ecc = make_ecc_parm(api, named_params[k], tech[k])
+            if v > 1:
+                ecc = make_ecc_parm(api, named_params[k], tech[k], 0)    
+            else:
+                ecc = make_ecc_parm(api, named_params[k], tech[k])
             eccs.append(ecc)
         eccpar = make_ecc_parms(api, *eccs)
         eccpars.append(eccpar)

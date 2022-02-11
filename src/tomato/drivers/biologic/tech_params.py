@@ -100,29 +100,3 @@ techfiles = {
         "LOOP": "loop4.ecc"
     }
 }
-
-@dataclass
-class cplimit_step:
-    current: float
-    is_delta: bool
-    time: float
-    test1_magic: int
-    test1_value: float
-    test2_magic: int
-    test2_value: float
-    test3_magic: int
-    test3_value: float
-    limit_magic: int
-
-@dataclass
-class calimit_step:
-    voltage: float
-    is_delta: bool
-    time: float
-    test1_magic: int
-    test1_value: float
-    test2_magic: int
-    test2_value: float
-    test3_magic: int
-    test3_value: float
-    limit_magic: int
