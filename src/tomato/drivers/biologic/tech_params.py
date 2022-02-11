@@ -28,7 +28,6 @@ params = {
         'time': 1,
         'record_every_dE': 1,
         'record_every_dt': 1,
-        'E_range': 1
     },
     "CPLIMIT": {
         'current': 20,
