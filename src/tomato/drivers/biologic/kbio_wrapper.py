@@ -9,7 +9,7 @@ from .kbio.tech_types import TECH_ID
 from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms
 from .kbio.c_utils import c_is_64b
 
-from .tech_params import params, named_params, techfiles
+from .tech_params import params, named_params, techfiles, datatypes
 
 def get_test_magic(
     variable: str, 
@@ -125,13 +125,27 @@ def dsl_to_ecc(api, dsl: list[dict]) -> list[EccParams]:
     return eccpars
 
 
-def parse_raw_data(api, data):
+def parse_raw_data(api, data, devname):
     current_values, data_info, data_record = data
 
     status = PROG_STATE(current_values.State).name
-    tech_name = TECH_ID(data_info.TechniqueID).name
+    techname = TECH_ID(data_info.TechniqueID).name
+    vmp3 = devname in VMP3_FAMILY
+
+    dtypes = datatypes["VMP3" if vmp3 else "SP-300"][techname]
     
-    return current_values, data_info, data_record
+    parsed_data = {}
+    t_rel = 0
+    for k, v in zip(dtypes, data):
+        if k == "t_low":
+            t_rel += v
+        elif k == "t_high":
+            t_rel += v << 32
+        else:
+            parsed_data[k] = api.ConvertNumericIntoSingle(v)
+    parsed_data["time"] = t_rel * current_values.TimeBase
+
+    return parsed_data
 
 
 def get_kbio_api(dllpath):
