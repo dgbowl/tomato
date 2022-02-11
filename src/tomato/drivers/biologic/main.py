@@ -32,7 +32,7 @@ def get_data(address: str, channel: int, dllpath: str) -> list:
     id_, device_info = api.Connect(address)
     data = api.GetData(id_, channel)
     api.Disconnect(id_)
-    parsed_data = parse_raw_data(api, data)
+    parsed_data = parse_raw_data(api, data, device_info.model)
     return parsed_data
 
 
