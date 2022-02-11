@@ -35,7 +35,7 @@ def translate(technique: dict) -> dict:
     if technique["name"] == "OCV":
         tech = {
             "name": "OCV",
-            "time": technique["time"],
+            "wait": technique["time"],
             "record_every_dt": technique.get("record_every_dt", 60.0),
             "record_every_dE": technique.get("record_every_dE", 0.1),
         }
@@ -113,11 +113,13 @@ def dsl_to_ecc(api, dsl: list[dict]) -> list[EccParams]:
     for tech in dsl:
         eccs = []
         for k, v in params[tech["name"]].items():
+            print(k, v)
             if v > 1:
                 ecc = make_ecc_parm(api, named_params[k], tech[k], 0)    
             else:
                 ecc = make_ecc_parm(api, named_params[k], tech[k])
             eccs.append(ecc)
+        print("made all pars")
         eccpar = make_ecc_parms(api, *eccs)
         eccpars.append(eccpar)
     return eccpars

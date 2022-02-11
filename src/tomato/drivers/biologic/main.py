@@ -44,6 +44,7 @@ def start_job(
 ) -> None:
     api = get_kbio_api(dllpath)
     dsl = payload_to_dsl(payload)
+    print(dsl)
     eccpars = dsl_to_ecc(api, dsl)
     ntechs = len(eccpars)
     first = True
@@ -54,7 +55,8 @@ def start_job(
         if ti == ntechs:
             last = True
         techfile = get_kbio_techpath(dllpath, tech["name"], device_info.model)
-        api.LoadTechnique(id_, channel, techfile, eccpars, first=first, last=last)
+        print(channel, techfile, eccpars, first, last)
+        api.LoadTechnique(id_, channel, techfile, eccpars, first=first, last=last, display=True)
         ti += 1
         first = False
     api.StartChannel(id_, channel)

@@ -2,7 +2,8 @@ from .kbio.kbio_tech import ECC_parm
 from dataclasses import dataclass
 
 named_params = {
-    'time': ECC_parm("Rest_time_T", float),
+    'wait': ECC_parm("Rest_time_T", float),
+    'time': ECC_parm("Duration_step", float),
     'record_every_dt': ECC_parm("Record_every_dT", float),
     'record_every_dE': ECC_parm("Record_every_dE", float),
     'E_range': ECC_parm("E_Range", int),
@@ -25,7 +26,7 @@ named_params = {
 
 params = {
     "OCV": {
-        'time': 1,
+        'wait': 1,
         'record_every_dE': 1,
         'record_every_dt': 1,
     },

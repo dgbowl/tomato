@@ -16,7 +16,6 @@ pl = [
         "record_every_dt": 5,
         "record_every_dE": 0.01,
         "I_range": 8,
-        "limit_voltage_max": 4.0
     }
 ]
 
