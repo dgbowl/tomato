@@ -10,7 +10,7 @@ from .kbio.tech_types import TECH_ID
 from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms, ECC_parm
 from .kbio.c_utils import c_is_64b
 
-from .tech_params import params, named_params, techfiles, datatypes
+from .tech_params import named_params, techfiles, datatypes, I_ranges, E_ranges
 
 def get_test_magic(
     variable: str, 
@@ -38,7 +38,8 @@ def get_num_steps(tech: dict) -> int:
         "current", 
         "voltage", 
         "is_delta", 
-        "time", 
+        "time",
+        "scan_rate" 
         "limit_voltage_min", 
         "limit_voltage_max",
         "limit_current_min", 
@@ -57,23 +58,36 @@ def pad_steps(param: Union[list, int, float], ns: int) -> list:
     else:
         ret = [param] * ns
     return ret
-        
 
-def translate(technique: dict) -> dict:
-    if technique["name"] == "OCV":
-        tech = {
-            "name": "OCV",
-            "Rest_time_T": technique["time"],
-            "Record_every_dT": technique.get("record_every_dt", 30.0),
-            "Record_every_dE": technique.get("record_every_dE", 0.005),
-        }
-    elif technique["name"] in {"CPLIMIT", "CALIMIT"}:
+
+def current(val: Union[str,float], capacity: float) -> float:
+    if isinstance(val, float):
+        return val
+    elif "/" in val:
+        pre, post = val.split("/")
+        if pre == "C":
+            return capacity / float(post)
+        elif pre in {"D", "-C"}:
+            return -1 * capacity / float(post)
+    else:
+        if "D" in val:
+            pre = float(val.replace("D", "")) * -1
+        elif "C" in val:
+            pre = float(val.replace("C", ""))
+        else:
+            pre = float(val)
+        return pre * capacity
+    log.error(f"current string '{val}' not understood.")
+    return capacity / float(post)
+
+
+def translate(technique: dict, capacity: float) -> dict:
+    if technique["name"] in {"CPLIMIT", "CALIMIT"}:
         ns = get_num_steps(technique)
         tech = {
             "name": technique["name"],
             "Step_number": ns - 1,
             "N_Cycles": technique.get("n_cycles", 1),
-            "I_Range": technique["I_range"],
             "Record_every_dT": technique.get("record_every_dt", 30.0),
             "Record_every_dE": technique.get("record_every_dE", 0.005),
             "Duration_step": pad_steps(technique["time"], ns),
@@ -96,16 +110,61 @@ def translate(technique: dict) -> dict:
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
         if technique["name"] == "CPLIMIT":
-            tech["Current_step"] = pad_steps(technique["current"], ns)
+            I = current(technique["current"], capacity)
+            tech["Current_step"] = pad_steps(I, ns)
+            tech["I_Range"] = I_ranges[technique.get("I_range", "keep")]
         elif technique["name"] == "CALIMIT":
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
+    elif technique["name"] == "LOOP":
+        tech = {
+            "loop_N_times": technique.get("n_gotos", -1),
+            "protocol_number": technique.get("goto", 0)
+        }
+    elif technique["name"] in {"VSCANLIMIT", "ISCANLIMIT"}:
+        ns = get_num_steps(technique)
+        tech = {
+            "name": technique["name"],
+            "Scan_number": ns - 1,
+            "N_Cycles": technique.get("n_cycles", 1),
+            "vs_initial": pad_steps(technique.get("is_delta", False), ns),
+            "Scan_Rate": pad_steps(technique.get("scan_rate", 0.001), ns),
+            "Test1_Config": pad_steps(0, ns),
+            "Test1_Value": pad_steps(0.0, ns),
+            "Test2_Config": pad_steps(0, ns),
+            "Test2_Value": pad_steps(0.0, ns),
+            "Test3_Config": pad_steps(0, ns),
+            "Test3_Value": pad_steps(0.0, ns),
+            "Exit_Cond": pad_steps(2 * int(technique.get("exit_on_limit", False)), ns),
+        }
+        ci = 1
+        for prop in {"voltage", "current"}:
+            for cond in {"max", "min"}:
+                if f"limit_{prop}_{cond}" in technique and ci < 4:
+                    conf = get_test_magic(prop, cond)
+                    val = technique[f"limit_{prop}_{cond}"]
+                    tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
+                    tech[f"Test{ci}_Value"] = pad_steps(val, ns)
+                    ci += 1
+        if technique["name"] == "ISCANLIMIT":
+            I = current(technique["current"], capacity)
+            tech["Current_step"] = pad_steps(I, ns)
+            tech["Begin_measuring_E"] = technique.get("scan_start", 0.0)
+            tech["End_measuring_E"] = technique.get("scan_end", 1.0)
+            tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
+            tech["I_Range"] = I_ranges[technique.get("I_range", "keep")]
+        elif technique["name"] == "VSCANLIMIT":
+            tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
+            tech["Begin_measuring_I"] = technique.get("scan_start", 0.0)
+            tech["End_measuring_I"] = technique.get("scan_end", 1.0)
+            tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
     else:
-        log.error(f"technique name '{technique['name']}' not understood.")
+        if technique["name"] == "OCV":
+            log.error(f"technique name '{technique['name']}' not understood.")
         tech = {
             "name": "OCV",
-            "time": technique.get("time", 0.0),
-            "record_every_dt": technique.get("record_every_dt", 60.0),
-            "record_every_dE": technique.get("record_every_dE", 0.1),
+            "Rest_time_T": technique.get("time", 0.0),
+            "Record_every_dT": technique.get("record_every_dt", 30.0),
+            "Record_every_dE": technique.get("record_every_dE", 0.005),
         }
     return tech 
 
@@ -126,10 +185,10 @@ def dsl_to_ecc(api, dsl: dict) -> EccParams:
     return eccpars
 
 
-def payload_to_ecc(api, payload: list[dict]) -> list[dict]:
+def payload_to_ecc(api, payload: list[dict], capacity: float) -> list[dict]:
     eccs = []
     for technique in payload:
-        dsl = translate(technique)
+        dsl = translate(technique, capacity)
         eccpars = dsl_to_ecc(api, dsl)
         eccs.append((dsl["name"], eccpars))
     return eccs
@@ -155,6 +214,8 @@ def parse_raw_data(api, data, devname):
                 t_rel += v
             elif k == "t_high":
                 t_rel += v << 32
+            elif k == "cycle":
+                point[k] = v
             else:
                 point[k] = api.ConvertNumericIntoSingle(v)
         point["time"] = t_rel * current_values.TimeBase
@@ -172,6 +233,7 @@ def get_kbio_api(dllpath):
     log.debug(f"biologic library path is '{apipath}'")
     api = KBIO_api(apipath)
     return api
+
 
 def get_kbio_techpath(
     dllpath, 

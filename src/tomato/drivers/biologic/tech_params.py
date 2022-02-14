@@ -24,50 +24,30 @@ named_params = {
     "protocol_number": int
 }
 
-params = {
-    "OCV": {
-        'wait': 1,
-        'record_every_dE': 1,
-        'record_every_dt': 1,
-    },
-    "CPLIMIT": {
-        'current': 20,
-        'is_delta': 20,
-        'time': 20,
-        'test1_magic': 20,
-        'test1_value': 20,
-        'test2_magic': 20,
-        'test2_value': 20,
-        'test3_magic': 20,
-        'test3_value': 20,
-        'limit_magic': 20,
-        'n_cycles': 1,
-        'n_steps': 1,
-        'record_every_dt': 1,
-        'record_every_dE': 1,
-        'I_range': 1,
-    },
-    "CALIMIT": {
-        'voltage': 20,
-        'is_delta': 20,
-        'time': 20,
-        'test1_magic': 20,
-        'test1_value': 20,
-        'test2_magic': 20,
-        'test2_value': 20,
-        'test3_magic': 20,
-        'test3_value': 20,
-        'limit_magic': 20,
-        'n_cycles': 1,
-        'n_steps': 1,
-        'record_every_dt': 1,
-        'record_every_dE': 1,
-        'I_range': 1,
-    },
-    "LOOP": {
-        'n_gotos': 1,
-        'goto': 1
-    }
+
+I_ranges = {
+    "keep": -1,
+    "100 pA": 0,
+    "1 nA": 1,
+    "10 nA": 2,
+    "100 nA": 3,
+    "1 μA": 4,
+    "10 μA": 5,
+    "100 μA": 6,
+    "1 mA": 7,
+    "10 mA": 8,
+    "100 mA": 9,
+    "1 A": 10,
+    "booster": 11,
+    "auto": 12,
+}
+
+
+E_ranges = {
+    "±2.5 V": 0,
+    "±5 V": 1,
+    "±10 V": 2,
+    "auto": 3,
 }
 
 datatypes = {
@@ -91,7 +71,7 @@ techfiles = {
     "VMP3": {
         "OCV": "ocv.ecc",
         "CPLIMIT": "cplimit.ecc",
-        "CALIMIT": "cplimit.ecc",
+        "CALIMIT": "calimit.ecc",
         "LOOP": "loop.ecc"
     },
     "SP-300": {
