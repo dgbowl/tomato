@@ -5,10 +5,9 @@ log = logging.getLogger(__name__)
 
 from .kbio_wrapper import (
     get_kbio_techpath,
-    payload_to_dsl, 
+    payload_to_ecc, 
     parse_raw_data, 
-    get_kbio_api, 
-    dsl_to_ecc,
+    get_kbio_api,
 )
 
 
@@ -43,19 +42,16 @@ def start_job(
     payload: list[dict]
 ) -> None:
     api = get_kbio_api(dllpath)
-    dsl = payload_to_dsl(payload)
-    print(dsl)
-    eccpars = dsl_to_ecc(api, dsl)
+    eccpars = payload_to_ecc(api, payload)
     ntechs = len(eccpars)
     first = True
     last = False
     ti = 1
     id_, device_info = api.Connect(address)
-    for tech, eccpars in zip(dsl, eccpars):
+    for techname, eccpars in eccpars:
         if ti == ntechs:
             last = True
-        techfile = get_kbio_techpath(dllpath, tech["name"], device_info.model)
-        print(channel, techfile, eccpars, first, last)
+        techfile = get_kbio_techpath(dllpath, techname, device_info.model)
         api.LoadTechnique(id_, channel, techfile, eccpars, first=first, last=last, display=True)
         ti += 1
         first = False

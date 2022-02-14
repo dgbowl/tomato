@@ -1,4 +1,5 @@
 import os
+from typing import Union
 
 import logging
 log = logging.getLogger(__name__)
@@ -6,7 +7,7 @@ log = logging.getLogger(__name__)
 from .kbio.kbio_api import KBIO_api
 from .kbio.kbio_types import PROG_STATE, VMP3_FAMILY, EccParams
 from .kbio.tech_types import TECH_ID
-from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms
+from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms, ECC_parm
 from .kbio.c_utils import c_is_64b
 
 from .tech_params import params, named_params, techfiles, datatypes
@@ -31,65 +32,73 @@ def get_test_magic(
     return magic
 
 
+def get_num_steps(tech: dict) -> int:
+    ns = 1
+    for k in {
+        "current", 
+        "voltage", 
+        "is_delta", 
+        "time", 
+        "limit_voltage_min", 
+        "limit_voltage_max",
+        "limit_current_min", 
+        "limit_current_max", 
+    }:
+        if k in tech and isinstance(tech[k], list):
+            ns = max(len(tech[k]), ns)
+    return ns
+
+
+def pad_steps(param: Union[list, int, float], ns: int) -> list:
+    if isinstance(param, list):
+        ret = [0] * ns
+        for i in range(ns):
+            ret[i] = param[i]
+    else:
+        ret = [param] * ns
+    return ret
+        
+
 def translate(technique: dict) -> dict:
     if technique["name"] == "OCV":
         tech = {
             "name": "OCV",
-            "wait": technique["time"],
-            "record_every_dt": technique.get("record_every_dt", 60.0),
-            "record_every_dE": technique.get("record_every_dE", 0.1),
+            "Rest_time_T": technique["time"],
+            "Record_every_dT": technique.get("record_every_dt", 30.0),
+            "Record_every_dE": technique.get("record_every_dE", 0.005),
         }
-    elif technique["name"] == "CPLIMIT":
+    elif technique["name"] in {"CPLIMIT", "CALIMIT"}:
+        ns = get_num_steps(technique)
         tech = {
-            "name": "CPLIMIT",
-            "n_cycles": 1,
-            "n_steps": 0,
-            "current": technique["current"],
-            "time": technique["time"],
+            "name": technique["name"],
+            "Step_number": ns - 1,
+            "N_Cycles": technique.get("n_cycles", 1),
             "I_range": technique["I_range"],
-            "is_delta": technique.get("is_delta", False),
-            "record_every_dt": technique.get("record_every_dt", 60.0),
-            "record_every_dE": technique.get("record_every_dE", 0.1),
-            "test1_magic": 0,
-            "test1_value": 0.0,
-            "test2_magic": 0,
-            "test2_value": 0.0,
-            "test3_magic": 0,
-            "test3_value": 0.0,
-            "limit_magic": 2 * int(technique.get("exit_on_limit", False)),
+            "Duration_step": pad_steps(technique["time"], ns),
+            "vs_initial": pad_steps(technique.get("is_delta", False), ns),
+            "Record_every_dT": pad_steps(technique.get("record_every_dt", 30.0), ns),
+            "Record_every_dE": pad_steps(technique.get("record_every_dE", 0.005), ns),
+            "Test1_Config": pad_steps(0, ns),
+            "Test1_Value": pad_steps(0.0, ns),
+            "Test2_Config": pad_steps(0, ns),
+            "Test2_Value": pad_steps(0.0, ns),
+            "Test3_Config": pad_steps(0, ns),
+            "Test3_Value": pad_steps(0.0, ns),
+            "Exit_Cond": pad_steps(2 * int(technique.get("exit_on_limit", False)), ns),
         }
         ci = 1
         for prop in {"voltage", "current"}:
             for cond in {"max", "min"}:
                 if f"limit_{prop}_{cond}" in technique and ci < 4:
-                    tech[f"test{ci}_magic"] = get_test_magic(prop, cond)
-                    tech[f"test{ci}_value"] = technique[f"limit_{prop}_{cond}"]
+                    conf = get_test_magic(prop, cond)
+                    val = technique[f"limit_{prop}_{cond}"]
+                    tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
+                    tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
-    elif technique["name"] == "CALIMIT":
-        tech = {
-            "name": "CALIMIT",
-            "n_cycles": 1,
-            "n_steps": 0,
-            "voltage": technique["voltage"],
-            "time": technique["time"],
-            "is_delta": technique.get("is_delta", False),
-            "record_every_dt": technique.get("record_every_dt", 60.0),
-            "record_every_dE": technique.get("record_every_dE", 0.1),
-            "test1_magic": 0,
-            "test1_value": 0.0,
-            "test2_magic": 0,
-            "test2_value": 0.0,
-            "test3_magic": 0,
-            "test3_value": 0.0,
-            "limit_magic": 2 * int(technique.get("exit_on_limit", False)),
-        }
-        ci = 1
-        for prop in {"voltage", "current"}:
-            for cond in {"max", "min"}:
-                if f"limit_{prop}_{cond}" in technique and ci < 4:
-                    tech[f"test{ci}_magic"] = get_test_magic(prop, cond)
-                    tech[f"test{ci}_value"] = technique[f"limit_{prop}_{cond}"]
-                    ci += 1
+        if technique["name"] == "CPLIMIT":
+            tech["Current_step"] = pad_steps(technique["current"], ns),
+        elif technique["name"] == "CALIMIT":
+            tech["Voltage_step"] = pad_steps(technique["current"], ns),
     else:
         log.error(f"technique name '{technique['name']}' not understood.")
         tech = {
@@ -101,28 +110,27 @@ def translate(technique: dict) -> dict:
     return tech 
 
 
-def payload_to_dsl(payload: list[dict]) -> list[dict]:
-    translated = []
-    for technique in payload:
-        translated.append(translate(technique))
-    return translated
-
-
-def dsl_to_ecc(api, dsl: list[dict]) -> list[EccParams]:
-    eccpars = []
-    for tech in dsl:
-        eccs = []
-        for k, v in params[tech["name"]].items():
-            print(k, v)
-            if v > 1:
-                ecc = make_ecc_parm(api, named_params[k], tech[k], 0)    
-            else:
-                ecc = make_ecc_parm(api, named_params[k], tech[k])
+def dsl_to_ecc(api, dsl: dict) -> EccParams:
+    eccs = []
+    for k, val in dsl.items():
+        if isinstance(val, list):
+            for i, v in zip(range(len(val)), val):
+                ecc = make_ecc_parm(api, ECC_parm(k, named_params[k]), v, i)
+                eccs.append(ecc)
+        else:
+            ecc = make_ecc_parm(api, ECC_parm(k, named_params[k]), v)
             eccs.append(ecc)
-        print("made all pars")
-        eccpar = make_ecc_parms(api, *eccs)
-        eccpars.append(eccpar)
+    eccpars = make_ecc_parms(api, *eccs)
     return eccpars
+
+
+def payload_to_ecc(api, payload: list[dict]) -> list[dict]:
+    eccs = []
+    for technique in payload:
+        dsl = translate(technique)
+        eccpars = dsl_to_ecc(api, dsl)
+        eccs.append((dsl["name"], eccpars))
+    return eccs
 
 
 def parse_raw_data(api, data, devname):
