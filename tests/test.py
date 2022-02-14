@@ -5,17 +5,20 @@ import time
 pl = [
     {
         "name": "OCV", 
-        "time": 60, 
-        "record_every_dt": 10
+        "time": 5, 
+        "record_every_dt": 1
     },
     {
         "name": "CPLIMIT", 
-        "current": 0.001,
+        "current": [-0.004, 0.005],
         "time": 600, 
         "is_delta": False,
-        "record_every_dt": 5,
+        "record_every_dt": 10,
         "record_every_dE": 0.01,
-        "I_range": 8,
+        "I_range": "10 mA",
+        "limit_voltage_max": 4.1,
+        "limit_voltage_min": 3.0,
+        "n_cycles": 10
     }
 ]
 

@@ -15,16 +15,16 @@ from .tech_params import named_params, techfiles, datatypes, I_ranges, E_ranges
 def get_test_magic(
     variable: str, 
     sign: str, 
-    logic: str = "+", 
+    logic: str = "or", 
     active: bool = True
 ) -> int:
     magic = int(active)
     
-    assert logic.lower() in {"x", "*", "and", "+", "or"}
-    magic += 2 * int(logic.lower() in {"x", "*", "and"})
+    assert logic.lower() in {"and", "or"}
+    magic += 2 * int(logic.lower() in {"and"})
 
-    assert sign.lower() in {"<", "max", ">", "min"}
-    magic += 4 * int(sign.lower() in {">", "min"})
+    assert sign.lower() in {"max", "min"}
+    magic += 4 * int(sign.lower() in {"max"})
 
     assert variable.lower() in {"voltage", "E", "current", "I"}
     magic += 96 * int(variable.lower() in {"current", "I"})
@@ -60,25 +60,28 @@ def pad_steps(param: Union[list, int, float], ns: int) -> list:
     return ret
 
 
-def current(val: Union[str,float], capacity: float) -> float:
-    if isinstance(val, float):
-        return val
-    elif "/" in val:
-        pre, post = val.split("/")
-        if pre == "C":
-            return capacity / float(post)
-        elif pre in {"D", "-C"}:
-            return -1 * capacity / float(post)
-    else:
-        if "D" in val:
-            pre = float(val.replace("D", "")) * -1
-        elif "C" in val:
-            pre = float(val.replace("C", ""))
+def current(val: Union[list,str,float], capacity: float) -> float:
+    if not isinstance(val, list):
+        val = [val]
+    ret = []
+    for v in val:
+        if isinstance(v, float):
+            ret.append(v)
+        elif "/" in v:
+            pre, post = v.split("/")
+            if pre == "C":
+                ret.append(capacity / float(post))
+            elif pre in {"D", "-C"}:
+                ret.append(-1 * capacity / float(post))
         else:
-            pre = float(val)
-        return pre * capacity
-    log.error(f"current string '{val}' not understood.")
-    return capacity / float(post)
+            if "D" in v:
+                pre = float(v.replace("D", "")) * -1
+            elif "C" in v:
+                pre = float(v.replace("C", ""))
+            else:   
+                pre = float(v)
+            ret.append(pre * capacity)
+    return ret
 
 
 def translate(technique: dict, capacity: float) -> dict:
@@ -158,7 +161,7 @@ def translate(technique: dict, capacity: float) -> dict:
             tech["End_measuring_I"] = technique.get("scan_end", 1.0)
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
     else:
-        if technique["name"] == "OCV":
+        if technique["name"] != "OCV":
             log.error(f"technique name '{technique['name']}' not understood.")
         tech = {
             "name": "OCV",
