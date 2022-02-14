@@ -2,26 +2,26 @@ from .kbio.kbio_tech import ECC_parm
 from dataclasses import dataclass
 
 named_params = {
-    'wait': ECC_parm("Rest_time_T", float),
-    'time': ECC_parm("Duration_step", float),
-    'record_every_dt': ECC_parm("Record_every_dT", float),
-    'record_every_dE': ECC_parm("Record_every_dE", float),
-    'E_range': ECC_parm("E_Range", int),
-    'I_range': ECC_parm("I_Range", int),
-    'current': ECC_parm("Current_step", float),
-    'voltage': ECC_parm("Voltage_step", float),
-    'is_delta': ECC_parm("vs_initial", bool),
-    'test1_magic': ECC_parm("Test1_Config", int),
-    'test1_value': ECC_parm("Test1_Value", float),
-    'test2_magic': ECC_parm("Test2_Config", int),
-    'test2_value': ECC_parm("Test2_Value", float),
-    'test3_magic': ECC_parm("Test3_Config", int),
-    'test3_value': ECC_parm("Test3_Value", float),
-    'limit_magic': ECC_parm("Exit_Cond", int),
-    'n_cycles': ECC_parm("N_Cycles", int),
-    'n_steps': ECC_parm("Step_number", int),
-    'n_gotos': ECC_parm("loop_N_times", int),
-    'goto': ECC_parm("protocol_number", int)
+    'Rest_time_T': float,
+    'Duration_step': float,
+    'Record_every_dt': float,
+    'Record_every_dE': float,
+    "E_Range": int,
+    "I_Range": int,
+    "Current_step": float,
+    "Voltage_step": float,
+    "vs_initial": bool,
+    "Test1_Config": int,
+    "Test1_Value": float,
+    "Test2_Config": int,
+    "Test2_Value": float,
+    "Test3_Config": int,
+    "Test3_Value": float,
+    "Exit_Cond": int,
+    "N_Cycles": int,
+    "Step_number": int,
+    "loop_N_times": int,
+    "protocol_number": int
 }
 
 params = {

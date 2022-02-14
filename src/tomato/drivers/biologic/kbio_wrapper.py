@@ -113,7 +113,9 @@ def translate(technique: dict) -> dict:
 def dsl_to_ecc(api, dsl: dict) -> EccParams:
     eccs = []
     for k, val in dsl.items():
-        if isinstance(val, list):
+        if k == "name":
+            continue
+        elif isinstance(val, list):
             for i, v in zip(range(len(val)), val):
                 ecc = make_ecc_parm(api, ECC_parm(k, named_params[k]), v, i)
                 eccs.append(ecc)
