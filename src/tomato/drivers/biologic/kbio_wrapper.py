@@ -74,10 +74,10 @@ def translate(technique: dict) -> dict:
             "Step_number": ns - 1,
             "N_Cycles": technique.get("n_cycles", 1),
             "I_Range": technique["I_range"],
-            "Duration_step": pad_steps(technique["time"], ns),
-            "vs_initial": pad_steps(technique.get("is_delta", False), ns),
             "Record_every_dT": technique.get("record_every_dt", 30.0),
             "Record_every_dE": technique.get("record_every_dE", 0.005),
+            "Duration_step": pad_steps(technique["time"], ns),
+            "vs_initial": pad_steps(technique.get("is_delta", False), ns),
             "Test1_Config": pad_steps(0, ns),
             "Test1_Value": pad_steps(0.0, ns),
             "Test2_Config": pad_steps(0, ns),
@@ -96,9 +96,9 @@ def translate(technique: dict) -> dict:
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
         if technique["name"] == "CPLIMIT":
-            tech["Current_step"] = pad_steps(technique["current"], ns),
+            tech["Current_step"] = pad_steps(technique["current"], ns)
         elif technique["name"] == "CALIMIT":
-            tech["Voltage_step"] = pad_steps(technique["voltage"], ns),
+            tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
     else:
         log.error(f"technique name '{technique['name']}' not understood.")
         tech = {
@@ -113,7 +113,6 @@ def translate(technique: dict) -> dict:
 def dsl_to_ecc(api, dsl: dict) -> EccParams:
     eccs = []
     for k, val in dsl.items():
-        print(k, val)
         if k == "name":
             continue
         elif isinstance(val, list):
