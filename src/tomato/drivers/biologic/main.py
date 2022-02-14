@@ -48,11 +48,11 @@ def start_job(
     last = False
     ti = 1
     id_, device_info = api.Connect(address)
-    for techname, eccpars in eccpars:
+    for techname, pars in eccpars:
         if ti == ntechs:
             last = True
         techfile = get_kbio_techpath(dllpath, techname, device_info.model)
-        api.LoadTechnique(id_, channel, techfile, eccpars, first=first, last=last, display=True)
+        api.LoadTechnique(id_, channel, techfile, pars, first=first, last=last, display=True)
         ti += 1
         first = False
     api.StartChannel(id_, channel)

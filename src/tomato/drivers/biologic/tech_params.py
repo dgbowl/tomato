@@ -4,7 +4,7 @@ from dataclasses import dataclass
 named_params = {
     'Rest_time_T': float,
     'Duration_step': float,
-    'Record_every_dt': float,
+    'Record_every_dT': float,
     'Record_every_dE': float,
     "E_Range": int,
     "I_Range": int,
