@@ -22,17 +22,12 @@ pl = [
 address = "192.109.209.6"
 channel = 1
 dllpath = "C:\\EC-Lab Development Package\\EC-Lab Development Package\\"
+capacity = 45e-3
 
 print(tomato.drivers.biologic.get_status(address, channel, dllpath))
-tomato.drivers.biologic.start_job(address, channel, dllpath, pl)
-time.sleep(10)
-print(tomato.drivers.biologic.get_status(address, channel, dllpath))
-print(tomato.drivers.biologic.get_data(address, channel, dllpath))
-time.sleep(20)
-print(tomato.drivers.biologic.get_data(address, channel, dllpath))
-time.sleep(20)
-print(tomato.drivers.biologic.get_data(address, channel, dllpath))
-time.sleep(20)
-print(tomato.drivers.biologic.get_data(address, channel, dllpath))
-time.sleep(20)
-print(tomato.drivers.biologic.get_data(address, channel, dllpath))
+print(tomato.drivers.biologic.start_job(address, channel, dllpath, pl, capacity))
+for i in range(100):
+    print(f"cycle number {i}/100")
+    print(tomato.drivers.biologic.get_status(address, channel, dllpath))
+    print(tomato.drivers.biologic.get_data(address, channel, dllpath))
+    time.sleep(10)

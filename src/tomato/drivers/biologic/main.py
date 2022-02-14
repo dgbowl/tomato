@@ -39,10 +39,11 @@ def start_job(
     address: str,
     channel: int,
     dllpath: str,
-    payload: list[dict]
+    payload: list[dict],
+    capacity: float
 ) -> None:
     api = get_kbio_api(dllpath)
-    eccpars = payload_to_ecc(api, payload)
+    eccpars = payload_to_ecc(api, payload, capacity)
     ntechs = len(eccpars)
     first = True
     last = False
