@@ -6,6 +6,8 @@ pl = [
     {
         "name": "OCV", 
         "time": 5, 
+        "I_range": "1 mA",
+        "E_range": "5 V",
         "record_every_dt": 1
     },
     {
@@ -16,7 +18,7 @@ pl = [
         "record_every_dt": 1,
         "record_every_dE": 0.01,
         "I_range": "100 mA",
-        "E_range": "±10 V",
+        "E_range": "5 V",
         "limit_voltage_max": 4.1,
         "limit_voltage_min": 3.0,
         "n_cycles": 2
@@ -28,7 +30,7 @@ pl = [
         "is_delta": False,
         "record_every_dt": 2,
         "I_range": "10 mA",
-        "E_range": "±5 V",
+        "E_range": "5 V",
         "limit_voltage_max": 4.1
     },
     {
@@ -38,7 +40,7 @@ pl = [
         "is_delta": False,
         "record_every_dt": 2,
         "I_range": "10 mA",
-        "E_range": "±5 V",
+        "E_range": "5 V",
         "limit_current_min": "C/10"
     },
     {
@@ -48,6 +50,7 @@ pl = [
         "is_delta": False,
         "record_every_dt": 2,
         "I_range": "100 mA",
+        "E_range": "10 V",
         "limit_voltage_min": 3.9
     },
     {
