@@ -20,6 +20,9 @@ def get_status(address: str, channel: int, dllpath: str) -> tuple:
     id_, device_info = api.Connect(address)
     channel_info = api.GetChannelInfo(id_, channel)
     api.Disconnect(id_)
+    print(f"{version=}")
+    print(f"{device_info=}")
+    print(f"{channel_info=}")
     return version, device_info, channel_info
 
 
