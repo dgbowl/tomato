@@ -3,6 +3,7 @@ named_params = {
     'Duration_step': float,
     'Record_every_dT': float,
     'Record_every_dE': float,
+    'Record_every_dI': float,
     "E_Range": int,
     "I_Range": int,
     "Current_step": float,

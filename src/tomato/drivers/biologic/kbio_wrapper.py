@@ -53,7 +53,7 @@ def get_num_steps(tech: dict) -> int:
 def pad_steps(param: Union[list, int, float], ns: int) -> list:
     if isinstance(param, list):
         ret = [0] * ns
-        for i in range(ns):
+        for i in range(len(param)):
             ret[i] = param[i]
     else:
         ret = [param] * ns
@@ -90,9 +90,10 @@ def translate(technique: dict, capacity: float) -> dict:
         tech = {
             "name": technique["name"],
             "Step_number": ns - 1,
-            "N_Cycles": technique.get("n_cycles", 1),
+            "N_Cycles": technique.get("n_cycles", 0),
             "Record_every_dT": technique.get("record_every_dt", 30.0),
-            "Record_every_dE": technique.get("record_every_dE", 0.005),
+            "I_Range": I_ranges[technique.get("I_range", "keep")],
+            "E_Range": E_ranges[technique.get("E_range", "auto")],
             "Duration_step": pad_steps(technique["time"], ns),
             "vs_initial": pad_steps(technique.get("is_delta", False), ns),
             "Test1_Config": pad_steps(0, ns),
@@ -108,18 +109,20 @@ def translate(technique: dict, capacity: float) -> dict:
             for cond in {"max", "min"}:
                 if f"limit_{prop}_{cond}" in technique and ci < 4:
                     conf = get_test_magic(prop, cond)
-                    val = technique[f"limit_{prop}_{cond}"]
+                    val = current(technique[f"limit_{prop}_{cond}"], capacity)
                     tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
         if technique["name"] == "CPLIMIT":
             I = current(technique["current"], capacity)
             tech["Current_step"] = pad_steps(I, ns)
-            tech["I_Range"] = I_ranges[technique.get("I_range", "keep")]
+            tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
         elif technique["name"] == "CALIMIT":
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
+            tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
     elif technique["name"] == "LOOP":
         tech = {
+            "name": "LOOP",
             "loop_N_times": technique.get("n_gotos", -1),
             "protocol_number": technique.get("goto", 0)
         }
@@ -128,7 +131,9 @@ def translate(technique: dict, capacity: float) -> dict:
         tech = {
             "name": technique["name"],
             "Scan_number": ns - 1,
-            "N_Cycles": technique.get("n_cycles", 1),
+            "N_Cycles": technique.get("n_cycles", 0),
+            "I_Range": I_ranges[technique.get("I_range", "keep")],
+            "E_Range": E_ranges[technique.get("E_range", "auto")],
             "vs_initial": pad_steps(technique.get("is_delta", False), ns),
             "Scan_Rate": pad_steps(technique.get("scan_rate", 0.001), ns),
             "Test1_Config": pad_steps(0, ns),
@@ -144,7 +149,7 @@ def translate(technique: dict, capacity: float) -> dict:
             for cond in {"max", "min"}:
                 if f"limit_{prop}_{cond}" in technique and ci < 4:
                     conf = get_test_magic(prop, cond)
-                    val = technique[f"limit_{prop}_{cond}"]
+                    val = current(technique[f"limit_{prop}_{cond}"], capacity)
                     tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
@@ -154,7 +159,6 @@ def translate(technique: dict, capacity: float) -> dict:
             tech["Begin_measuring_E"] = technique.get("scan_start", 0.0)
             tech["End_measuring_E"] = technique.get("scan_end", 1.0)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
-            tech["I_Range"] = I_ranges[technique.get("I_range", "keep")]
         elif technique["name"] == "VSCANLIMIT":
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
             tech["Begin_measuring_I"] = technique.get("scan_start", 0.0)
