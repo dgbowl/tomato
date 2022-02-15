@@ -16,17 +16,20 @@ def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     
     """
     api = get_kbio_api(dllpath)
-    version = api.GetLibVersion()
+    metadata = {}
+    metadata["dll_version"] = api.GetLibVersion()
     log.debug(f"connecting to '{address}:{channel}'")
     id_, device_info = api.Connect(address)
+    metadata["device_model"] = device_info.model
+    metadata["device_channels"] = device_info.NumberOfChannels
     channel_info = api.GetChannelInfo(id_, channel)
     dt = datetime.now(timezone.utc)
+    metadata["channel_state"] = channel_info.state
+    metadata["channel_board"] = channel_info.board
+    metadata["channel_amp"] = channel_info.amplifier
     log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
-    print(f"{version=}")
-    print(f"{device_info=}")
-    print(f"{channel_info=}")
-    return dt.timestamp(), {}
+    return dt.timestamp(), metadata
 
 
 def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
@@ -42,7 +45,6 @@ def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
     data = parse_raw_data(api, data, device_info.model)
-
     return dt.timestamp(), data
 
 
