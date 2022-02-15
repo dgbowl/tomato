@@ -8,6 +8,7 @@ named_params = {
     "I_Range": int,
     "Current_step": float,
     "Voltage_step": float,
+    "Scan_Rate": float,
     "vs_initial": bool,
     "Test1_Config": int,
     "Test1_Value": float,
@@ -18,8 +19,13 @@ named_params = {
     "Exit_Cond": int,
     "N_Cycles": int,
     "Step_number": int,
+    "Scan_number": int,
     "loop_N_times": int,
-    "protocol_number": int
+    "protocol_number": int,
+    "Begin_measuring_I": float,
+    "End_measuring_I": float,
+    "Begin_measuring_E": float,
+    "End_measuring_E": float,
 }
 
 
@@ -53,15 +59,15 @@ datatypes = {
         "OCV": ["t_high", "t_low", "Ewe", "Ece"],
         "CPLIMIT": ["t_high", "t_low", "Ewe", "I", "cycle"],
         "CALIMIT": ["t_high", "t_low", "Ewe", "I", "cycle"],
-        "VSCANLIMIT": ["t_high", "t_low", "Ec", "<I>", "<Ewe>", "cycle"],
-        "ISCANLIMIT": ["t_high", "t_low", "Ic", "<I>", "<Ewe>", "cycle"],
+        "PDYNLIMIT": ["t_high", "t_low", "Ec", "<I>", "<Ewe>", "cycle"],
+        "GDYNLIMIT": ["t_high", "t_low", "Ic", "<I>", "<Ewe>", "cycle"],
     },
     "SP-300": {
         "OCV": ["t_high", "t_low", "Ewe"],
         "CPLIMIT": ["t_high", "t_low", "Ewe", "I", "cycle"],
         "CALIMIT": ["t_high", "t_low", "Ewe", "I", "cycle"],
-        "VSCANLIMIT": ["t_high", "t_low", "<I>", "<Ewe>", "cycle"],
-        "ISCANLIMIT": ["t_high", "t_low", "<I>", "<Ewe>", "cycle"],
+        "PDYNLIMIT": ["t_high", "t_low", "<I>", "<Ewe>", "cycle"],
+        "GDYNLIMIT": ["t_high", "t_low", "<I>", "<Ewe>", "cycle"],
     }
 }
 
@@ -70,12 +76,16 @@ techfiles = {
         "OCV": "ocv.ecc",
         "CPLIMIT": "cplimit.ecc",
         "CALIMIT": "calimit.ecc",
+        "VSCANLIMIT": "vscanlimit.ecc",
+        "ISCANLIMIT": "iscanlimit.ecc",
         "LOOP": "loop.ecc"
     },
     "SP-300": {
         "OCV": "ocv4.ecc",
         "CPLIMIT": "cplimit4.ecc",
         "CALIMIT": "calimit4.ecc",
+        "VSCANLIMIT": "vscanlimit4.ecc",
+        "ISCANLIMIT": "iscanlimit4.ecc",
         "LOOP": "loop4.ecc"
     }
 }
