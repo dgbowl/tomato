@@ -1,7 +1,7 @@
 
 import logging
-import time
 log = logging.getLogger(__name__)
+from datetime import datetime, timezone
 
 from .kbio_wrapper import (
     get_kbio_techpath,
@@ -11,31 +11,39 @@ from .kbio_wrapper import (
 )
 
 
-def get_status(address: str, channel: int, dllpath: str) -> tuple:
+def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     """
     
     """
     api = get_kbio_api(dllpath)
     version = api.GetLibVersion()
+    log.debug(f"connecting to '{address}:{channel}'")
     id_, device_info = api.Connect(address)
     channel_info = api.GetChannelInfo(id_, channel)
+    dt = datetime.now(timezone.utc)
+    log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
     print(f"{version=}")
     print(f"{device_info=}")
     print(f"{channel_info=}")
-    return version, device_info, channel_info
+    return dt.timestamp(), {}
 
 
-def get_data(address: str, channel: int, dllpath: str) -> list:
+def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     """
     
     """
     api = get_kbio_api(dllpath)
+    log.debug(f"connecting to '{address}:{channel}'")
     id_, device_info = api.Connect(address)
+    log.debug(f"getting data")
     data = api.GetData(id_, channel)
+    dt = datetime.now(timezone.utc)
+    log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
-    parsed_data = parse_raw_data(api, data, device_info.model)
-    return parsed_data
+    data = parse_raw_data(api, data, device_info.model)
+
+    return dt.timestamp(), data
 
 
 def start_job(
@@ -44,32 +52,45 @@ def start_job(
     dllpath: str,
     payload: list[dict],
     capacity: float
-) -> None:
+) -> float:
     api = get_kbio_api(dllpath)
+    log.debug("translating payload to ECC")
     eccpars = payload_to_ecc(api, payload, capacity)
     ntechs = len(eccpars)
     first = True
     last = False
     ti = 1
+    log.debug(f"connecting to '{address}:{channel}'")
     id_, device_info = api.Connect(address)
     for techname, pars in eccpars:
         if ti == ntechs:
             last = True
         techfile = get_kbio_techpath(dllpath, techname, device_info.model)
+        log.debug(f"loading technique {ti}: '{techname}'")
         api.LoadTechnique(id_, channel, techfile, pars, first=first, last=last, display=True)
         ti += 1
         first = False
+    log.debug(f"starting run on '{address}:{channel}'")
     api.StartChannel(id_, channel)
+    dt = datetime.now(timezone.utc)
+    log.info(f"run started at '{dt}'")
+    log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
+    return dt.timestamp()
 
 
-def stop_job(address: str, channel: int, dllpath: str) -> None:
+def stop_job(address: str, channel: int, dllpath: str) -> float:
     """
 
     """
     api = get_kbio_api(dllpath)
+    log.debug(f"connecting to '{address}:{channel}'")
     id_, device_info = api.Connect(address)
+    log.debug(f"stopping run on '{address}:{channel}'")
     api.StopChannel(id_, channel)
+    dt = datetime.now(timezone.utc)
+    log.info(f"run stopped at '{dt}'")
     api.Disconnect(id_)
+    return dt.timestamp()
 
 

@@ -203,7 +203,7 @@ def parse_raw_data(api, data, devname):
     status = PROG_STATE(current_values.State).name
     techname = TECH_ID(data_info.TechniqueID).name
 
-    parsed_meta = {
+    parsed = {
         "status": status,
         "technique_index" : data_info.TechniqueIndex,
         "technique_name": techname,
@@ -212,7 +212,8 @@ def parse_raw_data(api, data, devname):
         "elapsed_time": current_values.ElapsedTime,
         "E_range": f"{current_values.EweRangeMax - current_values.EweRangeMin} V",
         "I_range": {v: k for k, v in I_ranges.items()}[current_values.IRange],
-        "data_rows": data_info.NbRows
+        "data_rows": data_info.NbRows,
+        "data": []
     }
 
     vmp3 = devname in VMP3_FAMILY    
@@ -237,7 +238,9 @@ def parse_raw_data(api, data, devname):
         point["time"] = t_rel * current_values.TimeBase
         parsed_data.append(point)
         ix = inx
-    return parsed_meta, parsed_data
+    parsed["data"] = parsed_data
+    
+    return parsed
 
 
 def get_kbio_api(dllpath):
