@@ -26,7 +26,8 @@ def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     dt = datetime.now(timezone.utc)
     metadata["channel_state"] = channel_info.state
     metadata["channel_board"] = channel_info.board
-    metadata["channel_amp"] = channel_info.amplifier
+    metadata["channel_amp"] = channel_info.amplifier if channel_info.NbAmps else None
+    metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_Irange]
     log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
     return dt.timestamp(), metadata
