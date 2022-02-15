@@ -1,6 +1,3 @@
-from .kbio.kbio_tech import ECC_parm
-from dataclasses import dataclass
-
 named_params = {
     'Rest_time_T': float,
     'Duration_step': float,

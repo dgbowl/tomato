@@ -13,7 +13,24 @@ from .kbio_wrapper import (
 
 def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     """
+    Get the current status of the device. 
+
+    Parameters
+    ----------
+    address
+        IP address of the potentiostat.
     
+    channel
+        Numeric, 1-indexed ID of the channel.
+    
+    dllpath
+        Path to the BioLogic DLL file.
+    
+    Returns
+    -------
+    timestamp, metadata: tuple[float, dict]
+        Returns a tuple containing the timestamp and associated metadata.
+
     """
     api = get_kbio_api(dllpath)
     metadata = {}
@@ -35,6 +52,23 @@ def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
 
 def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     """
+    Get cached data from the device. 
+
+    Parameters
+    ----------
+    address
+        IP address of the potentiostat.
+    
+    channel
+        Numeric, 1-indexed ID of the channel.
+    
+    dllpath
+        Path to the BioLogic DLL file.
+    
+    Returns
+    -------
+    timestamp, metadata: tuple[float, dict]
+        Returns a tuple containing the timestamp and associated metadata.
     
     """
     api = get_kbio_api(dllpath)
@@ -54,8 +88,41 @@ def start_job(
     channel: int,
     dllpath: str,
     payload: list[dict],
-    capacity: float
+    capacity: float = 0.0
 ) -> float:
+    """
+    Start a job on the device.
+
+    The function first translates the ``payload`` into an instrument-specific
+    language, using the ``capacity`` provided if necessary. The converted 
+    ``payload`` is then submitted to the device, overwriting any current job
+    information.
+
+    Parameters
+    ----------
+    address
+        IP address of the potentiostat.
+    
+    channel
+        Numeric, 1-indexed ID of the channel.
+    
+    dllpath
+        Path to the BioLogic DLL file.
+    
+    payload
+        A protocol describing the techniques to be executed and their order.
+    
+    capacity
+        The capacity information for the studied battery cell. Only required for
+        battery-testing applications or for payloads where currents are specified
+        using C or D rates.
+    
+    Returns
+    -------
+    timestamp
+        A timestamp corresponding to the start of the job execution.
+
+    """
     api = get_kbio_api(dllpath)
     log.debug("translating payload to ECC")
     eccpars = payload_to_ecc(api, payload, capacity)
@@ -84,6 +151,26 @@ def start_job(
 
 def stop_job(address: str, channel: int, dllpath: str) -> float:
     """
+    Stop a job running on the device.
+
+    This function stops any currently running technique on the specified channel
+    of the device. No data is returned.
+
+    Parameters
+    ----------
+    address
+        IP address of the potentiostat.
+    
+    channel
+        Numeric, 1-indexed ID of the channel.
+    
+    dllpath
+        Path to the BioLogic DLL file.
+    
+    Returns
+    -------
+    timestamp
+        A timestamp corresponding to the start of the job execution.
 
     """
     api = get_kbio_api(dllpath)
