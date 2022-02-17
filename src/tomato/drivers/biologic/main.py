@@ -11,7 +11,11 @@ from .kbio_wrapper import (
 )
 
 
-def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
+def get_status(
+    address: str = None, 
+    channel: int = None, 
+    dllpath: str = None
+) -> tuple[float, dict]:
     """
     Get the current status of the device. 
 

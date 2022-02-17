@@ -31,6 +31,8 @@ setuptools.setup(
     python_requires=">=3.9",
     install_requires=[
         "appdirs>=1.4.0",
+        "toml",
+        "pyyaml",
     ],
     entry_points={
         "console_scripts": [
