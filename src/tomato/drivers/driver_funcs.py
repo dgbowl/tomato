@@ -13,7 +13,6 @@ def driver_worker(settings: dict, pipeline: dict, payload: dict, ) -> None:
         address = dval["address"]
         channel = dval["channel"]
         skwargs = settings["drivers"][driver]
-        print(skwargs)
         ret = driver_api(
             driver, 
             "get_status", 

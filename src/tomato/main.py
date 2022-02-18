@@ -10,6 +10,7 @@ import appdirs
 import os
 import toml
 import yaml
+import json
 import sqlite3
 import textwrap
 from importlib import metadata
@@ -145,6 +146,7 @@ def _get_state(dbpath, type="sqlite3") -> Callable:
                 sampleid TEXT,
                 ready INTEGER NOT NULL,
                 jobid INTEGER,
+                pid INTEGER,
                 FOREIGN KEY (jobid) REFERENCES queue (jobid)
                 );""")
         log.warning(f"creating a new {type} 'state' table at '{dbpath}'")
@@ -170,6 +172,21 @@ def _add_sample(path: str, name: str, params: dict) -> None:
 
 def _assign_sample(sampleid: str, pipeline: str) -> None:
     return
+
+
+def _sql_queue_payload(queue: Callable, pstr: str) -> None:
+    conn = queue()
+    cur = conn.cursor()
+    log.info(f"inserting a new job into 'state'")
+    sql_insert_job = textwrap.dedent(f"""\
+        INSERT INTO queue (payload, status, submitted_at)
+        VALUES (?, ?, ?)
+        """)
+    print(pstr)
+    cur.execute(sql_insert_job, (pstr, 'q', str(datetime.now(timezone.utc))))
+    conn.commit()
+    conn.close()
+
 
 
 def _pipelines_to_state(pipelines: dict, state: Callable) -> None:
@@ -236,3 +253,48 @@ def run_daemon():
     _pipelines_to_state(pipelines, sc)
 
     main_loop(settings, pipelines, qc, sc)
+
+
+def run_qsub():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f'%(prog)s version {metadata.version("tomato")}',
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Increase verbosity by one level."
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="count",
+        default=0,
+        help="Decrease verbosity by one level."
+    )
+    parser.add_argument(
+        "jobfile",
+        help="Job file to be submitted to queue."
+    )
+    args = parser.parse_args()
+    loglevel = min(max(30 + 10 * (args.quiet - args.verbose), 10), 50)
+    logging.basicConfig(level=loglevel)
+    log.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
+
+    dirs = appdirs.AppDirs("tomato", "dgbowl", version=metadata.version("tomato"))
+    log.debug(f"local config folder is '{dirs.user_config_dir}'")
+    log.debug(f"local data folder is '{dirs.user_data_dir}'")
+    log.debug(f"local log folder is '{dirs.user_log_dir}'")
+
+    settings = _get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    qc = _get_queue(settings["queue"]["path"], type = settings["queue"]["type"])
+
+    with open(args.jobfile, "r") as infile:
+        payload = json.load(infile)
+    pstr = json.dumps(payload)
+    _sql_queue_payload(qc, pstr)
+    

@@ -33,10 +33,12 @@ setuptools.setup(
         "appdirs>=1.4.0",
         "toml",
         "pyyaml",
+        "psutil",
     ],
     entry_points={
         "console_scripts": [
-            "tomato=tomato:run_daemon"
+            "tomato=tomato:run_daemon",
+            "tqsub=tomato:run_qsub",
         ]
     },
 )
