@@ -14,7 +14,8 @@ from .kbio_wrapper import (
 def get_status(
     address: str = None, 
     channel: int = None, 
-    dllpath: str = None
+    dllpath: str = None,
+    **kwargs: dict,
 ) -> tuple[float, dict]:
     """
     Get the current status of the device. 
@@ -54,7 +55,12 @@ def get_status(
     return dt.timestamp(), metadata
 
 
-def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
+def get_data(
+    address: str = None, 
+    channel: int = None, 
+    dllpath: str = None,
+    **kwargs: dict,
+) -> tuple[float, dict]:
     """
     Get cached data from the device. 
 
@@ -88,11 +94,12 @@ def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
 
 
 def start_job(
-    address: str,
-    channel: int,
-    dllpath: str,
-    payload: list[dict],
-    capacity: float = 0.0
+    address: str = None,
+    channel: int = None,
+    dllpath: str = None,
+    payload: list[dict] = [],
+    capacity: float = 0.0,
+    **kwargs: dict,
 ) -> float:
     """
     Start a job on the device.

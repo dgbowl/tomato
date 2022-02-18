@@ -2,6 +2,7 @@ from typing import Callable
 import textwrap
 import psutil
 import os
+import multiprocessing
 import time
 import json
 from datetime import datetime, timezone
@@ -118,7 +119,6 @@ def main_loop(
         conn.close()
         for pip, jobid, pid in ret:
             log.debug(f"checking PID of running job '{jobid}'")
-            print(pip, jobid, pid)
             if psutil.pid_exists(pid) and "tworker" in psutil.Process(pid).name():
                 log.debug(f"PID of running job '{jobid}' found")
                 _sql_job_set_status(queue, "r", jobid)
@@ -147,21 +147,16 @@ def main_loop(
                 for pip in matched_pips:
                     can_queue  = _pipeline_ready_sample(state, pip, payload["sample"])
                     if can_queue:
-                        log.debug(f"queueing job '{jobid}'")
-                        pid = os.fork()
-                        if pid == 0:
-                            driver_worker(settings, pip, payload)
-                            if payload["tomato"]["unlock_when_done"]:
-                                _sql_job_set_status(queue, "c", jobid)
-                            else:
-                                _sql_job_set_status(queue, "cw", jobid)
-                            _sql_job_set_time(queue, "completed_at", jobid)
-                            os._exit(0)
-                        else:
-                            _sql_pip_assign(state, pip, jobid, pid)
-                            _sql_job_set_status(queue, "r", jobid)
-                            _sql_job_set_time(queue, "executed_at", jobid)
-                            break
+                        p = multiprocessing.Process(
+                            target=driver_worker, 
+                            args=(settings, pipelines[pip], payload)
+                        )
+                        p.start()
+                        log.info(f"executing job '{jobid}' on pid '{p.pid}'")
+                        _sql_pip_assign(state, pip, jobid, p.pid)
+                        _sql_job_set_status(queue, "r", jobid)
+                        _sql_job_set_time(queue, "executed_at", jobid)
+                        break
         time.sleep(1)
 
 
