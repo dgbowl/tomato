@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from typing import Callable
 
 from .daemon import main_loop
+from . import dbhandler
 
 
 def _get_settings(configpath: str, datapath: str) -> dict:
@@ -79,84 +80,6 @@ def _get_pipelines(tomlpath: str) -> dict:
     return ppls
 
 
-def _get_queue(dbpath, type="sqlite3") -> Callable:
-    if type == "sqlite3":
-        sql = sqlite3
-    else:
-        raise RuntimeError(f"database type '{type}' unsupported")
-
-    if not os.path.exists(dbpath):
-        conn = sql.connect(dbpath)
-        conn.close()
-    
-    log.debug(f"attempting to load the 'queue' database at '{dbpath}'")
-    sql_check_queue_table = textwrap.dedent("""\
-        SELECT name FROM sqlite_master WHERE type='table' AND name='queue';""")
-    conn = sql.connect(dbpath)
-    cur = conn.cursor()
-    log.debug(f"attempting to find table 'queue' in '{dbpath}'")
-    cur.execute(sql_check_queue_table)
-    exists = bool(len(cur.fetchall()))
-    conn.close()
-    if exists:
-        log.debug(f"table 'queue' present at '{dbpath}'")
-    else:
-        sql_create_queue_table = textwrap.dedent("""\
-            CREATE TABLE IF NOT EXISTS queue (
-                jobid INTEGER PRIMARY KEY AUTOINCREMENT,
-                payload TEXT NOT NULL,
-                status TEXT NOT NULL,
-                submitted_at TEXT NOT NULL,
-                executed_at TEXT,
-                completed_at TEXT
-                );""")
-        log.warning(f"creating a new {type} 'queue' table at '{dbpath}'")
-        conn = sql.connect(dbpath)
-        cur = conn.cursor()
-        cur.execute(sql_create_queue_table)
-        conn.close()
-    return lambda: sql.connect(dbpath)
-
-
-def _get_state(dbpath, type="sqlite3") -> Callable:
-    if type == "sqlite3":
-        sql = sqlite3
-    else:
-        raise RuntimeError(f"database type '{type}' unsupported")
-
-    if not os.path.exists(dbpath):
-        conn = sql.connect(dbpath)
-        conn.close()
-    
-    log.debug(f"attempting to load the 'state' database at '{dbpath}'")
-    sql_check_queue_table = textwrap.dedent("""\
-        SELECT name FROM sqlite_master WHERE type='table' AND name='state';""")
-    conn = sql.connect(dbpath)
-    cur = conn.cursor()
-    log.debug(f"attempting to find table 'state' in '{dbpath}'")
-    cur.execute(sql_check_queue_table)
-    exists = bool(len(cur.fetchall()))
-    conn.close()
-    if exists:
-        log.debug(f"table 'state' present at '{dbpath}'")
-    else:
-        sql_create_queue_table = textwrap.dedent("""\
-            CREATE TABLE IF NOT EXISTS state (
-                pipeline TEXT PRIMARY KEY,
-                sampleid TEXT,
-                ready INTEGER NOT NULL,
-                jobid INTEGER,
-                pid INTEGER,
-                FOREIGN KEY (jobid) REFERENCES queue (jobid)
-                );""")
-        log.warning(f"creating a new {type} 'state' table at '{dbpath}'")
-        conn = sql.connect(dbpath)
-        cur = conn.cursor()
-        cur.execute(sql_create_queue_table)
-        conn.close()
-    return lambda: sql.connect(dbpath)
-
-
 def _get_sample(path: str, name: str) -> dict:
     with open(path, "r") as sf:
         samples = yaml.full_load(sf)
@@ -174,18 +97,6 @@ def _assign_sample(sampleid: str, pipeline: str) -> None:
     return
 
 
-def _sql_queue_payload(queue: Callable, pstr: str) -> None:
-    conn = queue()
-    cur = conn.cursor()
-    log.info(f"inserting a new job into 'state'")
-    sql_insert_job = textwrap.dedent(f"""\
-        INSERT INTO queue (payload, status, submitted_at)
-        VALUES (?, ?, ?)
-        """)
-    print(pstr)
-    cur.execute(sql_insert_job, (pstr, 'q', str(datetime.now(timezone.utc))))
-    conn.commit()
-    conn.close()
 
 
 
@@ -247,8 +158,12 @@ def run_daemon():
 
     settings = _get_settings(dirs.user_config_dir, dirs.user_data_dir)
     pipelines = _get_pipelines(settings["devices"]["path"])
-    qc = _get_queue(settings["queue"]["path"], type = settings["queue"]["type"])
-    sc = _get_state(settings["state"]["path"], type = settings["state"]["type"])
+    qc = dbhandler.get_queue_func(
+        settings["queue"]["path"], type = settings["queue"]["type"]
+    )
+    sc = dbhandler.get_state_func(
+        settings["state"]["path"], type = settings["state"]["type"]
+    )
     
     _pipelines_to_state(pipelines, sc)
 
@@ -291,10 +206,12 @@ def run_qsub():
     log.debug(f"local log folder is '{dirs.user_log_dir}'")
 
     settings = _get_settings(dirs.user_config_dir, dirs.user_data_dir)
-    qc = _get_queue(settings["queue"]["path"], type = settings["queue"]["type"])
+    qc = dbhandler.get_queue_func(
+        settings["queue"]["path"], type = settings["queue"]["type"]
+    )
 
     with open(args.jobfile, "r") as infile:
         payload = json.load(infile)
     pstr = json.dumps(payload)
-    _sql_queue_payload(qc, pstr)
+    dbhandler.queue_payload(qc, pstr)
     

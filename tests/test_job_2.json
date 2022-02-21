@@ -1,0 +1,28 @@
+{
+    "sample": {
+        "name": "cell_2",
+        "capacity": 45e-3
+    },
+    "method": {
+        "MPG2": [
+            {
+                "name": "OCV", 
+                "time": 50, 
+                "I_range": "1 mA",
+                "E_range": "5 V",
+                "record_every_dt": 1
+            },
+            {
+                "name": "OCV", 
+                "time": 60, 
+                "I_range": "1 μA",
+                "E_range": "5 V",
+                "record_every_dt": 1
+            }
+        ]
+    },
+    "tomato": {
+        "unlock_when_done": false,
+        "output_dir": "C:\\Users\\krpe\\tomato\\outfiles"
+    }
+}

@@ -12,8 +12,8 @@ from .kbio_wrapper import (
 
 
 def get_status(
-    address: str = None, 
-    channel: int = None, 
+    address: str, 
+    channel: int, 
     dllpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
@@ -33,8 +33,9 @@ def get_status(
     
     Returns
     -------
-    timestamp, metadata: tuple[float, dict]
-        Returns a tuple containing the timestamp and associated metadata.
+    timestamp, ready, metadata: tuple[float, bool, dict]
+        Returns a tuple containing the timestamp, readiness status, and 
+        associated metadata.
 
     """
     api = get_kbio_api(dllpath)
@@ -52,12 +53,16 @@ def get_status(
     metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_IRange]
     log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
-    return dt.timestamp(), metadata
+    if metadata["channel_state"] in ["STOP"]:
+        ready = True
+    else:
+        ready = False
+    return dt.timestamp(), ready, metadata
 
 
 def get_data(
-    address: str = None, 
-    channel: int = None, 
+    address: str, 
+    channel: int, 
     dllpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
@@ -94,8 +99,8 @@ def get_data(
 
 
 def start_job(
-    address: str = None,
-    channel: int = None,
+    address: str,
+    channel: int,
     dllpath: str = None,
     payload: list[dict] = [],
     capacity: float = 0.0,
@@ -160,7 +165,12 @@ def start_job(
     return dt.timestamp()
 
 
-def stop_job(address: str, channel: int, dllpath: str) -> float:
+def stop_job(
+    address: str, 
+    channel: int, 
+    dllpath: str,
+    **kwargs: dict,
+) -> float:
     """
     Stop a job running on the device.
 
