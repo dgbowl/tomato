@@ -37,8 +37,8 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "tomato=tomato:run_daemon",
-            "tqsub=tomato:run_qsub",
+            "tomato=tomato:run_tomato",
+            "ketchup=tomato:run_ketchup",
         ]
     },
 )
