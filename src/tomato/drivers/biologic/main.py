@@ -153,7 +153,7 @@ def start_job(
             last = True
         techfile = get_kbio_techpath(dllpath, techname, device_info.model)
         log.debug(f"loading technique {ti}: '{techname}'")
-        api.LoadTechnique(id_, channel, techfile, pars, first=first, last=last, display=True)
+        api.LoadTechnique(id_, channel, techfile, pars, first=first, last=last, display=False)
         ti += 1
         first = False
     log.debug(f"starting run on '{address}:{channel}'")

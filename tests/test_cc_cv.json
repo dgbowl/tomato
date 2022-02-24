@@ -1,7 +1,7 @@
 {
     "sample": {
         "name": "cell_1",
-        "capacity": 45e-3
+        "capacity": 0.045
     },
     "method": {
         "MPG2": [
