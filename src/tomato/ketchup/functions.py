@@ -58,13 +58,26 @@ def status(args):
                         print(f"{str(jobid):6s} {status:6s} {str(pid):7s} {pip:20s}")
     else:
         jobid = int(args.jobid)
-        print(f"printing status of job '{jobid}' not yet implemented")
+        ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+        payload, status, sub, exe, com = ji
+        print(f"job '{jobid}':")
+        print(f"  - status: '{status}'")
+        print(f"  - submitted at: '{sub}'")
+        if status.startswith("r"):
+            print(f"  - running since:'{exe}'")
+            running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
+            for pip, pjobid, pid in running:
+                if pjobid == jobid:
+                    print(f"  - on pipeline: '{pip}'")
+                    print(f"  - with PID: '{pid}'")
+                    break
+        if status.startswith("c"):
+            print(f"  - executed at:  '{exe}'")
+            print(f"  - completed at: '{com}'")
 
 
 def stop(args):
-    dirs = setlib.get_dirs()
-    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
-    state = settings["state"]
+    print("stopping jobs not yet implemented")
 
 
 def load(args):

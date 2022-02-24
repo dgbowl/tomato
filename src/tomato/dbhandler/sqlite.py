@@ -93,6 +93,21 @@ def job_set_status(
     conn.close()
 
 
+def job_get_info(
+    dbpath: str, 
+    jobid: int,
+    type: str = "sqlite3",
+) -> tuple:
+    conn, cur = get_db_conn(dbpath, type)
+    cur.execute(
+        "SELECT payload, status, submitted_at, executed_at, completed_at FROM queue "
+        f"WHERE jobid = {jobid};"
+    )
+    ret = cur.fetchone()
+    conn.close()
+    return ret
+    
+
 def job_set_time(
     dbpath: str, 
     tcol: str, 
