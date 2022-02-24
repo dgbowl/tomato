@@ -15,8 +15,7 @@
             {
                 "name": "constant_current", 
                 "current": ["C/10", "D/5"],
-                "time": 11, 
-                "is_delta": false,
+                "time": 20, 
                 "record_every_dt": 1,
                 "record_every_dE": 0.01,
                 "I_range": "100 mA",
@@ -28,7 +27,6 @@
         ]
     },
     "tomato": {
-        "unlock_when_done": false,
-        "output_dir": "C:\\Users\\krpe\\tomato\\outfiles"
+        "unlock_when_done": false
     }
 }

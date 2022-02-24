@@ -1,0 +1,22 @@
+sample:
+    name: cell_1
+    capacity: 45e-3
+method:
+    MPG2:
+        - name: "open_circuit_voltage"
+          time: 5
+          I_range: "1 mA"
+          E_range: "5 V"
+          record_every_dt: 1
+        - name: "constant_current"
+          current: ["C/10", "D/5"]
+          time: 20
+          record_every_dt: 1
+          record_every_dE: 0.01
+          I_range: "100 mA"
+          E_range: "10 V"
+          limit_voltage_max: 4.1
+          limit_voltage_min: 3.0
+          n_cycles: 2
+tomato:
+    unlock_when_done: false
