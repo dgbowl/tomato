@@ -33,17 +33,30 @@ def status(args):
     state = settings["state"]
     queue = settings["queue"]
 
-    if args.jobid == "queue":
+    if args.jobid == "state":
         pips = dbhandler.pipeline_get_all(state["path"], type=state["type"])
-        print(f"{'pipeline':20s} {'ready':5s} {'jobid (PID)':12s} {'sampleid':20s}")
-        print("="*60)
+        print(f"{'pipeline':20s} {'ready':5s} {'jobid':6s} {'(PID)':9s} {'sampleid':20s} ")
+        print("="*65)
         for pip in pips:
             sampleid, ready, jobid, pid = dbhandler.pipeline_get_info(
                 state["path"], pip, state["type"]
             )
             rstr = 'yes' if ready else 'no'
-            job = f"{jobid} ({pid})" if jobid is not None else str(jobid)
+            job = f"{str(jobid):5s} ({pid})" if jobid is not None else str(jobid)
             print(f"{pip:20s} {rstr:5s} {job:12s} {str(sampleid):20s}")
+    elif args.jobid == "queue":
+        jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
+        running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
+        print(f"{'jobid':6s} {'status':6s} {'pid':7s} {'pipeline':20s}")
+        print("="*42)
+        for jobid, payload, status in jobs:
+            if status.startswith("q"):
+                print(f"{str(jobid):6s} {status}")
+            elif status.startswith("r"):
+                for pip, pjobid, pid in running:
+                    if pjobid == jobid:
+                        break
+                print(f"{str(jobid):6s} {status:6s} {str(pid):7s} {pip:20s}")
     else:
         jobid = int(args.jobid)
         print(f"printing status of job '{jobid}' not yet implemented")

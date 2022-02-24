@@ -55,28 +55,12 @@ def _default_parsers() -> tuple[argparse.ArgumentParser]:
     return parser, verbose
 
 
-def _get_sample(path: str, name: str) -> dict:
-    with open(path, "r") as sf:
-        samples = yaml.full_load(sf)
-    return samples.get(name, None)
-
-
-def _add_sample(path: str, name: str, params: dict) -> None:
-    with open(path, "rw") as sf:
-        samples = yaml.full_load(sf)
-        samples[name] = params
-        yaml.dump(samples, sf)
-
-def _assign_sample(sampleid: str, pipeline: str) -> None:
-    return
-
 def sync_pipelines_to_state(
     pipelines: dict, 
     dbpath: str, 
     type: str = "sqlite3",
 ) -> None:
     pstate = dbhandler.pipeline_get_all(dbpath, type)
-    print(pstate)
     for pip in pipelines.keys():
         log.debug(f"checking presence of pipeline '{pip}' in 'state'")
         if pip not in pstate:
@@ -126,8 +110,12 @@ def run_ketchup():
     status.add_argument(
         "jobid",
         nargs="?",
-        help="The jobid of the requested job, or 'queue' for the status of the queue.",
-        default="queue"
+        help=(
+            "The jobid of the requested job, "
+            "or 'queue' for the status of the queue,"
+            "or 'state' for the status of pipelines."
+        ),
+        default="state"
     )
     status.set_defaults(func=ketchup.status)
 
