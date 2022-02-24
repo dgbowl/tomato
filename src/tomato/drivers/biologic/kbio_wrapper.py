@@ -122,7 +122,7 @@ def translate(technique: dict, capacity: float) -> dict:
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
     elif technique["name"] == "loop":
         tech = {
-            "name": "LOOP",
+            "name": "loop",
             "loop_N_times": technique.get("n_gotos", -1),
             "protocol_number": technique.get("goto", 0)
         }
