@@ -53,22 +53,21 @@ def job_wrapper(
     pip: str,
     jobid: int,
 ) -> None:
-    queue = dbhandler.get_queue_func(
-        settings["queue"]["path"], type = settings["queue"]["type"]
-    )
-    state = dbhandler.get_state_func(
-        settings["state"]["path"], type = settings["state"]["type"]
-    )
+
+    queue = settings["queue"]
+    state = settings["state"]
     pid = os.getpid()
     log.info(f"executing job '{jobid}' on pid '{pid}'")
-    dbhandler.pipeline_assign_job(state, pip, jobid, pid)
-    dbhandler.job_set_status(queue, "r", jobid)
-    dbhandler.job_set_time(queue, "executed_at", jobid)
+    dbhandler.pipeline_assign_job(
+        state["path"], pip, jobid, pid, type=state["type"]
+    )
+    dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
+    dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
     driver_worker(settings, pipelines[pip], payload, jobid)
     ready = payload.get("tomato", {}).get("unlock_when_done", False)
-    dbhandler.job_set_status(queue, "c", jobid)
-    dbhandler.job_set_time(queue, "completed_at", jobid)
-    dbhandler.pipeline_reset_job(state, pip, ready)
+    dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
+    dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
+    dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
 
 def main_loop(
     settings: dict, 
