@@ -48,9 +48,9 @@ I_ranges = {
 
 
 E_ranges = {
-    "±2.5 V": 0,
-    "±5 V": 1,
-    "±10 V": 2,
+    "2.5 V": 0,
+    "5 V": 1,
+    "10 V": 2,
     "auto": 3,
 }
 
@@ -73,19 +73,19 @@ datatypes = {
 
 techfiles = {
     "VMP3": {
-        "OCV": "ocv.ecc",
-        "CPLIMIT": "cplimit.ecc",
-        "CALIMIT": "calimit.ecc",
-        "VSCANLIMIT": "vscanlimit.ecc",
-        "ISCANLIMIT": "iscanlimit.ecc",
-        "LOOP": "loop.ecc"
+        "open_circuit_voltage": "ocv.ecc",
+        "constant_current": "cplimit.ecc",
+        "constant_voltage": "calimit.ecc",
+        "sweep_voltage": "vscanlimit.ecc",
+        "sweep_current": "iscanlimit.ecc",
+        "loop": "loop.ecc"
     },
     "SP-300": {
-        "OCV": "ocv4.ecc",
-        "CPLIMIT": "cplimit4.ecc",
-        "CALIMIT": "calimit4.ecc",
-        "VSCANLIMIT": "vscanlimit4.ecc",
-        "ISCANLIMIT": "iscanlimit4.ecc",
-        "LOOP": "loop4.ecc"
+        "open_circuit_voltage": "ocv4.ecc",
+        "constant_current": "cplimit4.ecc",
+        "constant_voltage": "calimit4.ecc",
+        "sweep_voltage": "vscanlimit4.ecc",
+        "sweep_current": "iscanlimit4.ecc",
+        "loop": "loop4.ecc"
     }
 }

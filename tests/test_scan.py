@@ -4,38 +4,38 @@ import time
 
 pl = [
     {
-        "name": "OCV", 
+        "name": "open_circuit_voltage", 
         "time": 5, 
         "I_range": "1 mA",
-        "E_range": "±5 V",
+        "E_range": "5 V",
         "record_every_dt": 1,
     },
     {
-        "name": "CPLIMIT",
+        "name": "constant_current",
         "time": 20,
         "record_every_dt": 1,
         "current": "C/5",
         "I_range": "10 mA",
-        "E_range": "±5 V",
+        "E_range": "5 V",
         "limit_voltage_max": 4.1,
     },
     {
-        "name": "VSCANLIMIT", 
+        "name": "sweep_voltage", 
         "voltage": [4.1, 3.9, 4.1, 3.8, 4.1],
         "scan_rate": 2.5e-3,
         "record_every_dE": 0.005,
         "n_cycles": 1,
         "I_range": "100 mA",
-        "E_range": "±5 V",
+        "E_range": "5 V",
     },
     {
-        "name": "ISCANLIMIT", 
+        "name": "sweep_current", 
         "current": ["C/10", "D/10", "C/5", "D/5"],
         "scan_rate": 2.5e-3,
         "record_every_dI": 0.005,
         "n_cycles": 2,
         "I_range": "10 mA",
-        "E_range": "±5 V",
+        "E_range": "5 V",
     }
 ]
 
