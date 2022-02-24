@@ -85,7 +85,7 @@ def current(val: Union[list,str,float], capacity: float) -> float:
 
 
 def translate(technique: dict, capacity: float) -> dict:
-    if technique["name"] in {"CPLIMIT", "CALIMIT"}:
+    if technique["name"].startswith("constant_"):
         ns = get_num_steps(technique)
         tech = {
             "name": technique["name"],
@@ -113,20 +113,20 @@ def translate(technique: dict, capacity: float) -> dict:
                     tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
-        if technique["name"] == "CPLIMIT":
+        if technique["name"].endswith("current"):
             I = current(technique["current"], capacity)
             tech["Current_step"] = pad_steps(I, ns)
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
-        elif technique["name"] == "CALIMIT":
+        elif technique["name"].endswith("voltage"):
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
-    elif technique["name"] == "LOOP":
+    elif technique["name"] == "loop":
         tech = {
             "name": "LOOP",
             "loop_N_times": technique.get("n_gotos", -1),
             "protocol_number": technique.get("goto", 0)
         }
-    elif technique["name"] in {"VSCANLIMIT", "ISCANLIMIT"}:
+    elif technique["name"].startswith("sweep_"):
         ns = get_num_steps(technique)
         tech = {
             "name": technique["name"],
@@ -153,22 +153,22 @@ def translate(technique: dict, capacity: float) -> dict:
                     tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
-        if technique["name"] == "ISCANLIMIT":
+        if technique["name"].endswith("current"):
             I = current(technique["current"], capacity)
             tech["Current_step"] = pad_steps(I, ns)
             tech["Begin_measuring_E"] = technique.get("scan_start", 0.0)
             tech["End_measuring_E"] = technique.get("scan_end", 1.0)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
-        elif technique["name"] == "VSCANLIMIT":
+        elif technique["name"].endswith("voltage"):
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
             tech["Begin_measuring_I"] = technique.get("scan_start", 0.0)
             tech["End_measuring_I"] = technique.get("scan_end", 1.0)
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
     else:
-        if technique["name"] != "OCV":
+        if technique["name"] != "open_circuit_voltage":
             log.error(f"technique name '{technique['name']}' not understood.")
         tech = {
-            "name": "OCV",
+            "name": "open_circuit_voltage",
             "Rest_time_T": technique.get("time", 0.0),
             "Record_every_dT": technique.get("record_every_dt", 30.0),
             "Record_every_dE": technique.get("record_every_dE", 0.005),
