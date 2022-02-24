@@ -4,7 +4,6 @@ Main module - executables for tomato.
 """
 import argparse
 import logging
-log = logging.getLogger(__name__)
 import appdirs
 import os
 import yaml
@@ -18,9 +17,42 @@ from typing import Callable
 from . import daemon
 from . import dbhandler
 from . import setlib
+from . import ketchup
+
+log = logging.getLogger(__name__)
+
+def _logging_setup(args):
+    loglevel = min(max(30 + 10 * (args.quiet - args.verbose), 10), 50)
+    logging.basicConfig(level=loglevel)
+    log.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
 
 
+def _default_parsers() -> tuple[argparse.ArgumentParser]:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f'%(prog)s version {metadata.version("tomato")}',
+    )
 
+    verbose = argparse.ArgumentParser(add_help=False)
+
+    for p in [parser, verbose]:
+        p.add_argument(
+            "-v",
+            "--verbose",
+            action="count",
+            default=0,
+            help="Increase verbosity by one level."
+        )
+        p.add_argument(
+            "-q",
+            "--quiet",
+            action="count",
+            default=0,
+            help="Decrease verbosity by one level."
+        )
+    return parser, verbose
 
 
 def _get_sample(path: str, name: str) -> dict:
@@ -55,43 +87,11 @@ def sync_pipelines_to_state(
 
 
 def run_tomato():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f'%(prog)s version {metadata.version("tomato")}',
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help="Increase verbosity by one level."
-    )
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        action="count",
-        default=0,
-        help="Decrease verbosity by one level."
-    )
-    parser.add_argument(
-        "-d",
-        "--daemonize",
-        action="store_true",
-        default=False,
-        help="Daemonize tomato."
-    )
+    parser, _ = _default_parsers()
     args = parser.parse_args()
-    loglevel = min(max(30 + 10 * (args.quiet - args.verbose), 10), 50)
-    logging.basicConfig(level=loglevel)
-    log.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
+    _logging_setup(args)
 
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=metadata.version("tomato"))
-    log.debug(f"local config folder is '{dirs.user_config_dir}'")
-    log.debug(f"local data folder is '{dirs.user_data_dir}'")
-    log.debug(f"local log folder is '{dirs.user_log_dir}'")
-
+    dirs = setlib.get_dirs()
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     pipelines = setlib.get_pipelines(settings["devices"]["path"])
     
@@ -111,47 +111,67 @@ def run_tomato():
 
 
 def run_ketchup():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f'%(prog)s version {metadata.version("tomato")}',
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help="Increase verbosity by one level."
-    )
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        action="count",
-        default=0,
-        help="Decrease verbosity by one level."
-    )
-    parser.add_argument(
-        "jobfile",
-        help="Job file to be submitted to queue."
-    )
-    args = parser.parse_args()
-    loglevel = min(max(30 + 10 * (args.quiet - args.verbose), 10), 50)
-    logging.basicConfig(level=loglevel)
-    log.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
+    parser, verbose = _default_parsers()
+    subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=metadata.version("tomato"))
-    log.debug(f"local config folder is '{dirs.user_config_dir}'")
-    log.debug(f"local data folder is '{dirs.user_data_dir}'")
-    log.debug(f"local log folder is '{dirs.user_log_dir}'")
-
-    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
-    qc = dbhandler.get_queue_func(
-        settings["queue"]["path"], type = settings["queue"]["type"]
+    submit = subparsers.add_parser("submit")
+    submit.add_argument(
+        "payload",
+        help="File containing the payload to be submitted to tomato.",
+        default=None
     )
+    submit.set_defaults(func=ketchup.submit)
 
-    with open(args.jobfile, "r") as infile:
-        payload = json.load(infile)
-    pstr = json.dumps(payload)
-    dbhandler.queue_payload(qc, pstr)
+    status = subparsers.add_parser("status")
+    status.add_argument(
+        "jobid",
+        nargs="?",
+        help="The jobid of the requested job, or 'queue' for the status of the queue.",
+        default="queue"
+    )
+    status.set_defaults(func=ketchup.status)
+
+    stop = subparsers.add_parser("stop")
+    stop.add_argument(
+        "jobid",
+        help="The jobid of the job to be stopped.",
+        default=None
+    )
+    stop.set_defaults(func=ketchup.stop)
+
+    load = subparsers.add_parser("load")
+    load.add_argument(
+        "sample",
+        help="Name of the sample to be loaded.",
+        default=None
+    )
+    load.add_argument(
+        "pipeline",
+        help="Name of the pipeline to load the sample to.",
+        default=None
+    )
+    load.set_defaults(func=ketchup.load)
+
+    eject = subparsers.add_parser("eject")
+    eject.add_argument(
+        "pipeline",
+        help="Name of the pipeline to eject any sample from.",
+        default=None
+    )
+    eject.set_defaults(func=ketchup.eject)
+
+    ready = subparsers.add_parser("ready")
+    ready.add_argument(
+        "pipeline",
+        help="Name of the pipeline to mark as ready.",
+        default=None
+    )
+    ready.set_defaults(func=ketchup.ready)
+
+    args, extras = parser.parse_known_args()
+    args, extras = verbose.parse_known_args(extras, args)
+    _logging_setup(args)    
+
+    if "func" in args:
+        args.func(args)
     

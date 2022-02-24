@@ -223,6 +223,34 @@ def pipeline_insert(
     conn.close()
 
 
+def pipeline_load_sample(
+    dbpath: str,
+    pip: str,
+    sampleid: str,
+    type: str = "sqlite3",
+) -> None:
+    conn, cur = get_db_conn(dbpath, type)
+    cur.execute(
+        f"UPDATE state SET sampleid = '{sampleid}', ready = 0 "
+        f"WHERE pipeline = '{pip}';"
+    )
+    conn.commit()
+    conn.close()
+
+
+def pipeline_eject_sample(
+    dbpath: str,
+    pip: str,
+    type: str = "sqlite3",
+) -> None:
+    conn, cur = get_db_conn(dbpath, type)
+    cur.execute(
+        f"UPDATE state SET sampleid = NULL, ready = 0 "
+        f"WHERE pipeline = '{pip}';"
+    )
+    conn.commit()
+    conn.close()
+
 def queue_payload(
     dbpath: str,
     pstr: str,

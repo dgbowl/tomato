@@ -2,17 +2,28 @@ import os
 import textwrap
 import toml
 import logging
+import appdirs
 from importlib import metadata
 from datetime import datetime, timezone
-
 log = logging.getLogger(__name__)
+
+_VERSION = metadata.version("tomato")
+
+
+def get_dirs() -> appdirs.AppDirs:
+    dirs = appdirs.AppDirs("tomato", "dgbowl", version=_VERSION)
+    log.debug(f"local config folder is '{dirs.user_config_dir}'")
+    log.debug(f"local data folder is '{dirs.user_data_dir}'")
+    log.debug(f"local log folder is '{dirs.user_log_dir}'")
+    return dirs
+
 
 def get_settings(configpath: str, datapath: str) -> dict:
     settingsfile = os.path.join(configpath, "settings.toml")
     if not os.path.exists(settingsfile):
         log.warning(f"config file not present. Writing defaults to '{settingsfile}'")
         defaults = textwrap.dedent(f"""\
-            # Default settings for tomato v{metadata.version('tomato')}
+            # Default settings for tomato v{_VERSION}
             # Generated on {str(datetime.now(timezone.utc))}
             [state]
             type = 'sqlite3'
