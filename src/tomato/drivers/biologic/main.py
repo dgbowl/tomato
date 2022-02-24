@@ -11,7 +11,12 @@ from .kbio_wrapper import (
 )
 
 
-def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
+def get_status(
+    address: str, 
+    channel: int, 
+    dllpath: str = None,
+    **kwargs: dict,
+) -> tuple[float, dict]:
     """
     Get the current status of the device. 
 
@@ -28,8 +33,9 @@ def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     
     Returns
     -------
-    timestamp, metadata: tuple[float, dict]
-        Returns a tuple containing the timestamp and associated metadata.
+    timestamp, ready, metadata: tuple[float, bool, dict]
+        Returns a tuple containing the timestamp, readiness status, and 
+        associated metadata.
 
     """
     api = get_kbio_api(dllpath)
@@ -47,10 +53,19 @@ def get_status(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
     metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_IRange]
     log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
-    return dt.timestamp(), metadata
+    if metadata["channel_state"] in ["STOP"]:
+        ready = True
+    else:
+        ready = False
+    return dt.timestamp(), ready, metadata
 
 
-def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
+def get_data(
+    address: str, 
+    channel: int, 
+    dllpath: str = None,
+    **kwargs: dict,
+) -> tuple[float, dict]:
     """
     Get cached data from the device. 
 
@@ -86,9 +101,10 @@ def get_data(address: str, channel: int, dllpath: str) -> tuple[float, dict]:
 def start_job(
     address: str,
     channel: int,
-    dllpath: str,
-    payload: list[dict],
-    capacity: float = 0.0
+    dllpath: str = None,
+    payload: list[dict] = [],
+    capacity: float = 0.0,
+    **kwargs: dict,
 ) -> float:
     """
     Start a job on the device.
@@ -137,7 +153,7 @@ def start_job(
             last = True
         techfile = get_kbio_techpath(dllpath, techname, device_info.model)
         log.debug(f"loading technique {ti}: '{techname}'")
-        api.LoadTechnique(id_, channel, techfile, pars, first=first, last=last, display=True)
+        api.LoadTechnique(id_, channel, techfile, pars, first=first, last=last, display=False)
         ti += 1
         first = False
     log.debug(f"starting run on '{address}:{channel}'")
@@ -149,7 +165,12 @@ def start_job(
     return dt.timestamp()
 
 
-def stop_job(address: str, channel: int, dllpath: str) -> float:
+def stop_job(
+    address: str, 
+    channel: int, 
+    dllpath: str,
+    **kwargs: dict,
+) -> float:
     """
     Stop a job running on the device.
 

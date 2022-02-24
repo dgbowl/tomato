@@ -31,10 +31,14 @@ setuptools.setup(
     python_requires=">=3.9",
     install_requires=[
         "appdirs>=1.4.0",
+        "toml",
+        "pyyaml",
+        "psutil",
     ],
     entry_points={
         "console_scripts": [
-            "tomato=tomato:run_daemon"
+            "tomato=tomato:run_tomato",
+            "ketchup=tomato:run_ketchup",
         ]
     },
 )

@@ -3,7 +3,7 @@ import time
 
 
 address = "192.109.209.6"
-channel = 1
+channel = 2
 dllpath = "C:\\EC-Lab Development Package\\EC-Lab Development Package\\"
 
 print(tomato.drivers.biologic.get_status(address, channel, dllpath))
