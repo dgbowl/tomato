@@ -6,14 +6,14 @@
     "method": {
         "MPG2": [
             {
-                "name": "OCV", 
+                "name": "open_circuit_voltage", 
                 "time": 5, 
                 "I_range": "1 mA",
                 "E_range": "5 V",
                 "record_every_dt": 1
             },
             {
-                "name": "CPLIMIT", 
+                "name": "constant_current", 
                 "current": ["C/10", "D/5"],
                 "time": 11, 
                 "is_delta": false,

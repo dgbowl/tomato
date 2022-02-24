@@ -58,9 +58,7 @@ def job_wrapper(
     state = settings["state"]
     pid = os.getpid()
     log.info(f"executing job '{jobid}' on pid '{pid}'")
-    dbhandler.pipeline_assign_job(
-        state["path"], pip, jobid, pid, type=state["type"]
-    )
+    dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
     dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
     driver_worker(settings, pipelines[pip], payload, jobid)
@@ -105,6 +103,7 @@ def main_loop(
                     pipinfo = dbhandler.pipeline_get_info(stp, pip, type = stt)
                     can_queue = _pipeline_ready_sample(pipinfo, payload["sample"])
                     if can_queue:
+                        dbhandler.pipeline_reset_job(stp, pip, False, type=stt)
                         p = multiprocessing.Process(
                             name=f"driver_worker_{jobid}",
                             target=job_wrapper, 

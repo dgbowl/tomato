@@ -35,7 +35,7 @@ def status(args):
 
     if args.jobid == "state":
         pips = dbhandler.pipeline_get_all(state["path"], type=state["type"])
-        print(f"{'pipeline':20s} {'ready':5s} {'jobid':6s} {'(PID)':9s} {'sampleid':20s} ")
+        print(f"{'pipeline':20s} {'ready':5s} {'jobid':5s} {'(PID)':9s} {'sampleid':20s} ")
         print("="*65)
         for pip in pips:
             sampleid, ready, jobid, pid = dbhandler.pipeline_get_info(
@@ -43,7 +43,7 @@ def status(args):
             )
             rstr = 'yes' if ready else 'no'
             job = f"{str(jobid):5s} ({pid})" if jobid is not None else str(jobid)
-            print(f"{pip:20s} {rstr:5s} {job:12s} {str(sampleid):20s}")
+            print(f"{pip:20s} {rstr:5s} {job:15s} {str(sampleid):20s}")
     elif args.jobid == "queue":
         jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
         running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
@@ -55,8 +55,7 @@ def status(args):
             elif status.startswith("r"):
                 for pip, pjobid, pid in running:
                     if pjobid == jobid:
-                        break
-                print(f"{str(jobid):6s} {status:6s} {str(pid):7s} {pip:20s}")
+                        print(f"{str(jobid):6s} {status:6s} {str(pid):7s} {pip:20s}")
     else:
         jobid = int(args.jobid)
         print(f"printing status of job '{jobid}' not yet implemented")
@@ -118,5 +117,13 @@ def ready(args):
     pips = dbhandler.pipeline_get_all(state["path"], type=state["type"])
     assert args.pipeline in pips, f"pipeline '{args.pipeline}' not found."
 
-    log.info(f"marking pipeline '{args.pipeline}' as ready.")
-    dbhandler.pipeline_reset_job(state["path"], args.pipeline, True, state["type"])
+    log.debug(f"checking if pipeline '{args.pipeline}' is running.")
+    sampleid, ready, jobid, pid = dbhandler.pipeline_get_info(
+        state["path"], args.pipeline, state["type"]
+    )
+
+    if jobid is None and pid is None:
+        log.info(f"marking pipeline '{args.pipeline}' as ready.")
+        dbhandler.pipeline_reset_job(state["path"], args.pipeline, True, state["type"])
+    else:
+        log.warning(f"cannot mark pipeline as ready: job '{jobid}' is running.")
