@@ -21,25 +21,25 @@ def driver_api(
 def data_poller(
     driver: str, address: str, channel: int, device: str, root: str, kwargs: dict
 ) -> None:
-    pollrate = kwargs.get("pollrate", 10)
-    verbose = bool(kwargs.get("verbose", 0))
+    pollrate = kwargs.pop("pollrate", 10)
+    verbose = bool(kwargs.pop("verbose", 0))
     cont = True
     while cont:
         ts, nrows, data = driver_api(driver, "get_data", address, channel, **kwargs)
         while nrows > 0:
             isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
-            isots = ts.replace(":", "")
+            isots = isots.replace(":", "")
             fn = os.path.join(root, f"{device}_{isots}_data.json")
             with open(fn, "w") as of:
                 json.dump(data, of)
             ts, nrows, data = driver_api(driver, "get_data", address, channel, **kwargs)
-
+        
+        ts, done, metadata = driver_api(
+            driver, "get_status", address, channel, **kwargs
+        )
         if verbose:
-            ts, done, metadata = driver_api(
-                driver, "get_status", address, channel, **kwargs
-            )
             isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
-            isots = ts.replace(":", "")
+            isots = isots.replace(":", "")
             fn = os.path.join(root, f"{device}_{isots}_status.json")
             with open(fn, "w") as of:
                 json.dump(metadata, of)
@@ -63,10 +63,6 @@ def driver_worker(settings: dict, pipeline: dict, payload: dict, jobid: int) -> 
         ch = dval["channel"]
         pl = payload["method"][dev]
         smpl = payload["sample"]
-        kwargs = {
-            "pollrate": dval.get("pollrate", 10),
-            "verbose": dval.get("verbose", 0),
-        }
 
         log.debug(f"jobid {jobid}: getting status of device '{dev}'")
         ts, ready, metadata = driver_api(drv, "get_status", addr, ch, **dpar)
@@ -82,10 +78,15 @@ def driver_worker(settings: dict, pipeline: dict, payload: dict, jobid: int) -> 
             json.dump(metadata, of)
 
         log.debug(f"jobid {jobid}: starting data polling for device '{dev}'")
+        kwargs = dpar
+        kwargs.update({
+            "pollrate": dval.get("pollrate", 10),
+            "verbose": dval.get("verbose", 0),
+        })
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{dev}",
             target=data_poller,
-            args=(drv, addr, ch, dev, root, dpar),
+            args=(drv, addr, ch, dev, root, kwargs),
         )
         jobs.append(p)
         p.start()

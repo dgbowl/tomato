@@ -70,11 +70,8 @@ def get_pipelines(tomlpath: str) -> dict:
                 chs = [v["add_device"][devname]["channel"]]
             for ch in chs:
                 name = k + str(ch)
-                data = {
-                    "address": settings["devices"][devname]["address"],
-                    "driver": settings["devices"][devname]["driver"],
-                    "channel": ch,
-                    "capabilities": settings["devices"][devname]["capabilities"],
-                }
+                dpars = settings["devices"][devname]
+                data = {k: v for k, v in dpars.items() if k is not "channels"}
+                data["channel"] = ch
                 ppls[name] = {v["add_device"][devname]["name"]: data}
     return ppls
