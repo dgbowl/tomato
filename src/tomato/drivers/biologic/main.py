@@ -1,40 +1,40 @@
-
 import logging
+
 log = logging.getLogger(__name__)
 from datetime import datetime, timezone
 
 from .kbio_wrapper import (
     get_kbio_techpath,
-    payload_to_ecc, 
-    parse_raw_data, 
+    payload_to_ecc,
+    parse_raw_data,
     get_kbio_api,
 )
 
 
 def get_status(
-    address: str, 
-    channel: int, 
+    address: str,
+    channel: int,
     dllpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
-    Get the current status of the device. 
+    Get the current status of the device.
 
     Parameters
     ----------
     address
         IP address of the potentiostat.
-    
+
     channel
         Numeric, 1-indexed ID of the channel.
-    
+
     dllpath
         Path to the BioLogic DLL file.
-    
+
     Returns
     -------
     timestamp, ready, metadata: tuple[float, bool, dict]
-        Returns a tuple containing the timestamp, readiness status, and 
+        Returns a tuple containing the timestamp, readiness status, and
         associated metadata.
 
     """
@@ -61,30 +61,30 @@ def get_status(
 
 
 def get_data(
-    address: str, 
-    channel: int, 
+    address: str,
+    channel: int,
     dllpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
-    Get cached data from the device. 
+    Get cached data from the device.
 
     Parameters
     ----------
     address
         IP address of the potentiostat.
-    
+
     channel
         Numeric, 1-indexed ID of the channel.
-    
+
     dllpath
         Path to the BioLogic DLL file.
-    
+
     Returns
     -------
-    timestamp, metadata: tuple[float, dict]
+    timestamp, nrows, data: tuple[float, int, dict]
         Returns a tuple containing the timestamp and associated metadata.
-    
+
     """
     api = get_kbio_api(dllpath)
     log.debug(f"connecting to '{address}:{channel}'")
@@ -95,7 +95,7 @@ def get_data(
     log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
     data = parse_raw_data(api, data, device_info.model)
-    return dt.timestamp(), data
+    return dt.timestamp(), data["data_rows"], data
 
 
 def start_job(
@@ -110,7 +110,7 @@ def start_job(
     Start a job on the device.
 
     The function first translates the ``payload`` into an instrument-specific
-    language, using the ``capacity`` provided if necessary. The converted 
+    language, using the ``capacity`` provided if necessary. The converted
     ``payload`` is then submitted to the device, overwriting any current job
     information.
 
@@ -118,21 +118,21 @@ def start_job(
     ----------
     address
         IP address of the potentiostat.
-    
+
     channel
         Numeric, 1-indexed ID of the channel.
-    
+
     dllpath
         Path to the BioLogic DLL file.
-    
+
     payload
         A protocol describing the techniques to be executed and their order.
-    
+
     capacity
         The capacity information for the studied battery cell. Only required for
         battery-testing applications or for payloads where currents are specified
         using C or D rates.
-    
+
     Returns
     -------
     timestamp
@@ -153,7 +153,9 @@ def start_job(
             last = True
         techfile = get_kbio_techpath(dllpath, techname, device_info.model)
         log.debug(f"loading technique {ti}: '{techname}'")
-        api.LoadTechnique(id_, channel, techfile, pars, first=first, last=last, display=False)
+        api.LoadTechnique(
+            id_, channel, techfile, pars, first=first, last=last, display=False
+        )
         ti += 1
         first = False
     log.debug(f"starting run on '{address}:{channel}'")
@@ -166,8 +168,8 @@ def start_job(
 
 
 def stop_job(
-    address: str, 
-    channel: int, 
+    address: str,
+    channel: int,
     dllpath: str,
     **kwargs: dict,
 ) -> float:
@@ -181,13 +183,13 @@ def stop_job(
     ----------
     address
         IP address of the potentiostat.
-    
+
     channel
         Numeric, 1-indexed ID of the channel.
-    
+
     dllpath
         Path to the BioLogic DLL file.
-    
+
     Returns
     -------
     timestamp
@@ -203,5 +205,3 @@ def stop_job(
     log.info(f"run stopped at '{dt}'")
     api.Disconnect(id_)
     return dt.timestamp()
-
-

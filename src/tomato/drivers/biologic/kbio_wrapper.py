@@ -2,6 +2,7 @@ import os
 from typing import Union
 
 import logging
+
 log = logging.getLogger(__name__)
 
 from .kbio.kbio_api import KBIO_api
@@ -12,14 +13,12 @@ from .kbio.c_utils import c_is_64b
 
 from .tech_params import named_params, techfiles, datatypes, I_ranges, E_ranges
 
+
 def get_test_magic(
-    variable: str, 
-    sign: str, 
-    logic: str = "or", 
-    active: bool = True
+    variable: str, sign: str, logic: str = "or", active: bool = True
 ) -> int:
     magic = int(active)
-    
+
     assert logic.lower() in {"and", "or"}
     magic += 2 * int(logic.lower() in {"and"})
 
@@ -35,15 +34,14 @@ def get_test_magic(
 def get_num_steps(tech: dict) -> int:
     ns = 1
     for k in {
-        "current", 
-        "voltage", 
-        "is_delta", 
+        "current",
+        "voltage",
+        "is_delta",
         "time",
-        "scan_rate" 
-        "limit_voltage_min", 
+        "scan_rate" "limit_voltage_min",
         "limit_voltage_max",
-        "limit_current_min", 
-        "limit_current_max", 
+        "limit_current_min",
+        "limit_current_max",
     }:
         if k in tech and isinstance(tech[k], list):
             ns = max(len(tech[k]), ns)
@@ -60,28 +58,48 @@ def pad_steps(param: Union[list, int, float], ns: int) -> list:
     return ret
 
 
-def current(val: Union[list,str,float], capacity: float) -> float:
-    if not isinstance(val, list):
-        val = [val]
-    ret = []
-    for v in val:
-        if isinstance(v, float):
-            ret.append(v)
-        elif "/" in v:
-            pre, post = v.split("/")
-            if pre == "C":
-                ret.append(capacity / float(post))
-            elif pre in {"D", "-C"}:
-                ret.append(-1 * capacity / float(post))
+def _current(val: Union[list, str, float], capacity: float) -> float:
+    if isinstance(val, float):
+        return val
+    elif "/" in val:
+        pre, post = val.split("/")
+        if pre == "C":
+            return capacity / float(post)
+        elif pre in {"D", "-C"}:
+            return -1 * capacity / float(post)
+    else:
+        if val == "C":
+            pre = 1.0
+        elif val == "D":
+            pre = -1.0
+        elif "D" in val:
+            pre = float(val.replace("D", "")) * -1
+        elif "C" in val:
+            pre = float(val.replace("C", ""))
         else:
-            if "D" in v:
-                pre = float(v.replace("D", "")) * -1
-            elif "C" in v:
-                pre = float(v.replace("C", ""))
-            else:   
-                pre = float(v)
-            ret.append(pre * capacity)
+            pre = float(val)
+        return pre * capacity
+
+
+def current(val: Union[list, str, float], capacity: float) -> Union[list[float], float]:
+    if isinstance(val, list):
+        ret = []
+        for v in val:
+            ret.append(_current(v, capacity))
+    else:
+        ret = _current(val, capacity)
     return ret
+
+
+def vlimit(cond: str, vals: list[float], Is: list[float] = None) -> list[float]:
+    if Is is not None:
+        signs = [i > 0 for i in Is]
+        for i, v in enumerate(vals):
+            if cond == "max" and not signs[i]:
+                vals[i] = v + 0.0005
+            elif cond == "min" and signs[i]:
+                vals[i] = v - 0.0005
+    return vals
 
 
 def translate(technique: dict, capacity: float) -> dict:
@@ -105,14 +123,6 @@ def translate(technique: dict, capacity: float) -> dict:
             "Exit_Cond": pad_steps(2 * int(technique.get("exit_on_limit", False)), ns),
         }
         ci = 1
-        for prop in {"voltage", "current"}:
-            for cond in {"max", "min"}:
-                if f"limit_{prop}_{cond}" in technique and ci < 4:
-                    conf = get_test_magic(prop, cond)
-                    val = current(technique[f"limit_{prop}_{cond}"], capacity)
-                    tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
-                    tech[f"Test{ci}_Value"] = pad_steps(val, ns)
-                    ci += 1
         if technique["name"].endswith("current"):
             I = current(technique["current"], capacity)
             tech["Current_step"] = pad_steps(I, ns)
@@ -120,11 +130,24 @@ def translate(technique: dict, capacity: float) -> dict:
         elif technique["name"].endswith("voltage"):
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
+        for prop in {"voltage", "current"}:
+            for cond in {"max", "min"}:
+                if f"limit_{prop}_{cond}" in technique and ci < 4:
+                    conf = get_test_magic(prop, cond)
+                    tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
+                    if prop == "current":
+                        Is = current(technique[f"limit_{prop}_{cond}"], capacity)
+                        vals = pad_steps(Is, ns)
+                    else:
+                        padded = pad_steps(technique[f"limit_{prop}_{cond}"], ns)
+                        vals = vlimit(cond, padded, tech.get("Current_step"))
+                    tech[f"Test{ci}_Value"] = vals
+                    ci += 1
     elif technique["name"] == "loop":
         tech = {
             "name": "loop",
             "loop_N_times": technique.get("n_gotos", -1),
-            "protocol_number": technique.get("goto", 0)
+            "protocol_number": technique.get("goto", 0),
         }
     elif technique["name"].startswith("sweep_"):
         ns = get_num_steps(technique)
@@ -173,7 +196,7 @@ def translate(technique: dict, capacity: float) -> dict:
             "Record_every_dT": technique.get("record_every_dt", 30.0),
             "Record_every_dE": technique.get("record_every_dE", 0.005),
         }
-    return tech 
+    return tech
 
 
 def dsl_to_ecc(api, dsl: dict) -> EccParams:
@@ -209,7 +232,7 @@ def parse_raw_data(api, data, devname):
 
     parsed = {
         "status": status,
-        "technique_index" : data_info.TechniqueIndex,
+        "technique_index": data_info.TechniqueIndex,
         "technique_name": techname,
         "loop_number": data_info.loop,
         "start_time": data_info.StartTime,
@@ -217,14 +240,14 @@ def parse_raw_data(api, data, devname):
         "E_range": f"{current_values.EweRangeMax - current_values.EweRangeMin} V",
         "I_range": {v: k for k, v in I_ranges.items()}[current_values.IRange],
         "data_rows": data_info.NbRows,
-        "data": []
+        "data": [],
     }
 
-    vmp3 = devname in VMP3_FAMILY    
+    vmp3 = devname in VMP3_FAMILY
     parsed_data = []
     if data_info.NbRows > 0:
         dtypes = datatypes["VMP3" if vmp3 else "SP-300"][techname]
-    
+
     ix = 0
     for _ in range(data_info.NbRows):
         inx = ix + data_info.NbCols
@@ -243,7 +266,7 @@ def parse_raw_data(api, data, devname):
         parsed_data.append(point)
         ix = inx
     parsed["data"] = parsed_data
-    
+
     return parsed
 
 
@@ -259,8 +282,8 @@ def get_kbio_api(dllpath):
 
 
 def get_kbio_techpath(
-    dllpath, 
-    techname, 
+    dllpath,
+    techname,
     devname,
 ) -> str:
     vmp3 = devname in VMP3_FAMILY

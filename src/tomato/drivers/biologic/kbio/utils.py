@@ -6,84 +6,98 @@ and prone to be used in several modules.
 
 import os
 
-#------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------#
 
-def class_name (obj) :
+
+def class_name(obj):
     """Return the class name of an object."""
     name = type(obj).__name__
     return name
 
-#------------------------------------------------------------------------------#
 
-def exception_brief (e, extended=False) :
+# ------------------------------------------------------------------------------#
+
+
+def exception_brief(e, extended=False):
     """Return either a simple version of an exception, or a more verbose one."""
     brief = f"{class_name(e)}"
-    if extended :
+    if extended:
         brief += f" : {e}"
     return brief
 
-#------------------------------------------------------------------------------#
 
-def warn_diff (msg,cmp) :
+# ------------------------------------------------------------------------------#
+
+
+def warn_diff(msg, cmp):
     """Check a predicate (assert) or a mismatch, and on error print a message."""
-    if type(cmp) is bool :
+    if type(cmp) is bool:
         not_ok = not cmp
-        if not_ok :
+        if not_ok:
             print(f"{msg} failed")
-    else :
-        not_ok = (cmp[0] != cmp[1])
-        if not_ok :
+    else:
+        not_ok = cmp[0] != cmp[1]
+        if not_ok:
             print(f"{msg} {cmp}")
     return not_ok
 
-#------------------------------------------------------------------------------#
 
-def error_diff (msg,cmp) :
+# ------------------------------------------------------------------------------#
+
+
+def error_diff(msg, cmp):
     """Check a predicate (assert) or a mismatch, and on error raise an exception."""
-    if type(cmp) is bool :
-        if not cmp :
+    if type(cmp) is bool:
+        if not cmp:
             raise RuntimeError(f"{msg}")
-    else :
-        if (cmp[0] != cmp[1]) :
+    else:
+        if cmp[0] != cmp[1]:
             raise RuntimeError(f"{msg} {cmp}")
 
-#------------------------------------------------------------------------------#
 
-def prepend_path (path, filename) :
+# ------------------------------------------------------------------------------#
+
+
+def prepend_path(path, filename):
     """Prepend a path to filename in case one is not already provided."""
-    if path :
+    if path:
         segs = os.path.split(filename)
-        if (segs[0] == '') and (filename != '') :
+        if (segs[0] == "") and (filename != ""):
             filename = path + filename
     return filename
 
-#------------------------------------------------------------------------------#
 
-def file_complete (filename, an_ext) :
+# ------------------------------------------------------------------------------#
+
+
+def file_complete(filename, an_ext):
     """Append an extension to a filename unless the file already exists or if it already has one."""
-    if not os.path.isfile(filename) :
-        root,ext = os.path.splitext(filename)
-    if not ext :
-            filename = root + an_ext
+    if not os.path.isfile(filename):
+        root, ext = os.path.splitext(filename)
+    if not ext:
+        filename = root + an_ext
     return filename
 
-#------------------------------------------------------------------------------#
 
-def pp_plural (nb, label, num=True, nothing='') :
+# ------------------------------------------------------------------------------#
+
+
+def pp_plural(nb, label, num=True, nothing=""):
     """Return a user friendly version of an ordinal and a label.
-    
-       num is used to force a number version,
-       nothing is what to say if there is nothing
+
+    num is used to force a number version,
+    nothing is what to say if there is nothing
     """
-    if nb == 0 :
-        if nothing :
+    if nb == 0:
+        if nothing:
             en_clair = f"{nothing}"
-        else :
+        else:
             en_clair = f"{0 if num else 'no'} {label}"
-    elif nb == 1 :
+    elif nb == 1:
         en_clair = f"{1 if num else 'one'} {label}"
-    else :
+    else:
         en_clair = f"{nb} {label}s"
     return en_clair
 
-#==============================================================================#
+
+# ==============================================================================#
