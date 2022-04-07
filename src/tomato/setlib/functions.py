@@ -5,6 +5,7 @@ import logging
 import appdirs
 from importlib import metadata
 from datetime import datetime, timezone
+
 log = logging.getLogger(__name__)
 
 _VERSION = metadata.version("tomato")
@@ -22,7 +23,8 @@ def get_settings(configpath: str, datapath: str) -> dict:
     settingsfile = os.path.join(configpath, "settings.toml")
     if not os.path.exists(settingsfile):
         log.warning(f"config file not present. Writing defaults to '{settingsfile}'")
-        defaults = textwrap.dedent(f"""\
+        defaults = textwrap.dedent(
+            f"""\
             # Default settings for tomato v{_VERSION}
             # Generated on {str(datetime.now(timezone.utc))}
             [state]
@@ -43,15 +45,16 @@ def get_settings(configpath: str, datapath: str) -> dict:
             [drivers]
             [drivers.biologic]
             dllpath = 'C:\EC-Lab Development Package\EC-Lab Development Package\'
-            """)
+            """
+        )
         if not os.path.exists(configpath):
             os.makedirs(configpath)
         with open(settingsfile, "w") as of:
             of.write(defaults)
-    
+
     log.debug(f"loading tomato settings from '{settingsfile}'")
     settings = toml.load(settingsfile)
-    
+
     return settings
 
 
@@ -71,7 +74,7 @@ def get_pipelines(tomlpath: str) -> dict:
                     "address": settings["devices"][devname]["address"],
                     "driver": settings["devices"][devname]["driver"],
                     "channel": ch,
-                    "capabilities": settings["devices"][devname]["capabilities"]
+                    "capabilities": settings["devices"][devname]["capabilities"],
                 }
                 ppls[name] = {v["add_device"][devname]["name"]: data}
     return ppls

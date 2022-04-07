@@ -1,9 +1,9 @@
 named_params = {
-    'Rest_time_T': float,
-    'Duration_step': float,
-    'Record_every_dT': float,
-    'Record_every_dE': float,
-    'Record_every_dI': float,
+    "Rest_time_T": float,
+    "Duration_step": float,
+    "Record_every_dT": float,
+    "Record_every_dE": float,
+    "Record_every_dI": float,
     "E_Range": int,
     "I_Range": int,
     "Current_step": float,
@@ -68,7 +68,7 @@ datatypes = {
         "CALIMIT": ["t_high", "t_low", "Ewe", "I", "cycle"],
         "PDYNLIMIT": ["t_high", "t_low", "<I>", "<Ewe>", "cycle"],
         "GDYNLIMIT": ["t_high", "t_low", "<I>", "<Ewe>", "cycle"],
-    }
+    },
 }
 
 techfiles = {
@@ -78,7 +78,7 @@ techfiles = {
         "constant_voltage": "calimit.ecc",
         "sweep_voltage": "vscanlimit.ecc",
         "sweep_current": "iscanlimit.ecc",
-        "loop": "loop.ecc"
+        "loop": "loop.ecc",
     },
     "SP-300": {
         "open_circuit_voltage": "ocv4.ecc",
@@ -86,6 +86,6 @@ techfiles = {
         "constant_voltage": "calimit4.ecc",
         "sweep_voltage": "vscanlimit4.ecc",
         "sweep_current": "iscanlimit4.ecc",
-        "loop": "loop4.ecc"
-    }
+        "loop": "loop4.ecc",
+    },
 }
