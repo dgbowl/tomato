@@ -33,7 +33,7 @@ def data_poller(
             with open(fn, "w") as of:
                 json.dump(data, of)
             ts, nrows, data = driver_api(driver, "get_data", address, channel, **kwargs)
-        
+
         ts, done, metadata = driver_api(
             driver, "get_status", address, channel, **kwargs
         )
@@ -79,10 +79,12 @@ def driver_worker(settings: dict, pipeline: dict, payload: dict, jobid: int) -> 
 
         log.debug(f"jobid {jobid}: starting data polling for device '{dev}'")
         kwargs = dpar
-        kwargs.update({
-            "pollrate": dval.get("pollrate", 10),
-            "verbose": dval.get("verbose", 0),
-        })
+        kwargs.update(
+            {
+                "pollrate": dval.get("pollrate", 10),
+                "verbose": dval.get("verbose", 0),
+            }
+        )
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{dev}",
             target=data_poller,

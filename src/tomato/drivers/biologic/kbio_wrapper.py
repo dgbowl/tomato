@@ -58,7 +58,7 @@ def pad_steps(param: Union[list, int, float], ns: int) -> list:
     return ret
 
 
-def _current(val: Union[list,str,float], capacity: float) -> float:
+def _current(val: Union[list, str, float], capacity: float) -> float:
     if isinstance(val, float):
         return val
     elif "/" in val:
@@ -76,9 +76,10 @@ def _current(val: Union[list,str,float], capacity: float) -> float:
             pre = float(val.replace("D", "")) * -1
         elif "C" in val:
             pre = float(val.replace("C", ""))
-        else:   
+        else:
             pre = float(val)
         return pre * capacity
+
 
 def current(val: Union[list, str, float], capacity: float) -> Union[list[float], float]:
     if isinstance(val, list):
