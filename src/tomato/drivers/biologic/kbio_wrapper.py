@@ -84,6 +84,18 @@ def current(val: Union[list,str,float], capacity: float) -> float:
     return ret
 
 
+def vlimit(cond: str, vals: list[float], Is: list[float] = None) -> list[float]:
+    if Is is not None:
+        signs = [i > 0  for i in Is]
+        for i, v in enumerate(vals):
+            if cond == "max" and not signs[i]:
+                vals[i] = v + 0.0005
+            elif cond == "min" and signs[i]:
+                vals[i] = v - 0.0005
+    return vals
+
+
+
 def translate(technique: dict, capacity: float) -> dict:
     if technique["name"].startswith("constant_"):
         ns = get_num_steps(technique)
@@ -105,14 +117,6 @@ def translate(technique: dict, capacity: float) -> dict:
             "Exit_Cond": pad_steps(2 * int(technique.get("exit_on_limit", False)), ns),
         }
         ci = 1
-        for prop in {"voltage", "current"}:
-            for cond in {"max", "min"}:
-                if f"limit_{prop}_{cond}" in technique and ci < 4:
-                    conf = get_test_magic(prop, cond)
-                    val = current(technique[f"limit_{prop}_{cond}"], capacity)
-                    tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
-                    tech[f"Test{ci}_Value"] = pad_steps(val, ns)
-                    ci += 1
         if technique["name"].endswith("current"):
             I = current(technique["current"], capacity)
             tech["Current_step"] = pad_steps(I, ns)
@@ -120,6 +124,19 @@ def translate(technique: dict, capacity: float) -> dict:
         elif technique["name"].endswith("voltage"):
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
+        for prop in {"voltage", "current"}:
+            for cond in {"max", "min"}:
+                if f"limit_{prop}_{cond}" in technique and ci < 4:
+                    conf = get_test_magic(prop, cond)
+                    tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
+                    if prop == "current":
+                        Is = current(technique[f"limit_{prop}_{cond}"],capacity)
+                        vals = pad_steps(Is, ns)
+                    else:
+                        padded = pad_steps(technique[f"limit_{prop}_{cond}"], ns)
+                        vals = vlimit(cond, padded, tech.get("Current_step"))
+                    tech[f"Test{ci}_Value"] = vals
+                    ci += 1
     elif technique["name"] == "loop":
         tech = {
             "name": "loop",

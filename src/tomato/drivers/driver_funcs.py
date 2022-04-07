@@ -27,29 +27,37 @@ def data_poller(
     root: str,
     kwargs: dict
 ) -> None:
-    delay = 10
+    pollrate = kwargs.get("pollrate", 10)
+    verbose = bool(kwargs.get("verbose", 0))
     cont = True
     while cont:
-        ts, data = driver_api(
+        ts, nrows, data = driver_api(
             driver, "get_data", address, channel, **kwargs
         )
-        isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat().replace(":", "")
-        fn = os.path.join(root, f'{device}_{isots}_data.json')
-        with open(fn, "w") as of:
-            json.dump(data, of)
+        while nrows > 0:
+            isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+            isots = ts.replace(":", "")
+            fn = os.path.join(root, f'{device}_{isots}_data.json')
+            with open(fn, "w") as of:
+                json.dump(data, of)
+            ts, nrows, data = driver_api(
+               driver, "get_data", address, channel, **kwargs
+            )
         
-        ts, done, metadata = driver_api(
-            driver, "get_status", address, channel, **kwargs
-        )
-        isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat().replace(":", "")
-        fn = os.path.join(root, f'{device}_{isots}_status.json')
-        with open(fn, "w") as of:
-            json.dump(metadata, of)
+        if verbose:
+            ts, done, metadata = driver_api(
+                driver, "get_status", address, channel, **kwargs
+            )
+            isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+            isots = ts.replace(":", "")
+            fn = os.path.join(root, f'{device}_{isots}_status.json')
+            with open(fn, "w") as of:
+                json.dump(metadata, of)
 
         if done:
             cont = False
         else:
-            time.sleep(delay)
+            time.sleep(pollrate)
 
 
 def driver_worker(settings: dict, pipeline: dict, payload: dict, jobid: int) -> None:
@@ -65,6 +73,11 @@ def driver_worker(settings: dict, pipeline: dict, payload: dict, jobid: int) -> 
         ch = dval["channel"]
         pl = payload["method"][dev]
         smpl = payload["sample"]
+        kwargs = {
+            "pollrate": dval.get("pollrate", 10),
+            "verbose": dval.get("verbose", 0)
+        }
+        
 
         log.debug(f"jobid {jobid}: getting status of device '{dev}'")
         ts, ready, metadata = driver_api(
