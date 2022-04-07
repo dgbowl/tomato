@@ -58,27 +58,35 @@ def pad_steps(param: Union[list, int, float], ns: int) -> list:
     return ret
 
 
-def current(val: Union[list, str, float], capacity: float) -> float:
-    if not isinstance(val, list):
-        val = [val]
-    ret = []
-    for v in val:
-        if isinstance(v, float):
-            ret.append(v)
-        elif "/" in v:
-            pre, post = v.split("/")
-            if pre == "C":
-                ret.append(capacity / float(post))
-            elif pre in {"D", "-C"}:
-                ret.append(-1 * capacity / float(post))
-        else:
-            if "D" in v:
-                pre = float(v.replace("D", "")) * -1
-            elif "C" in v:
-                pre = float(v.replace("C", ""))
-            else:
-                pre = float(v)
-            ret.append(pre * capacity)
+def _current(val: Union[list,str,float], capacity: float) -> float:
+    if isinstance(val, float):
+        return val
+    elif "/" in val:
+        pre, post = val.split("/")
+        if pre == "C":
+            return capacity / float(post)
+        elif pre in {"D", "-C"}:
+            return -1 * capacity / float(post)
+    else:
+        if val == "C":
+            pre = 1.0
+        elif val == "D":
+            pre = -1.0
+        elif "D" in val:
+            pre = float(val.replace("D", "")) * -1
+        elif "C" in val:
+            pre = float(val.replace("C", ""))
+        else:   
+            pre = float(val)
+        return pre * capacity
+
+def current(val: Union[list, str, float], capacity: float) -> Union[list[float], float]:
+    if isinstance(val, list):
+        ret = []
+        for v in val:
+            ret.append(_current(v, capacity))
+    else:
+        ret = _current(val, capacity)
     return ret
 
 
