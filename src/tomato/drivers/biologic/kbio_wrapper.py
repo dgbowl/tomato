@@ -195,6 +195,8 @@ def translate(technique: dict, capacity: float) -> dict:
             "Rest_time_T": technique.get("time", 0.0),
             "Record_every_dT": technique.get("record_every_dt", 30.0),
             "Record_every_dE": technique.get("record_every_dE", 0.005),
+            "I_Range": I_ranges[technique.get("I_range", "keep")],
+            "E_Range": E_ranges[technique.get("E_range", "auto")],
         }
     return tech
 
@@ -231,15 +233,21 @@ def parse_raw_data(api, data, devname):
     techname = TECH_ID(data_info.TechniqueID).name
 
     parsed = {
-        "status": status,
-        "technique_index": data_info.TechniqueIndex,
-        "technique_name": techname,
-        "loop_number": data_info.loop,
-        "start_time": data_info.StartTime,
-        "elapsed_time": current_values.ElapsedTime,
-        "E_range": f"{current_values.EweRangeMax - current_values.EweRangeMin} V",
-        "I_range": {v: k for k, v in I_ranges.items()}[current_values.IRange],
-        "data_rows": data_info.NbRows,
+        "technique": {
+            "index": data_info.TechniqueIndex,
+            "name": techname,
+            "data_rows": data_info.NbRows,
+            "data_cols": data_info.NbCols,
+            "start_time": data_info.StartTime,
+            "loop_number": data_info.loop,
+        },
+        "current": {
+            "status": status,
+            "elapsed_time": current_values.ElapsedTime,
+            "I_range": {v: k for k, v in I_ranges.items()}[current_values.IRange],
+            "E_range": {"min": current_values.EweRangeMin, "max": current_values.EweRangeMax},
+            "timebase": current_values.TimeBase,
+        },
         "data": [],
     }
 
