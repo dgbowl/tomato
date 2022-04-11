@@ -1,0 +1,8 @@
+sample:
+    name: sample
+method:
+    worker:
+        - name: "random"
+          payload: bla
+tomato:
+    unlock_when_done: false

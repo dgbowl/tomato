@@ -51,49 +51,44 @@ def data_poller(
 
 
 def driver_worker(settings: dict, pipeline: dict, payload: dict, jobid: int) -> None:
-
     root = os.path.join(settings["queue"]["storage"], str(jobid))
-    os.makedirs(root)
-
     jobs = []
-    for dev, dval in pipeline.items():
-        drv = dval["driver"]
+    for v in pipeline["devices"]:
+        print(v)
+        drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
         dpar = settings["drivers"].get(drv, {})
-        addr = dval["address"]
-        ch = dval["channel"]
-        pl = payload["method"][dev]
+        pl = payload["method"][tag]
         smpl = payload["sample"]
 
-        log.debug(f"jobid {jobid}: getting status of device '{dev}'")
+        log.debug(f"jobid {jobid}: getting status of device '{tag}'")
         ts, ready, metadata = driver_api(drv, "get_status", addr, ch, **dpar)
-        assert ready, f"Failed: device '{dev}' is not ready."
+        assert ready, f"Failed: device '{tag}' is not ready."
 
-        log.debug(f"jobid {jobid}: starting payload for device '{dev}'")
+        log.debug(f"jobid {jobid}: starting payload for device '{tag}'")
         start_ts = driver_api(drv, "start_job", addr, ch, **dpar, payload=pl, **smpl)
         metadata["uts"] = start_ts
 
         isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat().replace(":", "")
-        fn = os.path.join(root, f"{dev}_{isots}_status.json")
+        fn = os.path.join(root, f"{tag}_{isots}_status.json")
         with open(fn, "w") as of:
             json.dump(metadata, of)
 
-        log.debug(f"jobid {jobid}: starting data polling for device '{dev}'")
+        log.debug(f"jobid {jobid}: starting data polling for device '{tag}'")
         kwargs = dpar
         kwargs.update(
             {
-                "pollrate": dval.get("pollrate", 10),
-                "verbose": dval.get("verbose", 0),
+                "pollrate": v.get("pollrate", 10),
+                "verbose": v.get("verbose", 0),
             }
         )
         p = multiprocessing.Process(
-            name=f"data_poller_{jobid}_{dev}",
+            name=f"data_poller_{jobid}_{tag}",
             target=data_poller,
-            args=(drv, addr, ch, dev, root, kwargs),
+            args=(drv, addr, ch, tag, root, kwargs),
         )
         jobs.append(p)
         p.start()
 
     for p in jobs:
         p.join()
-
     return

@@ -202,7 +202,7 @@ def pipeline_remove(
 ) -> None:
     conn, cur = get_db_conn(dbpath, type)
     log.warning(f"deleting pipeline '{pip}' from 'state'")
-    cur.execute("DELETE FROM state WHERE pipeline='{pip}';")
+    cur.execute(f"DELETE FROM state WHERE pipeline='{pip}';")
     conn.commit()
     conn.close()
 

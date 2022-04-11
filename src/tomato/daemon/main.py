@@ -1,10 +1,11 @@
 from typing import Callable
 import psutil
 import os
-import multiprocessing
+import subprocess
 import time
 import json
 import logging
+import sys
 
 log = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ from ..drivers import driver_worker
 from .. import dbhandler
 
 
-def _find_matching_pipelines(pipelines: dict, method: dict) -> list[str]:
+def _find_matching_pipelines(pipelines: list, method: dict) -> list[str]:
     req_names = set(method.keys())
     req_capabs = []
     for k in req_names:
@@ -20,16 +21,16 @@ def _find_matching_pipelines(pipelines: dict, method: dict) -> list[str]:
             req_capabs.append(s["name"])
     req_capabs = set(req_capabs)
 
-    name_match = []
     candidates = []
-    for cd in pipelines.keys():
-        if req_names.intersection(set(pipelines[cd].keys())) == req_names:
+    for cd in pipelines:
+        dnames = set([dev["tag"] for dev in cd["devices"]])
+        if req_names.intersection(dnames) == req_names:
             candidates.append(cd)
 
     matched = []
     for cd in candidates:
         capabs = []
-        for k, v in pipelines[cd].items():
+        for v in cd["devices"]:
             capabs += v["capabilities"]
         if req_capabs.intersection(set(capabs)) == req_capabs:
             matched.append(cd)
@@ -48,14 +49,15 @@ def _pipeline_ready_sample(ret: tuple, sample: dict) -> bool:
             return False
 
 
-def job_wrapper(
-    settings: dict,
-    pipelines: dict,
-    payload: dict,
-    pip: str,
-    jobid: int,
-) -> None:
-
+def job_wrapper() -> None:
+    jobfile = sys.argv[1]
+    with open(jobfile, "r") as infile:
+        jsdata = json.load(infile)
+    settings = jsdata["settings"]
+    payload = jsdata["payload"]
+    pipeline = jsdata["pipeline"]
+    pip = pipeline["name"]
+    jobid = jsdata["jobid"]
     queue = settings["queue"]
     state = settings["state"]
     pid = os.getpid()
@@ -63,7 +65,7 @@ def job_wrapper(
     dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
     dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
-    driver_worker(settings, pipelines[pip], payload, jobid)
+    driver_worker(settings, pipeline, payload, jobid)
     ready = payload.get("tomato", {}).get("unlock_when_done", False)
     dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
@@ -94,22 +96,31 @@ def main_loop(settings: dict, pipelines: dict) -> None:
         for jobid, strpl, st in ret:
             payload = json.loads(strpl)
             if st in ["q", "qw"]:
-                log.debug(f"checking whether job '{jobid}' can be matched")
+                if st == "q":
+                    log.debug(f"checking whether job '{jobid}' can ever be matched")
                 matched_pips = _find_matching_pipelines(pipelines, payload["method"])
                 if len(matched_pips) > 0 and st != "qw":
                     dbhandler.job_set_status(qup, "qw", jobid, type=qut)
                 log.debug(f"checking whether job '{jobid}' can be queued")
                 for pip in matched_pips:
-                    pipinfo = dbhandler.pipeline_get_info(stp, pip, type=stt)
+                    pipinfo = dbhandler.pipeline_get_info(stp, pip["name"], type=stt)
                     can_queue = _pipeline_ready_sample(pipinfo, payload["sample"])
                     if can_queue:
-                        dbhandler.pipeline_reset_job(stp, pip, False, type=stt)
-                        p = multiprocessing.Process(
-                            name=f"driver_worker_{jobid}",
-                            target=job_wrapper,
-                            args=(settings, pipelines, payload, pip, jobid),
+                        dbhandler.pipeline_reset_job(stp, pip["name"], False, type=stt)
+                        args = {
+                            "settings": settings,
+                            "pipeline": pip,
+                            "payload": payload,
+                            "jobid": jobid
+                        }
+                        root = os.path.join(settings["queue"]["storage"], str(jobid))
+                        os.makedirs(root)
+                        jpath = os.path.join(root, "jobdata.json")
+                        with open(jpath, "w") as of:
+                            json.dump(args, of, indent=1)
+                        p = subprocess.Popen(
+                            ["tomato_worker", str(jpath)]
                         )
-                        p.start()
                         break
         time.sleep(settings.get("main loop", 1))
 
