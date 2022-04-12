@@ -1,5 +1,7 @@
 import setuptools
-import os
+import versioneer
+version=versioneer.get_version()
+cmdclass=versioneer.get_cmdclass()
 
 with open("VERSION", "r") as infile:
     version = infile.read().strip()
@@ -12,6 +14,7 @@ packagedir = "src"
 setuptools.setup(
     name="tomato",
     version=version,
+    cmdclass=cmdclass,
     author="Peter Kraus",
     author_email="peter@tondon.de",
     description="au-tomation without pain!",
