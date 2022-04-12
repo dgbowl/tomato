@@ -111,7 +111,7 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                             "settings": settings,
                             "pipeline": pip,
                             "payload": payload,
-                            "jobid": jobid
+                            "jobid": jobid,
                         }
                         root = os.path.join(settings["queue"]["storage"], str(jobid))
                         os.makedirs(root)
@@ -119,8 +119,9 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                         with open(jpath, "w") as of:
                             json.dump(args, of, indent=1)
                         p = subprocess.Popen(
-                            ["tomato_worker", str(jpath)], 
-                            creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NO_WINDOW
+                            ["tomato_worker", str(jpath)],
+                            creationflags=subprocess.DETACHED_PROCESS
+                            | subprocess.CREATE_NO_WINDOW,
                         )
                         break
         time.sleep(settings.get("main loop", 1))

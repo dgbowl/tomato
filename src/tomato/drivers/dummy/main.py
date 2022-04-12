@@ -64,7 +64,7 @@ def get_data(
     npoints = random.randint(0, channel) // 2
     points = []
     for i in range(npoints):
-        points.append({"value": random.random()*100})
+        points.append({"value": random.random() * 100})
     data = {"data": points}
     return dt.timestamp(), npoints, data
 

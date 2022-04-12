@@ -245,7 +245,10 @@ def parse_raw_data(api, data, devname):
             "status": status,
             "elapsed_time": current_values.ElapsedTime,
             "I_range": {v: k for k, v in I_ranges.items()}[current_values.IRange],
-            "E_range": {"min": current_values.EweRangeMin, "max": current_values.EweRangeMax},
+            "E_range": {
+                "min": current_values.EweRangeMin,
+                "max": current_values.EweRangeMax,
+            },
             "timebase": current_values.TimeBase,
         },
         "data": [],
