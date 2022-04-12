@@ -95,7 +95,7 @@ def get_data(
     log.debug(f"disconnecting from '{address}:{channel}'")
     api.Disconnect(id_)
     data = parse_raw_data(api, data, device_info.model)
-    return dt.timestamp(), data["data_rows"], data
+    return dt.timestamp(), data["technique"]["data_rows"], data
 
 
 def start_job(
