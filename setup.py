@@ -3,9 +3,6 @@ import versioneer
 version=versioneer.get_version()
 cmdclass=versioneer.get_cmdclass()
 
-with open("VERSION", "r") as infile:
-    version = infile.read().strip()
-
 with open("README.md", "r", encoding="utf-8") as infile:
     readme = infile.read()
 
