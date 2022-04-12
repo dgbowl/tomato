@@ -59,11 +59,37 @@ def get_settings(configpath: str, datapath: str) -> dict:
 
     return settings
 
+def _default_pipelines() -> dict[str, dict]:
+    data = {
+        "devices": [
+            {
+                "name": "dummy_device", 
+                "address": None, 
+                "channels": [1],
+                "driver": "dummy",
+                "capabilities": ["random"]
+            }
+        ],
+        "pipelines": [
+            {
+                "name": "dummy-*", 
+                "devices": [
+                    {"tag": "worker", "name": "dummy_device", "channel": "each"}
+                ]
+            }
+        ]
+    }
+    return data
+
 
 def get_pipelines(yamlpath: str) -> dict:
     log.debug(f"loading pipeline settings from '{yamlpath}'")
-    with open(yamlpath, "r") as infile:
-        jsdata = yaml.safe_load(infile)
+    try:
+        with open(yamlpath, "r") as infile:
+            jsdata = yaml.safe_load(infile)
+    except FileNotFoundError:
+        log.error(f"device settings not found. Running with a 'dummy' device.")
+        jsdata = _default_pipelines()
     devices = jsdata["devices"]
     pipelines = jsdata["pipelines"]
     ret = []

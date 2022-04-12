@@ -4,6 +4,7 @@ Main module - executables for tomato.
 """
 import argparse
 import logging
+import psutil
 import appdirs
 import os
 import yaml
@@ -78,10 +79,17 @@ def run_tomato():
     args = parser.parse_args()
     _logging_setup(args)
 
+    ppid = os.getppid()
+    toms = [p.pid for p in psutil.process_iter() if "tomato" in p.name()]
+    toms.pop(toms.index(ppid))
+    if len(toms) > 0:
+        logging.critical("cannot run more than one instance of 'tomato'")
+        logging.info(f"'tomato' is currently running as pid {toms}")
+        return
+
     dirs = setlib.get_dirs()
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     pipelines = setlib.get_pipelines(settings["devices"]["path"])
-    log.debug(pipelines)
     log.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
     dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
     log.debug(f"setting up 'state' table in '{settings['queue']['path']}'")
