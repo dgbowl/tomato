@@ -57,18 +57,20 @@ def _default_parsers() -> tuple[argparse.ArgumentParser]:
 
 
 def sync_pipelines_to_state(
-    pipelines: dict,
+    pipelines: list,
     dbpath: str,
     type: str = "sqlite3",
 ) -> None:
     pstate = dbhandler.pipeline_get_all(dbpath, type)
-    for pip in pipelines.keys():
-        log.debug(f"checking presence of pipeline '{pip}' in 'state'")
-        if pip not in pstate:
-            dbhandler.pipeline_insert(dbpath, pip, type)
-    for pip in pstate:
-        if pip not in pipelines:
-            dbhandler.pipeline_remove(dbpath, pip, type)
+    for pip in pipelines:
+        log.debug(f"checking presence of pipeline '{pip['name']}' in 'state'")
+        if pip["name"] not in pstate:
+            dbhandler.pipeline_insert(dbpath, pip["name"], type)
+    pnames = [p["name"] for p in pipelines]
+    for pname in pstate:
+        if pname not in pnames:
+            dbhandler.pipeline_remove(dbpath, pname, type)
+    pstate = dbhandler.pipeline_get_all(dbpath, type)
 
 
 def run_tomato():
@@ -79,7 +81,7 @@ def run_tomato():
     dirs = setlib.get_dirs()
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     pipelines = setlib.get_pipelines(settings["devices"]["path"])
-
+    log.debug(pipelines)
     log.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
     dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
     log.debug(f"setting up 'state' table in '{settings['queue']['path']}'")

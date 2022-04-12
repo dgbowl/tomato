@@ -1,6 +1,8 @@
 import os
 import textwrap
 import toml
+import yaml
+import copy
 import logging
 import appdirs
 from importlib import metadata
@@ -58,20 +60,42 @@ def get_settings(configpath: str, datapath: str) -> dict:
     return settings
 
 
-def get_pipelines(tomlpath: str) -> dict:
-    log.debug(f"loading pipeline settings from '{tomlpath}'")
-    settings = toml.load(tomlpath)
-    ppls = {}
-    for k, v in settings["pipelines"].items():
-        for devname in v["add_device"].keys():
-            if v["add_device"][devname]["channel"] == "each":
-                chs = settings["devices"][devname]["channels"]
-            else:
-                chs = [v["add_device"][devname]["channel"]]
-            for ch in chs:
-                name = k + str(ch)
-                dpars = settings["devices"][devname]
-                data = {k: v for k, v in dpars.items() if k is not "channels"}
-                data["channel"] = ch
-                ppls[name] = {v["add_device"][devname]["name"]: data}
-    return ppls
+def get_pipelines(yamlpath: str) -> dict:
+    log.debug(f"loading pipeline settings from '{yamlpath}'")
+    with open(yamlpath, "r") as infile:
+        jsdata = yaml.safe_load(infile)
+    devices = jsdata["devices"]
+    pipelines = jsdata["pipelines"]
+    ret = []
+    for pip in pipelines:
+        if "*" in pip["name"]:
+            data = {"name": pip["name"], "devices": []}
+            assert len(pip["devices"]) == 1
+            for ppars in pip["devices"]:
+                for dpars in devices:
+                    if dpars["name"] == ppars["name"]:
+                        break
+                dev = {k: v for k, v in dpars.items() if k != "channels"}
+                dev["tag"] = ppars["tag"]
+                data["devices"].append(dev)
+                for ch in dpars["channels"]:
+                    d = copy.deepcopy(data)
+                    d["devices"][0]["channel"] = ch
+                    d["name"] = d["name"].replace("*", f"{ch}")
+                    ret.append(d)
+        else:
+            data = {"name": pip["name"], "devices": []}
+            for ppars in pip["devices"]:
+                for dpars in devices:
+                    if dpars["name"] == ppars["name"]:
+                        break
+                dev = {k: v for k, v in dpars.items() if k != "channels"}
+                dev["tag"] = ppars["tag"]
+                if isinstance(ppars.get("channel"), int):
+                    assert ppars["channel"] in dpars["channels"]
+                    dev["channel"] = ppars["channel"]
+                else:
+                    assert "*" in pip["name"]
+                data["devices"].append(dev)
+            ret.append(data)
+    return ret
