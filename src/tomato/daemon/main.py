@@ -119,7 +119,8 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                         with open(jpath, "w") as of:
                             json.dump(args, of, indent=1)
                         p = subprocess.Popen(
-                            ["tomato_worker", str(jpath)]
+                            ["tomato_worker", str(jpath)], 
+                            creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NO_WINDOW
                         )
                         break
         time.sleep(settings.get("main loop", 1))
