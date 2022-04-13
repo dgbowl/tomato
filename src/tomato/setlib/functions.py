@@ -65,7 +65,7 @@ def _default_pipelines() -> dict[str, dict]:
             {
                 "name": "dummy_device", 
                 "address": None, 
-                "channels": [1],
+                "channels": [5, 10],
                 "driver": "dummy",
                 "capabilities": ["random"]
             }

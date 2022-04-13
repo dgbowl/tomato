@@ -61,7 +61,7 @@ def get_data(
 
     """
     dt = datetime.now(timezone.utc)
-    npoints = random.randint(0, channel) // 2
+    npoints = random.randint(0, channel)
     points = []
     for i in range(npoints):
         points.append({"value": random.random() * 100})

@@ -1,13 +1,13 @@
 from typing import Callable
+from importlib import metadata
 import psutil
+import argparse
 import os
 import subprocess
 import time
 import json
 import logging
 import sys
-
-log = logging.getLogger(__name__)
 
 from ..drivers import driver_worker
 from .. import dbhandler
@@ -49,10 +49,37 @@ def _pipeline_ready_sample(ret: tuple, sample: dict) -> bool:
             return False
 
 
-def job_wrapper() -> None:
-    jobfile = sys.argv[1]
-    with open(jobfile, "r") as infile:
+def tomato_job() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f'%(prog)s version {metadata.version("tomato")}',
+    )
+    parser.add_argument(
+        "jobfile",
+        help="Path to a ketchup-processed payload json file.",
+        default=None,
+    )
+    args = parser.parse_args()
+    
+    logfile = args.jobfile.replace(".json", ".log")
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s:%(levelname)-8s:%(message)s',
+        handlers=[
+            logging.FileHandler(logfile, mode="a"),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(__name__)
+
+    logger.info("attempting to load jobfile '%s'", args.jobfile)
+    with open(args.jobfile, "r") as infile:
         jsdata = json.load(infile)
+
+    logger.debug("parsing data from jobfile")
     settings = jsdata["settings"]
     payload = jsdata["payload"]
     pipeline = jsdata["pipeline"]
@@ -61,18 +88,26 @@ def job_wrapper() -> None:
     queue = settings["queue"]
     state = settings["state"]
     pid = os.getpid()
-    log.info(f"executing job '{jobid}' on pid '{pid}'")
+
+    logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
     dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
     dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
-    driver_worker(settings, pipeline, payload, jobid)
+
+    logger.info("handing off to 'driver_worker'")
+    logger.info("==============================")
+    driver_worker(settings, pipeline, payload, jobid, logfile)
+
+    logger.info("==============================")
     ready = payload.get("tomato", {}).get("unlock_when_done", False)
     dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
+    logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
     dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
 
 
 def main_loop(settings: dict, pipelines: dict) -> None:
+    log = logging.getLogger(__name__)
     qup = settings["queue"]["path"]
     qut = settings["queue"]["type"]
     stp = settings["state"]["path"]
@@ -118,10 +153,11 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                         jpath = os.path.join(root, "jobdata.json")
                         with open(jpath, "w") as of:
                             json.dump(args, of, indent=1)
-                        p = subprocess.Popen(
-                            ["tomato_worker", str(jpath)],
-                            creationflags=subprocess.DETACHED_PROCESS
-                            | subprocess.CREATE_NO_WINDOW,
+                        cfs = subprocess.CREATE_NEW_PROCESS_GROUP
+                        cfs |= subprocess.CREATE_NO_WINDOW
+                        subprocess.Popen(
+                            ["tomato_job", str(jpath)],
+                            creationflags=cfs,
                         )
                         break
         time.sleep(settings.get("main loop", 1))
