@@ -7,7 +7,7 @@ import time
 import json
 import logging
 
-from ..drivers import driver_worker
+from ..drivers import driver_worker, driver_reset
 from .. import dbhandler
 
 
@@ -105,9 +105,16 @@ def tomato_job() -> None:
     else:
         logger.info("job was terminated, setting status to 'cd'")
         dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
-    dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
+        logger.info("handing off to 'driver_reset'")
+        logger.info("==============================")
+        driver_reset(settings, pipeline)
+        logger.info("==============================")
+        ready = False
+
     logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
     dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
+    dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
+    
 
 
 def main_loop(settings: dict, pipelines: dict) -> None:

@@ -22,7 +22,7 @@ def _logging_setup(args):
     log.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
 
 
-def _default_parsers() -> tuple[argparse.ArgumentParser]:
+def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser]:
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
         "--version",

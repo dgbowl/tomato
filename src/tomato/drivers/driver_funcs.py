@@ -137,3 +137,24 @@ def driver_worker(
     queue.put_nowait(None)
     listener.join()
     return ret
+
+
+def driver_reset(
+    settings: dict, 
+    pipeline: dict,
+) -> None:
+    log = logging.getLogger(__name__)
+    for vi, v in enumerate(pipeline["devices"]):
+        log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
+        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'") 
+        drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
+        dpar = settings["drivers"].get(drv, {})
+        
+        log.debug(f"{vi+1}: resetting device")
+        driver_api(drv, "stop_job", addr, ch, **dpar)
+
+        log.debug(f"{vi+1}: getting status")
+        ts, ready, metadata = driver_api(drv, "get_status", addr, ch, **dpar)
+        assert ready, f"Failed: device '{tag}' is not ready."
+
+        

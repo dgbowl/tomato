@@ -1,5 +1,6 @@
 import logging
 import random
+import time
 
 log = logging.getLogger(__name__)
 from datetime import datetime, timezone
@@ -67,6 +68,7 @@ def get_data(
     for i in range(npoints):
         points.append({"value": random.random() * 100})
     data = {"data": points}
+    time.sleep(npoints)
     return dt.timestamp(), npoints, data
 
 
