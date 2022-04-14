@@ -2,6 +2,8 @@ import os
 import json
 import yaml
 import logging
+import signal
+import psutil
 from .. import setlib
 from .. import dbhandler
 
@@ -78,8 +80,30 @@ def status(args):
             print(f"  - completed at: '{com}'")
 
 
-def stop(args):
-    print("stopping jobs not yet implemented")
+def cancel(args):
+    dirs = setlib.get_dirs()
+    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    state = settings["state"]
+    queue = settings["queue"]
+    jobid = int(args.jobid)
+    jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+    status = jobinfo[1]
+    log.debug(f"found job {jobid} with status '{status}'")
+    if status in {"q", "qw"}:
+        log.info(f"setting job {jobid} to status 'cd'")
+        dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
+    elif status == "r":
+        running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
+        for pip, pjobid, pid in running:
+            if pjobid == jobid:
+                log.warning(f"cancelling a running job {jobid} with pid {pid}")
+                proc = psutil.Process(pid=pid)
+                cproc = proc.children()
+                for p in cproc:
+                    p.send_signal(signal.SIGTERM)
+                    log.debug(f"SIGTERM sent to pid {p.pid}")
+
+    
 
 
 def load(args):

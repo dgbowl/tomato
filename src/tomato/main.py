@@ -5,15 +5,8 @@ Main module - executables for tomato.
 import argparse
 import logging
 import psutil
-import appdirs
 import os
-import yaml
-import json
-import sqlite3
-import textwrap
 from importlib import metadata
-from datetime import datetime, timezone
-from typing import Callable
 
 from . import daemon
 from . import dbhandler
@@ -80,7 +73,7 @@ def run_tomato():
     _logging_setup(args)
 
     ppid = os.getppid()
-    toms = [p.pid for p in psutil.process_iter() if "tomato" in p.name()]
+    toms = [p.pid for p in psutil.process_iter() if p.name() in {"tomato", "tomato.exe"}]
     toms.pop(toms.index(ppid))
     if len(toms) > 0:
         logging.critical("cannot run more than one instance of 'tomato'")
@@ -126,9 +119,9 @@ def run_ketchup():
     )
     status.set_defaults(func=ketchup.status)
 
-    stop = subparsers.add_parser("stop")
-    stop.add_argument("jobid", help="The jobid of the job to be stopped.", default=None)
-    stop.set_defaults(func=ketchup.stop)
+    cancel = subparsers.add_parser("cancel")
+    cancel.add_argument("jobid", help="The jobid of the job to be cancelled.", default=None)
+    cancel.set_defaults(func=ketchup.cancel)
 
     load = subparsers.add_parser("load")
     load.add_argument("sample", help="Name of the sample to be loaded.", default=None)

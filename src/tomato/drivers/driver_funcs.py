@@ -10,7 +10,6 @@ import logging
 from .logger_funcs import log_listener_config, log_listener, log_worker_config
 
 
-
 def driver_api(
     driver: str, command: str, address: str, channel: int, **kwargs: dict
 ) -> Any:
@@ -29,10 +28,8 @@ def data_poller(
     configurer: Callable,
     kwargs: dict
 ) -> None:
-    
     configurer(logqueue)
     log = logging.getLogger()
-
     pollrate = kwargs.pop("pollrate", 10)
     verbose = bool(kwargs.pop("verbose", 0))
     cont = True
@@ -42,11 +39,10 @@ def data_poller(
             isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
             isots = isots.replace(":", "")
             fn = os.path.join(root, f"{device}_{isots}_data.json")
-            log.debug(f"'{device}': found {nrows} data rows, writing into '{fn}'")
+            log.debug(f"found {nrows} data rows, writing into '{fn}'")
             with open(fn, "w") as of:
                 json.dump(data, of)
             ts, nrows, data = driver_api(driver, "get_data", address, channel, **kwargs)
-
         ts, done, metadata = driver_api(
             driver, "get_status", address, channel, **kwargs
         )
@@ -54,17 +50,15 @@ def data_poller(
             isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
             isots = isots.replace(":", "")
             fn = os.path.join(root, f"{device}_{isots}_status.json")
-            log.debug(f"'{device}': writing status info into '{fn}'")
+            log.debug(f"'writing status info into '{fn}'")
             with open(fn, "w") as of:
                 json.dump(metadata, of)
-    
         if done:
             cont = False
         else:
             time.sleep(pollrate)
-    log.info(f"'{device}': rejoining main thread")
-
-
+    log.info(f"rejoining main thread")
+    return
 
 
 def driver_worker(
@@ -76,38 +70,40 @@ def driver_worker(
 ) -> None:
     
     log = logging.getLogger(__name__)
-    log.debug("setting up queue and listener")
+    log.debug("starting 'log_listener'")
     queue = multiprocessing.Queue(-1)
     listener = multiprocessing.Process(
-        target=log_listener, 
+        target=log_listener,
+        name="log_listener", 
         args=(queue, log_listener_config, logfile)
     )
     listener.start()
+    log.debug(f"started 'log_listener' on pid {listener.pid}")
 
 
     root = os.path.join(settings["queue"]["storage"], str(jobid))
     jobs = []
     for vi, v in enumerate(pipeline["devices"]):
         log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
-        log.info(f"processing device '{v['tag']}' of type '{v['driver']}'") 
+        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'") 
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
         dpar = settings["drivers"].get(drv, {})
         pl = payload["method"][tag]
         smpl = payload["sample"]
 
-        log.debug(f"getting status of {vi+1}")
+        log.debug(f"{vi+1}: getting status")
         ts, ready, metadata = driver_api(drv, "get_status", addr, ch, **dpar)
         assert ready, f"Failed: device '{tag}' is not ready."
 
-        log.debug(f"starting payload on {vi+1}")
+        log.debug(f"{vi+1}: starting payload")
         start_ts = driver_api(drv, "start_job", addr, ch, **dpar, payload=pl, **smpl)
         metadata["uts"] = start_ts
 
+        log.debug(f"{vi+1}: writing metadata")
         isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat().replace(":", "")
         fn = os.path.join(root, f"{tag}_{isots}_status.json")
         with open(fn, "w") as of:
             json.dump(metadata, of)
-
         kwargs = dpar
         kwargs.update(
             {
@@ -115,7 +111,7 @@ def driver_worker(
                 "verbose": v.get("verbose", 0),
             }
         )
-        log.info(f"starting data poller on {vi+1}: every {kwargs['pollrate']}s")
+        log.info(f"{vi+1}: starting 'data_poller': every {kwargs['pollrate']}s")
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{tag}",
             target=data_poller,
@@ -123,12 +119,21 @@ def driver_worker(
         )
         jobs.append(p)
         p.start()
+        log.info(f"{vi+1}: started 'data_poller' on pid {p.pid}")
 
-    log.info("waiting for data pollers to join")
+    log.info("waiting for all 'data_poller' jobs to join")
+    log.info("------------------------------------------")
+    ret = None
     for p in jobs:
         p.join()
+        if p.exitcode == 0:
+            log.info(f"'data_poller' with pid {p.pid} closed successfully")
+        else:
+            log.critical(f"'data_poller' with pid {p.pid} was terminated")
+            ret = 1
     
-    log.debug("quitting log listener")
+    log.info("-----------------------")
+    log.info("quitting 'log_listener'")
     queue.put_nowait(None)
     listener.join()
-    return
+    return ret

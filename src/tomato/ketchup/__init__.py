@@ -1,1 +1,1 @@
-from .functions import submit, status, stop, load, eject, ready
+from .functions import submit, status, cancel, load, eject, ready

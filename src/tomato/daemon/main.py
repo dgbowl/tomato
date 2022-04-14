@@ -1,4 +1,3 @@
-from typing import Callable
 from importlib import metadata
 import psutil
 import argparse
@@ -7,7 +6,6 @@ import subprocess
 import time
 import json
 import logging
-import sys
 
 from ..drivers import driver_worker
 from .. import dbhandler
@@ -67,7 +65,7 @@ def tomato_job() -> None:
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s:%(levelname)-8s:%(message)s',
+        format='%(asctime)s:%(levelname)-8s:%(processName)s:%(message)s',
         handlers=[
             logging.FileHandler(logfile, mode="a"),
             logging.StreamHandler()
@@ -89,6 +87,7 @@ def tomato_job() -> None:
     state = settings["state"]
     pid = os.getpid()
 
+    
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
     dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
     dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
@@ -96,11 +95,16 @@ def tomato_job() -> None:
 
     logger.info("handing off to 'driver_worker'")
     logger.info("==============================")
-    driver_worker(settings, pipeline, payload, jobid, logfile)
+    ret = driver_worker(settings, pipeline, payload, jobid, logfile)
 
     logger.info("==============================")
     ready = payload.get("tomato", {}).get("unlock_when_done", False)
-    dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
+    if ret is None:
+        logger.info("job finished successfully, setting status to 'c'")
+        dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
+    else:
+        logger.info("job was terminated, setting status to 'cd'")
+        dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
     logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
     dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])

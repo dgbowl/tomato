@@ -32,7 +32,8 @@ def get_status(
 
     """
     dt = datetime.now(timezone.utc)
-    return dt.timestamp(), True, {}
+    metadata = {}
+    return dt.timestamp(), True, metadata
 
 
 def get_data(

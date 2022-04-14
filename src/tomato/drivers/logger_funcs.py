@@ -16,7 +16,7 @@ def log_listener(queue, configurer, path):
             break
         logger = logging.getLogger(record.name)
         logger.handle(record)
-
+    
 
 def log_worker_config(queue):
     h = logging.handlers.QueueHandler(queue)
