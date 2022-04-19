@@ -11,40 +11,38 @@ from .logger_funcs import log_listener_config, log_listener, log_worker_config
 
 
 def driver_api(
-    driver: str, command: str, address: str, channel: int, **kwargs: dict
+    driver: str, 
+    command: str, 
+    jobqueue: multiprocessing.Queue,
+    logger: logging.Logger,
+    address: str, 
+    channel: int, 
+    **kwargs: dict
 ) -> Any:
     m = importlib.import_module(f"tomato.drivers.{driver}")
     func = getattr(m, command)
-    return func(address, channel, **kwargs)
+    return func(address, channel, jobqueue, logger, **kwargs)
 
 
 def data_poller(
     driver: str, 
+    jq: multiprocessing.Queue,
+    lq: multiprocessing.Queue, 
     address: str, 
     channel: int, 
     device: str, 
     root: str, 
-    logqueue: multiprocessing.Queue, 
-    configurer: Callable,
     kwargs: dict
 ) -> None:
-    configurer(logqueue)
+    log_worker_config(lq)
     log = logging.getLogger()
     pollrate = kwargs.pop("pollrate", 10)
     verbose = bool(kwargs.pop("verbose", 0))
+    log.debug(f"in 'data_poller', {pollrate=}")
     cont = True
     while cont:
-        ts, nrows, data = driver_api(driver, "get_data", address, channel, **kwargs)
-        while nrows > 0:
-            isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
-            isots = isots.replace(":", "")
-            fn = os.path.join(root, f"{device}_{isots}_data.json")
-            log.debug(f"found {nrows} data rows, writing into '{fn}'")
-            with open(fn, "w") as of:
-                json.dump(data, of)
-            ts, nrows, data = driver_api(driver, "get_data", address, channel, **kwargs)
         ts, done, metadata = driver_api(
-            driver, "get_status", address, channel, **kwargs
+            driver, "get_status", jq, log, address, channel, **kwargs
         )
         if verbose:
             isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
@@ -53,6 +51,19 @@ def data_poller(
             log.debug(f"'writing status info into '{fn}'")
             with open(fn, "w") as of:
                 json.dump(metadata, of)
+        ts, nrows, data = driver_api(
+            driver, "get_data", jq, log, address, channel, **kwargs
+        )
+        while nrows > 0:
+            isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+            isots = isots.replace(":", "")
+            fn = os.path.join(root, f"{device}_{isots}_data.json")
+            log.debug(f"found {nrows} data rows, writing into '{fn}'")
+            with open(fn, "w") as of:
+                json.dump(data, of)
+            ts, nrows, data = driver_api(
+                driver, "get_data", jq, log, address, channel, **kwargs
+            )
         if done:
             cont = False
         else:
@@ -68,14 +79,16 @@ def driver_worker(
     jobid: int,
     logfile: str
 ) -> None:
+
+    jq = multiprocessing.Queue(maxsize=0)
     
     log = logging.getLogger(__name__)
     log.debug("starting 'log_listener'")
-    queue = multiprocessing.Queue(-1)
+    lq = multiprocessing.Queue(maxsize=0)
     listener = multiprocessing.Process(
         target=log_listener,
         name="log_listener", 
-        args=(queue, log_listener_config, logfile)
+        args=(lq, log_listener_config, logfile)
     )
     listener.start()
     log.debug(f"started 'log_listener' on pid {listener.pid}")
@@ -92,11 +105,13 @@ def driver_worker(
         smpl = payload["sample"]
 
         log.debug(f"{vi+1}: getting status")
-        ts, ready, metadata = driver_api(drv, "get_status", addr, ch, **dpar)
+        ts, ready, metadata = driver_api(drv, "get_status", jq, log, addr, ch, **dpar)
         assert ready, f"Failed: device '{tag}' is not ready."
 
         log.debug(f"{vi+1}: starting payload")
-        start_ts = driver_api(drv, "start_job", addr, ch, **dpar, payload=pl, **smpl)
+        start_ts = driver_api(
+            drv, "start_job", jq, log, addr, ch, **dpar, payload=pl, **smpl
+        )
         metadata["uts"] = start_ts
 
         log.debug(f"{vi+1}: writing metadata")
@@ -115,7 +130,7 @@ def driver_worker(
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{tag}",
             target=data_poller,
-            args=(drv, addr, ch, tag, root, queue, log_worker_config, kwargs),
+            args=(drv, jq, lq, addr, ch, tag, root, kwargs),
         )
         jobs.append(p)
         p.start()
@@ -134,8 +149,9 @@ def driver_worker(
     
     log.info("-----------------------")
     log.info("quitting 'log_listener'")
-    queue.put_nowait(None)
+    lq.put_nowait(None)
     listener.join()
+    jq.close()
     return ret
 
 

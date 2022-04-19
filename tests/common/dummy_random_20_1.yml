@@ -1,8 +1,9 @@
 sample:
-    name: sample
+    name: dummy_random_20_1
 method:
     worker:
         - name: "random"
-          payload: bla
+          time: 20
+          delay: 1
 tomato:
     unlock_when_done: false

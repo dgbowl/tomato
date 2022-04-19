@@ -1,14 +1,41 @@
 import logging
 import random
 import time
+import multiprocessing
 
-log = logging.getLogger(__name__)
 from datetime import datetime, timezone
+
+
+
+def _dummy_process(
+    queue: multiprocessing.Queue,
+    name: str = "random",
+    delay: int = 1,
+    t: int = 10,
+) -> None:
+    ts = time.perf_counter()
+    te = time.perf_counter()
+    nd = 0
+    while te - ts < t:
+        if queue.empty():
+            queue.put(None)
+        if te >= ts + nd * delay:
+            nd += 1
+            data = {
+                "time": te - ts,
+                "value": random.random() if name == "random" else nd
+            }
+            queue.put(data)
+        time.sleep(delay/20)
+        te = time.perf_counter()
+    return
 
 
 def get_status(
     address: str,
     channel: int,
+    jobqueue: multiprocessing.Queue,
+    logger: logging.Logger,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -32,14 +59,18 @@ def get_status(
         associated metadata.
 
     """
+    logger.debug("in 'dummy.get_status'")
     dt = datetime.now(timezone.utc)
-    metadata = {}
-    return dt.timestamp(), True, metadata
+    metadata = {"address": address, "channel": channel}
+    ready = jobqueue.empty()
+    return dt.timestamp(), ready, metadata
 
 
 def get_data(
     address: str,
     channel: int,
+    jobqueue: multiprocessing.Queue,
+    logger: logging.Logger,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -62,19 +93,28 @@ def get_data(
         Returns a tuple containing the timestamp and associated metadata.
 
     """
+    logger.debug(
+        f"in 'dummy.get_data', jobqueue is{'' if jobqueue.empty() else ' not'} empty"
+    )
     dt = datetime.now(timezone.utc)
-    npoints = random.randint(0, channel)
     points = []
-    for i in range(npoints):
-        points.append({"value": random.random() * 100})
+    while not jobqueue.empty():
+        v = jobqueue.get()
+        if isinstance(v, dict):
+            points.append(v)
+    if jobqueue.empty() and len(points) > 0:
+        jobqueue.put(None)
+    npoints = len(points)
     data = {"data": points}
-    time.sleep(npoints)
     return dt.timestamp(), npoints, data
 
 
 def start_job(
     address: str,
     channel: int,
+    jobqueue: multiprocessing.Queue,
+    logger: logging.Logger,
+    payload: list[dict],
     **kwargs: dict,
 ) -> float:
     """
@@ -87,9 +127,6 @@ def start_job(
 
     channel
         Numeric, 1-indexed ID of the channel.
-
-    dllpath
-        Path to the BioLogic DLL file.
 
     payload
         A protocol describing the techniques to be executed and their order.
@@ -106,12 +143,27 @@ def start_job(
 
     """
     dt = datetime.now(timezone.utc)
+    logger.info("in 'dummy.start_job'")
+    for ip, p in enumerate(payload):
+        delay = p.get("delay", 1)
+        t = p.get("time", 10)
+        name = p["name"]
+        logger.debug(
+            f"starting 'dummy._dummy_process' {ip} with {name=}, {t=}, {delay=}."
+        )
+        pr = multiprocessing.Process(
+            target = _dummy_process,
+            args = (jobqueue, name, delay, t)
+        )
+        pr.start()
     return dt.timestamp()
 
 
 def stop_job(
     address: str,
     channel: int,
+    jobqueue: multiprocessing.Queue,
+    logger: multiprocessing.Queue,
     **kwargs: dict,
 ) -> float:
     """
@@ -137,5 +189,6 @@ def stop_job(
         A timestamp corresponding to the start of the job execution.
 
     """
+    jobqueue.close()
     dt = datetime.now(timezone.utc)
     return dt.timestamp()
