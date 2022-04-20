@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def submit(args):
-    dirs = setlib.get_dirs()
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     queue = settings["queue"]
 
@@ -30,7 +30,7 @@ def submit(args):
 
 
 def status(args):
-    dirs = setlib.get_dirs()
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
     queue = settings["queue"]
@@ -81,7 +81,7 @@ def status(args):
 
 
 def cancel(args):
-    dirs = setlib.get_dirs()
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
     queue = settings["queue"]
@@ -107,7 +107,7 @@ def cancel(args):
 
 
 def load(args):
-    dirs = setlib.get_dirs()
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
 
@@ -122,7 +122,7 @@ def load(args):
 
 
 def eject(args):
-    dirs = setlib.get_dirs()
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
 
@@ -148,7 +148,7 @@ def eject(args):
 
 
 def ready(args):
-    dirs = setlib.get_dirs()
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
 

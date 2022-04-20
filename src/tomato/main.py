@@ -29,9 +29,15 @@ def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser
         action="version",
         version=f'%(prog)s version {metadata.version("tomato")}',
     )
+    parser.add_argument(
+        "-t",
+        "--test",
+        action="store_true",
+        default=False,
+        help="Launch tomato in test mode.",
+    )
 
     verbose = argparse.ArgumentParser(add_help=False)
-
     for p in [parser, verbose]:
         p.add_argument(
             "-v",
@@ -75,12 +81,12 @@ def run_tomato():
     ppid = os.getppid()
     toms = [p.pid for p in psutil.process_iter() if p.name() in {"tomato", "tomato.exe"}]
     toms.pop(toms.index(ppid))
-    if len(toms) > 0:
+    if len(toms) > 0 and not args.test:
         logging.critical("cannot run more than one instance of 'tomato'")
         logging.info(f"'tomato' is currently running as pid {toms}")
         return
 
-    dirs = setlib.get_dirs()
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     pipelines = setlib.get_pipelines(settings["devices"]["path"])
     log.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")

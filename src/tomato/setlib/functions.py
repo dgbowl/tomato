@@ -7,14 +7,27 @@ import logging
 import appdirs
 from importlib import metadata
 from datetime import datetime, timezone
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 
 _VERSION = metadata.version("tomato")
 
+@dataclass
+class LocalDir:
+    user_config_dir: str
+    user_data_dir: str
+    user_log_dir: str
 
-def get_dirs() -> appdirs.AppDirs:
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=_VERSION)
+def get_dirs(testmode: bool = False) -> appdirs.AppDirs:
+    if testmode:
+        dirs = LocalDir(
+            user_config_dir = ".",
+            user_data_dir = ".",
+            user_log_dir = ".",
+        )
+    else:
+        dirs = appdirs.AppDirs("tomato", "dgbowl", version=_VERSION)
     log.debug(f"local config folder is '{dirs.user_config_dir}'")
     log.debug(f"local data folder is '{dirs.user_data_dir}'")
     log.debug(f"local log folder is '{dirs.user_log_dir}'")

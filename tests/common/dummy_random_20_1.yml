@@ -5,5 +5,3 @@ method:
         - name: "random"
           time: 20
           delay: 1
-tomato:
-    unlock_when_done: false

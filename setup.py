@@ -35,6 +35,11 @@ setuptools.setup(
         "pyyaml",
         "psutil",
     ],
+    extras_require={
+        "testing": [
+            "pytest",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "tomato=tomato:run_tomato",
