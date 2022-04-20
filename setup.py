@@ -35,11 +35,16 @@ setuptools.setup(
         "pyyaml",
         "psutil",
     ],
+    extras_require={
+        "testing": [
+            "pytest",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "tomato=tomato:run_tomato",
             "ketchup=tomato:run_ketchup",
-            "tomato_worker=tomato.daemon:job_wrapper"
+            "tomato_job=tomato.daemon:tomato_job"
         ]
     },
 )

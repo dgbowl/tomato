@@ -1,0 +1,7 @@
+sample:
+    name: dummy_random_2_0.1
+method:
+    worker:
+        - name: "random"
+          time: 2
+          delay: 0.1

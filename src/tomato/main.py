@@ -4,15 +4,9 @@ Main module - executables for tomato.
 """
 import argparse
 import logging
-import appdirs
+import psutil
 import os
-import yaml
-import json
-import sqlite3
-import textwrap
 from importlib import metadata
-from datetime import datetime, timezone
-from typing import Callable
 
 from . import daemon
 from . import dbhandler
@@ -28,16 +22,22 @@ def _logging_setup(args):
     log.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
 
 
-def _default_parsers() -> tuple[argparse.ArgumentParser]:
+def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser]:
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
         "--version",
         action="version",
         version=f'%(prog)s version {metadata.version("tomato")}',
     )
+    parser.add_argument(
+        "-t",
+        "--test",
+        action="store_true",
+        default=False,
+        help="Launch tomato in test mode.",
+    )
 
     verbose = argparse.ArgumentParser(add_help=False)
-
     for p in [parser, verbose]:
         p.add_argument(
             "-v",
@@ -78,10 +78,19 @@ def run_tomato():
     args = parser.parse_args()
     _logging_setup(args)
 
-    dirs = setlib.get_dirs()
+    ppid = os.getppid()
+    toms = [
+        p.pid for p in psutil.process_iter() if p.name() in {"tomato", "tomato.exe"}
+    ]
+    toms.pop(toms.index(ppid))
+    if len(toms) > 0 and not args.test:
+        logging.critical("cannot run more than one instance of 'tomato'")
+        logging.info(f"'tomato' is currently running as pid {toms}")
+        return
+
+    dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     pipelines = setlib.get_pipelines(settings["devices"]["path"])
-    log.debug(pipelines)
     log.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
     dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
     log.debug(f"setting up 'state' table in '{settings['queue']['path']}'")
@@ -118,9 +127,11 @@ def run_ketchup():
     )
     status.set_defaults(func=ketchup.status)
 
-    stop = subparsers.add_parser("stop")
-    stop.add_argument("jobid", help="The jobid of the job to be stopped.", default=None)
-    stop.set_defaults(func=ketchup.stop)
+    cancel = subparsers.add_parser("cancel")
+    cancel.add_argument(
+        "jobid", help="The jobid of the job to be cancelled.", default=None
+    )
+    cancel.set_defaults(func=ketchup.cancel)
 
     load = subparsers.add_parser("load")
     load.add_argument("sample", help="Name of the sample to be loaded.", default=None)

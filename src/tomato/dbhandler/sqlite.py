@@ -1,7 +1,5 @@
 import sqlite3
-from typing import Callable
 from datetime import datetime, timezone
-import os
 import logging
 
 log = logging.getLogger(__name__)

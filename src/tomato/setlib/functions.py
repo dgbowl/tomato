@@ -7,14 +7,29 @@ import logging
 import appdirs
 from importlib import metadata
 from datetime import datetime, timezone
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 
 _VERSION = metadata.version("tomato")
 
 
-def get_dirs() -> appdirs.AppDirs:
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=_VERSION)
+@dataclass
+class LocalDir:
+    user_config_dir: str
+    user_data_dir: str
+    user_log_dir: str
+
+
+def get_dirs(testmode: bool = False) -> appdirs.AppDirs:
+    if testmode:
+        dirs = LocalDir(
+            user_config_dir=".",
+            user_data_dir=".",
+            user_log_dir=".",
+        )
+    else:
+        dirs = appdirs.AppDirs("tomato", "dgbowl", version=_VERSION)
     log.debug(f"local config folder is '{dirs.user_config_dir}'")
     log.debug(f"local data folder is '{dirs.user_data_dir}'")
     log.debug(f"local log folder is '{dirs.user_log_dir}'")
@@ -60,10 +75,37 @@ def get_settings(configpath: str, datapath: str) -> dict:
     return settings
 
 
+def _default_pipelines() -> dict[str, dict]:
+    data = {
+        "devices": [
+            {
+                "name": "dummy_device",
+                "address": None,
+                "channels": [5, 10],
+                "driver": "dummy",
+                "capabilities": ["random"],
+            }
+        ],
+        "pipelines": [
+            {
+                "name": "dummy-*",
+                "devices": [
+                    {"tag": "worker", "name": "dummy_device", "channel": "each"}
+                ],
+            }
+        ],
+    }
+    return data
+
+
 def get_pipelines(yamlpath: str) -> dict:
     log.debug(f"loading pipeline settings from '{yamlpath}'")
-    with open(yamlpath, "r") as infile:
-        jsdata = yaml.safe_load(infile)
+    try:
+        with open(yamlpath, "r") as infile:
+            jsdata = yaml.safe_load(infile)
+    except FileNotFoundError:
+        log.error(f"device settings not found. Running with a 'dummy' device.")
+        jsdata = _default_pipelines()
     devices = jsdata["devices"]
     pipelines = jsdata["pipelines"]
     ret = []
