@@ -1,7 +1,0 @@
-sample:
-    name: dummy_random_20_1
-method:
-    worker:
-        - name: "random"
-          time: 20
-          delay: 1
