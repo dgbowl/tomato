@@ -6,7 +6,6 @@ import multiprocessing
 from datetime import datetime, timezone
 
 
-
 def _dummy_process(
     queue: multiprocessing.Queue,
     name: str = "random",
@@ -23,10 +22,10 @@ def _dummy_process(
             nd += 1
             data = {
                 "time": te - ts,
-                "value": random.random() if name == "random" else nd
+                "value": random.random() if name == "random" else nd,
             }
             queue.put(data)
-        time.sleep(delay/20)
+        time.sleep(delay / 20)
         te = time.perf_counter()
     return
 
@@ -152,8 +151,7 @@ def start_job(
             f"starting 'dummy._dummy_process' {ip} with {name=}, {t=}, {delay=}."
         )
         pr = multiprocessing.Process(
-            target = _dummy_process,
-            args = (jobqueue, name, delay, t)
+            target=_dummy_process, args=(jobqueue, name, delay, t)
         )
         pr.start()
     return dt.timestamp()

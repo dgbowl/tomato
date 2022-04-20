@@ -13,18 +13,20 @@ log = logging.getLogger(__name__)
 
 _VERSION = metadata.version("tomato")
 
+
 @dataclass
 class LocalDir:
     user_config_dir: str
     user_data_dir: str
     user_log_dir: str
 
+
 def get_dirs(testmode: bool = False) -> appdirs.AppDirs:
     if testmode:
         dirs = LocalDir(
-            user_config_dir = ".",
-            user_data_dir = ".",
-            user_log_dir = ".",
+            user_config_dir=".",
+            user_data_dir=".",
+            user_log_dir=".",
         )
     else:
         dirs = appdirs.AppDirs("tomato", "dgbowl", version=_VERSION)
@@ -72,25 +74,26 @@ def get_settings(configpath: str, datapath: str) -> dict:
 
     return settings
 
+
 def _default_pipelines() -> dict[str, dict]:
     data = {
         "devices": [
             {
-                "name": "dummy_device", 
-                "address": None, 
+                "name": "dummy_device",
+                "address": None,
                 "channels": [5, 10],
                 "driver": "dummy",
-                "capabilities": ["random"]
+                "capabilities": ["random"],
             }
         ],
         "pipelines": [
             {
-                "name": "dummy-*", 
+                "name": "dummy-*",
                 "devices": [
                     {"tag": "worker", "name": "dummy_device", "channel": "each"}
-                ]
+                ],
             }
-        ]
+        ],
     }
     return data
 

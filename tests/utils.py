@@ -1,6 +1,7 @@
 import subprocess
 import time
 
+
 def run_casename(casename: str) -> str:
     cfg = subprocess.CREATE_NEW_PROCESS_GROUP
     proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
@@ -11,11 +12,11 @@ def run_casename(casename: str) -> str:
 
     while True:
         ret = subprocess.run(
-            ["ketchup", "-t", "status", "1"], 
-            capture_output=True, 
+            ["ketchup", "-t", "status", "1"],
+            capture_output=True,
             text=True,
         )
-        status = ret.stdout.split("\n")[1].split(":")[1].strip().replace("'","")
+        status = ret.stdout.split("\n")[1].split(":")[1].strip().replace("'", "")
         if status.startswith("c"):
             break
         else:

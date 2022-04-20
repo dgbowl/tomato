@@ -11,13 +11,13 @@ from .logger_funcs import log_listener_config, log_listener, log_worker_config
 
 
 def driver_api(
-    driver: str, 
-    command: str, 
+    driver: str,
+    command: str,
     jobqueue: multiprocessing.Queue,
     logger: logging.Logger,
-    address: str, 
-    channel: int, 
-    **kwargs: dict
+    address: str,
+    channel: int,
+    **kwargs: dict,
 ) -> Any:
     m = importlib.import_module(f"tomato.drivers.{driver}")
     func = getattr(m, command)
@@ -25,14 +25,14 @@ def driver_api(
 
 
 def data_poller(
-    driver: str, 
+    driver: str,
     jq: multiprocessing.Queue,
-    lq: multiprocessing.Queue, 
-    address: str, 
-    channel: int, 
-    device: str, 
-    root: str, 
-    kwargs: dict
+    lq: multiprocessing.Queue,
+    address: str,
+    channel: int,
+    device: str,
+    root: str,
+    kwargs: dict,
 ) -> None:
     log_worker_config(lq)
     log = logging.getLogger()
@@ -73,32 +73,27 @@ def data_poller(
 
 
 def driver_worker(
-    settings: dict, 
-    pipeline: dict, 
-    payload: dict, 
-    jobid: int,
-    logfile: str
+    settings: dict, pipeline: dict, payload: dict, jobid: int, logfile: str
 ) -> None:
 
     jq = multiprocessing.Queue(maxsize=0)
-    
+
     log = logging.getLogger(__name__)
     log.debug("starting 'log_listener'")
     lq = multiprocessing.Queue(maxsize=0)
     listener = multiprocessing.Process(
         target=log_listener,
-        name="log_listener", 
-        args=(lq, log_listener_config, logfile)
+        name="log_listener",
+        args=(lq, log_listener_config, logfile),
     )
     listener.start()
     log.debug(f"started 'log_listener' on pid {listener.pid}")
-
 
     root = os.path.join(settings["queue"]["storage"], str(jobid))
     jobs = []
     for vi, v in enumerate(pipeline["devices"]):
         log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
-        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'") 
+        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
         dpar = settings["drivers"].get(drv, {})
         pl = payload["method"][tag]
@@ -146,7 +141,7 @@ def driver_worker(
         else:
             log.critical(f"'data_poller' with pid {p.pid} was terminated")
             ret = 1
-    
+
     log.info("-----------------------")
     log.info("quitting 'log_listener'")
     lq.put_nowait(None)
@@ -156,21 +151,19 @@ def driver_worker(
 
 
 def driver_reset(
-    settings: dict, 
+    settings: dict,
     pipeline: dict,
 ) -> None:
     log = logging.getLogger(__name__)
     for vi, v in enumerate(pipeline["devices"]):
         log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
-        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'") 
+        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
         dpar = settings["drivers"].get(drv, {})
-        
+
         log.debug(f"{vi+1}: resetting device")
         driver_api(drv, "stop_job", addr, ch, **dpar)
 
         log.debug(f"{vi+1}: getting status")
         ts, ready, metadata = driver_api(drv, "get_status", addr, ch, **dpar)
         assert ready, f"Failed: device '{tag}' is not ready."
-
-        

@@ -103,8 +103,6 @@ def cancel(args):
                     p.send_signal(signal.SIGTERM)
                     log.debug(f"SIGTERM sent to pid {p.pid}")
 
-    
-
 
 def load(args):
     dirs = setlib.get_dirs(args.test)

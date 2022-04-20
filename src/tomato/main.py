@@ -79,7 +79,9 @@ def run_tomato():
     _logging_setup(args)
 
     ppid = os.getppid()
-    toms = [p.pid for p in psutil.process_iter() if p.name() in {"tomato", "tomato.exe"}]
+    toms = [
+        p.pid for p in psutil.process_iter() if p.name() in {"tomato", "tomato.exe"}
+    ]
     toms.pop(toms.index(ppid))
     if len(toms) > 0 and not args.test:
         logging.critical("cannot run more than one instance of 'tomato'")
@@ -126,7 +128,9 @@ def run_ketchup():
     status.set_defaults(func=ketchup.status)
 
     cancel = subparsers.add_parser("cancel")
-    cancel.add_argument("jobid", help="The jobid of the job to be cancelled.", default=None)
+    cancel.add_argument(
+        "jobid", help="The jobid of the job to be cancelled.", default=None
+    )
     cancel.set_defaults(func=ketchup.cancel)
 
     load = subparsers.add_parser("load")

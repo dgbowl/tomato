@@ -60,16 +60,13 @@ def tomato_job() -> None:
         default=None,
     )
     args = parser.parse_args()
-    
+
     logfile = args.jobfile.replace(".json", ".log")
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s:%(levelname)-8s:%(processName)s:%(message)s',
-        handlers=[
-            logging.FileHandler(logfile, mode="a"),
-            logging.StreamHandler()
-        ]
+        format="%(asctime)s:%(levelname)-8s:%(processName)s:%(message)s",
+        handlers=[logging.FileHandler(logfile, mode="a"), logging.StreamHandler()],
     )
     logger = logging.getLogger(__name__)
 
@@ -87,7 +84,6 @@ def tomato_job() -> None:
     state = settings["state"]
     pid = os.getpid()
 
-    
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
     dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
     dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
@@ -114,7 +110,6 @@ def tomato_job() -> None:
     logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
     dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
-    
 
 
 def main_loop(settings: dict, pipelines: dict) -> None:
