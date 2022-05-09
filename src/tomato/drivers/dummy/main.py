@@ -104,7 +104,7 @@ def get_data(
     if jobqueue.empty() and len(points) > 0:
         jobqueue.put(None)
     npoints = len(points)
-    data = {"data": points}
+    data = {"data": points, "current": None}
     return dt.timestamp(), npoints, data
 
 
