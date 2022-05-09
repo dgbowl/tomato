@@ -40,6 +40,7 @@ def data_poller(
     verbose = bool(kwargs.pop("verbose", 0))
     log.debug(f"in 'data_poller', {pollrate=}")
     cont = True
+    previous = None
     while cont:
         ts, done, metadata = driver_api(
             driver, "get_status", jq, log, address, channel, **kwargs
@@ -54,6 +55,8 @@ def data_poller(
         ts, nrows, data = driver_api(
             driver, "get_data", jq, log, address, channel, **kwargs
         )
+        data["previous"] = previous
+        previous = data["current"]
         while nrows > 0:
             isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
             isots = isots.replace(":", "")
@@ -64,6 +67,8 @@ def data_poller(
             ts, nrows, data = driver_api(
                 driver, "get_data", jq, log, address, channel, **kwargs
             )
+            data["previous"] = previous
+            previous = data["current"]
         if done:
             cont = False
         else:
