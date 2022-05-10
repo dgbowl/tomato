@@ -44,7 +44,7 @@ setuptools.setup(
         "console_scripts": [
             "tomato=tomato:run_tomato",
             "ketchup=tomato:run_ketchup",
-            "tomato_job=tomato.daemon:tomato_job"
+            "tomato_job=tomato.drivers:tomato_job"
         ]
     },
 )
