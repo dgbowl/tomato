@@ -138,7 +138,7 @@ def main_loop(settings: dict, pipelines: dict) -> None:
             payload = json.loads(strpl)
             if st in ["q", "qw"]:
                 if st == "q":
-                    log.debug(f"checking whether job '{jobid}' can ever be matched")
+                    log.info(f"checking whether job '{jobid}' can ever be matched")
                 matched_pips = _find_matching_pipelines(pipelines, payload["method"])
                 if len(matched_pips) > 0 and st != "qw":
                     dbhandler.job_set_status(qup, "qw", jobid, type=qut)
@@ -147,6 +147,7 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                     pipinfo = dbhandler.pipeline_get_info(stp, pip["name"], type=stt)
                     can_queue = _pipeline_ready_sample(pipinfo, payload["sample"])
                     if can_queue:
+                        log.info(f"queueing job '{jobid}' on pipeline '{pip['name']}'")
                         dbhandler.pipeline_reset_job(stp, pip["name"], False, type=stt)
                         args = {
                             "settings": settings,
@@ -167,14 +168,3 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                         )
                         break
         time.sleep(settings.get("main loop", 1))
-
-        # - if jobid->status == q:
-        #     find matching pipelines -> qw
-        # - if jobid->status == qw:
-        #     find matching pipelines
-        #     find matching samples
-        #     is pipeline ready -> r -> assign jobid and pid into pipeline state
-
-    # for pname, pvals in pipelines.items():
-    #    print(f'driver_worker(settings, pvals, None): with {pname}')
-    #    driver_worker(settings, pvals, None)
