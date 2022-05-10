@@ -1,5 +1,7 @@
-from typing import Any, Callable
+from typing import Any
+from importlib import metadata
 import importlib
+import argparse
 import time
 import multiprocessing
 import os
@@ -8,6 +10,79 @@ from datetime import datetime, timezone
 import logging
 
 from .logger_funcs import log_listener_config, log_listener, log_worker_config
+from .. import dbhandler
+
+def tomato_job() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f'%(prog)s version {metadata.version("tomato")}',
+    )
+    parser.add_argument(
+        "jobfile",
+        help="Path to a ketchup-processed payload json file.",
+        default=None,
+    )
+    args = parser.parse_args()
+
+    logfile = args.jobfile.replace(".json", ".log")
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s:%(levelname)-8s:%(processName)s:%(message)s",
+        handlers=[logging.FileHandler(logfile, mode="a"), logging.StreamHandler()],
+    )
+    logger = logging.getLogger(__name__)
+
+    logger.info("attempting to load jobfile '%s'", args.jobfile)
+    with open(args.jobfile, "r") as infile:
+        jsdata = json.load(infile)
+
+    logger.debug("parsing data from jobfile")
+    settings = jsdata["settings"]
+    payload = jsdata["payload"]
+    pipeline = jsdata["pipeline"]
+    pip = pipeline["name"]
+    jobid = jsdata["jobid"]
+    queue = settings["queue"]
+    state = settings["state"]
+    
+    
+    verbosity = payload.get("tomato", {}).get("verbosity", "INFO")
+    loglevel = logging._checkLevel(verbosity)
+    logger.debug("setting logger verbosity to '%s'", verbosity)
+    logger.setLevel(loglevel)
+    
+    pid = os.getpid()
+
+    logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
+    dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
+    dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
+    dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
+
+    logger.info("handing off to 'driver_worker'")
+    logger.info("==============================")
+    ret = driver_worker(settings, pipeline, payload, jobid, logfile, loglevel)
+
+    logger.info("==============================")
+    ready = payload.get("tomato", {}).get("unlock_when_done", False)
+    if ret is None:
+        logger.info("job finished successfully, setting status to 'c'")
+        dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
+    else:
+        logger.info("job was terminated, setting status to 'cd'")
+        dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
+        logger.info("handing off to 'driver_reset'")
+        logger.info("==============================")
+        driver_reset(settings, pipeline)
+        logger.info("==============================")
+        ready = False
+
+    logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
+    dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
+    dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
+
 
 
 def driver_api(
@@ -32,14 +107,16 @@ def data_poller(
     channel: int,
     device: str,
     root: str,
+    loglevel: int,
     kwargs: dict,
 ) -> None:
-    log_worker_config(lq)
+    log_worker_config(lq, loglevel)
     log = logging.getLogger()
     pollrate = kwargs.pop("pollrate", 10)
     verbose = bool(kwargs.pop("verbose", 0))
     log.debug(f"in 'data_poller', {pollrate=}")
     cont = True
+    previous = None
     while cont:
         ts, done, metadata = driver_api(
             driver, "get_status", jq, log, address, channel, **kwargs
@@ -54,6 +131,8 @@ def data_poller(
         ts, nrows, data = driver_api(
             driver, "get_data", jq, log, address, channel, **kwargs
         )
+        data["previous"] = previous
+        previous = data["current"]
         while nrows > 0:
             isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
             isots = isots.replace(":", "")
@@ -64,6 +143,8 @@ def data_poller(
             ts, nrows, data = driver_api(
                 driver, "get_data", jq, log, address, channel, **kwargs
             )
+            data["previous"] = previous
+            previous = data["current"]
         if done:
             cont = False
         else:
@@ -73,12 +154,18 @@ def data_poller(
 
 
 def driver_worker(
-    settings: dict, pipeline: dict, payload: dict, jobid: int, logfile: str
+    settings: dict, 
+    pipeline: dict, 
+    payload: dict, 
+    jobid: int, 
+    logfile: str,
+    loglevel: int,
 ) -> None:
 
     jq = multiprocessing.Queue(maxsize=0)
 
     log = logging.getLogger(__name__)
+    log.setLevel(loglevel)
     log.debug("starting 'log_listener'")
     lq = multiprocessing.Queue(maxsize=0)
     listener = multiprocessing.Process(
@@ -125,7 +212,7 @@ def driver_worker(
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{tag}",
             target=data_poller,
-            args=(drv, jq, lq, addr, ch, tag, root, kwargs),
+            args=(drv, jq, lq, addr, ch, tag, root, loglevel, kwargs),
         )
         jobs.append(p)
         p.start()

@@ -12,8 +12,7 @@ def _dummy_process(
     delay: int = 1,
     t: int = 10,
 ) -> None:
-    ts = time.perf_counter()
-    te = time.perf_counter()
+    ts = te = time.perf_counter()
     nd = 0
     while te - ts < t:
         if queue.empty():
@@ -25,7 +24,7 @@ def _dummy_process(
                 "value": random.random() if name == "random" else nd,
             }
             queue.put(data)
-        time.sleep(delay / 20)
+        time.sleep(1e-3)
         te = time.perf_counter()
     return
 
@@ -104,7 +103,7 @@ def get_data(
     if jobqueue.empty() and len(points) > 0:
         jobqueue.put(None)
     npoints = len(points)
-    data = {"data": points}
+    data = {"data": points, "current": None}
     return dt.timestamp(), npoints, data
 
 
@@ -154,6 +153,8 @@ def start_job(
             target=_dummy_process, args=(jobqueue, name, delay, t)
         )
         pr.start()
+    # Delay before quitting so that processes get a chance to start
+    time.sleep(1) 
     return dt.timestamp()
 
 

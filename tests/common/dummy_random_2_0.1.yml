@@ -5,3 +5,5 @@ method:
         - name: "random"
           time: 2
           delay: 0.1
+tomato:
+    verbosity: "DEBUG"
