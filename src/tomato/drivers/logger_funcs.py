@@ -20,7 +20,7 @@ def log_listener(queue, configurer, path):
         logger.handle(record)
 
 
-def log_worker_config(queue, loglevel = logging.INFO):
+def log_worker_config(queue, loglevel=logging.INFO):
     h = logging.handlers.QueueHandler(queue)
     root = logging.getLogger()
     root.addHandler(h)

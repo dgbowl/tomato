@@ -155,7 +155,7 @@ def start_job(
         )
         pr.start()
     # Delay before quitting so that processes get a chance to start
-    time.sleep(1) 
+    time.sleep(1)
     return dt.timestamp()
 
 

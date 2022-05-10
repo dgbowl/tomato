@@ -14,6 +14,7 @@ from .logger_funcs import log_listener_config, log_listener, log_worker_config
 from .yadg_funcs import get_yadg_preset
 from .. import dbhandler
 
+
 def tomato_job() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -51,12 +52,12 @@ def tomato_job() -> None:
     tomato = payload.get("tomato", {})
     pipeline = jsdata["pipeline"]
     pip = pipeline["name"]
-    
+
     verbosity = tomato.get("verbosity", "INFO")
     loglevel = logging._checkLevel(verbosity)
     logger.debug("setting logger verbosity to '%s'", verbosity)
     logger.setLevel(loglevel)
-    
+
     pid = os.getpid()
 
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
@@ -69,14 +70,14 @@ def tomato_job() -> None:
     ret = driver_worker(settings, pipeline, payload, jobid, logfile, loglevel)
 
     logger.info("==============================")
-    
+
     output = tomato.get("output", {"prefix": f"results.{jobid}"})
     dgfile = f"{output['prefix']}.json"
     logging.debug("creating a preset file '%s'", f"preset.{jobid}.json")
     preset = get_yadg_preset(payload["method"], pipeline)
     with open(f"preset.{jobid}.json", "w") as of:
         json.dump(preset, of)
-    
+
     logging.info("running yadg to create a datagram in '%s'", dgfile)
     command = ["yadg", "preset", "-pa", f"preset.{jobid}.json", jobfolder, dgfile]
     logging.debug(" ".join(command))
@@ -100,7 +101,6 @@ def tomato_job() -> None:
     logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
     dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
-
 
 
 def driver_api(
@@ -164,10 +164,10 @@ def data_poller(
 
 
 def driver_worker(
-    settings: dict, 
-    pipeline: dict, 
-    payload: dict, 
-    jobid: int, 
+    settings: dict,
+    pipeline: dict,
+    payload: dict,
+    jobid: int,
     logfile: str,
     loglevel: int,
 ) -> None:
