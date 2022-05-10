@@ -83,7 +83,7 @@ def _default_pipelines() -> dict[str, dict]:
                 "address": None,
                 "channels": [5, 10],
                 "driver": "dummy",
-                "capabilities": ["random"],
+                "capabilities": ["random", "sequential"],
                 "pollrate": 1,
             }
         ],

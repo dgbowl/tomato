@@ -9,19 +9,26 @@ from . import utils
 
 
 @pytest.mark.parametrize(
-    "casename, npoints",
+    "casename, npoints, prefix",
     [
         (
             "dummy_random_2_0.1",
             20,
+            "results.1",
         ),
         (
             "dummy_random_5_2",
             3,
+            "results.1",
+        ),
+        (
+            "dummy_sequential_1_0.05",
+            20,
+            "data",
         ),
     ],
 )
-def test_run_dummy_random(casename, npoints, datadir):
+def test_run_dummy_random(casename, npoints, prefix, datadir):
     os.chdir(datadir)
     status = utils.run_casename(casename)
     assert status == "c"
@@ -36,3 +43,10 @@ def test_run_dummy_random(casename, npoints, datadir):
                 for point in jsdata["data"]:
                     data.append(point)
     assert len(data) == npoints
+    if prefix is not None:
+        print(os.listdir())
+        assert os.path.exists(f"{prefix}.json")
+        assert os.path.exists(f"{prefix}.zip")
+        with open(f"{prefix}.json", "r") as of:
+            dg = json.load(of)
+        assert len(dg["steps"][0]["data"]) == npoints

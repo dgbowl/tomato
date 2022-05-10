@@ -103,10 +103,10 @@ def vlimit(cond: str, vals: list[float], Is: list[float] = None) -> list[float]:
 
 
 def translate(technique: dict, capacity: float) -> dict:
-    if technique["name"].startswith("constant_"):
+    if technique["technique"].startswith("constant_"):
         ns = get_num_steps(technique)
         tech = {
-            "name": technique["name"],
+            "technique": technique["technique"],
             "Step_number": ns - 1,
             "N_Cycles": technique.get("n_cycles", 0),
             "Record_every_dT": technique.get("record_every_dt", 30.0),
@@ -123,11 +123,11 @@ def translate(technique: dict, capacity: float) -> dict:
             "Exit_Cond": pad_steps(2 * int(technique.get("exit_on_limit", False)), ns),
         }
         ci = 1
-        if technique["name"].endswith("current"):
+        if technique["technique"].endswith("current"):
             I = current(technique["current"], capacity)
             tech["Current_step"] = pad_steps(I, ns)
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
-        elif technique["name"].endswith("voltage"):
+        elif technique["technique"].endswith("voltage"):
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
         for prop in {"voltage", "current"}:
@@ -143,16 +143,16 @@ def translate(technique: dict, capacity: float) -> dict:
                         vals = vlimit(cond, padded, tech.get("Current_step"))
                     tech[f"Test{ci}_Value"] = vals
                     ci += 1
-    elif technique["name"] == "loop":
+    elif technique["technique"] == "loop":
         tech = {
-            "name": "loop",
+            "technique": "loop",
             "loop_N_times": technique.get("n_gotos", -1),
             "protocol_number": technique.get("goto", 0),
         }
-    elif technique["name"].startswith("sweep_"):
+    elif technique["technique"].startswith("sweep_"):
         ns = get_num_steps(technique)
         tech = {
-            "name": technique["name"],
+            "technique": technique["technique"],
             "Scan_number": ns - 1,
             "N_Cycles": technique.get("n_cycles", 0),
             "I_Range": I_ranges[technique.get("I_range", "keep")],
@@ -176,22 +176,22 @@ def translate(technique: dict, capacity: float) -> dict:
                     tech[f"Test{ci}_Config"] = pad_steps(conf, ns)
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
-        if technique["name"].endswith("current"):
+        if technique["technique"].endswith("current"):
             I = current(technique["current"], capacity)
             tech["Current_step"] = pad_steps(I, ns)
             tech["Begin_measuring_E"] = technique.get("scan_start", 0.0)
             tech["End_measuring_E"] = technique.get("scan_end", 1.0)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)
-        elif technique["name"].endswith("voltage"):
+        elif technique["technique"].endswith("voltage"):
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
             tech["Begin_measuring_I"] = technique.get("scan_start", 0.0)
             tech["End_measuring_I"] = technique.get("scan_end", 1.0)
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
     else:
-        if technique["name"] != "open_circuit_voltage":
-            log.error(f"technique name '{technique['name']}' not understood.")
+        if technique["technique"] != "open_circuit_voltage":
+            log.error(f"technique name '{technique['technique']}' not understood.")
         tech = {
-            "name": "open_circuit_voltage",
+            "technique": "open_circuit_voltage",
             "Rest_time_T": technique.get("time", 0.0),
             "Record_every_dT": technique.get("record_every_dt", 30.0),
             "Record_every_dE": technique.get("record_every_dE", 0.005),
@@ -204,7 +204,7 @@ def translate(technique: dict, capacity: float) -> dict:
 def dsl_to_ecc(api, dsl: dict) -> EccParams:
     eccs = []
     for k, val in dsl.items():
-        if k == "name":
+        if k == "technique":
             continue
         elif isinstance(val, list):
             for i, v in zip(range(len(val)), val):
@@ -222,7 +222,7 @@ def payload_to_ecc(api, payload: list[dict], capacity: float) -> list[dict]:
     for technique in payload:
         dsl = translate(technique, capacity)
         eccpars = dsl_to_ecc(api, dsl)
-        eccs.append((dsl["name"], eccpars))
+        eccs.append((dsl["technique"], eccpars))
     return eccs
 
 

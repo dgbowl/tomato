@@ -9,13 +9,9 @@ from ..drivers import driver_worker, driver_reset, tomato_job
 from .. import dbhandler
 
 
-def _find_matching_pipelines(pipelines: list, method: dict) -> list[str]:
-    req_names = set(method.keys())
-    req_capabs = []
-    for k in req_names:
-        for s in method[k]:
-            req_capabs.append(s["name"])
-    req_capabs = set(req_capabs)
+def _find_matching_pipelines(pipelines: list, method: list[dict]) -> list[str]:
+    req_names = set([item["device"] for item in method])
+    req_capabs = set([item["technique"] for item in method])
 
     candidates = []
     for cd in pipelines:
@@ -94,7 +90,7 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                         with open(jpath, "w") as of:
                             json.dump(args, of, indent=1)
                         cfs = subprocess.CREATE_NO_WINDOW
-                        cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
+                        #cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
                         subprocess.Popen(
                             ["tomato_job", str(jpath)],
                             creationflags=cfs,
