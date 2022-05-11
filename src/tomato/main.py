@@ -99,7 +99,7 @@ def run_tomato():
         pipelines, settings["state"]["path"], type=settings["state"]["type"]
     )
 
-    daemon.main_loop(settings, pipelines)
+    daemon.main_loop(settings, pipelines, test = args.test)
 
 
 def run_ketchup():

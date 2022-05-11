@@ -41,7 +41,7 @@ def _pipeline_ready_sample(ret: tuple, sample: dict) -> bool:
             return False
 
 
-def main_loop(settings: dict, pipelines: dict) -> None:
+def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
     log = logging.getLogger(__name__)
     qup = settings["queue"]["path"]
     qut = settings["queue"]["type"]
@@ -90,7 +90,8 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                         with open(jpath, "w") as of:
                             json.dump(args, of, indent=1)
                         cfs = subprocess.CREATE_NO_WINDOW
-                        cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
+                        if not test:
+                            cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
                         subprocess.Popen(
                             ["tomato_job", str(jpath)],
                             creationflags=cfs,
