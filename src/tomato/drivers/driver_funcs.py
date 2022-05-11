@@ -71,8 +71,14 @@ def tomato_job() -> None:
 
     logger.info("==============================")
 
-    output = tomato.get("output", {"prefix": f"results.{jobid}"})
-    dgfile = f"{output['prefix']}.json"
+    output = tomato.get("output", {})
+    prefix = output.get("prefix", f"results.{jobid}")
+    path = output.get("path", ".")
+    if os.path.exists(path):
+        assert os.path.isdir(path)
+    else:
+        os.makedirs(path)
+    dgfile = os.path.join(path, f"{prefix}.json")
     logging.debug("creating a preset file '%s'", f"preset.{jobid}.json")
     preset = get_yadg_preset(payload["method"], pipeline)
     with open(f"preset.{jobid}.json", "w") as of:

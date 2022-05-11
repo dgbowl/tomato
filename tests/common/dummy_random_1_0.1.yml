@@ -1,0 +1,10 @@
+sample:
+    name: dummy_random_1_0.1
+method:
+  - device: "worker"
+    technique: "random"
+    time: 1
+    delay: 0.1
+tomato:
+    output:
+        path: newfolder

@@ -26,6 +26,11 @@ from . import utils
             20,
             "data",
         ),
+        (
+            "dummy_random_1_0.1",
+            10,
+            os.path.join("newfolder", "results.1"),
+        ),
     ],
 )
 def test_run_dummy_random(casename, npoints, prefix, datadir):
