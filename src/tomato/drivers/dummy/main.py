@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 def _dummy_process(
     queue: multiprocessing.Queue,
-    name: str = "random",
+    tech: str = "random",
     delay: int = 1,
     t: int = 10,
 ) -> None:
@@ -21,7 +21,7 @@ def _dummy_process(
             nd += 1
             data = {
                 "time": te - ts,
-                "value": random.random() if name == "random" else nd,
+                "value": random.random() if tech == "random" else nd,
             }
             queue.put(data)
         time.sleep(1e-3)
@@ -142,19 +142,20 @@ def start_job(
     """
     dt = datetime.now(timezone.utc)
     logger.info("in 'dummy.start_job'")
+    logger.debug(f"{payload=}")
     for ip, p in enumerate(payload):
         delay = p.get("delay", 1)
         t = p.get("time", 10)
-        name = p["name"]
+        tech = p["technique"]
         logger.debug(
-            f"starting 'dummy._dummy_process' {ip} with {name=}, {t=}, {delay=}."
+            f"starting 'dummy._dummy_process' {ip} with {tech=}, {t=}, {delay=}."
         )
         pr = multiprocessing.Process(
-            target=_dummy_process, args=(jobqueue, name, delay, t)
+            target=_dummy_process, args=(jobqueue, tech, delay, t)
         )
         pr.start()
     # Delay before quitting so that processes get a chance to start
-    time.sleep(1) 
+    time.sleep(1)
     return dt.timestamp()
 
 

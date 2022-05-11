@@ -4,13 +4,16 @@ import importlib
 import argparse
 import time
 import multiprocessing
+import subprocess
 import os
 import json
 from datetime import datetime, timezone
 import logging
 
 from .logger_funcs import log_listener_config, log_listener, log_worker_config
+from .yadg_funcs import get_yadg_preset
 from .. import dbhandler
+
 
 def tomato_job() -> None:
     parser = argparse.ArgumentParser()
@@ -26,6 +29,7 @@ def tomato_job() -> None:
     )
     args = parser.parse_args()
 
+    jobfolder, _ = os.path.split(os.path.abspath(args.jobfile))
     logfile = args.jobfile.replace(".json", ".log")
 
     logging.basicConfig(
@@ -40,20 +44,20 @@ def tomato_job() -> None:
         jsdata = json.load(infile)
 
     logger.debug("parsing data from jobfile")
-    settings = jsdata["settings"]
-    payload = jsdata["payload"]
-    pipeline = jsdata["pipeline"]
-    pip = pipeline["name"]
     jobid = jsdata["jobid"]
+    settings = jsdata["settings"]
     queue = settings["queue"]
     state = settings["state"]
-    
-    
-    verbosity = payload.get("tomato", {}).get("verbosity", "INFO")
+    payload = jsdata["payload"]
+    tomato = payload.get("tomato", {})
+    pipeline = jsdata["pipeline"]
+    pip = pipeline["name"]
+
+    verbosity = tomato.get("verbosity", "INFO")
     loglevel = logging._checkLevel(verbosity)
     logger.debug("setting logger verbosity to '%s'", verbosity)
     logger.setLevel(loglevel)
-    
+
     pid = os.getpid()
 
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
@@ -66,7 +70,28 @@ def tomato_job() -> None:
     ret = driver_worker(settings, pipeline, payload, jobid, logfile, loglevel)
 
     logger.info("==============================")
-    ready = payload.get("tomato", {}).get("unlock_when_done", False)
+
+    output = tomato.get("output", {})
+    prefix = output.get("prefix", f"results.{jobid}")
+    path = output.get("path", ".")
+    if os.path.exists(path):
+        assert os.path.isdir(path)
+    else:
+        os.makedirs(path)
+    dgfile = os.path.join(path, f"{prefix}.json")
+    logging.debug("creating a preset file '%s'", f"preset.{jobid}.json")
+    preset = get_yadg_preset(payload["method"], pipeline)
+    with open(f"preset.{jobid}.json", "w") as of:
+        json.dump(preset, of)
+
+    logging.info("running yadg to create a datagram in '%s'", dgfile)
+    command = ["yadg", "preset", "-pa", f"preset.{jobid}.json", jobfolder, dgfile]
+    logging.debug(" ".join(command))
+    subprocess.run(command, check=True)
+    logging.debug("removing the preset file '%s'", f"preset.{jobid}.json")
+    os.unlink(f"preset.{jobid}.json")
+
+    ready = tomato.get("unlock_when_done", False)
     if ret is None:
         logger.info("job finished successfully, setting status to 'c'")
         dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
@@ -82,7 +107,6 @@ def tomato_job() -> None:
     logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
     dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
-
 
 
 def driver_api(
@@ -113,21 +137,13 @@ def data_poller(
     log_worker_config(lq, loglevel)
     log = logging.getLogger()
     pollrate = kwargs.pop("pollrate", 10)
-    verbose = bool(kwargs.pop("verbose", 0))
     log.debug(f"in 'data_poller', {pollrate=}")
     cont = True
     previous = None
     while cont:
-        ts, done, metadata = driver_api(
+        ts, done, _ = driver_api(
             driver, "get_status", jq, log, address, channel, **kwargs
         )
-        if verbose:
-            isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
-            isots = isots.replace(":", "")
-            fn = os.path.join(root, f"{device}_{isots}_status.json")
-            log.debug(f"'writing status info into '{fn}'")
-            with open(fn, "w") as of:
-                json.dump(metadata, of)
         ts, nrows, data = driver_api(
             driver, "get_data", jq, log, address, channel, **kwargs
         )
@@ -154,10 +170,10 @@ def data_poller(
 
 
 def driver_worker(
-    settings: dict, 
-    pipeline: dict, 
-    payload: dict, 
-    jobid: int, 
+    settings: dict,
+    pipeline: dict,
+    payload: dict,
+    jobid: int,
     logfile: str,
     loglevel: int,
 ) -> None:
@@ -183,7 +199,7 @@ def driver_worker(
         log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
         dpar = settings["drivers"].get(drv, {})
-        pl = payload["method"][tag]
+        pl = [item for item in payload["method"] if item["device"] == v["tag"]]
         smpl = payload["sample"]
 
         log.debug(f"{vi+1}: getting status")
@@ -196,18 +212,12 @@ def driver_worker(
         )
         metadata["uts"] = start_ts
 
-        log.debug(f"{vi+1}: writing metadata")
-        isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat().replace(":", "")
-        fn = os.path.join(root, f"{tag}_{isots}_status.json")
+        log.debug(f"{vi+1}: writing initial status")
+        fn = os.path.join(root, f"{tag}_status.json")
         with open(fn, "w") as of:
             json.dump(metadata, of)
         kwargs = dpar
-        kwargs.update(
-            {
-                "pollrate": v.get("pollrate", 10),
-                "verbose": v.get("verbose", 0),
-            }
-        )
+        kwargs.update({"pollrate": v.get("pollrate", 10)})
         log.info(f"{vi+1}: starting 'data_poller': every {kwargs['pollrate']}s")
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{tag}",

@@ -1,9 +1,10 @@
 sample:
-    name: dummy_random_2_0.1
+    name: dummy_random_1_0.1
 method:
   - device: "worker"
     technique: "random"
-    time: 2
+    time: 1
     delay: 0.1
 tomato:
-    verbosity: "DEBUG"
+    output:
+        path: newfolder
