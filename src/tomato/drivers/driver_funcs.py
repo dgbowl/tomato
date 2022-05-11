@@ -206,9 +206,8 @@ def driver_worker(
         )
         metadata["uts"] = start_ts
 
-        log.debug(f"{vi+1}: writing metadata")
-        isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat().replace(":", "")
-        fn = os.path.join(root, f"{tag}_{isots}_status.json")
+        log.debug(f"{vi+1}: writing initial status")
+        fn = os.path.join(root, f"{tag}_status.json")
         with open(fn, "w") as of:
             json.dump(metadata, of)
         kwargs = dpar

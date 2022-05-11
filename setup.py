@@ -35,8 +35,8 @@ setuptools.setup(
         "toml",
         "pyyaml",
         "psutil",
-        "yadg>=4.1.0rc5"
-        #"yadg @ git+https://github.com/PeterKraus/yadg.git@tomatojson#egg=yadg"
+        #"yadg>=4.1.0rc5"
+        "yadg @ git+https://github.com/dgbowl/yadg.git@master#egg=yadg"
     ],
     extras_require={
         "testing": [

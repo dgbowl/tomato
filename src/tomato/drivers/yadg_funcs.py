@@ -21,6 +21,15 @@ def get_yadg_preset(method: list[dict], pipeline: dict) -> dict:
             "parser": _device_to_parser[devices[dev]],
             "input": {"folders": ["."], "prefix": dev, "suffix": "data.json"},
             "parameters": {"filetype": "tomato.json"},
+            "externaldate": {
+                "using": {
+                    "file": {
+                        "type": "json",
+                        "path": f"{dev}_status.json",
+                        "match": "uts"
+                    }
+                },
+            }
         }
         preset["steps"].append(step)
     return preset
