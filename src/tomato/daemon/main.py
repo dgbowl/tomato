@@ -90,7 +90,7 @@ def main_loop(settings: dict, pipelines: dict) -> None:
                         with open(jpath, "w") as of:
                             json.dump(args, of, indent=1)
                         cfs = subprocess.CREATE_NO_WINDOW
-                        # cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
+                        cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
                         subprocess.Popen(
                             ["tomato_job", str(jpath)],
                             creationflags=cfs,
