@@ -24,6 +24,12 @@ def submit(args):
             payload = json.load(infile)
         elif args.payload.endswith("yml") or args.payload.endswith("yaml"):
             payload = yaml.full_load(infile)
+    if "tomato" not in payload:
+        payload["tomato"] = {}
+    if "output" not in payload["tomato"]:
+        payload["tomato"]["output"] = {}
+    if "path" not in payload["tomato"]["output"]:
+        payload["tomato"]["output"]["path"] = os.getcwd()
     pstr = json.dumps(payload)
     log.info("queueing 'payload' into 'queue'")
     dbhandler.queue_payload(queue["path"], pstr, type=queue["type"])

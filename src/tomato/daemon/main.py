@@ -4,8 +4,6 @@ import subprocess
 import time
 import json
 import logging
-
-from ..drivers import driver_worker, driver_reset, tomato_job
 from .. import dbhandler
 
 
