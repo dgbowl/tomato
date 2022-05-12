@@ -29,7 +29,9 @@ def submit(args):
     if "output" not in payload["tomato"]:
         payload["tomato"]["output"] = {}
     if "path" not in payload["tomato"]["output"]:
-        payload["tomato"]["output"]["path"] = os.getcwd()
+        cwd = os.getcwd()
+        log.info("Output path not set. Setting output path to '%s'", cwd)
+        payload["tomato"]["output"]["path"] = cwd
     pstr = json.dumps(payload)
     log.info("queueing 'payload' into 'queue'")
     dbhandler.queue_payload(queue["path"], pstr, type=queue["type"])
