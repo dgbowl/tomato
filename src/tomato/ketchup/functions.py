@@ -4,6 +4,7 @@ import yaml
 import logging
 import signal
 import psutil
+from pathlib import Path
 from .. import setlib
 from .. import dbhandler
 
@@ -29,7 +30,7 @@ def submit(args):
     if "output" not in payload["tomato"]:
         payload["tomato"]["output"] = {}
     if "path" not in payload["tomato"]["output"]:
-        cwd = os.getcwd()
+        cwd = str(Path().resolve())
         log.info("Output path not set. Setting output path to '%s'", cwd)
         payload["tomato"]["output"]["path"] = cwd
     pstr = json.dumps(payload)
