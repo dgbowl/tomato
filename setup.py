@@ -35,8 +35,7 @@ setuptools.setup(
         "toml",
         "pyyaml",
         "psutil",
-        #"yadg>=4.1.0rc5"
-        "yadg @ git+https://github.com/dgbowl/yadg.git@master#egg=yadg"
+        "yadg>=4.1",
     ],
     extras_require={
         "testing": [

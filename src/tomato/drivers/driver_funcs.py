@@ -74,9 +74,12 @@ def tomato_job() -> None:
     output = tomato.get("output", {})
     prefix = output.get("prefix", f"results.{jobid}")
     path = output.get("path", ".")
+    logger.debug("output path is '%s'", path)
     if os.path.exists(path):
+        logger.debug("path exists, making sure it's a folder")
         assert os.path.isdir(path)
     else:
+        logger.debug("path does not exist, creating")
         os.makedirs(path)
     dgfile = os.path.join(path, f"{prefix}.json")
     logging.debug("creating a preset file '%s'", f"preset.{jobid}.json")
