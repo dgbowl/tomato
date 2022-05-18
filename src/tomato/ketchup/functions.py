@@ -107,10 +107,17 @@ def cancel(args):
             if pjobid == jobid:
                 log.warning(f"cancelling a running job {jobid} with pid {pid}")
                 proc = psutil.Process(pid=pid)
-                cproc = proc.children()
-                for p in cproc:
-                    p.send_signal(signal.SIGTERM)
-                    log.debug(f"SIGTERM sent to pid {p.pid}")
+                for cp in proc.children():
+                    if cp.name() in {"python", "python.exe"}:
+                        for ccp in cp.children():
+                            log.debug(
+                                "sending SIGTERM to pid %d with name '%s'",
+                                ccp.pid,
+                                ccp.name()
+                            )
+                            ccp.send_signal(signal.SIGTERM)
+                        
+                    
 
 
 def load(args):
