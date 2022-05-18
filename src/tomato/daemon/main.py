@@ -50,7 +50,7 @@ def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
         ret = dbhandler.pipeline_get_running(stp, type=stt)
         for pip, jobid, pid in ret:
             log.debug(f"checking PID of running job '{jobid}'")
-            if psutil.pid_exists(pid) and "python" in psutil.Process(pid).name():
+            if psutil.pid_exists(pid) and "tomato_job" in psutil.Process(pid).name():
                 log.debug(f"PID of running job '{jobid}' found")
                 # dbhandler.job_set_status(queue, "r", jobid)
             else:

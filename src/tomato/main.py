@@ -78,7 +78,7 @@ def run_tomato():
     args = parser.parse_args()
     _logging_setup(args)
 
-    ppid = os.getppid()
+    ppid = os.getppid() # On Windows, tomato.exe is the parent of os.getpid()
     toms = [
         p.pid for p in psutil.process_iter() if p.name() in {"tomato", "tomato.exe"}
     ]
