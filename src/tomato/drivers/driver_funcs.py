@@ -58,7 +58,8 @@ def tomato_job() -> None:
     logger.debug("setting logger verbosity to '%s'", verbosity)
     logger.setLevel(loglevel)
 
-    pid = os.getpid()
+    #pid = os.getpid()
+    pid = os.getppid() # On Windows, the parent is the tomato_job.exe
 
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
     dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
@@ -262,8 +263,10 @@ def driver_reset(
         dpar = settings["drivers"].get(drv, {})
 
         log.debug(f"{vi+1}: resetting device")
-        driver_api(drv, "stop_job", addr, ch, **dpar)
+        driver_api(drv, "stop_job", None, log, addr, ch, **dpar)
 
         log.debug(f"{vi+1}: getting status")
-        ts, ready, metadata = driver_api(drv, "get_status", addr, ch, **dpar)
+        ts, ready, metadata = driver_api(
+            drv, "get_status", None, log, addr, ch, **dpar
+        )
         assert ready, f"Failed: device '{tag}' is not ready."
