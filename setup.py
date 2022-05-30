@@ -36,6 +36,7 @@ setuptools.setup(
         "pyyaml",
         "psutil",
         "yadg>=4.1",
+        "dgbowl_schemas @ git+https://github.com/dgbowl/dgbowl-schemas.git@master#egg=dgbowl_schemas",
     ],
     extras_require={
         "testing": [

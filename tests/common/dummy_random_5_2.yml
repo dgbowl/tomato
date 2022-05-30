@@ -1,3 +1,4 @@
+version: "0.1"
 sample:
     name: dummy_random_5_2
 method:

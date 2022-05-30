@@ -72,9 +72,9 @@ def tomato_job() -> None:
 
     logger.info("==============================")
 
-    output = tomato.get("output", {})
-    prefix = output.get("prefix", f"results.{jobid}")
-    path = output.get("path", ".")
+    output = tomato["output"]
+    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
+    path = output["path"]
     logger.debug("output path is '%s'", path)
     if os.path.exists(path):
         logger.debug("path exists, making sure it's a folder")
