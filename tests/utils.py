@@ -4,6 +4,7 @@ import psutil
 import signal
 import os
 
+
 def run_casename(casename: str) -> str:
     cfg = subprocess.CREATE_NEW_PROCESS_GROUP
     proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
@@ -25,7 +26,7 @@ def run_casename(casename: str) -> str:
             break
         else:
             time.sleep(0.1)
-    
+
     for cp in p.children():
         cp.send_signal(signal.SIGTERM)
     proc.terminate()

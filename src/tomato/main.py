@@ -78,7 +78,7 @@ def run_tomato():
     args = parser.parse_args()
     _logging_setup(args)
 
-    ppid = os.getppid() # On Windows, tomato.exe is the parent of os.getpid()
+    ppid = os.getppid()  # On Windows, tomato.exe is the parent of os.getpid()
     toms = [
         p.pid for p in psutil.process_iter() if p.name() in {"tomato", "tomato.exe"}
     ]
@@ -99,7 +99,7 @@ def run_tomato():
         pipelines, settings["state"]["path"], type=settings["state"]["type"]
     )
 
-    daemon.main_loop(settings, pipelines, test = args.test)
+    daemon.main_loop(settings, pipelines, test=args.test)
 
 
 def run_ketchup():

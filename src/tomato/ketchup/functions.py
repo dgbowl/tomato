@@ -112,11 +112,9 @@ def cancel(args):
                             log.debug(
                                 "sending SIGTERM to pid %d with name '%s'",
                                 ccp.pid,
-                                ccp.name()
+                                ccp.name(),
                             )
                             ccp.send_signal(signal.SIGTERM)
-                        
-                    
 
 
 def load(args):
