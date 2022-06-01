@@ -1,9 +1,0 @@
-name: "Docs build job"
-description: "Build the documentation."
-runs:
-  using: "composite"
-  steps:
-    - run: sphinx-apidoc -o docs/source src/dgpost -T -M
-      shell: bash
-    - run: sphinx-build -W -b html docs/source public/master
-      shell: bash
