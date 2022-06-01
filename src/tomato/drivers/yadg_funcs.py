@@ -26,10 +26,10 @@ def get_yadg_preset(method: list[dict], pipeline: dict) -> dict:
                     "file": {
                         "type": "json",
                         "path": f"{dev}_status.json",
-                        "match": "uts"
+                        "match": "uts",
                     }
                 },
-            }
+            },
         }
         preset["steps"].append(step)
     return preset

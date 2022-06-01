@@ -36,6 +36,7 @@ setuptools.setup(
         "pyyaml",
         "psutil",
         "yadg>=4.1",
+        "dgbowl_schemas>=105",
     ],
     extras_require={
         "testing": [

@@ -5,6 +5,7 @@ import logging
 import signal
 import psutil
 from pathlib import Path
+from dgbowl_schemas.tomato import to_payload
 from .. import setlib
 from .. import dbhandler
 
@@ -22,18 +23,16 @@ def submit(args):
     log.debug(f"attempting to open payload at '{args.payload}'")
     with open(args.payload, "r") as infile:
         if args.payload.endswith("json"):
-            payload = json.load(infile)
+            pldict = json.load(infile)
         elif args.payload.endswith("yml") or args.payload.endswith("yaml"):
-            payload = yaml.full_load(infile)
-    if "tomato" not in payload:
-        payload["tomato"] = {}
-    if "output" not in payload["tomato"]:
-        payload["tomato"]["output"] = {}
-    if "path" not in payload["tomato"]["output"]:
+            pldict = yaml.full_load(infile)
+    payload = to_payload(**pldict)
+    log.debug("payload=Payload(%s)", payload)
+    if payload.tomato.output.path is None:
         cwd = str(Path().resolve())
         log.info("Output path not set. Setting output path to '%s'", cwd)
-        payload["tomato"]["output"]["path"] = cwd
-    pstr = json.dumps(payload)
+        payload.tomato.output.path = cwd
+    pstr = payload.json()
     log.info("queueing 'payload' into 'queue'")
     dbhandler.queue_payload(queue["path"], pstr, type=queue["type"])
 
@@ -113,11 +112,9 @@ def cancel(args):
                             log.debug(
                                 "sending SIGTERM to pid %d with name '%s'",
                                 ccp.pid,
-                                ccp.name()
+                                ccp.name(),
                             )
                             ccp.send_signal(signal.SIGTERM)
-                        
-                    
 
 
 def load(args):

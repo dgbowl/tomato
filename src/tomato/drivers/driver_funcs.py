@@ -58,8 +58,8 @@ def tomato_job() -> None:
     logger.debug("setting logger verbosity to '%s'", verbosity)
     logger.setLevel(loglevel)
 
-    #pid = os.getpid()
-    pid = os.getppid() # On Windows, the parent is the tomato_job.exe
+    # pid = os.getpid()
+    pid = os.getppid()  # On Windows, the parent is the tomato_job.exe
 
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
     dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
@@ -72,9 +72,9 @@ def tomato_job() -> None:
 
     logger.info("==============================")
 
-    output = tomato.get("output", {})
-    prefix = output.get("prefix", f"results.{jobid}")
-    path = output.get("path", ".")
+    output = tomato["output"]
+    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
+    path = output["path"]
     logger.debug("output path is '%s'", path)
     if os.path.exists(path):
         logger.debug("path exists, making sure it's a folder")
@@ -266,7 +266,5 @@ def driver_reset(
         driver_api(drv, "stop_job", None, log, addr, ch, **dpar)
 
         log.debug(f"{vi+1}: getting status")
-        ts, ready, metadata = driver_api(
-            drv, "get_status", None, log, addr, ch, **dpar
-        )
+        ts, ready, metadata = driver_api(drv, "get_status", None, log, addr, ch, **dpar)
         assert ready, f"Failed: device '{tag}' is not ready."
