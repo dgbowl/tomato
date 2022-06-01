@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tomato: au-tomation without the pain! &mdash; tomato master documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tomato package" href="tomato.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> tomato
+            <img src="_static/tomato.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                master
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tomato.html">tomato package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">tomato</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li><strong>tomato</strong>: au-tomation without the pain!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tomato-au-tomation-without-the-pain">
+<h1><strong>tomato</strong>: au-tomation without the pain!<a class="headerlink" href="#tomato-au-tomation-without-the-pain" title="Permalink to this headline"></a></h1>
+<p><strong>tomato</strong> is an instrument automation package, currently developed in the
+<a class="reference external" href="https://www.empa.ch/web/s501">Materials for Energy Conversion</a> at Empa.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Tomato is Windows-only.</p>
+</div>
+<p>Currently supported hardware is:</p>
+<ul class="simple">
+<li><p>a Dummy device for testing</p></li>
+<li><p>BioLogic potentiostats via the EC-Lib library</p></li>
+</ul>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
+<p>The <strong>tomato</strong> package consists of two key parts: the job scheduler app <code class="docutils literal notranslate"><span class="pre">tomato</span></code>,
+and the queue management app <code class="docutils literal notranslate"><span class="pre">ketchup</span></code>.</p>
+<section id="using-tomato">
+<h3>Using <code class="docutils literal notranslate"><span class="pre">tomato</span></code><a class="headerlink" href="#using-tomato" title="Permalink to this headline"></a></h3>
+<p>The job scheduler <code class="docutils literal notranslate"><span class="pre">tomato</span></code> can be started in verbose mode for diagnostic output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato -vv
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">tomato</span></code> is used to schedule <em>jobs</em> from the <em>queue</em> onto <em>pipelines</em>. A <em>pipeline</em>
+is a way of organising one or many <em>devices</em> in a single, addressable unit. In general,
+a single <em>pipeline</em> should be a digital twin composed of all <em>devices</em> neccessary to
+carry out a single <em>payload</em>.</p>
+<p>Note that only a single instance of <code class="docutils literal notranslate"><span class="pre">tomato</span></code> can be running at a single machine.</p>
+</section>
+<section id="using-ketchup">
+<h3>Using <code class="docutils literal notranslate"><span class="pre">ketchup</span></code><a class="headerlink" href="#using-ketchup" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">ketchup</span></code> is used to submit, check the status of, and cancel <em>jobs</em> to the <em>queue</em>,
+as well as to load or eject <em>samples</em> from <em>pipelines</em>.</p>
+<p>To submit a <em>payload</em> to the <em>queue</em>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup submit &lt;payload.yml&gt;
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;payload.yml&gt;</span></code> is a file containing the <em>payload</em> information, including
+the description of the <em>sample</em>, details of the <em>method</em>, and other information
+required by <code class="docutils literal notranslate"><span class="pre">tomato</span></code>.</p>
+<p>To check the status of the <em>queue</em> or of a <em>job</em>, run either of:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup status
+ketchup status queue
+ketchup status &lt;jobid&gt;
+</pre></div>
+</div>
+<p>The first option will print information about the status of all <em>pipelines</em>
+that <code class="docutils literal notranslate"><span class="pre">tomato</span></code> is managing. The second option, with the <code class="docutils literal notranslate"><span class="pre">queue</span></code> argument, will
+print information about all jobs that are currently in the <em>queue</em> or already
+running - information about completed jobs is not currently shown. Finally,
+to check the status of a single <em>job</em>, supply the <code class="docutils literal notranslate"><span class="pre">&lt;jobid&gt;</span></code> as an argument.</p>
+</section>
+</section>
+<section id="output-data">
+<h2>Output data<a class="headerlink" href="#output-data" title="Permalink to this headline"></a></h2>
+<p>By default, all data in the <em>job</em> folder is processed using <code class="docutils literal notranslate"><span class="pre">yadg</span></code> to create
+a <em>datagram</em>, and zipped into a zip archive. This zip archive includes all raw
+data files, the <code class="docutils literal notranslate"><span class="pre">tomato_job</span></code> log file, and a copy of the full job payload in a
+<code class="docutils literal notranslate"><span class="pre">json</span></code> file. The <em>datagram</em> contains timestamped, unit-annotated raw data, and
+included instrumental uncertainties.</p>
+<p>The default location where this output will be placed is the <code class="docutils literal notranslate"><span class="pre">cwd()</span></code> where the
+<code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">submit</span></code> command was executed; the default filenames of the returned files
+are <code class="docutils literal notranslate"><span class="pre">results.&lt;jobid&gt;.[zip,json]</span></code>.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tomato.html" class="btn btn-neutral float-right" title="tomato package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 - 2022, dgbowl authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Other Versions</span>
+      v: master
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"> 
+      <script src="../versions.js"></script>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

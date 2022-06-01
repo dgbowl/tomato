@@ -1,0 +1,18 @@
+tomato.daemon package
+=====================
+
+.. automodule:: tomato.daemon
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+tomato.daemon.main module
+-------------------------
+
+.. automodule:: tomato.daemon.main
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tomato.drivers.biologic package &mdash; tomato master documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tomato.drivers.biologic.kbio package" href="tomato.drivers.biologic.kbio.html" />
+    <link rel="prev" title="tomato.drivers package" href="tomato.drivers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> tomato
+            <img src="_static/tomato.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                master
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tomato.html">tomato package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.dbhandler.html">tomato.dbhandler package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="tomato.drivers.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">tomato.drivers.biologic package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-tomato.drivers.biologic.kbio_wrapper">tomato.drivers.biologic.kbio_wrapper module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-tomato.drivers.biologic.main">tomato.drivers.biologic.main module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-tomato.drivers.biologic.tech_params">tomato.drivers.biologic.tech_params module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="tomato.drivers.dummy.html">tomato.drivers.dummy package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.driver_funcs">tomato.drivers.driver_funcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.logger_funcs">tomato.drivers.logger_funcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.yadg_funcs">tomato.drivers.yadg_funcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.setlib.html">tomato.setlib package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#module-tomato.main">tomato.main module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tomato</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="tomato.html">tomato package</a> &raquo;</li>
+          <li><a href="tomato.drivers.html">tomato.drivers package</a> &raquo;</li>
+      <li>tomato.drivers.biologic package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tomato.drivers.biologic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-tomato.drivers.biologic">
+<span id="tomato-drivers-biologic-package"></span><h1>tomato.drivers.biologic package<a class="headerlink" href="#module-tomato.drivers.biologic" title="Permalink to this headline"></a></h1>
+<p><cite>biologic</cite>: Driver for BioLogic potentiostats.</p>
+<p>This driver is a wrapper around BioLogic’s <cite>kbio</cite> package.</p>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.biologic.kbio.html">tomato.drivers.biologic.kbio package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.c_utils">tomato.drivers.biologic.kbio.c_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.kbio_api">tomato.drivers.biologic.kbio.kbio_api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.kbio_tech">tomato.drivers.biologic.kbio.kbio_tech module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.kbio_types">tomato.drivers.biologic.kbio.kbio_types module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.tech_types">tomato.drivers.biologic.kbio.tech_types module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.utils">tomato.drivers.biologic.kbio.utils module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-tomato.drivers.biologic.kbio_wrapper">
+<span id="tomato-drivers-biologic-kbio-wrapper-module"></span><h2>tomato.drivers.biologic.kbio_wrapper module<a class="headerlink" href="#module-tomato.drivers.biologic.kbio_wrapper" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.current">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.current" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">dsl_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParams" title="tomato.drivers.biologic.kbio.kbio_types.EccParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">EccParams</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_api">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_api" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_techpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">techname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_num_steps">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_num_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tech</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_num_steps" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_test_magic">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_test_magic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'or'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_test_magic" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.pad_steps">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">pad_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.pad_steps" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.parse_raw_data">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">parse_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.parse_raw_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.payload_to_ecc">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">payload_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.payload_to_ecc" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.translate">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">technique</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.translate" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.vlimit">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">vlimit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.vlimit" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tomato.drivers.biologic.main">
+<span id="tomato-drivers-biologic-main-module"></span><h2>tomato.drivers.biologic.main module<a class="headerlink" href="#module-tomato.drivers.biologic.main" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.get_data">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.get_data" title="Permalink to this definition"></a></dt>
+<dd><p>Get cached data from the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>timestamp, nrows, data</strong> – Returns a tuple containing the timestamp and associated metadata.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[float, int, dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.get_status">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.get_status" title="Permalink to this definition"></a></dt>
+<dd><p>Get the current status of the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>timestamp, ready, metadata</strong> – Returns a tuple containing the timestamp, readiness status, and
+associated metadata.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[float, bool, dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.start_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">start_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.start_job" title="Permalink to this definition"></a></dt>
+<dd><p>Start a job on the device.</p>
+<p>The function first translates the <code class="docutils literal notranslate"><span class="pre">payload</span></code> into an instrument-specific
+language, using the <code class="docutils literal notranslate"><span class="pre">capacity</span></code> provided if necessary. The converted
+<code class="docutils literal notranslate"><span class="pre">payload</span></code> is then submitted to the device, overwriting any current job
+information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+<li><p><strong>payload</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – A protocol describing the techniques to be executed and their order.</p></li>
+<li><p><strong>capacity</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The capacity information for the studied battery cell. Only required for
+battery-testing applications or for payloads where currents are specified
+using C or D rates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A timestamp corresponding to the start of the job execution.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>timestamp</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.stop_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">stop_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.stop_job" title="Permalink to this definition"></a></dt>
+<dd><p>Stop a job running on the device.</p>
+<p>This function stops any currently running technique on the specified channel
+of the device. No data is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A timestamp corresponding to the start of the job execution.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>timestamp</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tomato.drivers.biologic.tech_params">
+<span id="tomato-drivers-biologic-tech-params-module"></span><h2>tomato.drivers.biologic.tech_params module<a class="headerlink" href="#module-tomato.drivers.biologic.tech_params" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tomato.drivers.html" class="btn btn-neutral float-left" title="tomato.drivers package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tomato.drivers.biologic.kbio.html" class="btn btn-neutral float-right" title="tomato.drivers.biologic.kbio package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 - 2022, dgbowl authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Other Versions</span>
+      v: master
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"> 
+      <script src="../versions.js"></script>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
