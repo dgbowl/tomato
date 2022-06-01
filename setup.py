@@ -42,6 +42,12 @@ setuptools.setup(
         "testing": [
             "pytest",
         ],
+        "docs": [
+            "sphinx==4.5.0",
+            "sphinx-rtd-theme",
+            "sphinx-autodoc-typehints",
+            "autodoc-pydantic"
+        ]
     },
     entry_points={
         "console_scripts": [
