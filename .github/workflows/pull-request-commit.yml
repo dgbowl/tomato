@@ -42,26 +42,26 @@ jobs:
       - run: pip install --pre --find-links=. tomato[testing]
         shell: bash
       - uses: ./.github/workflows/test-job
-  # pages:
-  #   needs: [build]
-  #   strategy:
-  #     matrix:
-  #       pyver: ['3.9']
-  #       os: ['ubuntu-latest']
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-python@v2
-  #       with:
-  #         python-version: ${{ matrix.pyver }}
-  #     - uses: ./.github/workflows/before-job
-  #     - uses: actions/download-artifact@v2
-  #       with:
-  #         name: dist-${{ matrix.os }}-${{ matrix.pyver }}
-  #     - run: pip install --pre --find-links=. dgpost[docs]
-  #       shell: bash
-  #     - uses: ./.github/workflows/docs-job
-  #     - uses: actions/upload-artifact@v2
-  #       with: 
-  #         name: public-${{ matrix.os }}-${{ matrix.pyver }}
-  #         path: public
+  pages:
+    needs: [build]
+    strategy:
+      matrix:
+        pyver: ['3.9']
+        os: ['windows-latest']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.pyver }}
+      - uses: ./.github/workflows/before-job
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.pyver }}
+      - run: pip install --pre --find-links=. dgpost[docs]
+        shell: bash
+      - uses: ./.github/workflows/docs-job
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: public-${{ matrix.os }}-${{ matrix.pyver }}
+          path: public
