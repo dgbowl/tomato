@@ -82,8 +82,8 @@ def status(args):
             running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
             for pipeline, pjobid, pid in running:
                 if pjobid == jobid:
-                    print(f"{pipeline=}")
-                    print(f"{pid=}")
+                    print(f"with pipeline = {pipeline}")
+                    print(f"with PID = {pid}")
                     break
         if status.startswith("c"):
             print(f"completed at = {completed_at}")

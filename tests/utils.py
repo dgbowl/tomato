@@ -21,7 +21,7 @@ def run_casename(casename: str) -> str:
             capture_output=True,
             text=True,
         )
-        status = ret.stdout.split("\n")[1].split(":")[1].strip().replace("'", "")
+        status = ret.stdout.split("\n")[1].split("=")[1].strip()
         if status.startswith("c"):
             break
         else:
