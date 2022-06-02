@@ -61,7 +61,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-tomato.drivers.yadg_funcs">tomato.drivers.yadg_funcs module</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html"><strong>ketchup</strong>: command line interface to <strong>tomato</strong></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.setlib.html">tomato.setlib package</a></li>
 </ul>
 </li>
@@ -136,8 +136,8 @@
 <section id="module-tomato.drivers.driver_funcs">
 <span id="tomato-drivers-driver-funcs-module"></span><h2>tomato.drivers.driver_funcs module<a class="headerlink" href="#module-tomato.drivers.driver_funcs" title="Permalink to this headline"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.driver_funcs.data_poller">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.driver_funcs.</span></span><span class="sig-name descname"><span class="pre">data_poller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">driver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglevel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.driver_funcs.data_poller" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.driver_funcs.tomato_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.driver_funcs.</span></span><span class="sig-name descname"><span class="pre">tomato_job</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.driver_funcs.tomato_job" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
@@ -156,8 +156,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.driver_funcs.driver_reset">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.driver_funcs.</span></span><span class="sig-name descname"><span class="pre">driver_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.driver_funcs.driver_reset" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.driver_funcs.data_poller">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.driver_funcs.</span></span><span class="sig-name descname"><span class="pre">data_poller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">driver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglevel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.driver_funcs.data_poller" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
@@ -176,8 +176,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.driver_funcs.tomato_job">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.driver_funcs.</span></span><span class="sig-name descname"><span class="pre">tomato_job</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.driver_funcs.tomato_job" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.driver_funcs.driver_reset">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.driver_funcs.</span></span><span class="sig-name descname"><span class="pre">driver_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.driver_funcs.driver_reset" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
@@ -189,13 +189,13 @@
 <section id="module-tomato.drivers.logger_funcs">
 <span id="tomato-drivers-logger-funcs-module"></span><h2>tomato.drivers.logger_funcs module<a class="headerlink" href="#module-tomato.drivers.logger_funcs" title="Permalink to this headline"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.logger_funcs.log_listener">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.logger_funcs.</span></span><span class="sig-name descname"><span class="pre">log_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.logger_funcs.log_listener" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.logger_funcs.log_listener_config">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.logger_funcs.</span></span><span class="sig-name descname"><span class="pre">log_listener_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.logger_funcs.log_listener_config" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.logger_funcs.log_listener_config">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.logger_funcs.</span></span><span class="sig-name descname"><span class="pre">log_listener_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.logger_funcs.log_listener_config" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.logger_funcs.log_listener">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.logger_funcs.</span></span><span class="sig-name descname"><span class="pre">log_listener</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configurer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.logger_funcs.log_listener" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

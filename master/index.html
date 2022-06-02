@@ -87,7 +87,7 @@
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
 <p>The <strong>tomato</strong> package consists of two key parts: the job scheduler app <code class="docutils literal notranslate"><span class="pre">tomato</span></code>,
-and the queue management app <code class="docutils literal notranslate"><span class="pre">ketchup</span></code>.</p>
+and the queue management app <a class="reference internal" href="tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>.</p>
 <section id="using-tomato">
 <h3>Using <code class="docutils literal notranslate"><span class="pre">tomato</span></code><a class="headerlink" href="#using-tomato" title="Permalink to this headline"></a></h3>
 <p>The job scheduler <code class="docutils literal notranslate"><span class="pre">tomato</span></code> can be started in verbose mode for diagnostic output:</p>
@@ -101,14 +101,14 @@ carry out a single <em>payload</em>.</p>
 <p>Note that only a single instance of <code class="docutils literal notranslate"><span class="pre">tomato</span></code> can be running at a single machine.</p>
 </section>
 <section id="using-ketchup">
-<h3>Using <code class="docutils literal notranslate"><span class="pre">ketchup</span></code><a class="headerlink" href="#using-ketchup" title="Permalink to this headline"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">ketchup</span></code> is used to submit, check the status of, and cancel <em>jobs</em> to the <em>queue</em>,
-as well as to load or eject <em>samples</em> from <em>pipelines</em>.</p>
+<h3>Using <a class="reference internal" href="tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a><a class="headerlink" href="#using-ketchup" title="Permalink to this headline"></a></h3>
+<p><a class="reference internal" href="tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a> is used to submit, check the status of, and cancel <em>jobs</em> to
+the <em>queue</em>, as well as to load or eject <em>samples</em> from <em>pipelines</em>.</p>
 <p>To submit a <em>payload</em> to the <em>queue</em>, run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup submit &lt;payload.yml&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup submit &lt;payload&gt;
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">&lt;payload.yml&gt;</span></code> is a file containing the <em>payload</em> information, including
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;payload&gt;</span></code> is a file containing the <em>payload</em> information, including
 the description of the <em>sample</em>, details of the <em>method</em>, and other information
 required by <code class="docutils literal notranslate"><span class="pre">tomato</span></code>.</p>
 <p>To check the status of the <em>queue</em> or of a <em>job</em>, run either of:</p>
@@ -117,11 +117,8 @@ ketchup status queue
 ketchup status &lt;jobid&gt;
 </pre></div>
 </div>
-<p>The first option will print information about the status of all <em>pipelines</em>
-that <code class="docutils literal notranslate"><span class="pre">tomato</span></code> is managing. The second option, with the <code class="docutils literal notranslate"><span class="pre">queue</span></code> argument, will
-print information about all jobs that are currently in the <em>queue</em> or already
-running - information about completed jobs is not currently shown. Finally,
-to check the status of a single <em>job</em>, supply the <code class="docutils literal notranslate"><span class="pre">&lt;jobid&gt;</span></code> as an argument.</p>
+<p>Further information about <a class="reference internal" href="tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a> is available in the documentation
+of the <a class="reference internal" href="tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a> module.</p>
 </section>
 </section>
 <section id="output-data">

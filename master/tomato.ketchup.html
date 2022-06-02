@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.ketchup package &mdash; tomato master documentation</title>
+  <title>ketchup: command line interface to tomato &mdash; tomato master documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -50,11 +50,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.dbhandler.html">tomato.dbhandler package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.ketchup package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-tomato.ketchup.functions">tomato.ketchup.functions module</a></li>
-</ul>
-</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><strong>ketchup</strong>: command line interface to <strong>tomato</strong></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.setlib.html">tomato.setlib package</a></li>
 </ul>
 </li>
@@ -79,7 +75,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="tomato.html">tomato package</a> &raquo;</li>
-      <li>tomato.ketchup package</li>
+      <li><strong>ketchup</strong>: command line interface to <strong>tomato</strong></li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/tomato.ketchup.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -89,16 +85,150 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-tomato.ketchup">
-<span id="tomato-ketchup-package"></span><h1>tomato.ketchup package<a class="headerlink" href="#module-tomato.ketchup" title="Permalink to this headline"></a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+  <span class="target" id="module-tomato.ketchup"></span><section id="ketchup-command-line-interface-to-tomato">
+<h1><strong>ketchup</strong>: command line interface to <strong>tomato</strong><a class="headerlink" href="#ketchup-command-line-interface-to-tomato" title="Permalink to this headline"></a></h1>
+<p><em>Code author: Peter Kraus</em></p>
+<p>Module of functions to interact with tomato. Includes job management functions:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.submit" title="tomato.ketchup.functions.submit"><code class="xref py py-func docutils literal notranslate"><span class="pre">submit()</span></code></a> to submit a <em>job</em> to <em>queue</em></p></li>
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.status" title="tomato.ketchup.functions.status"><code class="xref py py-func docutils literal notranslate"><span class="pre">status()</span></code></a> to query the status of tomato’s <em>pipelines</em>, its <em>queue</em>, or a <em>job</em></p></li>
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.cancel" title="tomato.ketchup.functions.cancel"><code class="xref py py-func docutils literal notranslate"><span class="pre">cancel()</span></code></a> to cancel a queued or kill a running <em>job</em></p></li>
+</ul>
+<p>Also includes <em>sample</em>/<em>pipeline</em> management functions:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.load" title="tomato.ketchup.functions.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> to load a <em>sample</em> into a <em>pipeline</em></p></li>
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.eject" title="tomato.ketchup.functions.eject"><code class="xref py py-func docutils literal notranslate"><span class="pre">eject()</span></code></a> to remove any <em>sample</em> present in a <em>pipeline</em></p></li>
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.ready" title="tomato.ketchup.functions.ready"><code class="xref py py-func docutils literal notranslate"><span class="pre">ready()</span></code></a> to mark a <em>pipeline</em> as ready</p></li>
+</ul>
 </section>
-<section id="module-tomato.ketchup.functions">
-<span id="tomato-ketchup-functions-module"></span><h2>tomato.ketchup.functions module<a class="headerlink" href="#module-tomato.ketchup.functions" title="Permalink to this headline"></a></h2>
+<span class="target" id="module-tomato.ketchup.functions"></span><dl class="py function">
+<dt class="sig sig-object py" id="tomato.ketchup.functions.submit">
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.submit" title="Permalink to this definition"></a></dt>
+<dd><p>Job submission function. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> submit &lt;payload&gt;
+</pre></div>
+</div>
+<p>Attempts to open the <code class="docutils literal notranslate"><span class="pre">yaml/json</span></code> file specified in the <code class="docutils literal notranslate"><span class="pre">&lt;payload&gt;</span></code> argument,
+and submit it to tomato’s queue.</p>
+<p>The supplied <code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.Namespace</span></code> has to contain the path to the <code class="docutils literal notranslate"><span class="pre">payload</span></code>.
+Optional arguments include the verbose/quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/-q</span></code>) and the testing
+switch (<code class="docutils literal notranslate"><span class="pre">-t</span></code>).</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="o">.</span>\<span class="n">dummy_random_2_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span>
+<span class="go">jobid = 2</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Increased verbosity:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="o">-</span><span class="n">v</span> <span class="n">submit</span> <span class="o">.</span>\<span class="n">dummy_random_2_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span>
+<span class="go">INFO:tomato.ketchup.functions:Output path not set. Setting output path to &#39;C:\[...]&#39;</span>
+<span class="go">INFO:tomato.ketchup.functions:queueing &#39;payload&#39; into &#39;queue&#39;</span>
+<span class="go">INFO:tomato.dbhandler.sqlite:inserting a new job into &#39;state&#39;</span>
+<span class="go">jobid = 4</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.ketchup.functions.status">
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.status" title="Permalink to this definition"></a></dt>
+<dd><p>Job, queue and pipeline status query function. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> status
+ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> status <span class="o">[</span>queue<span class="p">|</span>state<span class="o">]</span>
+ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> status &lt;jobid&gt;
+</pre></div>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.Namespace</span></code> has to contain the <code class="docutils literal notranslate"><span class="pre">&lt;jobid&gt;</span></code> the status of
+which is supposed to be queried. Alternatively, the status of the <code class="docutils literal notranslate"><span class="pre">queue</span></code>
+or <code class="docutils literal notranslate"><span class="pre">state</span></code> of tomato can be queried. Optional arguments include the verbose/
+quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/-q</span></code>) and the testing switch (<code class="docutils literal notranslate"><span class="pre">-t</span></code>).</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get pipeline status of tomato:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span>
+<span class="go">pipeline             ready jobid  (PID)     sampleid</span>
+<span class="go">===================================================================</span>
+<span class="go">dummy-10             no    3      1035      dummy_sequential_1_0.05</span>
+<span class="go">dummy-5              no    None             None</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get queue status with queued &amp; running jobs:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="n">queue</span>
+<span class="go">jobid  status (PID)     pipeline</span>
+<span class="go">==========================================</span>
+<span class="go">3      r      1035      dummy-10</span>
+<span class="go">4      q</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get queue status with all jobs:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="o">-</span><span class="n">v</span> <span class="n">status</span> <span class="n">queue</span>
+<span class="go">jobid  status (PID)     pipeline</span>
+<span class="go">==========================================</span>
+<span class="go">1      c</span>
+<span class="go">2      cd</span>
+<span class="go">3      r      1035      dummy-10</span>
+<span class="go">4      q</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of a given job</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span>
+<span class="go">jobid = 1</span>
+<span class="go">status = c</span>
+<span class="go">submitted at = 2022-06-02 06:49:00.578619+00:00</span>
+<span class="go">executed at  = 2022-06-02 06:49:02.966775+00:00</span>
+<span class="go">completed at = 2022-06-02 06:49:08.229213+00:00</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.functions.cancel">
 <span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.cancel" title="Permalink to this definition"></a></dt>
+<dd><p>Job cancellation function. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> cancel &lt;jobid&gt;
+</pre></div>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.Namespace</span></code> has to contain the <code class="docutils literal notranslate"><span class="pre">&lt;jobid&gt;</span></code> of the job to be
+cancelled. Optional arguments include the verbose/quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/-q</span></code>) and
+the testing switch (<code class="docutils literal notranslate"><span class="pre">-t</span></code>).</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a job:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Cancelling a running job will generate a warning. Output FAIR data should be
+created as requested in the <code class="docutils literal notranslate"><span class="pre">&lt;payload&gt;</span></code>.</p>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a running job:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">1</span>
+<span class="go">WARNING:tomato.ketchup.functions:cancelling a running job 1 with pid 17584</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Cancelling a completed job will do nothing.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.ketchup.functions.load">
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.load" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -107,27 +237,10 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.ketchup.functions.load">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.load" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.functions.ready">
 <span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.ready" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.ketchup.functions.status">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.status" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.ketchup.functions.submit">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.submit" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
-</section>
 
 
            </div>

@@ -68,7 +68,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.yadg_funcs">tomato.drivers.yadg_funcs module</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html"><strong>ketchup</strong>: command line interface to <strong>tomato</strong></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.setlib.html">tomato.setlib package</a></li>
 </ul>
 </li>
@@ -131,43 +131,8 @@
 <section id="module-tomato.drivers.biologic.kbio_wrapper">
 <span id="tomato-drivers-biologic-kbio-wrapper-module"></span><h2>tomato.drivers.biologic.kbio_wrapper module<a class="headerlink" href="#module-tomato.drivers.biologic.kbio_wrapper" title="Permalink to this headline"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.current">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.current" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">dsl_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParams" title="tomato.drivers.biologic.kbio.kbio_types.EccParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">EccParams</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_api">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_api" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_techpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">techname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_num_steps">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_num_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tech</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_num_steps" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_test_magic">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_test_magic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'or'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_test_magic" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
@@ -176,8 +141,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_test_magic">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_test_magic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'or'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_test_magic" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_num_steps">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_num_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tech</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_num_steps" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
@@ -196,16 +161,21 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.parse_raw_data">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">parse_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.parse_raw_data" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.payload_to_ecc">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">payload_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.payload_to_ecc" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.current">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.current" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.vlimit">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">vlimit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.vlimit" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -221,11 +191,41 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.vlimit">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">vlimit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.vlimit" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">dsl_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParams" title="tomato.drivers.biologic.kbio.kbio_types.EccParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">EccParams</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.payload_to_ecc">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">payload_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.payload_to_ecc" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.parse_raw_data">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">parse_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.parse_raw_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_api">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_api" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_techpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">techname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -233,27 +233,6 @@
 </section>
 <section id="module-tomato.drivers.biologic.main">
 <span id="tomato-drivers-biologic-main-module"></span><h2>tomato.drivers.biologic.main module<a class="headerlink" href="#module-tomato.drivers.biologic.main" title="Permalink to this headline"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.biologic.main.get_data">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.get_data" title="Permalink to this definition"></a></dt>
-<dd><p>Get cached data from the device.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
-<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
-<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>timestamp, nrows, data</strong> – Returns a tuple containing the timestamp and associated metadata.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple[float, int, dict]</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.drivers.biologic.main.get_status">
 <span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.get_status" title="Permalink to this definition"></a></dt>
@@ -272,6 +251,27 @@ associated metadata.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>tuple[float, bool, dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.get_data">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.get_data" title="Permalink to this definition"></a></dt>
+<dd><p>Get cached data from the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>timestamp, nrows, data</strong> – Returns a tuple containing the timestamp and associated metadata.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[float, int, dict]</p>
 </dd>
 </dl>
 </dd></dl>

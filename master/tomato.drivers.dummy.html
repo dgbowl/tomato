@@ -20,7 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="tomato.ketchup package" href="tomato.ketchup.html" />
+    <link rel="next" title="ketchup: command line interface to tomato" href="tomato.ketchup.html" />
     <link rel="prev" title="tomato.drivers.biologic.kbio package" href="tomato.drivers.biologic.kbio.html" /> 
 </head>
 
@@ -65,7 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.yadg_funcs">tomato.drivers.yadg_funcs module</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html"><strong>ketchup</strong>: command line interface to <strong>tomato</strong></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.setlib.html">tomato.setlib package</a></li>
 </ul>
 </li>
@@ -111,27 +111,6 @@
 <section id="module-tomato.drivers.dummy.main">
 <span id="tomato-drivers-dummy-main-module"></span><h2>tomato.drivers.dummy.main module<a class="headerlink" href="#module-tomato.drivers.dummy.main" title="Permalink to this headline"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.drivers.dummy.main.get_data">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.dummy.main.</span></span><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.dummy.main.get_data" title="Permalink to this definition"></a></dt>
-<dd><p>Get cached data from the device.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
-<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
-<li><p><strong>dllpath</strong> – Path to the BioLogic DLL file.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>timestamp, nrows, data</strong> – Returns a tuple containing the timestamp and associated metadata.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple[float, int, dict]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="tomato.drivers.dummy.main.get_status">
 <span class="sig-prename descclassname"><span class="pre">tomato.drivers.dummy.main.</span></span><span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.dummy.main.get_status" title="Permalink to this definition"></a></dt>
 <dd><p>Get the current status of the device.</p>
@@ -149,6 +128,27 @@ associated metadata.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>tuple[float, bool, dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.dummy.main.get_data">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.dummy.main.</span></span><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.dummy.main.get_data" title="Permalink to this definition"></a></dt>
+<dd><p>Get cached data from the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>timestamp, nrows, data</strong> – Returns a tuple containing the timestamp and associated metadata.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[float, int, dict]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -208,7 +208,7 @@ of the device. No data is returned.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="tomato.drivers.biologic.kbio.html" class="btn btn-neutral float-left" title="tomato.drivers.biologic.kbio package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="tomato.ketchup.html" class="btn btn-neutral float-right" title="tomato.ketchup package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tomato.ketchup.html" class="btn btn-neutral float-right" title="ketchup: command line interface to tomato" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
