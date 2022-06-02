@@ -261,10 +261,7 @@ def queue_payload(
         (pstr, "q", submitted_at),
     )
     conn.commit()
-    cur.execute(
-        "SELECT jobid FROM queue "
-        f"WHERE submitted_at = '{submitted_at}';"
-    )
+    cur.execute("SELECT jobid FROM queue " f"WHERE submitted_at = '{submitted_at}';")
     ret = cur.fetchone()[0]
     conn.close()
     return ret

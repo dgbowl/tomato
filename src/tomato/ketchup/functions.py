@@ -21,14 +21,14 @@ def submit(args: Namespace) -> None:
     .. code:: bash
 
         ketchup [-t] [-v] [-q] submit <payload>
-    
+
     Attempts to open the ``yaml/json`` file specified in the ``<payload>`` argument,
     and submit it to tomato's queue.
 
     The supplied :class:`argparse.Namespace` has to contain the path to the ``payload``.
-    Optional arguments include the verbose/quiet switches (``-v/-q``) and the testing 
+    Optional arguments include the verbose/quiet switches (``-v/-q``) and the testing
     switch (``-t``).
-    
+
     Examples
     --------
 
@@ -77,24 +77,24 @@ def status(args: Namespace) -> None:
         ketchup [-t] [-v] [-q] status
         ketchup [-t] [-v] [-q] status [queue|state]
         ketchup [-t] [-v] [-q] status <jobid>
-    
-    The :class:`argparse.Namespace` has to contain the ``<jobid>`` the status of 
+
+    The :class:`argparse.Namespace` has to contain the ``<jobid>`` the status of
     which is supposed to be queried. Alternatively, the status of the ``queue``
     or ``state`` of tomato can be queried. Optional arguments include the verbose/
     quiet switches (``-v/-q``) and the testing switch (``-t``).
-    
+
     Examples
     --------
 
     >>> # Get pipeline status of tomato:
-    >>> ketchup status       
+    >>> ketchup status
     pipeline             ready jobid  (PID)     sampleid
     ===================================================================
     dummy-10             no    3      1035      dummy_sequential_1_0.05
     dummy-5              no    None             None
 
     >>> # Get queue status with queued & running jobs:
-    >>> ketchup status queue 
+    >>> ketchup status queue
     jobid  status (PID)     pipeline
     ==========================================
     3      r      1035      dummy-10
@@ -104,13 +104,13 @@ def status(args: Namespace) -> None:
     >>> ketchup -v status queue
     jobid  status (PID)     pipeline
     ==========================================
-    1      c     
+    1      c
     2      cd
     3      r      1035      dummy-10
     4      q
 
     >>> # Get status of a given job
-    >>> ketchup status 1     
+    >>> ketchup status 1
     jobid = 1
     status = c
     submitted at = 2022-06-02 06:49:00.578619+00:00
@@ -176,11 +176,11 @@ def cancel(args: Namespace) -> None:
     .. code:: bash
 
         ketchup [-t] [-v] [-q] cancel <jobid>
-    
+
     The :class:`argparse.Namespace` has to contain the ``<jobid>`` of the job to be
     cancelled. Optional arguments include the verbose/quiet switches (``-v/-q``) and
     the testing switch (``-t``).
-    
+
     Examples
     --------
 
@@ -199,7 +199,7 @@ def cancel(args: Namespace) -> None:
     .. note::
 
         Cancelling a completed job will do nothing.
-    
+
 
     """
     dirs = setlib.get_dirs(args.test)
