@@ -252,12 +252,19 @@ def queue_payload(
     dbpath: str,
     pstr: str,
     type: str = "sqlite3",
-) -> None:
+) -> tuple:
     conn, cur = get_db_conn(dbpath, type)
     log.info(f"inserting a new job into 'state'")
+    submitted_at = str(datetime.now(timezone.utc))
     cur.execute(
         "INSERT INTO queue (payload, status, submitted_at)" "VALUES (?, ?, ?);",
-        (pstr, "q", str(datetime.now(timezone.utc))),
+        (pstr, "q", submitted_at),
     )
     conn.commit()
+    cur.execute(
+        "SELECT jobid FROM queue "
+        f"WHERE submitted_at = '{submitted_at}';"
+    )
+    ret = cur.fetchone()[0]
     conn.close()
+    return ret
