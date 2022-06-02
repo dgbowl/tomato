@@ -17,7 +17,7 @@ Usage
 -----
 
 The **tomato** package consists of two key parts: the job scheduler app ``tomato``,
-and the queue management app ``ketchup``.
+and the queue management app :mod:`~tomato.ketchup`.
 
 Using ``tomato``
 ````````````````
@@ -35,19 +35,19 @@ carry out a single *payload*.
 
 Note that only a single instance of ``tomato`` can be running at a single machine.
     
-Using ``ketchup``
-`````````````````
+Using :mod:`~tomato.ketchup`
+````````````````````````````
 
-``ketchup`` is used to submit, check the status of, and cancel *jobs* to the *queue*,
-as well as to load or eject *samples* from *pipelines*.
+:mod:`~tomato.ketchup` is used to submit, check the status of, and cancel *jobs* to 
+the *queue*, as well as to load or eject *samples* from *pipelines*.
 
 To submit a *payload* to the *queue*, run:
 
 .. code:: bash
 
-    ketchup submit <payload.yml>
+    ketchup submit <payload>
 
-where ``<payload.yml>`` is a file containing the *payload* information, including
+where ``<payload>`` is a file containing the *payload* information, including
 the description of the *sample*, details of the *method*, and other information
 required by ``tomato``.
 
@@ -59,11 +59,8 @@ To check the status of the *queue* or of a *job*, run either of:
     ketchup status queue
     ketchup status <jobid>
 
-The first option will print information about the status of all *pipelines*
-that ``tomato`` is managing. The second option, with the ``queue`` argument, will
-print information about all jobs that are currently in the *queue* or already
-running - information about completed jobs is not currently shown. Finally,
-to check the status of a single *job*, supply the ``<jobid>`` as an argument.
+Further information about :mod:`~tomato.ketchup` is available in the documentation
+of the :mod:`~tomato.ketchup` module.
 
 Output data
 -----------
