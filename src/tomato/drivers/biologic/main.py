@@ -43,19 +43,26 @@ def get_status(
     api = get_kbio_api(dllpath)
     metadata = {}
     metadata["dll_version"] = api.GetLibVersion()
-    logger.debug(f"connecting to '{address}:{channel}'")
-    id_, device_info = api.Connect(address)
+    for t in range(0,10):
+        try:
+            logger.debug(f"connecting to '{address}:{channel}', try {t+1}")
+            id_, device_info = api.Connect(address)
+            channel_info = api.GetChannelInfo(id_, channel)
+            dt = datetime.now(timezone.utc)
+            logger.debug(f"disconnecting from '{address}:{channel}', try {t+1}")
+            api.Disconnect(id_)
+        except Exception as e:
+            logger.critical(e)
+        finally:
+            if channel_info.state in {"STOP", "RUN"}:
+                break
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
-    channel_info = api.GetChannelInfo(id_, channel)
-    dt = datetime.now(timezone.utc)
     metadata["channel_state"] = channel_info.state
     metadata["channel_board"] = channel_info.board
     metadata["channel_amp"] = channel_info.amplifier if channel_info.NbAmps else None
     metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_IRange]
-    logger.debug(f"disconnecting from '{address}:{channel}'")
-    api.Disconnect(id_)
-    if metadata["channel_state"] in ["STOP"]:
+    if metadata["channel_state"] == ["STOP"]:
         ready = True
     else:
         ready = False
@@ -149,27 +156,30 @@ def start_job(
     logger.debug("translating payload to ECC")
     eccpars = payload_to_ecc(api, payload, capacity)
     ntechs = len(eccpars)
-    first = True
-    last = False
-    ti = 1
-    logger.debug(f"connecting to '{address}:{channel}'")
-    id_, device_info = api.Connect(address)
-    for techname, pars in eccpars:
-        if ti == ntechs:
-            last = True
-        techfile = get_kbio_techpath(dllpath, techname, device_info.model)
-        logger.debug(f"loading technique {ti}: '{techname}'")
-        api.LoadTechnique(
-            id_, channel, techfile, pars, first=first, last=last, display=False
-        )
-        ti += 1
-        first = False
-    logger.debug(f"starting run on '{address}:{channel}'")
-    api.StartChannel(id_, channel)
-    dt = datetime.now(timezone.utc)
-    logger.info(f"run started at '{dt}'")
-    logger.debug(f"disconnecting from '{address}:{channel}'")
-    api.Disconnect(id_)
+    try:
+        first = True
+        last = False
+        ti = 1
+        logger.debug(f"connecting to '{address}:{channel}'")
+        id_, device_info = api.Connect(address)
+        for techname, pars in eccpars:
+            if ti == ntechs:
+                last = True
+            techfile = get_kbio_techpath(dllpath, techname, device_info.model)
+            logger.debug(f"loading technique {ti}: '{techname}'")
+            api.LoadTechnique(
+                id_, channel, techfile, pars, first=first, last=last, display=False
+            )
+            ti += 1
+            first = False
+        logger.debug(f"starting run on '{address}:{channel}'")
+        api.StartChannel(id_, channel)
+        dt = datetime.now(timezone.utc)
+        logger.info(f"run started at '{dt}'")
+        logger.debug(f"disconnecting from '{address}:{channel}'")
+        api.Disconnect(id_)
+    except Exception as e:
+        logger.critical(e)
     return dt.timestamp()
 
 
