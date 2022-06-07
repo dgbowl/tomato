@@ -1,5 +1,7 @@
 import logging
 import multiprocessing
+import time
+import portalocker
 
 from datetime import datetime, timezone
 
@@ -17,6 +19,7 @@ def get_status(
     jobqueue: multiprocessing.Queue,
     logger: logging.Logger,
     dllpath: str = None,
+    lockpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -43,29 +46,30 @@ def get_status(
     api = get_kbio_api(dllpath)
     metadata = {}
     metadata["dll_version"] = api.GetLibVersion()
-    for t in range(0,10):
+    with portalocker.Lock(lockpath, 'rb+', timeout=60) as fh:
         try:
-            logger.debug(f"connecting to '{address}:{channel}', try {t+1}")
+            logger.info(f"connecting to '{address}:{channel}'")
             id_, device_info = api.Connect(address)
+            logger.info(f"getting status of '{address}:{channel}'")
             channel_info = api.GetChannelInfo(id_, channel)
-            dt = datetime.now(timezone.utc)
-            logger.debug(f"disconnecting from '{address}:{channel}', try {t+1}")
+            logger.info(f"disconnecting from '{address}:{channel}'")
             api.Disconnect(id_)
         except Exception as e:
-            logger.critical(e)
-        finally:
-            if channel_info.state in {"STOP", "RUN"}:
-                break
+            logger.critical(f"{e=}")
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
     metadata["channel_board"] = channel_info.board
     metadata["channel_amp"] = channel_info.amplifier if channel_info.NbAmps else None
     metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_IRange]
-    if metadata["channel_state"] == ["STOP"]:
+    if metadata["channel_state"] in {"STOP"}:
         ready = True
-    else:
+    elif metadata["channel_state"] in {"RUN"}:
         ready = False
+    else:
+        logger.critical("channel state not understood: '%s'", metadata["channel_state"])
+        raise ValueError("channel state not understood")
+    dt = datetime.now(timezone.utc)
     return dt.timestamp(), ready, metadata
 
 
@@ -75,6 +79,7 @@ def get_data(
     jobqueue: multiprocessing.Queue,
     logger: logging.Logger,
     dllpath: str = None,
+    lockpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -98,13 +103,17 @@ def get_data(
 
     """
     api = get_kbio_api(dllpath)
-    logger.debug(f"connecting to '{address}:{channel}'")
-    id_, device_info = api.Connect(address)
-    logger.debug(f"getting data")
-    data = api.GetData(id_, channel)
+    with portalocker.Lock(lockpath, 'rb+', timeout=60) as fh:
+        try:
+            logger.info(f"connecting to '{address}:{channel}'")
+            id_, device_info = api.Connect(address)
+            logger.info(f"getting data from '{address}:{channel}'")
+            data = api.GetData(id_, channel)
+            logger.info(f"disconnecting from '{address}:{channel}'")
+            api.Disconnect(id_)
+        except Exception as e:
+            logger.critical(f"{e=}")
     dt = datetime.now(timezone.utc)
-    logger.debug(f"disconnecting from '{address}:{channel}'")
-    api.Disconnect(id_)
     data = parse_raw_data(api, data, device_info.model)
     return dt.timestamp(), data["technique"]["data_rows"], data
 
@@ -116,6 +125,7 @@ def start_job(
     logger: logging.Logger,
     payload: list[dict],
     dllpath: str = None,
+    lockpath: str = None,
     capacity: float = 0.0,
     **kwargs: dict,
 ) -> float:
@@ -156,30 +166,31 @@ def start_job(
     logger.debug("translating payload to ECC")
     eccpars = payload_to_ecc(api, payload, capacity)
     ntechs = len(eccpars)
-    try:
-        first = True
-        last = False
-        ti = 1
-        logger.debug(f"connecting to '{address}:{channel}'")
-        id_, device_info = api.Connect(address)
-        for techname, pars in eccpars:
-            if ti == ntechs:
-                last = True
-            techfile = get_kbio_techpath(dllpath, techname, device_info.model)
-            logger.debug(f"loading technique {ti}: '{techname}'")
-            api.LoadTechnique(
-                id_, channel, techfile, pars, first=first, last=last, display=False
-            )
-            ti += 1
-            first = False
-        logger.debug(f"starting run on '{address}:{channel}'")
-        api.StartChannel(id_, channel)
-        dt = datetime.now(timezone.utc)
-        logger.info(f"run started at '{dt}'")
-        logger.debug(f"disconnecting from '{address}:{channel}'")
-        api.Disconnect(id_)
-    except Exception as e:
-        logger.critical(e)
+    with portalocker.Lock(lockpath, 'rb+', timeout=60) as fh:
+        try:
+            first = True
+            last = False
+            ti = 1
+            logger.info(f"connecting to '{address}:{channel}'")
+            id_, device_info = api.Connect(address)
+            for techname, pars in eccpars:
+                if ti == ntechs:
+                    last = True
+                techfile = get_kbio_techpath(dllpath, techname, device_info.model)
+                logger.info(f"loading technique {ti}: '{techname}'")
+                api.LoadTechnique(
+                    id_, channel, techfile, pars, first=first, last=last, display=False
+                )
+                ti += 1
+                first = False
+            logger.info(f"starting run on '{address}:{channel}'")
+            api.StartChannel(id_, channel)    
+            logger.info(f"disconnecting from '{address}:{channel}'")
+            api.Disconnect(id_)
+        except Exception as e:
+            logger.critical(f"{e=}")
+    dt = datetime.now(timezone.utc)
+    logger.info(f"run started at '{dt}'")
     return dt.timestamp()
 
 
@@ -188,7 +199,8 @@ def stop_job(
     channel: int,
     jobqueue: multiprocessing.Queue,
     logger: multiprocessing.Queue,
-    dllpath: str,
+    dllpath: str = None,
+    lockpath: str = None,
     **kwargs: dict,
 ) -> float:
     """
@@ -215,12 +227,16 @@ def stop_job(
 
     """
     api = get_kbio_api(dllpath)
-    logger.debug(f"connecting to '{address}:{channel}'")
-    id_, device_info = api.Connect(address)
-    logger.debug(f"stopping run on '{address}:{channel}'")
-    api.StopChannel(id_, channel)
-    dt = datetime.now(timezone.utc)
-    logger.info(f"run stopped at '{dt}'")
-    api.Disconnect(id_)
+    with portalocker.Lock(lockpath, 'rb+', timeout=60) as fh:
+        try:
+            logger.info(f"connecting to '{address}:{channel}'")
+            id_, device_info = api.Connect(address)
+            logger.info(f"stopping run on '{address}:{channel}'")
+            api.StopChannel(id_, channel)
+            logger.info(f"run stopped at '{dt}'")
+            api.Disconnect(id_)
+        except Exception as e:
+            logger.critical(f"{e=}")
     jobqueue.close()
+    dt = datetime.now(timezone.utc)        
     return dt.timestamp()

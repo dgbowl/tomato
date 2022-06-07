@@ -208,6 +208,7 @@ def driver_worker(
 
         log.debug(f"{vi+1}: getting status")
         ts, ready, metadata = driver_api(drv, "get_status", jq, log, addr, ch, **dpar)
+        log.debug(f"{ready=}")
         assert ready, f"Failed: device '{tag}' is not ready."
 
         log.debug(f"{vi+1}: starting payload")
@@ -237,6 +238,7 @@ def driver_worker(
     ret = None
     for p in jobs:
         p.join()
+        log.debug(f"{p=}")
         if p.exitcode == 0:
             log.info(f"'data_poller' with pid {p.pid} closed successfully")
         else:

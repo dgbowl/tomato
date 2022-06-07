@@ -37,6 +37,7 @@ setuptools.setup(
         "psutil",
         "yadg>=4.1",
         "dgbowl_schemas>=105",
+        "portalocker",
     ],
     extras_require={
         "testing": [
