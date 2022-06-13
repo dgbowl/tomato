@@ -84,6 +84,25 @@
 <li><p>a Dummy device for testing</p></li>
 <li><p>BioLogic potentiostats via the EC-Lib library</p></li>
 </ul>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
+<p>Pre-built wheels of <strong>tomato</strong> are available on <a class="reference external" href="https://pypi.org/project/tomato/">PyPI</a>
+and can be installed using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">tomato</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We strongly recommend installing <strong>tomato</strong> into a separate conda environment.
+Additionally, <strong>tomato</strong> depends on <code class="docutils literal notranslate"><span class="pre">portalocker</span></code>, which can be installed from
+conda’s defaults channel. You can easily create a new conda environment and install
+the required packages using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">tomato</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.9</span> <span class="n">portalocker</span> <span class="n">git</span> <span class="n">pip</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">tomato</span>
+</pre></div>
+</div>
+</div>
+</section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
 <p>The <strong>tomato</strong> package consists of two key parts: the job scheduler app <code class="docutils literal notranslate"><span class="pre">tomato</span></code>,
