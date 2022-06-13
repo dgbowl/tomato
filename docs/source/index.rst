@@ -13,6 +13,28 @@ Currently supported hardware is:
 - a Dummy device for testing
 - BioLogic potentiostats via the EC-Lib library
 
+Installation
+------------
+Pre-built wheels of **tomato** are available on `PyPI <https://pypi.org/project/tomato/>`_
+and can be installed using:
+
+.. code::
+
+    pip install tomato
+
+.. note::
+
+    We strongly recommend installing **tomato** into a separate conda environment. 
+    Additionally, **tomato** depends on ``portalocker``, which can be installed from
+    conda's defaults channel. You can easily create a new conda environment and install
+    the required packages using:
+
+    .. code::
+
+        conda create -n tomato python=3.9 portalocker git pip
+        pip install tomato
+
+
 Usage
 -----
 
