@@ -74,10 +74,7 @@ def submit(args: Namespace) -> None:
     pstr = payload.json()
     log.info("queueing 'payload' into 'queue'")
     jobid = dbhandler.queue_payload(
-        queue["path"], 
-        pstr, 
-        type=queue["type"], 
-        jobname=args.jobname
+        queue["path"], pstr, type=queue["type"], jobname=args.jobname
     )
     print(f"jobid = {jobid}")
 
@@ -154,8 +151,10 @@ def status(args: Namespace) -> None:
     elif args.jobid == "queue":
         jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
         running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
-        print(f"{'jobid':6s} {'jobname':20s} {'status':6s} {'(PID)':9s} {'pipeline':20s}")
-        print("=" * (7+21+7+10+20))
+        print(
+            f"{'jobid':6s} {'jobname':20s} {'status':6s} {'(PID)':9s} {'pipeline':20s}"
+        )
+        print("=" * (7 + 21 + 7 + 10 + 20))
         for jobid, jobname, payload, status in jobs:
             if status.startswith("q"):
                 print(f"{str(jobid):6s} {str(jobname):20s} {status}")

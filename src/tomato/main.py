@@ -116,7 +116,7 @@ def run_ketchup():
         "-j",
         "--jobname",
         help="Set the job name of the submitted job to?",
-        default=None
+        default=None,
     )
     submit.set_defaults(func=ketchup.submit)
 

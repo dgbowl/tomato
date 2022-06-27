@@ -36,12 +36,8 @@ def queue_setup(
         while curr_version < user_version:
             if curr_version == 0:
                 log.info("upgrading table 'queue' from version 0 to 1")
-                cur.execute(
-                    "ALTER TABLE queue ADD COLUMN jobname TEXT;"
-                )
-                cur.execute(
-                    "PRAGMA user_version = 1;"
-                )
+                cur.execute("ALTER TABLE queue ADD COLUMN jobname TEXT;")
+                cur.execute("PRAGMA user_version = 1;")
                 conn.commit()
             cur.execute("PRAGMA user_version;")
             curr_version = cur.fetchone()[0]
@@ -59,9 +55,7 @@ def queue_setup(
             "    jobname TEXT"
             ");"
         )
-        cur.execute(
-            f"PRAGMA user_version = {user_version};"
-        )
+        cur.execute(f"PRAGMA user_version = {user_version};")
         conn.commit()
         conn.close()
 
@@ -280,13 +274,12 @@ def queue_payload(
     submitted_at = str(datetime.now(timezone.utc))
     if jobname is None:
         cur.execute(
-            "INSERT INTO queue (payload, status, submitted_at)" 
-            "VALUES (?, ?, ?);",
+            "INSERT INTO queue (payload, status, submitted_at)" "VALUES (?, ?, ?);",
             (pstr, "q", submitted_at),
         )
     else:
         cur.execute(
-            "INSERT INTO queue (payload, status, submitted_at, jobname)" 
+            "INSERT INTO queue (payload, status, submitted_at, jobname)"
             "VALUES (?, ?, ?, ?);",
             (pstr, "q", submitted_at, str(jobname)),
         )

@@ -55,11 +55,13 @@ def test_run_dummy_random(casename, npoints, prefix, datadir):
             dg = json.load(of)
         assert len(dg["steps"][0]["data"]) == npoints
 
+
 @pytest.mark.parametrize(
     "casename, jobname",
     [
         (
-            "dummy_random_1_0.1", "custom_name",
+            "dummy_random_1_0.1",
+            "custom_name",
         ),
     ],
 )
@@ -75,4 +77,3 @@ def test_run_dummy_jobname(casename, jobname, datadir):
     for line in ret.stdout.split("\n"):
         if line.startswith("jobname"):
             assert line.split("=")[1].strip() == jobname
-        
