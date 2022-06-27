@@ -184,7 +184,7 @@ def start_job(
                 ti += 1
                 first = False
             logger.info(f"starting run on '{address}:{channel}'")
-            api.StartChannel(id_, channel)    
+            api.StartChannel(id_, channel)
             logger.info(f"disconnecting from '{address}:{channel}'")
             api.Disconnect(id_)
         except Exception as e:
@@ -238,5 +238,5 @@ def stop_job(
         except Exception as e:
             logger.critical(f"{e=}")
     jobqueue.close()
-    dt = datetime.now(timezone.utc)        
+    dt = datetime.now(timezone.utc)
     return dt.timestamp()

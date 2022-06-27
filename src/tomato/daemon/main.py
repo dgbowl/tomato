@@ -61,7 +61,7 @@ def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
 
         # check existing jobs in queue
         ret = dbhandler.job_get_all(qup, type=qut)
-        for jobid, strpl, st in ret:
+        for jobid, jobname, strpl, st in ret:
             payload = json.loads(strpl)
             if st in ["q", "qw"]:
                 if st == "q":
