@@ -20,19 +20,14 @@ and can be installed using:
 
 .. code::
 
-    pip install tomato
+    pip install tomato[docs,testing]
+
+The optional targets ``[docs]`` and ``[testing]`` will install packages required for
+building the documentation and running the test-suite, respectively.
 
 .. note::
 
-    We strongly recommend installing **tomato** into a separate conda environment. 
-    Additionally, **tomato** depends on ``portalocker``, which can be installed from
-    conda's defaults channel. You can easily create a new conda environment and install
-    the required packages using:
-
-    .. code::
-
-        conda create -n tomato python=3.9 portalocker git pip
-        pip install tomato
+    We strongly recommend installing **tomato** into a separate conda environment.
 
 
 Usage

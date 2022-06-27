@@ -88,19 +88,14 @@
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
 <p>Pre-built wheels of <strong>tomato</strong> are available on <a class="reference external" href="https://pypi.org/project/tomato/">PyPI</a>
 and can be installed using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">tomato</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">tomato</span><span class="p">[</span><span class="n">docs</span><span class="p">,</span><span class="n">testing</span><span class="p">]</span>
 </pre></div>
 </div>
+<p>The optional targets <code class="docutils literal notranslate"><span class="pre">[docs]</span></code> and <code class="docutils literal notranslate"><span class="pre">[testing]</span></code> will install packages required for
+building the documentation and running the test-suite, respectively.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>We strongly recommend installing <strong>tomato</strong> into a separate conda environment.
-Additionally, <strong>tomato</strong> depends on <code class="docutils literal notranslate"><span class="pre">portalocker</span></code>, which can be installed from
-conda’s defaults channel. You can easily create a new conda environment and install
-the required packages using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">tomato</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.9</span> <span class="n">portalocker</span> <span class="n">git</span> <span class="n">pip</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="n">tomato</span>
-</pre></div>
-</div>
+<p>We strongly recommend installing <strong>tomato</strong> into a separate conda environment.</p>
 </div>
 </section>
 <section id="usage">
