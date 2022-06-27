@@ -112,6 +112,12 @@ def run_ketchup():
         help="File containing the payload to be submitted to tomato.",
         default=None,
     )
+    submit.add_argument(
+        "-j",
+        "--jobname",
+        help="Set the job name of the submitted job to?",
+        default=None
+    )
     submit.set_defaults(func=ketchup.submit)
 
     status = subparsers.add_parser("status")

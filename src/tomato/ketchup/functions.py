@@ -20,13 +20,14 @@ def submit(args: Namespace) -> None:
 
     .. code:: bash
 
-        ketchup [-t] [-v] [-q] submit <payload>
+        ketchup [-t] [-v] [-q] submit <payload> [--jobname JOBNAME]
 
     Attempts to open the ``yaml/json`` file specified in the ``<payload>`` argument,
     and submit it to tomato's queue.
 
     The supplied :class:`argparse.Namespace` has to contain the path to the ``payload``.
-    Optional arguments include the verbose/quiet switches (``-v/-q``) and the testing
+    Optional arguments include an optional ``--jobname/-j`` parameter for supplying a
+    job name for the queue, the verbose/quiet switches (``-v/-q``) and the testing
     switch (``-t``).
 
     Examples
@@ -42,6 +43,14 @@ def submit(args: Namespace) -> None:
     INFO:tomato.ketchup.functions:queueing 'payload' into 'queue'
     INFO:tomato.dbhandler.sqlite:inserting a new job into 'state'
     jobid = 4
+
+    >>> # With a job name:
+    >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
+    jobid = 5
+    >>> ketchup status 5
+    jobid = 5
+    jobname = dummy_random_2_0.1
+    ...
 
     """
     dirs = setlib.get_dirs(args.test)
@@ -64,7 +73,12 @@ def submit(args: Namespace) -> None:
         payload.tomato.output.path = cwd
     pstr = payload.json()
     log.info("queueing 'payload' into 'queue'")
-    jobid = dbhandler.queue_payload(queue["path"], pstr, type=queue["type"])
+    jobid = dbhandler.queue_payload(
+        queue["path"], 
+        pstr, 
+        type=queue["type"], 
+        jobname=args.jobname
+    )
     print(f"jobid = {jobid}")
 
 
@@ -102,17 +116,18 @@ def status(args: Namespace) -> None:
 
     >>> # Get queue status with all jobs:
     >>> ketchup -v status queue
-    jobid  status (PID)     pipeline
-    ==========================================
-    1      c
-    2      cd
-    3      r      1035      dummy-10
-    4      q
+    jobid  jobname              status (PID)     pipeline
+    ==============================================================
+    1      None                 c
+    2      custom_name          cd
+    3      None                 r      1035      dummy-10
+    4      other_name           q
 
     >>> # Get status of a given job
     >>> ketchup status 1
     jobid = 1
-    status = c
+    jobname = None
+    status  = c
     submitted at = 2022-06-02 06:49:00.578619+00:00
     executed at  = 2022-06-02 06:49:02.966775+00:00
     completed at = 2022-06-02 06:49:08.229213+00:00
@@ -139,23 +154,27 @@ def status(args: Namespace) -> None:
     elif args.jobid == "queue":
         jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
         running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
-        print(f"{'jobid':6s} {'status':6s} {'(PID)':9s} {'pipeline':20s}")
-        print("=" * 42)
-        for jobid, payload, status in jobs:
+        print(f"{'jobid':6s} {'jobname':20s} {'status':6s} {'(PID)':9s} {'pipeline':20s}")
+        print("=" * (7+21+7+10+20))
+        for jobid, jobname, payload, status in jobs:
             if status.startswith("q"):
-                print(f"{str(jobid):6s} {status}")
+                print(f"{str(jobid):6s} {str(jobname):20s} {status}")
             elif status.startswith("r"):
                 for pip, pjobid, pid in running:
                     if pjobid == jobid:
-                        print(f"{str(jobid):6s} {status:6s} {str(pid):7s} {pip:20s}")
+                        print(
+                            f"{str(jobid):6s} {str(jobname):20s} "
+                            f"{status:6s} {str(pid):7s} {pip:20s}"
+                        )
             elif status.startswith("c") and args.verbose - args.quiet > 0:
-                print(f"{str(jobid):6s} {status:6s}")
+                print(f"{str(jobid):6s} {str(jobname):20s} {status:6s}")
     else:
         jobid = int(args.jobid)
         ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
-        payload, status, submitted_at, executed_at, completed_at = ji
+        jobname, payload, status, submitted_at, executed_at, completed_at = ji
         print(f"jobid = {jobid}")
-        print(f"status = {status}")
+        print(f"jobname = {jobname}")
+        print(f"status  = {status}")
         print(f"submitted at = {submitted_at}")
         if status.startswith("r") or status.startswith("c"):
             print(f"executed at  = {executed_at}")
