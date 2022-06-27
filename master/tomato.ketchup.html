@@ -105,13 +105,14 @@
 <dt class="sig sig-object py" id="tomato.ketchup.functions.submit">
 <span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.submit" title="Permalink to this definition"></a></dt>
 <dd><p>Job submission function. Usage:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> submit &lt;payload&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> submit &lt;payload&gt; <span class="o">[</span>--jobname JOBNAME<span class="o">]</span>
 </pre></div>
 </div>
 <p>Attempts to open the <code class="docutils literal notranslate"><span class="pre">yaml/json</span></code> file specified in the <code class="docutils literal notranslate"><span class="pre">&lt;payload&gt;</span></code> argument,
 and submit it to tomato’s queue.</p>
 <p>The supplied <code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.Namespace</span></code> has to contain the path to the <code class="docutils literal notranslate"><span class="pre">payload</span></code>.
-Optional arguments include the verbose/quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/-q</span></code>) and the testing
+Optional arguments include an optional <code class="docutils literal notranslate"><span class="pre">--jobname/-j</span></code> parameter for supplying a
+job name for the queue, the verbose/quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/-q</span></code>) and the testing
 switch (<code class="docutils literal notranslate"><span class="pre">-t</span></code>).</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job:</span>
@@ -125,6 +126,15 @@ switch (<code class="docutils literal notranslate"><span class="pre">-t</span></
 <span class="go">INFO:tomato.ketchup.functions:queueing &#39;payload&#39; into &#39;queue&#39;</span>
 <span class="go">INFO:tomato.dbhandler.sqlite:inserting a new job into &#39;state&#39;</span>
 <span class="go">jobid = 4</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With a job name:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="o">.</span>\<span class="n">dummy_random_2_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">j</span> <span class="n">dummy_random_2_0</span><span class="mf">.1</span>
+<span class="go">jobid = 5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">5</span>
+<span class="go">jobid = 5</span>
+<span class="go">jobname = dummy_random_2_0.1</span>
+<span class="gp">...</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -166,18 +176,19 @@ quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get queue status with all jobs:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="o">-</span><span class="n">v</span> <span class="n">status</span> <span class="n">queue</span>
-<span class="go">jobid  status (PID)     pipeline</span>
-<span class="go">==========================================</span>
-<span class="go">1      c</span>
-<span class="go">2      cd</span>
-<span class="go">3      r      1035      dummy-10</span>
-<span class="go">4      q</span>
+<span class="go">jobid  jobname              status (PID)     pipeline</span>
+<span class="go">==============================================================</span>
+<span class="go">1      None                 c</span>
+<span class="go">2      custom_name          cd</span>
+<span class="go">3      None                 r      1035      dummy-10</span>
+<span class="go">4      other_name           q</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of a given job</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span>
 <span class="go">jobid = 1</span>
-<span class="go">status = c</span>
+<span class="go">jobname = None</span>
+<span class="go">status  = c</span>
 <span class="go">submitted at = 2022-06-02 06:49:00.578619+00:00</span>
 <span class="go">executed at  = 2022-06-02 06:49:02.966775+00:00</span>
 <span class="go">completed at = 2022-06-02 06:49:08.229213+00:00</span>
