@@ -1,7 +1,7 @@
 import logging
 import multiprocessing
 import time
-import portalocker
+from filelock import FileLock
 
 from datetime import datetime, timezone
 
@@ -46,7 +46,7 @@ def get_status(
     api = get_kbio_api(dllpath)
     metadata = {}
     metadata["dll_version"] = api.GetLibVersion()
-    with portalocker.Lock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60) as fh:
         try:
             logger.info(f"connecting to '{address}:{channel}'")
             id_, device_info = api.Connect(address)
@@ -103,7 +103,7 @@ def get_data(
 
     """
     api = get_kbio_api(dllpath)
-    with portalocker.Lock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60) as fh:
         try:
             logger.info(f"connecting to '{address}:{channel}'")
             id_, device_info = api.Connect(address)
@@ -166,7 +166,7 @@ def start_job(
     logger.debug("translating payload to ECC")
     eccpars = payload_to_ecc(api, payload, capacity)
     ntechs = len(eccpars)
-    with portalocker.Lock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60) as fh:
         try:
             first = True
             last = False
@@ -227,7 +227,7 @@ def stop_job(
 
     """
     api = get_kbio_api(dllpath)
-    with portalocker.Lock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60) as fh:
         try:
             logger.info(f"connecting to '{address}:{channel}'")
             id_, device_info = api.Connect(address)
