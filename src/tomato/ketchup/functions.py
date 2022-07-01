@@ -220,13 +220,22 @@ def cancel(args: Namespace) -> None:
 
 
     """
+    def kill_tomato_job(proc):
+        if "tomato_job" in proc.name():
+            log.debug(
+                "sending SIGTERM to pid %d with name '%s'",
+                proc.pid,
+                proc.name(),
+            )
+            proc.send_signal(signal.SIGTERM)
+
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
     queue = settings["queue"]
     jobid = int(args.jobid)
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
-    status = jobinfo[1]
+    status = jobinfo[2]
     log.debug(f"found job {jobid} with status '{status}'")
     if status in {"q", "qw"}:
         log.info(f"setting job {jobid} to status 'cd'")
@@ -240,12 +249,7 @@ def cancel(args: Namespace) -> None:
                 for cp in proc.children():
                     if cp.name() in {"python", "python.exe"}:
                         for ccp in cp.children():
-                            log.debug(
-                                "sending SIGTERM to pid %d with name '%s'",
-                                ccp.pid,
-                                ccp.name(),
-                            )
-                            ccp.send_signal(signal.SIGTERM)
+                            kill_tomato_job(ccp)
 
 
 def load(args):

@@ -237,6 +237,9 @@ def stop_job(
             api.Disconnect(id_)
         except Exception as e:
             logger.critical(f"{e=}")
-    jobqueue.close()
+    if jobqueue:
+        jobqueue.close()
+    else:
+        pass  # FIXME
     dt = datetime.now(timezone.utc)
     return dt.timestamp()
