@@ -1,0 +1,8 @@
+version: "0.1"
+sample:
+    name: dummy_random_30_1
+method:
+  - device: "worker"
+    technique: "random"
+    time: 30
+    delay: 1
