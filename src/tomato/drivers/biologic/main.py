@@ -240,6 +240,6 @@ def stop_job(
     if jobqueue:
         jobqueue.close()
     else:
-        pass  # FIXME
+        pass
     dt = datetime.now(timezone.utc)
     return dt.timestamp()

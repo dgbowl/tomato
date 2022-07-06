@@ -63,7 +63,7 @@ def get_status(
     if jobqueue:
         ready = jobqueue.empty()
     else:  # this happens when called by driver_reset
-        raise NotImplementedError()  # FIXME
+        ready = True
     return dt.timestamp(), ready, metadata
 
 
@@ -195,6 +195,6 @@ def stop_job(
     if jobqueue:
         jobqueue.close()
     else:
-        pass  # FIXME
+        pass
     dt = datetime.now(timezone.utc)
     return dt.timestamp()
