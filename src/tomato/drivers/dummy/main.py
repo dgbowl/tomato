@@ -60,7 +60,10 @@ def get_status(
     logger.debug("in 'dummy.get_status'")
     dt = datetime.now(timezone.utc)
     metadata = {"address": address, "channel": channel}
-    ready = jobqueue.empty()
+    if jobqueue:
+        ready = jobqueue.empty()
+    else:  # this happens when called by driver_reset
+        ready = True
     return dt.timestamp(), ready, metadata
 
 
@@ -189,6 +192,9 @@ def stop_job(
         A timestamp corresponding to the start of the job execution.
 
     """
-    jobqueue.close()
+    if jobqueue:
+        jobqueue.close()
+    else:
+        pass
     dt = datetime.now(timezone.utc)
     return dt.timestamp()

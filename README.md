@@ -70,3 +70,4 @@ The default location where this output will be placed is the `cwd` where the
 
 ## Contributors:
 - [Peter Kraus](http://github.com/PeterKraus)
+- [Loris Ercole](http://github.com/lorisercole)

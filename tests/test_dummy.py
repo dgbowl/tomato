@@ -2,8 +2,6 @@ import pytest
 import json
 import os
 import subprocess
-import time
-import signal
 
 from . import utils
 
@@ -77,3 +75,15 @@ def test_run_dummy_jobname(casename, jobname, datadir):
     for line in ret.stdout.split("\n"):
         if line.startswith("jobname"):
             assert line.split("=")[1].strip() == jobname
+
+
+@pytest.mark.parametrize(
+    "casename",
+    [
+        "dummy_random_30_1",
+    ],
+)
+def test_run_dummy_cancel(casename, datadir):
+    os.chdir(datadir)
+    status = utils.run_casename(casename, inter_func=utils.cancel_job)
+    assert status == "cd"
