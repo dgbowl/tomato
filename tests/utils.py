@@ -22,7 +22,7 @@ def run_casename(
     subprocess.run(args)
     subprocess.run(["ketchup", "-t", "ready", "dummy-10", "-vv"])
 
-    inter_exec = False
+    inter_exec = True if inter_func is not None else False
 
     while True:
         ret = subprocess.run(
@@ -37,9 +37,9 @@ def run_casename(
                 if status.startswith("c"):
                     end = True
                     break
-                elif status.startswith("r") and not inter_exec:
+                elif status.startswith("r") and inter_exec:
                     inter_func()
-                    inter_exec = True
+                    inter_exec = False
                 time.sleep(0.1)
         if end:
             break
