@@ -5,7 +5,9 @@ import signal
 import os
 
 
-def run_casename(casename: str, jobname: str = None, inter_func: callable = None) -> str:
+def run_casename(
+    casename: str, jobname: str = None, inter_func: callable = None
+) -> str:
     cfg = subprocess.CREATE_NEW_PROCESS_GROUP
     proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
     p = psutil.Process(pid=proc.pid)

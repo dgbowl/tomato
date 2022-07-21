@@ -220,6 +220,7 @@ def cancel(args: Namespace) -> None:
 
 
     """
+
     def kill_tomato_job(proc):
         log.debug(
             "sending SIGTERM to pid %d with name '%s'",
