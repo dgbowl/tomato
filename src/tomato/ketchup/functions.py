@@ -221,13 +221,12 @@ def cancel(args: Namespace) -> None:
 
     """
     def kill_tomato_job(proc):
-        if "tomato_job" in proc.name():
-            log.debug(
-                "sending SIGTERM to pid %d with name '%s'",
-                proc.pid,
-                proc.name(),
-            )
-            proc.send_signal(signal.SIGTERM)
+        log.debug(
+            "sending SIGTERM to pid %d with name '%s'",
+            proc.pid,
+            proc.name(),
+        )
+        proc.send_signal(signal.SIGTERM)
 
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)

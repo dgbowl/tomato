@@ -20,8 +20,7 @@ def run_casename(casename: str, jobname: str = None, inter_func: callable = None
     subprocess.run(args)
     subprocess.run(["ketchup", "-t", "ready", "dummy-10", "-vv"])
 
-    if inter_func:
-        inter_func()
+    inter_exec = False
 
     while True:
         ret = subprocess.run(
@@ -36,8 +35,10 @@ def run_casename(casename: str, jobname: str = None, inter_func: callable = None
                 if status.startswith("c"):
                     end = True
                     break
-                else:
-                    time.sleep(0.1)
+                elif status.startswith("r") and not inter_exec:
+                    inter_func()
+                    inter_exec = True
+                time.sleep(0.1)
         if end:
             break
 
@@ -46,7 +47,6 @@ def run_casename(casename: str, jobname: str = None, inter_func: callable = None
     proc.terminate()
     return status
 
-def kill_job():
-    print('Sleeping 2 seconds...')
-    time.sleep(2)
-    subprocess.run(["ketchup", "-t", "cancel", "1", "-vv"])
+
+def cancel_job(jobid: int = 1):
+    subprocess.run(["ketchup", "-t", "cancel", f"{jobid}", "-vv"])
