@@ -51,4 +51,5 @@ def run_casename(
 
 
 def cancel_job(jobid: int = 1):
+    time.sleep(2)
     subprocess.run(["ketchup", "-t", "cancel", f"{jobid}", "-vv"])
