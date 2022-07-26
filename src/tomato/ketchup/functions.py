@@ -4,11 +4,13 @@ import yaml
 import logging
 import signal
 import psutil
+import subprocess
 from argparse import Namespace
 from pathlib import Path
 from dgbowl_schemas.tomato import to_payload
 from .. import setlib
 from .. import dbhandler
+from ..drivers import yadg_funcs
 
 
 log = logging.getLogger(__name__)
@@ -252,7 +254,7 @@ def cancel(args: Namespace) -> None:
                             kill_tomato_job(ccp)
 
 
-def load(args):
+def load(args: Namespace) -> None:
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -267,7 +269,7 @@ def load(args):
     )
 
 
-def eject(args):
+def eject(args: Namespace) -> None:
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -312,3 +314,45 @@ def ready(args):
         dbhandler.pipeline_reset_job(state["path"], args.pipeline, True, state["type"])
     else:
         log.warning(f"cannot mark pipeline as ready: job '{jobid}' is running.")
+
+
+def snapshot(args: Namespace) -> None:
+    dirs = setlib.get_dirs(args.test)
+    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    state, queue = settings["state"], settings["queue"]
+    jobid = int(args.jobid)
+
+    jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+    status = jobinfo[2]
+
+    if status.startswith("q"):
+        log.error("job with jobid '%s' is not yet running. Cannot create snapshot.", jobid)
+        return
+    elif status.startswith("c"):
+        log.warning("job with jobid '%s' has been completed. Will create snapshot.", jobid)
+        pass
+    elif status.startswith("r"):
+        log.debug("job with jobid '%s' is running. Will create snapshot.", jobid)
+    
+    jobdir = os.path.join(queue["storage"], f"{jobid}")
+    log.debug("processing jobdir '%s'", jobdir)
+    assert os.path.exists(jobdir) and os.path.isdir(jobdir)
+    jobfile = os.path.join(jobdir, "jobdata.json")
+    assert os.path.exists(jobfile) and os.path.isfile(jobfile)
+
+    with open(jobfile, "r") as inf:
+        jobdata = json.load(inf)
+    
+    method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
+    log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
+    preset = yadg_funcs.get_yadg_preset(method, pipeline)
+    with open(f"preset.{jobid}.json", "w") as of:
+        json.dump(preset, of)
+
+    dgfile = f"snapshot.{jobid}.json"
+    log.info("running yadg to create a datagram in '%s'", dgfile)
+    command = ["yadg", "preset", "-pa", f"preset.{jobid}.json", jobdir, dgfile]
+    log.debug(" ".join(command))
+    subprocess.run(command, check=True)
+    log.debug("removing the preset file '%s'", f"preset.{jobid}.json")
+    os.unlink(f"preset.{jobid}.json")

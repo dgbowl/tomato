@@ -87,3 +87,16 @@ def test_run_dummy_cancel(casename, datadir):
     os.chdir(datadir)
     status = utils.run_casename(casename, inter_func=utils.cancel_job)
     assert status == "cd"
+
+
+@pytest.mark.parametrize(
+    "casename",
+    [
+        "dummy_sequential_20_10",
+    ],
+)
+def test_run_dummy_snapshot(casename, datadir):
+    os.chdir(datadir)
+    status = utils.run_casename(casename, inter_func=utils.snapshot_job)
+    assert os.path.exists("snapshot.1.json")
+    assert os.path.exists("snapshot.1.zip")
