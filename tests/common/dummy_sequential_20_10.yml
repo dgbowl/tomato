@@ -1,4 +1,4 @@
-version: "0.1"
+version: "0.2"
 sample:
     name: dummy_sequential_20_10
 method:

@@ -3,7 +3,9 @@ import time
 import psutil
 import signal
 import os
+import logging
 
+logger = logging.get_logger(__name__)
 
 def run_casename(
     casename: str, jobname: str = None, inter_func: callable = None
@@ -23,6 +25,7 @@ def run_casename(
 
     inter_exec = True if inter_func is not None else False
 
+    start = time.perf_counter()
     while True:
         ret = subprocess.run(
             ["ketchup", "-t", "status", "1"],
@@ -37,10 +40,16 @@ def run_casename(
                     end = True
                     break
                 elif status.startswith("r") and inter_exec:
+                    logger.debug("Running 'inter_exec()'")
                     inter_func()
                     inter_exec = False
         time.sleep(0.1)
         if end:
+            dt = time.perf_counter() - start
+            logger.debug("Job complete in %d s. ", dt)
+            break
+        if time.perf_counter() - start > 120:
+            logger.warning("Job took more than 120 s. Aborting...")
             break
 
     for cp in p.children():
@@ -50,8 +59,10 @@ def run_casename(
 
 
 def cancel_job(jobid: int = 1):
+    logger.debug("Running 'ketchup cancel'.")
     subprocess.run(["ketchup", "-t", "cancel", f"{jobid}", "-vv"])
 
 
 def snapshot_job(jobid: int = 1):
+    logger.debug("Running 'ketchup snapshot'.")
     subprocess.run(["ketchup", "-t", "snapshot", f"{jobid}", "-vv"])
