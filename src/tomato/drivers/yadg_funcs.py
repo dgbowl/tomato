@@ -42,8 +42,9 @@ def get_yadg_preset(method: list[dict], pipeline: dict) -> dict:
         preset["steps"].append(step)
     return preset
 
+
 def process_yadg_preset(
-    preset: dict, 
+    preset: dict,
     path: str,
     prefix: str,
     jobdir: str,
@@ -52,12 +53,12 @@ def process_yadg_preset(
     logger.debug("creating a preset file '%s'", prpath)
     with open(prpath, "w") as of:
         json.dump(preset, of)
-    
+
     dgpath = os.path.join(path, f"{prefix}.json")
     logger.info("running yadg to create a datagram in '%s'", dgpath)
     command = ["yadg", "preset", "-pa", prpath, jobdir, dgpath]
     logger.debug(" ".join(command))
     subprocess.run(command, check=True)
-    
+
     logger.debug("removing the preset file '%s'", prpath)
     os.unlink(prpath)

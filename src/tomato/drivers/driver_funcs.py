@@ -70,13 +70,7 @@ def tomato_job() -> None:
     logger.info("handing off to 'driver_worker'")
     logger.info("==============================")
     ret = driver_worker(
-        settings, 
-        pipeline, 
-        payload, 
-        jobid,
-        jobfolder, 
-        logfile, 
-        loglevel
+        settings, pipeline, payload, jobid, jobfolder, logfile, loglevel
     )
 
     logger.info("==============================")
@@ -91,15 +85,12 @@ def tomato_job() -> None:
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(path)
-    
+
     preset = yadg_funcs.get_yadg_preset(payload["method"], pipeline)
     yadg_funcs.process_yadg_preset(
-        preset=preset,
-        path=path,
-        prefix=prefix,
-        jobdir=jobfolder
+        preset=preset, path=path, prefix=prefix, jobdir=jobfolder
     )
-    
+
     ready = tomato.get("unlock_when_done", False)
     if ret is None:
         logger.info("job finished successfully, setting status to 'c'")
@@ -192,14 +183,13 @@ def data_snapshot(
         if time.perf_counter() - start > snapshot["frequency"]:
             preset = yadg_funcs.get_yadg_preset(method, pipeline)
             yadg_funcs.process_yadg_preset(
-                preset=preset, 
+                preset=preset,
                 path=snapshot["path"],
-                prefix=snapshot["prefix"], 
+                prefix=snapshot["prefix"],
                 jobdir=jobfolder,
             )
             start = time.perf_counter()
         time.sleep(1)
-        
 
 
 def driver_worker(
@@ -262,7 +252,7 @@ def driver_worker(
         jobs.append(p)
         p.start()
         log.info(f"{vi+1}: started 'data_poller' on pid {p.pid}")
-    
+
     shot = payload.get("tomato", {}).get("snapshot", None)
     if shot is not None:
         log.info(f"starting 'data_snapshot': shot every {shot['frequency']}s")

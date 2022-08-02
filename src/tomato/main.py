@@ -160,9 +160,7 @@ def run_ketchup():
 
     snapshot = subparsers.add_parser("snapshot")
     snapshot.add_argument(
-        "jobid", 
-        help="The jobid of the job to be snapshotted.", 
-        default=None
+        "jobid", help="The jobid of the job to be snapshotted.", default=None
     )
     snapshot.set_defaults(func=ketchup.snapshot)
 

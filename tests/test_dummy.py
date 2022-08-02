@@ -92,7 +92,7 @@ def test_run_dummy_cancel(casename, datadir):
 @pytest.mark.parametrize(
     "casename, external",
     [
-        #("dummy_sequential_20_10", True),
+        # ("dummy_sequential_20_10", True),
         ("dummy_sequential_snapshot_30_5", False),
     ],
 )

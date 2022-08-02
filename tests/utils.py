@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def run_casename(
     casename: str, jobname: str = None, inter_func: callable = None
 ) -> str:

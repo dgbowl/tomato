@@ -332,14 +332,18 @@ def snapshot(args: Namespace) -> None:
     status = jobinfo[2]
 
     if status.startswith("q"):
-        log.error("job with jobid '%s' is not yet running. Cannot create snapshot.", jobid)
+        log.error(
+            "job with jobid '%s' is not yet running. Cannot create snapshot.", jobid
+        )
         return
     elif status.startswith("c"):
-        log.warning("job with jobid '%s' has been completed. Will create snapshot.", jobid)
+        log.warning(
+            "job with jobid '%s' has been completed. Will create snapshot.", jobid
+        )
         pass
     elif status.startswith("r"):
         log.debug("job with jobid '%s' is running. Will create snapshot.", jobid)
-    
+
     jobdir = os.path.join(queue["storage"], f"{jobid}")
     log.debug("processing jobdir '%s'", jobdir)
     assert os.path.exists(jobdir) and os.path.isdir(jobdir)
@@ -348,13 +352,10 @@ def snapshot(args: Namespace) -> None:
 
     with open(jobfile, "r") as inf:
         jobdata = json.load(inf)
-    
+
     method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
     log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
     preset = yadg_funcs.get_yadg_preset(method, pipeline)
     yadg_funcs.process_yadg_preset(
-        preset=preset,
-        path=".",
-        prefix=f"snapshot.{jobid}",
-        jobdir=jobdir
+        preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=jobdir
     )
