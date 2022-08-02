@@ -178,6 +178,11 @@ def status(args: Namespace) -> None:
     else:
         jobid = int(args.jobid)
         ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+        if ji is None:
+            log.error(
+                "job with jobid '%s' does not exist.", jobid
+            )
+            return None
         jobname, payload, status, submitted_at, executed_at, completed_at = ji
         print(f"jobid = {jobid}")
         print(f"jobname = {jobname}")
@@ -226,9 +231,7 @@ def cancel(args: Namespace) -> None:
 
         Cancelling a completed job will do nothing.
 
-
     """
-
     def kill_tomato_job(proc):
         log.debug(
             "sending SIGTERM to pid %d with name '%s'",
@@ -243,6 +246,11 @@ def cancel(args: Namespace) -> None:
     queue = settings["queue"]
     jobid = int(args.jobid)
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+    if jobinfo is None:
+        log.error(
+            "job with jobid '%s' does not exist.", jobid
+        )
+        return None
     status = jobinfo[2]
     log.debug(f"found job {jobid} with status '{status}'")
     if status in {"q", "qw"}:
@@ -261,6 +269,18 @@ def cancel(args: Namespace) -> None:
 
 
 def load(args: Namespace) -> None:
+    """
+    Load a sample into a pipeline. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
+
+    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
+    Checks whether the pipeline exists and whether it is empty before loading 
+    sample.
+
+    """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -269,6 +289,13 @@ def load(args: Namespace) -> None:
     pips = dbhandler.pipeline_get_all(state["path"], type=state["type"])
     assert args.pipeline in pips, f"pipeline '{args.pipeline}' not found."
 
+    sampleid, ready, jobid, pid = dbhandler.pipeline_get_info(
+        state["path"], args.pipeline, type=state["type"]
+    )
+    if sampleid is not None:
+        log.warning(f"pipeline '{args.pipeline}' is not empty. Aborting.")
+        return None
+
     log.info(f"loading sample '{args.sample}' into pipeline '{args.pipeline}'")
     dbhandler.pipeline_load_sample(
         state["path"], args.pipeline, args.sample, type=state["type"]
@@ -276,6 +303,17 @@ def load(args: Namespace) -> None:
 
 
 def eject(args: Namespace) -> None:
+    """
+    Eject a sample into a pipeline. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] eject <pipeline>
+
+    Marks the ``pipeline`` as empty. Checks whether the pipeline exists, and 
+    whether it is currently running.
+
+    """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -302,6 +340,17 @@ def eject(args: Namespace) -> None:
 
 
 def ready(args):
+    """
+    Mark pipeline as ready. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] ready <pipeline>
+
+    Marks the ``pipeline`` as ready. Checks whether the pipeline exists, and 
+    whether it is currently running.
+
+    """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -323,12 +372,37 @@ def ready(args):
 
 
 def snapshot(args: Namespace) -> None:
+    """
+    Create a snapshot of job data. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] snapshot <jobid>
+
+    Requests an up-to-date snapshot of the data of the job identified by ``jobid``.
+    Checks whether the job is running, raises a warning if job has been finished.
+
+    Examples
+    --------
+
+    >>> # Create a snapshot in current working directory:
+    >>> ketchup snapshot 1
+    >>> ls
+    snapshot.1.json
+    snapshot.1.zip
+
+    """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state, queue = settings["state"], settings["queue"]
     jobid = int(args.jobid)
 
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+    if jobinfo is None:
+        log.error(
+            "job with jobid '%s' does not exist.", jobid
+        )
+        return None
     status = jobinfo[2]
 
     if status.startswith("q"):

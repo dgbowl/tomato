@@ -25,10 +25,14 @@ def run_casename(
         args.append(jobname)
     subprocess.run(args)
     
+    while not os.path.exists(os.path.join("Jobs", "1", "jobdata.log")):
+        time.sleep(1)
+
     inter_exec = False
     start = time.perf_counter()
     end = False
     while True:
+        time.sleep(0.1)
         dt = time.perf_counter() - start
         if inter_exec and inter_func is not None:
             logger.debug("Running 'inter_func()'")
@@ -40,7 +44,6 @@ def run_casename(
         if dt > 120:
             logger.warning("Job took more than 120 s. Aborting...")
             break
-        time.sleep(2)
         ret = subprocess.run(
             ["ketchup", "-t", "status", "1"],
             capture_output=True,
