@@ -428,3 +428,43 @@ def snapshot(args: Namespace) -> None:
     yadg_funcs.process_yadg_preset(
         preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=jobdir
     )
+
+
+def search(args: Namespace) -> None:
+    """
+    Search the queue for a job that matches a given jobname. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] [-c] search <jobname>
+
+    Searches the ``queue`` for a job that matches the ``jobname``, returns the
+    job status and ``jobid``. If the option ``-c/--complete`` is specified,
+    the completed jobs will also be searched.
+    
+    .. note:: 
+
+        Output of ``ketchup search`` is a valid ``yaml``.
+
+    Examples
+    --------
+
+    >>> # Create a snapshot in current working directory:
+    >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
+    >>> ketchup search dummy_random_2
+    - jobname: dummy_random_2_0.1
+      jobid: 1
+      status: r
+
+    """
+    dirs = setlib.get_dirs(args.test)
+    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    queue = settings["queue"]
+    
+    alljobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
+    for jobid, jobname, payload, status in alljobs:
+        if jobname is not None and args.jobname in jobname:
+            if args.complete or not status.startswith("c"):
+                print(f"- jobname: {jobname}")
+                print(f"  jobid: {jobid}")
+                print(f"  status: {status}")

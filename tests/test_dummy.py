@@ -55,17 +55,28 @@ def test_run_dummy_random(casename, npoints, prefix, datadir):
 
 
 @pytest.mark.parametrize(
-    "casename, jobname",
+    "casename, jobname, search",
     [
         (
             "dummy_random_1_0.1",
             "custom_name",
+            False
+        ),
+        (
+            "dummy_random_30_1",
+            "$MATCH_custom_name",
+            True
         ),
     ],
 )
-def test_run_dummy_jobname(casename, jobname, datadir):
+def test_run_dummy_jobname(casename, jobname, search, datadir):
     os.chdir(datadir)
-    status = utils.run_casename(casename, jobname=jobname)
+    if search:
+        status = utils.run_casename(
+            casename, jobname=jobname, inter_func=utils.search_job
+        )
+    else:
+        status = utils.run_casename(casename, jobname=jobname)
     assert status == "c"
     ret = subprocess.run(
         ["ketchup", "-t", "status", "1"],

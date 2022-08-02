@@ -164,6 +164,21 @@ def run_ketchup():
     )
     snapshot.set_defaults(func=ketchup.snapshot)
 
+    search = subparsers.add_parser("search")
+    search.add_argument(
+        "jobname", 
+        help="The jobname of the searched job.", 
+        default=None,
+    )
+    search.add_argument(
+        "-c",
+        "--complete",
+        action="store_true",
+        default=False,
+        help="Search also in completed jobs.",
+    )
+    search.set_defaults(func=ketchup.search)
+
     args, extras = parser.parse_known_args()
     args, extras = verbose.parse_known_args(extras, args)
     _logging_setup(args)

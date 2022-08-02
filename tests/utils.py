@@ -73,3 +73,19 @@ def cancel_job(jobid: int = 1):
 def snapshot_job(jobid: int = 1):
     logger.debug("Running 'ketchup snapshot'.")
     subprocess.run(["ketchup", "-t", "snapshot", f"{jobid}", "-vv"])
+
+
+def search_job(jobid: int = 1):
+    logger.debug("Running 'ketchup search'.")
+    ret = subprocess.run(
+        ["ketchup", "-t", "search", "$MATCH", "-vv"],
+        capture_output=True,
+        text=True,
+    )
+    for line in ret.stdout.split("\n"):
+        if "jobname" in line:
+            assert "$MATCH" in line.split(":")[-1].strip()
+        elif "jobid" in line:
+            assert line.split(":")[-1].strip() == "1"
+        elif "status" in line:
+            assert line.split(":")[-1].strip() == "r"
