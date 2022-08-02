@@ -1,0 +1,12 @@
+version: "0.2"
+sample:
+    name: dummy_sequential_snapshot_30_5
+method:
+  - device: "worker"
+    technique: "sequential"
+    time: 30
+    delay: 5
+tomato:
+    verbosity: "DEBUG"
+    snapshot:
+        frequency: 10

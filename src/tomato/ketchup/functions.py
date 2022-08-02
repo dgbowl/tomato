@@ -4,11 +4,13 @@ import yaml
 import logging
 import signal
 import psutil
+import subprocess
 from argparse import Namespace
 from pathlib import Path
 from dgbowl_schemas.tomato import to_payload
 from .. import setlib
 from .. import dbhandler
+from ..drivers import yadg_funcs
 
 
 log = logging.getLogger(__name__)
@@ -71,6 +73,12 @@ def submit(args: Namespace) -> None:
         cwd = str(Path().resolve())
         log.info("Output path not set. Setting output path to '%s'", cwd)
         payload.tomato.output.path = cwd
+    if hasattr(payload.tomato, "snapshot"):
+        if payload.tomato.snapshot is not None:
+            if payload.tomato.snapshot.path is None:
+                cwd = str(Path().resolve())
+                log.info("Snapshot path not set. Setting output path to '%s'", cwd)
+                payload.tomato.snapshot.path = cwd
     pstr = payload.json()
     log.info("queueing 'payload' into 'queue'")
     jobid = dbhandler.queue_payload(
@@ -170,6 +178,9 @@ def status(args: Namespace) -> None:
     else:
         jobid = int(args.jobid)
         ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+        if ji is None:
+            log.error("job with jobid '%s' does not exist.", jobid)
+            return None
         jobname, payload, status, submitted_at, executed_at, completed_at = ji
         print(f"jobid = {jobid}")
         print(f"jobname = {jobname}")
@@ -218,7 +229,6 @@ def cancel(args: Namespace) -> None:
 
         Cancelling a completed job will do nothing.
 
-
     """
 
     def kill_tomato_job(proc):
@@ -235,6 +245,9 @@ def cancel(args: Namespace) -> None:
     queue = settings["queue"]
     jobid = int(args.jobid)
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+    if jobinfo is None:
+        log.error("job with jobid '%s' does not exist.", jobid)
+        return None
     status = jobinfo[2]
     log.debug(f"found job {jobid} with status '{status}'")
     if status in {"q", "qw"}:
@@ -252,7 +265,19 @@ def cancel(args: Namespace) -> None:
                             kill_tomato_job(ccp)
 
 
-def load(args):
+def load(args: Namespace) -> None:
+    """
+    Load a sample into a pipeline. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
+
+    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
+    Checks whether the pipeline exists and whether it is empty before loading
+    sample.
+
+    """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -261,13 +286,31 @@ def load(args):
     pips = dbhandler.pipeline_get_all(state["path"], type=state["type"])
     assert args.pipeline in pips, f"pipeline '{args.pipeline}' not found."
 
+    sampleid, ready, jobid, pid = dbhandler.pipeline_get_info(
+        state["path"], args.pipeline, type=state["type"]
+    )
+    if sampleid is not None:
+        log.warning(f"pipeline '{args.pipeline}' is not empty. Aborting.")
+        return None
+
     log.info(f"loading sample '{args.sample}' into pipeline '{args.pipeline}'")
     dbhandler.pipeline_load_sample(
         state["path"], args.pipeline, args.sample, type=state["type"]
     )
 
 
-def eject(args):
+def eject(args: Namespace) -> None:
+    """
+    Eject a sample into a pipeline. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] eject <pipeline>
+
+    Marks the ``pipeline`` as empty. Checks whether the pipeline exists, and
+    whether it is currently running.
+
+    """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -294,6 +337,17 @@ def eject(args):
 
 
 def ready(args):
+    """
+    Mark pipeline as ready. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] ready <pipeline>
+
+    Marks the ``pipeline`` as ready. Checks whether the pipeline exists, and
+    whether it is currently running.
+
+    """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -312,3 +366,65 @@ def ready(args):
         dbhandler.pipeline_reset_job(state["path"], args.pipeline, True, state["type"])
     else:
         log.warning(f"cannot mark pipeline as ready: job '{jobid}' is running.")
+
+
+def snapshot(args: Namespace) -> None:
+    """
+    Create a snapshot of job data. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] snapshot <jobid>
+
+    Requests an up-to-date snapshot of the data of the job identified by ``jobid``.
+    Checks whether the job is running, raises a warning if job has been finished.
+
+    Examples
+    --------
+
+    >>> # Create a snapshot in current working directory:
+    >>> ketchup snapshot 1
+    >>> ls
+    snapshot.1.json
+    snapshot.1.zip
+
+    """
+    dirs = setlib.get_dirs(args.test)
+    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    state, queue = settings["state"], settings["queue"]
+    jobid = int(args.jobid)
+
+    jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+    if jobinfo is None:
+        log.error("job with jobid '%s' does not exist.", jobid)
+        return None
+    status = jobinfo[2]
+
+    if status.startswith("q"):
+        log.error(
+            "job with jobid '%s' is not yet running. Cannot create snapshot.", jobid
+        )
+        return
+    elif status.startswith("c"):
+        log.warning(
+            "job with jobid '%s' has been completed. Will create snapshot.", jobid
+        )
+        pass
+    elif status.startswith("r"):
+        log.debug("job with jobid '%s' is running. Will create snapshot.", jobid)
+
+    jobdir = os.path.join(queue["storage"], f"{jobid}")
+    log.debug("processing jobdir '%s'", jobdir)
+    assert os.path.exists(jobdir) and os.path.isdir(jobdir)
+    jobfile = os.path.join(jobdir, "jobdata.json")
+    assert os.path.exists(jobfile) and os.path.isfile(jobfile)
+
+    with open(jobfile, "r") as inf:
+        jobdata = json.load(inf)
+
+    method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
+    log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
+    preset = yadg_funcs.get_yadg_preset(method, pipeline)
+    yadg_funcs.process_yadg_preset(
+        preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=jobdir
+    )

@@ -158,6 +158,12 @@ def run_ketchup():
     )
     ready.set_defaults(func=ketchup.ready)
 
+    snapshot = subparsers.add_parser("snapshot")
+    snapshot.add_argument(
+        "jobid", help="The jobid of the job to be snapshotted.", default=None
+    )
+    snapshot.set_defaults(func=ketchup.snapshot)
+
     args, extras = parser.parse_known_args()
     args, extras = verbose.parse_known_args(extras, args)
     _logging_setup(args)

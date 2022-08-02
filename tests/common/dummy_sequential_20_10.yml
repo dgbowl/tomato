@@ -1,0 +1,10 @@
+version: "0.2"
+sample:
+    name: dummy_sequential_20_10
+method:
+  - device: "worker"
+    technique: "sequential"
+    time: 20
+    delay: 10
+tomato:
+    verbosity: "DEBUG"
