@@ -15,8 +15,10 @@ def run_casename(
     proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
     p = psutil.Process(pid=proc.pid)
     while not os.path.exists("database.db"):
-        time.sleep(1)
-
+        time.sleep(0.1)
+    
+    logger.debug("Sleeping before job submission.")
+    time.sleep(2)
     subprocess.run(["ketchup", "-t", "load", casename, "dummy-10", "-vv"])
     subprocess.run(["ketchup", "-t", "ready", "dummy-10", "-vv"])
     args = ["ketchup", "-t", "submit", f"{casename}.yml", "dummy-10", "-vv"]
