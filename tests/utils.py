@@ -5,7 +5,7 @@ import signal
 import os
 import logging
 
-logger = logging.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 def run_casename(
     casename: str, jobname: str = None, inter_func: callable = None

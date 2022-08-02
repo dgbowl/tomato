@@ -73,6 +73,12 @@ def submit(args: Namespace) -> None:
         cwd = str(Path().resolve())
         log.info("Output path not set. Setting output path to '%s'", cwd)
         payload.tomato.output.path = cwd
+    if hasattr(payload.tomato, "snapshot"):
+        if payload.tomato.snapshot is not None:
+            if payload.tomato.snapshot.path is None:
+                cwd = str(Path().resolve())
+                log.info("Snapshot path not set. Setting output path to '%s'", cwd)
+                payload.tomato.snapshot.path = cwd
     pstr = payload.json()
     log.info("queueing 'payload' into 'queue'")
     jobid = dbhandler.queue_payload(
@@ -346,13 +352,9 @@ def snapshot(args: Namespace) -> None:
     method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
     log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
     preset = yadg_funcs.get_yadg_preset(method, pipeline)
-    with open(f"preset.{jobid}.json", "w") as of:
-        json.dump(preset, of)
-
-    dgfile = f"snapshot.{jobid}.json"
-    log.info("running yadg to create a datagram in '%s'", dgfile)
-    command = ["yadg", "preset", "-pa", f"preset.{jobid}.json", jobdir, dgfile]
-    log.debug(" ".join(command))
-    subprocess.run(command, check=True)
-    log.debug("removing the preset file '%s'", f"preset.{jobid}.json")
-    os.unlink(f"preset.{jobid}.json")
+    yadg_funcs.process_yadg_preset(
+        preset=preset,
+        path=".",
+        prefix=f"snapshot.{jobid}",
+        jobdir=jobdir
+    )

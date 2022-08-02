@@ -90,13 +90,17 @@ def test_run_dummy_cancel(casename, datadir):
 
 
 @pytest.mark.parametrize(
-    "casename",
+    "casename, external",
     [
-        "dummy_sequential_20_10",
+        #("dummy_sequential_20_10", True),
+        ("dummy_sequential_snapshot_30_5", False),
     ],
 )
-def test_run_dummy_snapshot(casename, datadir):
+def test_run_dummy_snapshot(casename, external, datadir):
     os.chdir(datadir)
-    status = utils.run_casename(casename, inter_func=utils.snapshot_job)
+    if external:
+        utils.run_casename(casename, inter_func=utils.snapshot_job)
+    else:
+        utils.run_casename(casename)
     assert os.path.exists("snapshot.1.json")
     assert os.path.exists("snapshot.1.zip")

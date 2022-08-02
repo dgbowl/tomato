@@ -4,14 +4,15 @@ import importlib
 import argparse
 import time
 import multiprocessing
-import subprocess
 import os
 import json
 from datetime import datetime, timezone
 import logging
 
+from tomato.dbhandler.sqlite import pipeline_assign_job
+
 from .logger_funcs import log_listener_config, log_listener, log_worker_config
-from .yadg_funcs import get_yadg_preset
+from . import yadg_funcs
 from .. import dbhandler
 
 
@@ -68,7 +69,15 @@ def tomato_job() -> None:
 
     logger.info("handing off to 'driver_worker'")
     logger.info("==============================")
-    ret = driver_worker(settings, pipeline, payload, jobid, logfile, loglevel)
+    ret = driver_worker(
+        settings, 
+        pipeline, 
+        payload, 
+        jobid,
+        jobfolder, 
+        logfile, 
+        loglevel
+    )
 
     logger.info("==============================")
 
@@ -82,19 +91,15 @@ def tomato_job() -> None:
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(path)
-    dgfile = os.path.join(path, f"{prefix}.json")
-    logging.debug("creating a preset file '%s'", f"preset.{jobid}.json")
-    preset = get_yadg_preset(payload["method"], pipeline)
-    with open(f"preset.{jobid}.json", "w") as of:
-        json.dump(preset, of)
-
-    logging.info("running yadg to create a datagram in '%s'", dgfile)
-    command = ["yadg", "preset", "-pa", f"preset.{jobid}.json", jobfolder, dgfile]
-    logging.debug(" ".join(command))
-    subprocess.run(command, check=True)
-    logging.debug("removing the preset file '%s'", f"preset.{jobid}.json")
-    os.unlink(f"preset.{jobid}.json")
-
+    
+    preset = yadg_funcs.get_yadg_preset(payload["method"], pipeline)
+    yadg_funcs.process_yadg_preset(
+        preset=preset,
+        path=path,
+        prefix=prefix,
+        jobdir=jobfolder
+    )
+    
     ready = tomato.get("unlock_when_done", False)
     if ret is None:
         logger.info("job finished successfully, setting status to 'c'")
@@ -173,11 +178,36 @@ def data_poller(
     return
 
 
+def data_snapshot(
+    method: dict,
+    pipeline: dict,
+    snapshot: dict,
+    jobfolder: str,
+    lq: multiprocessing.Queue,
+    loglevel: int,
+) -> None:
+    log_worker_config(lq, loglevel)
+    start = time.perf_counter()
+    while True:
+        if time.perf_counter() - start > snapshot["frequency"]:
+            preset = yadg_funcs.get_yadg_preset(method, pipeline)
+            yadg_funcs.process_yadg_preset(
+                preset=preset, 
+                path=snapshot["path"],
+                prefix=snapshot["prefix"], 
+                jobdir=jobfolder,
+            )
+            start = time.perf_counter()
+        time.sleep(1)
+        
+
+
 def driver_worker(
     settings: dict,
     pipeline: dict,
     payload: dict,
     jobid: int,
+    jobfolder: str,
     logfile: str,
     loglevel: int,
 ) -> None:
@@ -232,6 +262,17 @@ def driver_worker(
         jobs.append(p)
         p.start()
         log.info(f"{vi+1}: started 'data_poller' on pid {p.pid}")
+    
+    shot = payload.get("tomato", {}).get("snapshot", None)
+    if shot is not None:
+        log.info(f"starting 'data_snapshot': shot every {shot['frequency']}s")
+        sp = multiprocessing.Process(
+            name=f"data_snapshot_{jobid}",
+            target=data_snapshot,
+            args=(payload["method"], pipeline, shot, jobfolder, lq, loglevel),
+        )
+        sp.start()
+        log.info(f"started 'data_snapshot' on pid {sp.pid}")
 
     log.info("waiting for all 'data_poller' jobs to join")
     log.info("------------------------------------------")
@@ -247,6 +288,9 @@ def driver_worker(
 
     log.info("-----------------------")
     log.info("quitting 'log_listener'")
+    if shot is not None:
+        log.info("quitting 'data_snapshot'")
+        sp.terminate()
     lq.put_nowait(None)
     listener.join()
     jq.close()
