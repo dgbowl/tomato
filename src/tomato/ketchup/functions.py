@@ -179,9 +179,7 @@ def status(args: Namespace) -> None:
         jobid = int(args.jobid)
         ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
         if ji is None:
-            log.error(
-                "job with jobid '%s' does not exist.", jobid
-            )
+            log.error("job with jobid '%s' does not exist.", jobid)
             return None
         jobname, payload, status, submitted_at, executed_at, completed_at = ji
         print(f"jobid = {jobid}")
@@ -232,6 +230,7 @@ def cancel(args: Namespace) -> None:
         Cancelling a completed job will do nothing.
 
     """
+
     def kill_tomato_job(proc):
         log.debug(
             "sending SIGTERM to pid %d with name '%s'",
@@ -247,9 +246,7 @@ def cancel(args: Namespace) -> None:
     jobid = int(args.jobid)
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
     if jobinfo is None:
-        log.error(
-            "job with jobid '%s' does not exist.", jobid
-        )
+        log.error("job with jobid '%s' does not exist.", jobid)
         return None
     status = jobinfo[2]
     log.debug(f"found job {jobid} with status '{status}'")
@@ -277,7 +274,7 @@ def load(args: Namespace) -> None:
         ketchup [-t] [-v] [-q] load <samplename> <pipeline>
 
     Assigns the sample with the provided ``samplename`` into the ``pipeline``.
-    Checks whether the pipeline exists and whether it is empty before loading 
+    Checks whether the pipeline exists and whether it is empty before loading
     sample.
 
     """
@@ -310,7 +307,7 @@ def eject(args: Namespace) -> None:
 
         ketchup [-t] [-v] [-q] eject <pipeline>
 
-    Marks the ``pipeline`` as empty. Checks whether the pipeline exists, and 
+    Marks the ``pipeline`` as empty. Checks whether the pipeline exists, and
     whether it is currently running.
 
     """
@@ -347,7 +344,7 @@ def ready(args):
 
         ketchup [-t] [-v] [-q] ready <pipeline>
 
-    Marks the ``pipeline`` as ready. Checks whether the pipeline exists, and 
+    Marks the ``pipeline`` as ready. Checks whether the pipeline exists, and
     whether it is currently running.
 
     """
@@ -399,9 +396,7 @@ def snapshot(args: Namespace) -> None:
 
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
     if jobinfo is None:
-        log.error(
-            "job with jobid '%s' does not exist.", jobid
-        )
+        log.error("job with jobid '%s' does not exist.", jobid)
         return None
     status = jobinfo[2]
 
