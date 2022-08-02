@@ -92,6 +92,19 @@ The default location where this output will be placed is the ``cwd()`` where the
 ``ketchup submit`` command was executed; the default filenames of the returned files 
 are ``results.<jobid>.[zip,json]``.
 
+Data snapshotting
+-----------------
+
+Access to an up-to-date snapthos of the data while a *job* is running is provided 
+by :mod:`~tomato.ketchup`:
+
+.. code:: bash
+
+    ketchup snapshot <jobid>
+
+This will create an up-to-date ``snapshot.<jobid>.[zip,json]`` in the ``cwd()``.
+The files are overwritten on subsequent invocations of ``ketchup snapshot``. An
+automated snapshotting can be further enabled within the *payload* of the *job*.
 
 .. toctree::
    :maxdepth: 1
