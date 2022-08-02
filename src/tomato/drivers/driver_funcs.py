@@ -173,19 +173,24 @@ def data_snapshot(
     method: dict,
     pipeline: dict,
     snapshot: dict,
+    jobid: int,
     jobfolder: str,
     lq: multiprocessing.Queue,
     loglevel: int,
 ) -> None:
     log_worker_config(lq, loglevel)
     start = time.perf_counter()
+    if snapshot["prefix"] is None:
+        prefix = f"snapshot.{jobid}"
+    else:
+        prefix = snapshot["prefix"]
+    preset = yadg_funcs.get_yadg_preset(method, pipeline)
     while True:
         if time.perf_counter() - start > snapshot["frequency"]:
-            preset = yadg_funcs.get_yadg_preset(method, pipeline)
             yadg_funcs.process_yadg_preset(
                 preset=preset,
                 path=snapshot["path"],
-                prefix=snapshot["prefix"],
+                prefix=prefix,
                 jobdir=jobfolder,
             )
             start = time.perf_counter()
@@ -259,7 +264,7 @@ def driver_worker(
         sp = multiprocessing.Process(
             name=f"data_snapshot_{jobid}",
             target=data_snapshot,
-            args=(payload["method"], pipeline, shot, jobfolder, lq, loglevel),
+            args=(payload["method"], pipeline, shot, jobid, jobfolder, lq, loglevel),
         )
         sp.start()
         log.info(f"started 'data_snapshot' on pid {sp.pid}")

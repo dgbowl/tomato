@@ -36,7 +36,7 @@ setuptools.setup(
         "pyyaml",
         "psutil",
         "yadg>=4.1",
-        "dgbowl_schemas>=107",
+        "dgbowl_schemas>=108",
         "filelock",
     ],
     extras_require={

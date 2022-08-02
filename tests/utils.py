@@ -25,12 +25,15 @@ def run_casename(
         args.append(jobname)
     subprocess.run(args)
     
+    inter_exec = False
+    end = False
+    
+    start = time.perf_counter()
     while not os.path.exists(os.path.join("Jobs", "1", "jobdata.log")):
         time.sleep(1)
-
-    inter_exec = False
-    start = time.perf_counter()
-    end = False
+        dt = time.perf_counter() - start
+        if dt > 120:
+            break
     while True:
         time.sleep(0.1)
         dt = time.perf_counter() - start

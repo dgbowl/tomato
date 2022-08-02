@@ -10,4 +10,3 @@ tomato:
     verbosity: "DEBUG"
     snapshot:
         frequency: 10
-        prefix: snapshot.1
