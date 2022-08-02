@@ -240,17 +240,70 @@ created as requested in the <code class="docutils literal notranslate"><span cla
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.functions.load">
 <span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.load" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Load a sample into a pipeline. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> load &lt;samplename&gt; &lt;pipeline&gt;
+</pre></div>
+</div>
+<p>Assigns the sample with the provided <code class="docutils literal notranslate"><span class="pre">samplename</span></code> into the <code class="docutils literal notranslate"><span class="pre">pipeline</span></code>.
+Checks whether the pipeline exists and whether it is empty before loading
+sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.functions.eject">
 <span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">eject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.eject" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Eject a sample into a pipeline. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> eject &lt;pipeline&gt;
+</pre></div>
+</div>
+<p>Marks the <code class="docutils literal notranslate"><span class="pre">pipeline</span></code> as empty. Checks whether the pipeline exists, and
+whether it is currently running.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.functions.ready">
 <span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.ready" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Mark pipeline as ready. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> ready &lt;pipeline&gt;
+</pre></div>
+</div>
+<p>Marks the <code class="docutils literal notranslate"><span class="pre">pipeline</span></code> as ready. Checks whether the pipeline exists, and
+whether it is currently running.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.ketchup.functions.snapshot">
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.snapshot" title="Permalink to this definition"></a></dt>
+<dd><p>Create a snapshot of job data. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> snapshot &lt;jobid&gt;
+</pre></div>
+</div>
+<p>Requests an up-to-date snapshot of the data of the job identified by <code class="docutils literal notranslate"><span class="pre">jobid</span></code>.
+Checks whether the job is running, raises a warning if job has been finished.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a snapshot in current working directory:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">snapshot</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span>
+<span class="go">snapshot.1.json</span>
+<span class="go">snapshot.1.zip</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
 
 
 

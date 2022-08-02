@@ -145,6 +145,17 @@ included instrumental uncertainties.</p>
 <p>The default location where this output will be placed is the <code class="docutils literal notranslate"><span class="pre">cwd()</span></code> where the
 <code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">submit</span></code> command was executed; the default filenames of the returned files
 are <code class="docutils literal notranslate"><span class="pre">results.&lt;jobid&gt;.[zip,json]</span></code>.</p>
+</section>
+<section id="data-snapshotting">
+<h2>Data snapshotting<a class="headerlink" href="#data-snapshotting" title="Permalink to this headline"></a></h2>
+<p>Access to an up-to-date snapthos of the data while a <em>job</em> is running is provided
+by <a class="reference internal" href="tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup snapshot &lt;jobid&gt;
+</pre></div>
+</div>
+<p>This will create an up-to-date <code class="docutils literal notranslate"><span class="pre">snapshot.&lt;jobid&gt;.[zip,json]</span></code> in the <code class="docutils literal notranslate"><span class="pre">cwd()</span></code>.
+The files are overwritten on subsequent invocations of <code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">snapshot</span></code>. An
+automated snapshotting can be further enabled within the <em>payload</em> of the <em>job</em>.</p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
