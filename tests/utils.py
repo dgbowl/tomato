@@ -15,17 +15,17 @@ def run_casename(
     proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
     p = psutil.Process(pid=proc.pid)
     while not os.path.exists("database.db"):
-        time.sleep(0.1)
+        time.sleep(1)
+
     subprocess.run(["ketchup", "-t", "load", casename, "dummy-10", "-vv"])
+    subprocess.run(["ketchup", "-t", "ready", "dummy-10", "-vv"])
     args = ["ketchup", "-t", "submit", f"{casename}.yml", "dummy-10", "-vv"]
     if jobname is not None:
         args.append("--jobname")
         args.append(jobname)
     subprocess.run(args)
-    subprocess.run(["ketchup", "-t", "ready", "dummy-10", "-vv"])
 
     inter_exec = True if inter_func is not None else False
-
     start = time.perf_counter()
     while True:
         ret = subprocess.run(
@@ -44,7 +44,7 @@ def run_casename(
                     logger.debug("Running 'inter_exec()'")
                     inter_func()
                     inter_exec = False
-        time.sleep(0.1)
+        time.sleep(1)
         if end:
             dt = time.perf_counter() - start
             logger.debug("Job complete in %d s. ", dt)
