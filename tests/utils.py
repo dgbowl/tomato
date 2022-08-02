@@ -24,35 +24,35 @@ def run_casename(
         args.append("--jobname")
         args.append(jobname)
     subprocess.run(args)
-
-    inter_exec = True if inter_func is not None else False
+    
+    inter_exec = False
     start = time.perf_counter()
+    end = False
     while True:
+        dt = time.perf_counter() - start
+        if inter_exec and inter_func is not None:
+            logger.debug("Running 'inter_func()'")
+            inter_func()
+            inter_exec = False
+        if end:
+            logger.debug("Job complete in %d s. ", dt)
+            break
+        if dt > 120:
+            logger.warning("Job took more than 120 s. Aborting...")
+            break
+        time.sleep(2)
         ret = subprocess.run(
             ["ketchup", "-t", "status", "1"],
             capture_output=True,
             text=True,
         )
-        end = False
         for line in ret.stdout.split("\n"):
             if line.startswith("status"):
                 status = line.split("=")[1].strip()
                 if status.startswith("c"):
                     end = True
-                    break
-                elif status.startswith("r") and inter_exec:
-                    logger.debug("Running 'inter_exec()'")
-                    inter_func()
-                    inter_exec = False
-        time.sleep(1)
-        if end:
-            dt = time.perf_counter() - start
-            logger.debug("Job complete in %d s. ", dt)
-            break
-        if time.perf_counter() - start > 120:
-            logger.warning("Job took more than 120 s. Aborting...")
-            break
-
+                elif status.startswith("r"):
+                    inter_exec = True
     for cp in p.children():
         cp.send_signal(signal.SIGTERM)
     proc.terminate()
