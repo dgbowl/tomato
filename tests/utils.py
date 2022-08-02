@@ -18,7 +18,6 @@ def run_casename(
     if jobname is not None:
         args.append("--jobname")
         args.append(jobname)
-    print(args)
     subprocess.run(args)
     subprocess.run(["ketchup", "-t", "ready", "dummy-10", "-vv"])
 
@@ -40,7 +39,7 @@ def run_casename(
                 elif status.startswith("r") and inter_exec:
                     inter_func()
                     inter_exec = False
-                time.sleep(0.1)
+        time.sleep(0.1)
         if end:
             break
 
@@ -51,10 +50,8 @@ def run_casename(
 
 
 def cancel_job(jobid: int = 1):
-    time.sleep(2)
     subprocess.run(["ketchup", "-t", "cancel", f"{jobid}", "-vv"])
 
 
 def snapshot_job(jobid: int = 1):
-    time.sleep(5)
     subprocess.run(["ketchup", "-t", "snapshot", f"{jobid}", "-vv"])
