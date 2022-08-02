@@ -49,7 +49,7 @@ def ketchup_setup(casename, jobname):
 
 
 def ketchup_loop(start, inter_func):
-    inter_exec = False
+    inter_exec = None
     end = False
     logger.debug("In 'ketchup_loop'.")
     while True:
@@ -76,7 +76,7 @@ def ketchup_loop(start, inter_func):
                 status = line.split("=")[1].strip()
                 if status.startswith("c"):
                     end = True
-                elif status.startswith("r"):
+                elif status.startswith("r") and inter_exec is None:
                     inter_exec = True
     return status
 
