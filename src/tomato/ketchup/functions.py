@@ -4,7 +4,7 @@ import yaml
 import logging
 import signal
 import psutil
-import subprocess
+import time
 from argparse import Namespace
 from pathlib import Path
 from dgbowl_schemas.tomato import to_payload
@@ -232,12 +232,28 @@ def cancel(args: Namespace) -> None:
     """
 
     def kill_tomato_job(proc):
-        log.debug(
-            "sending SIGTERM to pid %d with name '%s'",
-            proc.pid,
-            proc.name(),
-        )
-        proc.send_signal(signal.SIGTERM)
+
+        def recurse(proclist):
+            for proc in proclist:
+                pc = proc.children()
+                log.debug(f"{proc.name()=}, {proc.pid=}, {pc=}")
+                if len(pc) > 0:
+                    recurse(pc)
+                    gone, alive = psutil.wait_procs(pc,timeout=10)
+                    log.debug(f"{gone=}")
+                    log.debug(f"{alive=}")
+                    rc = proc.wait(timeout=1)
+                    log.debug(f"{proc.name()=}, {proc.pid=}, {rc=}")
+                if proc.name() in {"python", "python.exe"}:
+                    proc.terminate()
+                    rc = proc.wait(timeout=1)
+                    log.debug(f"{proc.name()=}, {proc.pid=}, {rc=}")
+            
+        pc = proc.children()
+        log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
+        recurse(pc)
+                
+            
 
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
@@ -259,10 +275,7 @@ def cancel(args: Namespace) -> None:
             if pjobid == jobid:
                 log.warning(f"cancelling a running job {jobid} with pid {pid}")
                 proc = psutil.Process(pid=pid)
-                for cp in proc.children():
-                    if cp.name() in {"python", "python.exe"}:
-                        for ccp in cp.children():
-                            kill_tomato_job(ccp)
+                kill_tomato_job(proc)
 
 
 def load(args: Namespace) -> None:
@@ -428,3 +441,43 @@ def snapshot(args: Namespace) -> None:
     yadg_funcs.process_yadg_preset(
         preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=jobdir
     )
+
+
+def search(args: Namespace) -> None:
+    """
+    Search the queue for a job that matches a given jobname. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] [-c] search <jobname>
+
+    Searches the ``queue`` for a job that matches the ``jobname``, returns the
+    job status and ``jobid``. If the option ``-c/--complete`` is specified,
+    the completed jobs will also be searched.
+    
+    .. note:: 
+
+        Output of ``ketchup search`` is a valid ``yaml``.
+
+    Examples
+    --------
+
+    >>> # Create a snapshot in current working directory:
+    >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
+    >>> ketchup search dummy_random_2
+    - jobname: dummy_random_2_0.1
+      jobid: 1
+      status: r
+
+    """
+    dirs = setlib.get_dirs(args.test)
+    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    queue = settings["queue"]
+    
+    alljobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
+    for jobid, jobname, payload, status in alljobs:
+        if jobname is not None and args.jobname in jobname:
+            if args.complete or not status.startswith("c"):
+                print(f"- jobname: {jobname}")
+                print(f"  jobid: {jobid}")
+                print(f"  status: {status}")
