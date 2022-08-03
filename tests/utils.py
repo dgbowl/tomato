@@ -12,8 +12,12 @@ from tomato import dbhandler
 
 def tomato_setup():
     logger.debug("In 'tomato_setup'.")
-    cfg = subprocess.CREATE_NEW_PROCESS_GROUP
-    proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
+    if psutil.WINDOWS:
+        cfg = subprocess.CREATE_NEW_PROCESS_GROUP
+        proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
+    elif psutil.POSIX:
+        proc = subprocess.Popen(["tomato", "-t", "-vv"], start_new_session=True)
+        print("HERE")
     p = psutil.Process(pid=proc.pid)
     while not os.path.exists("database.db"):
         time.sleep(0.1)

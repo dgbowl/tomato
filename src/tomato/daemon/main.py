@@ -87,12 +87,19 @@ def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
                         jpath = os.path.join(root, "jobdata.json")
                         with open(jpath, "w") as of:
                             json.dump(args, of, indent=1)
-                        cfs = subprocess.CREATE_NO_WINDOW
-                        if not test:
-                            cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
-                        subprocess.Popen(
-                            ["tomato_job", str(jpath)],
-                            creationflags=cfs,
-                        )
+                        if psutil.WINDOWS:
+                            cfs = subprocess.CREATE_NO_WINDOW
+                            if not test:
+                                cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
+                            subprocess.Popen(
+                                ["tomato_job", str(jpath)],
+                                creationflags=cfs,
+                            )
+                        elif psutil.POSIX:
+                            sns = False if test else True
+                            subprocess.Popen(
+                                ["tomato_job", str(jpath)],
+                                start_new_session=sns
+                            )
                         break
         time.sleep(settings.get("main loop", 1))
