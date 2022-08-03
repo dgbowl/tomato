@@ -4,14 +4,12 @@
 **tomato** is an instrument automation package, currently developed in the 
 `Materials for Energy Conversion <https://www.empa.ch/web/s501>`_ at Empa. 
 
-.. warning::
-
-   Tomato is Windows-only. 
 
 Currently supported hardware is:
 
-- a Dummy device for testing
-- BioLogic potentiostats via the EC-Lib library
+- :mod:`~tomato.drivers.dummy`: driver for a dummy device, useful for testing
+- :mod:`~tomato.drivers.biologic`: driver for BioLogic potentiostats via the EC-Lib library;
+**Windows only**.
 
 Installation
 ------------

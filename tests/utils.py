@@ -10,10 +10,15 @@ logger = logging.getLogger(__name__)
 
 from tomato import dbhandler
 
+
 def tomato_setup():
     logger.debug("In 'tomato_setup'.")
-    cfg = subprocess.CREATE_NEW_PROCESS_GROUP
-    proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
+    if psutil.WINDOWS:
+        cfg = subprocess.CREATE_NEW_PROCESS_GROUP
+        proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
+    elif psutil.POSIX:
+        proc = subprocess.Popen(["tomato", "-t", "-vv"], start_new_session=True)
+        print("HERE")
     p = psutil.Process(pid=proc.pid)
     while not os.path.exists("database.db"):
         time.sleep(0.1)
@@ -22,14 +27,12 @@ def tomato_setup():
     while not queue or not state:
         if not queue:
             cur.execute(
-                "SELECT name FROM sqlite_master "
-                "WHERE type='table' AND name='queue';"
+                "SELECT name FROM sqlite_master " "WHERE type='table' AND name='queue';"
             )
             queue = bool(len(cur.fetchall()))
         if not state:
             cur.execute(
-                "SELECT name FROM sqlite_master "
-                "WHERE type='table' AND name='state';"
+                "SELECT name FROM sqlite_master " "WHERE type='table' AND name='state';"
             )
             state = bool(len(cur.fetchall()))
         time.sleep(0.1)
@@ -53,6 +56,7 @@ def ketchup_loop(start, inter_func):
     end = False
     logger.debug("In 'ketchup_loop'.")
     while True:
+        time.sleep(1)
         dt = time.perf_counter() - start
         if end:
             logger.debug("Job complete in %d s. ", dt)
@@ -86,11 +90,11 @@ def ketchup_kill(proc, p):
     for cp in p.children():
         cp.send_signal(signal.SIGTERM)
     proc.terminate()
-    
+
 
 def run_casename(
-    casename: str, 
-    jobname: str = None, 
+    casename: str,
+    jobname: str = None,
     inter_func: Callable = None,
 ) -> str:
     proc, p = tomato_setup()

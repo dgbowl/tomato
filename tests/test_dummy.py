@@ -57,16 +57,8 @@ def test_run_dummy_random(casename, npoints, prefix, datadir):
 @pytest.mark.parametrize(
     "casename, jobname, search",
     [
-        (
-            "dummy_random_1_0.1",
-            "custom_name",
-            False
-        ),
-        (
-            "dummy_random_30_1",
-            "$MATCH_custom_name",
-            True
-        ),
+        ("dummy_random_1_0.1", "custom_name", False),
+        ("dummy_random_30_1", "$MATCH_custom_name", True),
     ],
 )
 def test_run_dummy_jobname(casename, jobname, search, datadir):

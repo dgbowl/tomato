@@ -4,7 +4,7 @@ on:
     branches: ['master']
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -20,7 +20,7 @@ jobs:
           path: dist
   test:
     needs: [build]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -42,7 +42,7 @@ jobs:
       - uses: ./.github/workflows/test-job
   pages:
     needs: [build]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -67,7 +67,7 @@ jobs:
           path: public/master
   deploy:
     needs: [pages]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2

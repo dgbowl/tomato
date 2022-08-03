@@ -232,28 +232,24 @@ def cancel(args: Namespace) -> None:
     """
 
     def kill_tomato_job(proc):
-
-        def recurse(proclist):
-            for proc in proclist:
-                pc = proc.children()
-                log.debug(f"{proc.name()=}, {proc.pid=}, {pc=}")
-                if len(pc) > 0:
-                    recurse(pc)
-                    gone, alive = psutil.wait_procs(pc,timeout=10)
-                    log.debug(f"{gone=}")
-                    log.debug(f"{alive=}")
-                    rc = proc.wait(timeout=1)
-                    log.debug(f"{proc.name()=}, {proc.pid=}, {rc=}")
-                if proc.name() in {"python", "python.exe"}:
-                    proc.terminate()
-                    rc = proc.wait(timeout=1)
-                    log.debug(f"{proc.name()=}, {proc.pid=}, {rc=}")
-            
         pc = proc.children()
         log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
-        recurse(pc)
-                
-            
+        if psutil.WINDOWS:
+            for proc in pc:
+                if proc.name() in {"conhost.exe"}:
+                    continue
+                ppc = proc.children()
+                for proc in ppc:
+                    log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
+                    proc.terminate()
+                gone, alive = psutil.wait_procs(ppc, timeout=10)
+        elif psutil.POSIX:
+            for proc in pc:
+                log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
+                proc.terminate()
+            gone, alive = psutil.wait_procs(pc, timeout=10)
+        log.debug(f"{gone=}")
+        log.debug(f"{alive=}")
 
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
@@ -275,6 +271,7 @@ def cancel(args: Namespace) -> None:
             if pjobid == jobid:
                 log.warning(f"cancelling a running job {jobid} with pid {pid}")
                 proc = psutil.Process(pid=pid)
+                log.debug(f"{proc=}")
                 kill_tomato_job(proc)
 
 
@@ -454,8 +451,8 @@ def search(args: Namespace) -> None:
     Searches the ``queue`` for a job that matches the ``jobname``, returns the
     job status and ``jobid``. If the option ``-c/--complete`` is specified,
     the completed jobs will also be searched.
-    
-    .. note:: 
+
+    .. note::
 
         Output of ``ketchup search`` is a valid ``yaml``.
 
@@ -473,7 +470,7 @@ def search(args: Namespace) -> None:
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     queue = settings["queue"]
-    
+
     alljobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
     for jobid, jobname, payload, status in alljobs:
         if jobname is not None and args.jobname in jobname:

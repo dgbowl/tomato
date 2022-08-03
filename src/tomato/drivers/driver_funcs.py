@@ -8,6 +8,7 @@ import os
 import json
 from datetime import datetime, timezone
 import logging
+import psutil
 
 from tomato.dbhandler.sqlite import pipeline_assign_job
 
@@ -59,8 +60,10 @@ def tomato_job() -> None:
     logger.debug("setting logger verbosity to '%s'", verbosity)
     logger.setLevel(loglevel)
 
-    # pid = os.getpid()
-    pid = os.getppid()  # On Windows, the parent is the tomato_job.exe
+    if psutil.WINDOWS:
+        pid = os.getppid()
+    elif psutil.POSIX:
+        pid = os.getpid()
 
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
     dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
