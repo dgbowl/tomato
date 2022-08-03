@@ -127,13 +127,13 @@ def run_ketchup():
     status = subparsers.add_parser("status")
     status.add_argument(
         "jobid",
-        nargs="?",
+        nargs="*",
         help=(
             "The jobid of the requested job, "
             "or 'queue' for the status of the queue,"
             "or 'state' for the status of pipelines."
         ),
-        default="state",
+        default=["state"],
     )
     status.set_defaults(func=ketchup.status)
 
