@@ -170,8 +170,8 @@ def run_ketchup():
 
     search = subparsers.add_parser("search")
     search.add_argument(
-        "jobname", 
-        help="The jobname of the searched job.", 
+        "jobname",
+        help="The jobname of the searched job.",
         default=None,
     )
     search.add_argument(

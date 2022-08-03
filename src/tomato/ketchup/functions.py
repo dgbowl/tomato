@@ -451,8 +451,8 @@ def search(args: Namespace) -> None:
     Searches the ``queue`` for a job that matches the ``jobname``, returns the
     job status and ``jobid``. If the option ``-c/--complete`` is specified,
     the completed jobs will also be searched.
-    
-    .. note:: 
+
+    .. note::
 
         Output of ``ketchup search`` is a valid ``yaml``.
 
@@ -470,7 +470,7 @@ def search(args: Namespace) -> None:
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     queue = settings["queue"]
-    
+
     alljobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
     for jobid, jobname, payload, status in alljobs:
         if jobname is not None and args.jobname in jobname:

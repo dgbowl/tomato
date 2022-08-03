@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 from tomato import dbhandler
 
+
 def tomato_setup():
     logger.debug("In 'tomato_setup'.")
     if psutil.WINDOWS:
@@ -26,14 +27,12 @@ def tomato_setup():
     while not queue or not state:
         if not queue:
             cur.execute(
-                "SELECT name FROM sqlite_master "
-                "WHERE type='table' AND name='queue';"
+                "SELECT name FROM sqlite_master " "WHERE type='table' AND name='queue';"
             )
             queue = bool(len(cur.fetchall()))
         if not state:
             cur.execute(
-                "SELECT name FROM sqlite_master "
-                "WHERE type='table' AND name='state';"
+                "SELECT name FROM sqlite_master " "WHERE type='table' AND name='state';"
             )
             state = bool(len(cur.fetchall()))
         time.sleep(0.1)
@@ -91,11 +90,11 @@ def ketchup_kill(proc, p):
     for cp in p.children():
         cp.send_signal(signal.SIGTERM)
     proc.terminate()
-    
+
 
 def run_casename(
-    casename: str, 
-    jobname: str = None, 
+    casename: str,
+    jobname: str = None,
     inter_func: Callable = None,
 ) -> str:
     proc, p = tomato_setup()

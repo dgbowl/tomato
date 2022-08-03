@@ -1,5 +1,6 @@
 from . import dummy
 import psutil
+
 if psutil.WINDOWS:
     from . import biologic
 
