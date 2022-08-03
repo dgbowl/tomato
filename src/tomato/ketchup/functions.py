@@ -239,12 +239,16 @@ def cancel(args: Namespace) -> None:
         )
 
     def kill_tomato_job(proc):
+        log.warning(f"{proc.name()=}")
         for cp in proc.children():
+            log.warning(f" {cp.name()=}")
             if cp.name() in {"python", "python.exe"}:
-                for ccp in cp.children():
+                cpc = cp.children()
+                for ccp in cpc:
+                    log.warning(f"  {ccp.name()=}")
                     ccp.terminate()
                 gone, alive = psutil.wait_procs(
-                    cp,
+                    cpc,
                     timeout=3, 
                     callback=on_terminate
                 )
