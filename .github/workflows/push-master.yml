@@ -59,7 +59,6 @@ jobs:
             import subprocess
             fn = [f for f in os.listdir() if f.endswith('whl') and f.startswith('tomato')][0]
             subprocess.run(["pip", "install", f"{fn}[docs]"])
-      - uses: ./.github/workflows/test-job
       - uses: ./.github/workflows/docs-job
       - uses: actions/upload-artifact@v2
         with: 
