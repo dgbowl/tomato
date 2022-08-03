@@ -236,7 +236,7 @@ def cancel(args: Namespace) -> None:
         log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
         if psutil.WINDOWS:
             for proc in pc:
-                if pc.name() in {"conhost.exe"}:
+                if proc.name() in {"conhost.exe"}:
                     continue
                 ppc = proc.children()
                 for proc in ppc:
