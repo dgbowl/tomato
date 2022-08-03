@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime, timezone
 import logging
+import os
 
 log = logging.getLogger(__name__)
 
@@ -13,6 +14,11 @@ def get_db_conn(
         sql = sqlite3
     else:
         raise RuntimeError(f"database type '{type}' unsupported")
+    
+    head, tail = os.path.split(dbpath)
+    if not os.path.exists(head):
+        log.warning("making local data folder '%s'", head)
+        os.makedirs(head)
     conn = sql.connect(dbpath)
     cur = conn.cursor()
     return conn, cur
