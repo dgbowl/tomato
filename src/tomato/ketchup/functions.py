@@ -239,7 +239,12 @@ def cancel(args: Namespace) -> None:
                 log.debug(f"{proc.name()=}, {proc.pid=}, {pc=}")
                 if len(pc) > 0:
                     recurse(pc)
-                elif proc.name() in {"python", "python.exe"}:
+                    gone, alive = psutil.wait_procs(pc,timeout=10)
+                    log.debug(f"{gone=}")
+                    log.debug(f"{alive=}")
+                    rc = proc.wait(timeout=1)
+                    log.debug(f"{proc.name()=}, {proc.pid=}, {rc=}")
+                if proc.name() in {"python", "python.exe"}:
                     proc.terminate()
                     rc = proc.wait(timeout=1)
                     log.debug(f"{proc.name()=}, {proc.pid=}, {rc=}")
