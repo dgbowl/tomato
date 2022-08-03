@@ -305,6 +305,36 @@ Checks whether the job is running, raises a warning if job has been finished.</p
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.ketchup.functions.search">
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.functions.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.ketchup.functions.search" title="Permalink to this definition"></a></dt>
+<dd><p>Search the queue for a job that matches a given jobname. Usage:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ketchup <span class="o">[</span>-t<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-q<span class="o">]</span> <span class="o">[</span>-c<span class="o">]</span> search &lt;jobname&gt;
+</pre></div>
+</div>
+<p>Searches the <code class="docutils literal notranslate"><span class="pre">queue</span></code> for a job that matches the <code class="docutils literal notranslate"><span class="pre">jobname</span></code>, returns the
+job status and <code class="docutils literal notranslate"><span class="pre">jobid</span></code>. If the option <code class="docutils literal notranslate"><span class="pre">-c/--complete</span></code> is specified,
+the completed jobs will also be searched.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Output of <code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">search</span></code> is a valid <code class="docutils literal notranslate"><span class="pre">yaml</span></code>.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a snapshot in current working directory:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="o">.</span>\<span class="n">dummy_random_2_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">j</span> <span class="n">dummy_random_2_0</span><span class="mf">.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">search</span> <span class="n">dummy_random_2</span>
+<span class="go">- jobname: dummy_random_2_0.1</span>
+<span class="go">  jobid: 1</span>
+<span class="go">  status: r</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 
 
            </div>
