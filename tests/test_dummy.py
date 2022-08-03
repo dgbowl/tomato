@@ -115,7 +115,7 @@ def test_run_dummy_multiple(datadir):
     os.chdir(datadir)
     casenames = ["dummy_random_5_2", "dummy_random_1_0.1"]
     jobnames = ["job one", "job two"]
-    utils.run_casename(casename = casenames, jobname = jobnames)
+    utils.run_casename(casename=casenames, jobname=jobnames)
     ret = subprocess.run(
         ["ketchup", "-t", "status", "1", "2"],
         capture_output=True,
@@ -126,4 +126,3 @@ def test_run_dummy_multiple(datadir):
     assert {1, 2} == set([i["jobid"] for i in yml])
     assert set(jobnames) == set([i["jobname"] for i in yml])
     assert {"c"} == set([i["status"] for i in yml])
-    

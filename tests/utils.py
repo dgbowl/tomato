@@ -40,7 +40,7 @@ def tomato_setup():
     return proc, p
 
 
-def ketchup_setup(casename, jobname, pip = "dummy-10"):
+def ketchup_setup(casename, jobname, pip="dummy-10"):
     logger.debug("In 'ketchup_setup'.")
     subprocess.run(["ketchup", "-t", "load", casename, pip, "-vv"])
     subprocess.run(["ketchup", "-t", "ready", pip, "-vv"])

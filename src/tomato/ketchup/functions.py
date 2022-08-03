@@ -52,7 +52,7 @@ def submit(args: Namespace) -> None:
     >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
     jobid: 5
     jobname: dummy_random_2_0.1
-    
+
     """
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
