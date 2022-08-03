@@ -16,7 +16,7 @@ def get_db_conn(
         raise RuntimeError(f"database type '{type}' unsupported")
     
     head, tail = os.path.split(dbpath)
-    if not os.path.exists(head):
+    if head != "" and not os.path.exists(head):
         log.warning("making local data folder '%s'", head)
         os.makedirs(head)
     conn = sql.connect(dbpath)
