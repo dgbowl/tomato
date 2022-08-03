@@ -18,7 +18,6 @@ def tomato_setup():
         proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
     elif psutil.POSIX:
         proc = subprocess.Popen(["tomato", "-t", "-vv"], start_new_session=True)
-        print("HERE")
     p = psutil.Process(pid=proc.pid)
     while not os.path.exists("database.db"):
         time.sleep(0.1)
