@@ -231,34 +231,24 @@ def cancel(args: Namespace) -> None:
 
     """
 
-    def on_terminate(proc):
-        log.debug(
-            "process %d terminated with exit code '%s'",
-            proc.pid, 
-            proc.returncode
-        )
-
     def kill_tomato_job(proc):
-        log.warning(f"{proc.name()=}")
-        for cp in proc.children():
-            log.warning(f" {cp.name()=}")
-            if cp.name() in {"python", "python.exe"}:
-                cpc = cp.children()
-                for ccp in cpc:
-                    log.warning(f"  {ccp.name()=}")
-                    ccp.terminate()
-                gone, alive = psutil.wait_procs(
-                    cpc,
-                    timeout=3, 
-                    callback=on_terminate
-                )
-                for ccp in alive:
-                    ccp.kill()
-            else:
-                log.warning(
-                    "leaving process '%s' alive", 
-                    cp.name()
-                )
+
+        def recurse(proclist):
+            for proc in proclist:
+                pc = proc.children()
+                log.debug(f"{proc.name()=}, {proc.pid=}, {pc=}")
+                if len(pc) > 0:
+                    recurse(pc)
+                elif proc.name() in {"python", "python.exe"}:
+                    proc.terminate()
+                    rc = proc.wait(timeout=1)
+                    log.debug(f"{proc.name()=}, {proc.pid=}, {rc=}")
+            
+        pc = proc.children()
+        log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
+        recurse(pc)
+                
+            
 
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
