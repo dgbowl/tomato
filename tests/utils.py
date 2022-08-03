@@ -57,6 +57,7 @@ def ketchup_loop(start, inter_func):
     end = False
     logger.debug("In 'ketchup_loop'.")
     while True:
+        time.sleep(1)
         dt = time.perf_counter() - start
         if end:
             logger.debug("Job complete in %d s. ", dt)

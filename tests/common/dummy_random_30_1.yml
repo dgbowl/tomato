@@ -6,3 +6,5 @@ method:
     technique: "random"
     time: 30
     delay: 1
+tomato:
+    verbosity: "DEBUG"
