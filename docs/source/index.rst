@@ -6,12 +6,13 @@
 
 Currently supported hardware is:
 
-- :mod:`~tomato.drivers.dummy`: driver for a dummy device, useful for testing
-- :mod:`~tomato.drivers.biologic`: driver for BioLogic potentiostats via the EC-Lib library;
-**Windows only**.
+  - :mod:`~tomato.drivers.dummy`: driver for a dummy device, useful for testing
+  - :mod:`~tomato.drivers.biologic`: driver for BioLogic potentiostats via the EC-Lib library;
+    **Windows only**.
+
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: tomato user manual
 
    installation

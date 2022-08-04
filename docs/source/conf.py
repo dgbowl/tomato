@@ -34,8 +34,9 @@ extensions = [
     "sphinx.ext.autodoc",
     # "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
     # "sphinx.ext.autosummary",
-    "sphinx.ext.autosectionlabel",
+    # "sphinx.ext.autosectionlabel",
     "sphinx_autodoc_typehints",
     "sphinx_rtd_theme",
     "sphinxcontrib.autodoc_pydantic"
@@ -56,6 +57,9 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
+html_css_files = [
+    "custom_theme.css",
+]
 html_theme_options = {
     "body_max_width": "none",
     "sticky_navigation": True,
@@ -67,7 +71,7 @@ html_favicon = "./images/tomato_ico.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["images"]
+html_static_path = ["images", "_static"]
 
 
 # -- Extension configuration -------------------------------------------------
@@ -76,4 +80,8 @@ autosummary_generate = True
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 autodoc_member_order = "bysource"
 autodoc_pydantic_model_show_field_summary = False
+#autodoc_pydantic_model_show_validator_summary = False
 autodoc_pydantic_model_member_order = "bysource"
+intersphinx_mapping = {
+    'dgbowl_schemas': ("https://dgbowl.github.io/dgbowl-schemas/master", None)
+}

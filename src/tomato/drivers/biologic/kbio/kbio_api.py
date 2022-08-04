@@ -9,8 +9,8 @@ The aim of this API is to shield this module's clients from the ctypes intricaci
 leaving the user to use either plain types or types coming from this module, or the kbio_types module.
 
 The only consistent conventions in this API are :
-  * id_ is the connection identifier returned by a Connect call,
-  * ch is a 1 based channel identifier (vs a 0 based value in the DLL)
+  * ``id_`` is the connection identifier returned by a Connect call,
+  * ``ch`` is a 1 based channel identifier (vs a 0 based value in the DLL)
   * strings on the client side are encoded in this API, as the DLL uses bytes.
 
 Most of the functions raise an exception on error (a BL_Error exception type),

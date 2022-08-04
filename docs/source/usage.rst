@@ -1,11 +1,10 @@
 Usage
 -----
 
-The **tomato** package consists of two key parts: the job scheduler app ``tomato``,
-and the queue management app :mod:`~tomato.ketchup`.
+The **tomato** package consists of two key components: 
 
-Using ``tomato``
-````````````````
+  - the job scheduler in :mod:`tomato.daemon` executed by ``tomato``,
+  - the queue management app :mod:`tomato.ketchup` executed by ``ketchup``.
 
 The job scheduler ``tomato`` can be started in verbose mode for diagnostic output:
 
@@ -13,63 +12,107 @@ The job scheduler ``tomato`` can be started in verbose mode for diagnostic outpu
 
     tomato -vv
 
-``tomato`` is used to schedule *jobs* from the *queue* onto *pipelines*. A *pipeline*
-is a way of organising one or many *devices* in a single, addressable unit. In general, 
-a single *pipeline* should be a digital twin composed of all *devices* neccessary to
-carry out a single *payload*.
+It is used to schedule *jobs* from the *queue* onto *pipelines*, and tracks the overall
+*state* of the system. A *pipeline* is a way of organising one or many *devices* in a single, 
+addressable unit, see :ref:`devfile` for more details. In general, a single *pipeline* represents
+a digital twin of an experimental set-up, composed of all *devices* neccessary to carry out a 
+single experimental *payload*.
 
-Note that only a single instance of ``tomato`` can be running at a single machine.
-    
+.. note::
+
+    Only one instance of the :mod:`tomato.daemon` can be running at a single PC at the
+    same time, excluding any test-suite jobs (executed with the ``-t`` switch).
+
+.. note::
+
+    For instructions on how to set **tomato** up for a first run, see the :ref:`quickstart`.
+
 Using :mod:`~tomato.ketchup`
 ````````````````````````````
 
-:mod:`~tomato.ketchup` is used to submit, check the status of, and cancel *jobs* to 
-the *queue*, as well as to load or eject *samples* from *pipelines*.
+The :mod:`~tomato.ketchup` executable is used to submit *payloads* to the *queue*, 
+to check the status of and to cancel *jobs* in the *queue*, as well as to manage *pipelines* 
+by loading or ejecting *samples* and marking *pipelines* ready for execution.
 
-To submit a *payload* to the *queue*, run:
+    1.  **To submit** a *job* using a *payload* contained in a :ref:`payfile` to the *queue*, run:
 
-.. code:: bash
+        .. code-block:: bash
 
-    ketchup submit <payload>
+            >>> ketchup submit <payload>
+            jobid: <jobid>
 
-where ``<payload>`` is a file containing the *payload* information, including
-the description of the *sample*, details of the *method*, and other information
-required by ``tomato``.
+        The *job* will enter the *queue* and wait for a suitable *pipeline* to begin execution.
 
-To check the status of the *queue* or of a *job*, run either of:
+        .. note::
+    
+            For more information about how *jobs* are matched against *pipelines*, see the 
+            documentation of the :mod:`~tomato.daemon` module.
 
-.. code:: bash
+    2.  **To check the status** of a *job* with a known ``jobid``, run:
 
-    ketchup status
-    ketchup status queue
-    ketchup status <jobid>
+        .. code-block:: bash
 
-Further information about :mod:`~tomato.ketchup` is available in the documentation
-of the :mod:`~tomato.ketchup` module.
+            >>> ketchup status <jobid>
+            - jobid: <jobid>
+              jobname: null
+              status: r
+              submitted: 2022-06-30 11:18:21.538448+00:00
+              executed: 2022-06-30 11:18:22.983600+00:00
 
-Output data
------------
+        The list of possible *job* statuses is:
 
+        ======== ===========================================================
+         Status  Meaning
+        ======== ===========================================================
+           q     Job has entered the queue.
+           qw    Job is in the queue, waiting for a pipeline to be ready.
+           r     Job is running.
+           c     Job has completed successfully.
+           ce    Job has completed with an error.
+           cd    Job has been cancelled.
+        ======== ===========================================================
+
+        .. note::
+
+            The above command can process multiple ``jobids``, returning the information
+            in a ``yaml``-formatted output.
+
+    3.  **To cancel** a submitted *job* with a known ``jobid``, run:
+
+        .. code-block:: bash
+
+            >>> ketchup cancel <jobid>
+
+.. note::
+
+    Further information about :mod:`~tomato.ketchup` is available in the documentation
+    of the :mod:`~tomato.ketchup` module.
+
+Accessing output data
+`````````````````````
+
+Final job data
+**************
 By default, all data in the *job* folder is processed using ``yadg`` to create
 a *datagram*, and zipped into a zip archive. This zip archive includes all raw
-data files, the ``tomato_job`` log file, and a copy of the full job payload in a 
-``json`` file. The *datagram* contains timestamped, unit-annotated raw data, and
-included instrumental uncertainties.
+data files, the log file of the **tomato** job, and a copy of the full *payload* 
+in a ``json`` file. The *datagram* contains timestamped, unit-annotated raw data, 
+and includes instrumental uncertainties.
 
-The default location where this output will be placed is the ``cwd()`` where the 
-``ketchup submit`` command was executed; the default filenames of the returned files 
-are ``results.<jobid>.[zip,json]``.
+Unless specified within the *payload*, the default location where these output files 
+will be placed is the ``cwd()`` where the ``ketchup submit`` command was executed; 
+the default filenames of the returned files are ``results.<jobid>.[zip,json]``.
 
 Data snapshotting
------------------
-
-Access to an up-to-date snapthos of the data while a *job* is running is provided 
+*****************
+While the *job* is running, access to an up-to-date snapshot of the data is provided 
 by :mod:`~tomato.ketchup`:
 
 .. code:: bash
 
-    ketchup snapshot <jobid>
+    >>> ketchup snapshot <jobid>
 
 This will create an up-to-date ``snapshot.<jobid>.[zip,json]`` in the ``cwd()``.
 The files are overwritten on subsequent invocations of ``ketchup snapshot``. An
-automated snapshotting can be further enabled within the *payload* of the *job*.
+automated, periodic snapshotting can be further configured within the *payload* 
+of the *job*.
