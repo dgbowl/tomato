@@ -12,7 +12,8 @@ To prepare **tomato** for its first execution, you need to supply additional
 information configuring the package. The easiest way to do this is to execute
 **tomato** in verbose mode:
 
-.. code::
+.. code-block::
+   :linenos:
     
     PS C:\Users\krpe> tomato -vv
     DEBUG:tomato.main:loglevel set to 'DEBUG'
@@ -52,7 +53,8 @@ Settings file
 The ``settings.toml`` file should be located in the ``local config folder``. The default
 generated file looks similar to the below file:
 
-.. code::
+.. code-block:: toml
+   :linenos:
 
     [state]
     type = 'sqlite3'
@@ -94,7 +96,8 @@ the organisation of such *devices* into addressable chunks, called *pipelines*:
 ``devices`` section
 *******************
 
-.. code::
+.. code-block:: yaml
+   :linenos:
 
     devices:
       - name: MPG2-8
@@ -126,7 +129,8 @@ of the ``capabilities`` this *device* supports.
 ``pipelines`` section
 *********************
 
-.. code::
+.. code-block:: yaml
+   :linenos:
 
     pipelines:
       - name: MPG2-7-10
