@@ -93,6 +93,8 @@
 <li><p><a class="reference internal" href="#tomato.ketchup.functions.submit" title="tomato.ketchup.functions.submit"><code class="xref py py-func docutils literal notranslate"><span class="pre">submit()</span></code></a> to submit a <em>job</em> to <em>queue</em></p></li>
 <li><p><a class="reference internal" href="#tomato.ketchup.functions.status" title="tomato.ketchup.functions.status"><code class="xref py py-func docutils literal notranslate"><span class="pre">status()</span></code></a> to query the status of tomato’s <em>pipelines</em>, its <em>queue</em>, or a <em>job</em></p></li>
 <li><p><a class="reference internal" href="#tomato.ketchup.functions.cancel" title="tomato.ketchup.functions.cancel"><code class="xref py py-func docutils literal notranslate"><span class="pre">cancel()</span></code></a> to cancel a queued or kill a running <em>job</em></p></li>
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.snapshot" title="tomato.ketchup.functions.snapshot"><code class="xref py py-func docutils literal notranslate"><span class="pre">snapshot()</span></code></a> to create an up-to-date FAIR data archive of a running <em>job</em></p></li>
+<li><p><a class="reference internal" href="#tomato.ketchup.functions.search" title="tomato.ketchup.functions.search"><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></a> to find a <code class="docutils literal notranslate"><span class="pre">jobid</span></code> of a <em>job</em> from <code class="docutils literal notranslate"><span class="pre">jobname</span></code></p></li>
 </ul>
 <p>Also includes <em>sample</em>/<em>pipeline</em> management functions:</p>
 <ul class="simple">
@@ -117,7 +119,8 @@ switch (<code class="docutils literal notranslate"><span class="pre">-t</span></
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="o">.</span>\<span class="n">dummy_random_2_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span>
-<span class="go">jobid = 2</span>
+<span class="go">jobid: 2</span>
+<span class="go">jobname: null</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Increased verbosity:</span>
@@ -125,16 +128,14 @@ switch (<code class="docutils literal notranslate"><span class="pre">-t</span></
 <span class="go">INFO:tomato.ketchup.functions:Output path not set. Setting output path to &#39;C:\[...]&#39;</span>
 <span class="go">INFO:tomato.ketchup.functions:queueing &#39;payload&#39; into &#39;queue&#39;</span>
 <span class="go">INFO:tomato.dbhandler.sqlite:inserting a new job into &#39;state&#39;</span>
-<span class="go">jobid = 4</span>
+<span class="go">jobid: 4</span>
+<span class="go">jobname: null</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With a job name:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="o">.</span>\<span class="n">dummy_random_2_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">j</span> <span class="n">dummy_random_2_0</span><span class="mf">.1</span>
-<span class="go">jobid = 5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">5</span>
-<span class="go">jobid = 5</span>
-<span class="go">jobname = dummy_random_2_0.1</span>
-<span class="gp">...</span>
+<span class="go">jobid: 5</span>
+<span class="go">jobname: dummy_random_2_0.1</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -184,14 +185,19 @@ quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/
 <span class="go">4      other_name           q</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Calling <code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">status</span></code> with a single <code class="docutils literal notranslate"><span class="pre">jobid</span></code> will return a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, even though status of only one element was queried.</p>
+</div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of a given job</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span>
-<span class="go">jobid = 1</span>
-<span class="go">jobname = None</span>
-<span class="go">status  = c</span>
-<span class="go">submitted at = 2022-06-02 06:49:00.578619+00:00</span>
-<span class="go">executed at  = 2022-06-02 06:49:02.966775+00:00</span>
-<span class="go">completed at = 2022-06-02 06:49:08.229213+00:00</span>
+<span class="go">- jobid: 1</span>
+<span class="go">  jobname: null</span>
+<span class="go">  status:  c</span>
+<span class="go">  submitted: 2022-06-02 06:49:00.578619+00:00</span>
+<span class="go">  executed: 2022-06-02 06:49:02.966775+00:00</span>
+<span class="go">  completed: 2022-06-02 06:49:08.229213+00:00</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -315,16 +321,12 @@ Checks whether the job is running, raises a warning if job has been finished.</p
 <p>Searches the <code class="docutils literal notranslate"><span class="pre">queue</span></code> for a job that matches the <code class="docutils literal notranslate"><span class="pre">jobname</span></code>, returns the
 job status and <code class="docutils literal notranslate"><span class="pre">jobid</span></code>. If the option <code class="docutils literal notranslate"><span class="pre">-c/--complete</span></code> is specified,
 the completed jobs will also be searched.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Output of <code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">search</span></code> is a valid <code class="docutils literal notranslate"><span class="pre">yaml</span></code>.</p>
-</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a snapshot in current working directory:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="o">.</span>\<span class="n">dummy_random_2_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">j</span> <span class="n">dummy_random_2_0</span><span class="mf">.1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">search</span> <span class="n">dummy_random_2</span>
-<span class="go">- jobname: dummy_random_2_0.1</span>
-<span class="go">  jobid: 1</span>
+<span class="go">- jobid: 1</span>
+<span class="go">  jobname: dummy_random_2_0.1</span>
 <span class="go">  status: r</span>
 </pre></div>
 </div>
