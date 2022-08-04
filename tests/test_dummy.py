@@ -2,6 +2,7 @@ import pytest
 import json
 import os
 import subprocess
+import yaml
 
 from . import utils
 
@@ -108,3 +109,20 @@ def test_run_dummy_snapshot(casename, external, datadir):
     assert status == "c"
     assert os.path.exists("snapshot.1.json")
     assert os.path.exists("snapshot.1.zip")
+
+
+def test_run_dummy_multiple(datadir):
+    os.chdir(datadir)
+    casenames = ["dummy_random_5_2", "dummy_random_1_0.1"]
+    jobnames = ["job one", "job two"]
+    utils.run_casename(casename=casenames, jobname=jobnames)
+    ret = subprocess.run(
+        ["ketchup", "-t", "status", "1", "2"],
+        capture_output=True,
+        text=True,
+    )
+    yml = yaml.safe_load(ret.stdout)
+    assert len(yml) == 2
+    assert {1, 2} == set([i["jobid"] for i in yml])
+    assert set(jobnames) == set([i["jobname"] for i in yml])
+    assert {"c"} == set([i["status"] for i in yml])

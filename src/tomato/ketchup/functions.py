@@ -37,22 +37,21 @@ def submit(args: Namespace) -> None:
 
     >>> # Submit a job:
     >>> ketchup submit .\dummy_random_2_0.1.yml
-    jobid = 2
+    jobid: 2
+    jobname: null
 
     >>> # Increased verbosity:
     >>> ketchup -v submit .\dummy_random_2_0.1.yml
     INFO:tomato.ketchup.functions:Output path not set. Setting output path to 'C:\[...]'
     INFO:tomato.ketchup.functions:queueing 'payload' into 'queue'
     INFO:tomato.dbhandler.sqlite:inserting a new job into 'state'
-    jobid = 4
+    jobid: 4
+    jobname: null
 
     >>> # With a job name:
     >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
-    jobid = 5
-    >>> ketchup status 5
-    jobid = 5
-    jobname = dummy_random_2_0.1
-    ...
+    jobid: 5
+    jobname: dummy_random_2_0.1
 
     """
     dirs = setlib.get_dirs(args.test)
@@ -84,7 +83,8 @@ def submit(args: Namespace) -> None:
     jobid = dbhandler.queue_payload(
         queue["path"], pstr, type=queue["type"], jobname=args.jobname
     )
-    print(f"jobid = {jobid}")
+    print(f"jobid: {jobid}")
+    print(f"jobname: {'null' if args.jobname is None else args.jobname}")
 
 
 def status(args: Namespace) -> None:
@@ -128,14 +128,19 @@ def status(args: Namespace) -> None:
     3      None                 r      1035      dummy-10
     4      other_name           q
 
+    .. note::
+
+        Calling ``ketchup status`` with a single ``jobid`` will return a ``yaml``
+        :class:`list`, even though status of only one element was queried.
+
     >>> # Get status of a given job
     >>> ketchup status 1
-    jobid = 1
-    jobname = None
-    status  = c
-    submitted at = 2022-06-02 06:49:00.578619+00:00
-    executed at  = 2022-06-02 06:49:02.966775+00:00
-    completed at = 2022-06-02 06:49:08.229213+00:00
+    - jobid: 1
+      jobname: null
+      status:  c
+      submitted: 2022-06-02 06:49:00.578619+00:00
+      executed: 2022-06-02 06:49:02.966775+00:00
+      completed: 2022-06-02 06:49:08.229213+00:00
 
     """
     dirs = setlib.get_dirs(args.test)
@@ -143,7 +148,7 @@ def status(args: Namespace) -> None:
     state = settings["state"]
     queue = settings["queue"]
 
-    if args.jobid == "state":
+    if "state" in args.jobid:
         pips = dbhandler.pipeline_get_all(state["path"], type=state["type"])
         print(
             f"{'pipeline':20s} {'ready':5s} {'jobid':6s} {'(PID)':9s} {'sampleid':20s} "
@@ -156,7 +161,7 @@ def status(args: Namespace) -> None:
             rstr = "yes" if ready else "no"
             job = f"{str(jobid):6s} ({pid})" if jobid is not None else str(jobid)
             print(f"{pip:20s} {rstr:5s} {job:16s} {str(sampleid):20s}")
-    elif args.jobid == "queue":
+    elif "queue" in args.jobid:
         jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
         running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
         print(
@@ -176,26 +181,33 @@ def status(args: Namespace) -> None:
             elif status.startswith("c") and args.verbose - args.quiet > 0:
                 print(f"{str(jobid):6s} {str(jobname):20s} {status:6s}")
     else:
-        jobid = int(args.jobid)
-        ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
-        if ji is None:
-            log.error("job with jobid '%s' does not exist.", jobid)
-            return None
-        jobname, payload, status, submitted_at, executed_at, completed_at = ji
-        print(f"jobid = {jobid}")
-        print(f"jobname = {jobname}")
-        print(f"status  = {status}")
-        print(f"submitted at = {submitted_at}")
-        if status.startswith("r") or status.startswith("c"):
-            print(f"executed at  = {executed_at}")
-            running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
-            for pipeline, pjobid, pid in running:
-                if pjobid == jobid:
-                    print(f"with pipeline = {pipeline}")
-                    print(f"with PID = {pid}")
-                    break
-        if status.startswith("c"):
-            print(f"completed at = {completed_at}")
+        for jobid in args.jobid:
+            try:
+                jobid = int(jobid)
+            except:
+                logging.error("could not parse provided jobid: '%s'", jobid)
+                return 1
+            ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
+            if ji is None:
+                log.error("job with jobid '%s' does not exist.", jobid)
+                return None
+            jobname, payload, status, submitted_at, executed_at, completed_at = ji
+            print(f"- jobid: {jobid}")
+            print(f"  jobname: {'null' if jobname is None else jobname}")
+            print(f"  status: {status}")
+            print(f"  submitted: {submitted_at}")
+            if status.startswith("r") or status.startswith("c"):
+                print(f"  executed: {executed_at}")
+                running = dbhandler.pipeline_get_running(
+                    state["path"], type=state["type"]
+                )
+                for pipeline, pjobid, pid in running:
+                    if pjobid == jobid:
+                        print(f"  pipeline: {pipeline}")
+                        print(f"  pid: {pid}")
+                        break
+            if status.startswith("c"):
+                print(f"  completed: {completed_at}")
 
 
 def cancel(args: Namespace) -> None:
@@ -452,18 +464,14 @@ def search(args: Namespace) -> None:
     job status and ``jobid``. If the option ``-c/--complete`` is specified,
     the completed jobs will also be searched.
 
-    .. note::
-
-        Output of ``ketchup search`` is a valid ``yaml``.
-
     Examples
     --------
 
     >>> # Create a snapshot in current working directory:
     >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
     >>> ketchup search dummy_random_2
-    - jobname: dummy_random_2_0.1
-      jobid: 1
+    - jobid: 1
+      jobname: dummy_random_2_0.1
       status: r
 
     """
@@ -475,6 +483,6 @@ def search(args: Namespace) -> None:
     for jobid, jobname, payload, status in alljobs:
         if jobname is not None and args.jobname in jobname:
             if args.complete or not status.startswith("c"):
-                print(f"- jobname: {jobname}")
-                print(f"  jobid: {jobid}")
+                print(f"- jobid: {jobid}")
+                print(f"  jobname: {jobname}")
                 print(f"  status: {status}")

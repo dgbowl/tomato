@@ -3,8 +3,9 @@ import time
 import psutil
 import signal
 import os
+import yaml
 import logging
-from typing import Callable
+from typing import Callable, Union, Sequence
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +40,15 @@ def tomato_setup():
     return proc, p
 
 
-def ketchup_setup(casename, jobname):
+def ketchup_setup(casename, jobname, pip="dummy-10"):
     logger.debug("In 'ketchup_setup'.")
-    subprocess.run(["ketchup", "-t", "load", casename, "dummy-10", "-vv"])
-    subprocess.run(["ketchup", "-t", "ready", "dummy-10", "-vv"])
-    args = ["ketchup", "-t", "submit", f"{casename}.yml", "dummy-10", "-vv"]
+    subprocess.run(["ketchup", "-t", "load", casename, pip, "-vv"])
+    subprocess.run(["ketchup", "-t", "ready", pip, "-vv"])
+    args = ["ketchup", "-t", "submit", f"{casename}.yml", "-vv"]
     if jobname is not None:
         args.append("--jobname")
         args.append(jobname)
+    print(args)
     subprocess.run(args)
 
 
@@ -74,13 +76,13 @@ def ketchup_loop(start, inter_func):
             capture_output=True,
             text=True,
         )
-        for line in ret.stdout.split("\n"):
-            if line.startswith("status"):
-                status = line.split("=")[1].strip()
-                if status.startswith("c"):
-                    end = True
-                elif status.startswith("r") and inter_exec is None:
-                    inter_exec = True
+        yml = yaml.safe_load(ret.stdout)
+        assert len(yml) == 1
+        status = yml[0]["status"]
+        if status.startswith("c"):
+            end = True
+        elif status.startswith("r") and inter_exec is None:
+            inter_exec = True
     return status
 
 
@@ -92,12 +94,20 @@ def ketchup_kill(proc, p):
 
 
 def run_casename(
-    casename: str,
-    jobname: str = None,
+    casename: Union[str, list[str]],
+    jobname: Union[str, list[str]] = None,
     inter_func: Callable = None,
 ) -> str:
     proc, p = tomato_setup()
-    ketchup_setup(casename, jobname)
+    if isinstance(casename, str):
+        ketchup_setup(casename, jobname)
+    elif isinstance(casename, Sequence):
+        pnames = ["dummy-10", "dummy-5"]
+        for idx, tup in enumerate(zip(casename, jobname)):
+            cn, jn = tup
+            pn = pnames[idx]
+            print(f"{cn=}, {jn=}, {pn=}")
+            ketchup_setup(cn, jn, pip=pn)
     status = ketchup_loop(time.perf_counter(), inter_func)
     ketchup_kill(proc, p)
     return status
