@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato: au-tomation without the pain! &mdash; tomato master documentation</title>
+  <title>Installation &mdash; tomato master documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -21,7 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="installation.html" /> 
+    <link rel="next" title="Quick start guide" href="quickstart.html" />
+    <link rel="prev" title="tomato: au-tomation without the pain!" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -29,7 +30,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> tomato
+            <a href="index.html" class="icon icon-home"> tomato
             <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
@@ -44,8 +45,11 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">tomato user manual</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#testing-the-installation">Testing the installation</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 </ul>
@@ -65,17 +69,17 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">tomato</a>
+          <a href="index.html">tomato</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li><strong>tomato</strong>: au-tomation without the pain!</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Installation</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -83,42 +87,46 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="tomato-au-tomation-without-the-pain">
-<h1><strong>tomato</strong>: au-tomation without the pain!<a class="headerlink" href="#tomato-au-tomation-without-the-pain" title="Permalink to this headline"></a></h1>
-<p><strong>tomato</strong> is an instrument automation package, currently developed in the
-<a class="reference external" href="https://www.empa.ch/web/s501">Materials for Energy Conversion</a> lab at Empa.</p>
-<p><strong>tomato</strong> includes:</p>
-<ul class="simple">
-<li><p>the job scheduler and queue, <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a>, using a <code class="docutils literal notranslate"><span class="pre">sqlite3</span></code> backend for IPC;</p></li>
-<li><p>the configuration utility <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>, modelled after PBS / SGE;</p></li>
-<li><p>a set of device drivers, see the <a class="reference internal" href="#driver-library"><span class="std std-ref">tomato driver library</span></a>.</p></li>
-</ul>
-<p><em>Code author: Peter Kraus,
-Loris Ercole</em></p>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">tomato user manual</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-</ul>
+  <section id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<p>Pre-built wheels of <strong>tomato</strong> are available on <a class="reference external" href="https://pypi.org/project/tomato/">PyPI</a>
+and can be installed using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">pre</span> <span class="n">tomato</span><span class="p">[</span><span class="n">docs</span><span class="p">,</span><span class="n">testing</span><span class="p">]</span>
+</pre></div>
 </div>
-<div class="toctree-wrapper compound" id="driver-library">
-<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
-</ul>
+<p>We strongly recommend installing <strong>tomato</strong> into a separate <code class="docutils literal notranslate"><span class="pre">conda</span></code> or <code class="docutils literal notranslate"><span class="pre">venv</span></code>
+environment.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The optional targets <code class="docutils literal notranslate"><span class="pre">[docs]</span></code> and <code class="docutils literal notranslate"><span class="pre">[testing]</span></code> will install packages required
+for building this documentation and running the test-suite, respectively.</p>
 </div>
-<div class="toctree-wrapper compound">
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As currently <strong>tomato</strong> does not have a stable release, make sure to install
+the latest development version using the <code class="docutils literal notranslate"><span class="pre">--pre</span></code> argument to <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
 </div>
+<section id="testing-the-installation">
+<h2>Testing the installation<a class="headerlink" href="#testing-the-installation" title="Permalink to this headline"></a></h2>
+<p>To run the test-suite, you need to first install <strong>tomato</strong> using the above command,
+and then you need to clone the git repository, and launch <code class="docutils literal notranslate"><span class="pre">pytest</span></code> from within the
+created <code class="docutils literal notranslate"><span class="pre">tomato</span></code> folder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">dgbowl</span><span class="o">/</span><span class="n">tomato</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">tomato</span>
+<span class="n">pytest</span> <span class="o">-</span><span class="n">vv</span>
+</pre></div>
+</div>
+<p>The test-suite currently contains tests using the <a class="reference internal" href="apidoc/tomato.drivers.dummy.html#module-tomato.drivers.dummy" title="tomato.drivers.dummy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dummy</span></code></a> driver,
+and therefore should work on all platforms.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="tomato: au-tomation without the pain!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quick start guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

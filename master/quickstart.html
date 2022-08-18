@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick start guide &mdash; tomato master documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> tomato
+            <img src="_static/tomato.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                master
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">tomato user manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick start guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#first-time-set-up">First time set-up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#settings-file">Settings file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#devices-file">Devices file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#devices-section"><strong>devices</strong> section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipelines-section"><strong>pipelines</strong> section</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#payload-file">Payload file</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.html">tomato package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tomato</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Quick start guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quick-start-guide">
+<span id="quickstart"></span><h1>Quick start guide<a class="headerlink" href="#quick-start-guide" title="Permalink to this headline"></a></h1>
+<section id="first-time-set-up">
+<h2>First time set-up<a class="headerlink" href="#first-time-set-up" title="Permalink to this headline"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section assumes that <strong>tomato</strong> has been successfully <a class="reference internal" href="installation.html#installation"><span class="std std-ref">installed</span></a>.</p>
+</div>
+<p>To prepare <strong>tomato</strong> for its first execution, you need to supply additional
+information configuring the package. The easiest way to do this is to execute
+<strong>tomato</strong> in verbose mode:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> <span class="n">PS</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">krpe</span><span class="o">&gt;</span> <span class="n">tomato</span> <span class="o">-</span><span class="n">vv</span>
+<span class="linenos">2</span> <span class="n">DEBUG</span><span class="p">:</span><span class="n">tomato</span><span class="o">.</span><span class="n">main</span><span class="p">:</span><span class="n">loglevel</span> <span class="nb">set</span> <span class="n">to</span> <span class="s1">&#39;DEBUG&#39;</span>
+<span class="hll"><span class="linenos">3</span> <span class="n">DEBUG</span><span class="p">:</span><span class="n">tomato</span><span class="o">.</span><span class="n">setlib</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span><span class="n">local</span> <span class="n">config</span> <span class="n">folder</span> <span class="ow">is</span> <span class="s1">&#39;C:\Users\krpe\AppData\Local\dgbowl</span><span class="se">\t</span><span class="s1">omato</span><span class="se">\0</span><span class="s1">.2a1&#39;</span>
+</span><span class="linenos">4</span> <span class="n">DEBUG</span><span class="p">:</span><span class="n">tomato</span><span class="o">.</span><span class="n">setlib</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span><span class="n">local</span> <span class="n">data</span> <span class="n">folder</span> <span class="ow">is</span> <span class="s1">&#39;C:\Users\krpe\AppData\Local\dgbowl</span><span class="se">\t</span><span class="s1">omato</span><span class="se">\0</span><span class="s1">.2a1&#39;</span>
+<span class="linenos">5</span> <span class="n">DEBUG</span><span class="p">:</span><span class="n">tomato</span><span class="o">.</span><span class="n">setlib</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span><span class="n">local</span> <span class="n">log</span> <span class="n">folder</span> <span class="ow">is</span> <span class="s1">&#39;C:\Users\krpe\AppData\Local\dgbowl</span><span class="se">\t</span><span class="s1">omato</span><span class="se">\0</span><span class="s1">.2a1\Logs&#39;</span>
+<span class="linenos">6</span> <span class="n">WARNING</span><span class="p">:</span><span class="n">tomato</span><span class="o">.</span><span class="n">setlib</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span><span class="n">config</span> <span class="n">file</span> <span class="ow">not</span> <span class="n">present</span><span class="o">.</span> <span class="n">Writing</span> <span class="n">defaults</span> <span class="n">to</span> <span class="s1">&#39;C:\Users\krpe\AppData\Local\dgbowl</span><span class="se">\t</span><span class="s1">omato</span><span class="se">\0</span><span class="s1">.2a1\settings.toml&#39;</span>
+<span class="linenos">7</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>As you see on <code class="docutils literal notranslate"><span class="pre">line</span> <span class="pre">3</span></code> in this verbose output, <strong>tomato</strong> is configured to store its local configuration
+data in a user-accessible folder:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$env:localappdata\dgbowl\tomato\&lt;version&gt;</span></code> on Windows,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">$HOME/.config/&lt;version&gt;</span></code> on Linux.</p></li>
+</ul>
+</div></blockquote>
+<p>Within this <code class="docutils literal notranslate"><span class="pre">local</span> <span class="pre">config</span> <span class="pre">folder</span></code>, <strong>tomato</strong> expects to find at least the <a class="reference internal" href="#setfile"><span class="std std-ref">Settings file</span></a>
+(<code class="docutils literal notranslate"><span class="pre">settings.toml</span></code>).</p>
+<p>As you can also see from the log, on Windows the <code class="docutils literal notranslate"><span class="pre">local</span> <span class="pre">data</span> <span class="pre">folder</span></code> is by default also set to the
+same path, therefore all of <strong>tomato’s</strong> information (<em>device</em> settings, <em>state</em> and <em>queue</em> tables,
+<em>job</em> data) will be located in this versioned folder.</p>
+</section>
+<section id="settings-file">
+<span id="setfile"></span><h2>Settings file<a class="headerlink" href="#settings-file" title="Permalink to this headline"></a></h2>
+<p>The settings file named <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> has to be located in the <code class="docutils literal notranslate"><span class="pre">local</span> <span class="pre">config</span> <span class="pre">folder</span></code>.
+The default file generated by the first run of <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">-vv</span></code> above looks similar to the below file:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="k">[state]</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#39;sqlite3&#39;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#39;C:\Users\krpe\AppData\Local\dgbowl\tomato\0.1rc11\database.db&#39;</span><span class="w"></span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="w"> </span><span class="k">[queue]</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#39;sqlite3&#39;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#39;C:\Users\krpe\AppData\Local\dgbowl\tomato\0.1rc11\database.db&#39;</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w"> </span><span class="n">storage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#39;C:\Users\krpe\AppData\Local\dgbowl\tomato\0.1rc11\Jobs&#39;</span><span class="w"></span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="w"> </span><span class="k">[devices]</span><span class="w"></span>
+<span class="linenos">11</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#39;C:\Users\krpe\AppData\Local\dgbowl\tomato\0.1rc11\devices.yml&#39;</span><span class="w"></span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="w"> </span><span class="k">[drivers]</span><span class="w"></span>
+<span class="linenos">14</span><span class="w"> </span><span class="k">[drivers.biologic]</span><span class="w"></span>
+<span class="linenos">15</span><span class="w"> </span><span class="n">dllpath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#39;C:\EC-Lab Development Package\EC-Lab Development Package&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The sections <code class="docutils literal notranslate"><span class="pre">[state]</span></code> and <code class="docutils literal notranslate"><span class="pre">[queue]</span></code> contain the <code class="docutils literal notranslate"><span class="pre">path</span></code> of the database containing the
+<em>state</em> and <em>queue</em> tables, as well as the database <code class="docutils literal notranslate"><span class="pre">type</span></code>. For <code class="docutils literal notranslate"><span class="pre">queue</span></code>, the <code class="docutils literal notranslate"><span class="pre">storage</span></code> entry
+points to the folder where the raw data generated by <em>jobs</em> will be stored.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As of <code class="docutils literal notranslate"><span class="pre">tomato-0.2a1</span></code>, only <code class="docutils literal notranslate"><span class="pre">sqlite3</span></code> is supported as a database <code class="docutils literal notranslate"><span class="pre">type</span></code>.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">[devices]</span></code> section within the <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> file points to a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted
+<a class="reference internal" href="#devfile"><span class="std std-ref">Devices file</span></a>, defining the hardware configuration of the devices managed by <strong>tomato</strong>.</p>
+<p>Additional, <em>driver</em>-specific settings (such as the <code class="docutils literal notranslate"><span class="pre">dllpath</span></code> required by the
+<a class="reference internal" href="apidoc/tomato.drivers.biologic.html#module-tomato.drivers.biologic" title="tomato.drivers.biologic"><code class="xref py py-mod docutils literal notranslate"><span class="pre">biologic</span></code></a> driver) may be provided in the <code class="docutils literal notranslate"><span class="pre">[drivers]</span></code> section.</p>
+</section>
+<section id="devices-file">
+<span id="devfile"></span><h2>Devices file<a class="headerlink" href="#devices-file" title="Permalink to this headline"></a></h2>
+<p>This <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted file contains information about each <em>device</em>, corresponding to an
+individual piece of hardware managed by <strong>tomato</strong>, as well as information about the
+organisation of such <em>devices</em> into addressable chunks, called <em>pipelines</em>. The <em>pipelines</em>
+can be thought of as digital twins of experimental set-ups, and should contain all <em>devices</em>
+required to carry out a <em>payload</em> (see <a class="reference internal" href="#payfile"><span class="std std-ref">Payload file</span></a>).</p>
+<section id="devices-section">
+<h3><strong>devices</strong> section<a class="headerlink" href="#devices-section" title="Permalink to this headline"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-8</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.109.209.8&quot;</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">6</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">7</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">8</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">9</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">11</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">12</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">13</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">14</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">16</span><span class="p p-Indicator">]</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;biologic&quot;</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="w">     </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">open_circuit_voltage</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant_current</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant_voltage</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sweep_current</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sweep_voltage</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">loop</span><span class="w"></span>
+</pre></div>
+</div>
+<p>In the example <code class="docutils literal notranslate"><span class="pre">devices</span></code> section above, we define a single BioLogic MPG2 potentiostat.
+Each entry in this section has to define the <code class="docutils literal notranslate"><span class="pre">name</span></code> of the instrument, the <code class="docutils literal notranslate"><span class="pre">address</span></code>
+and <code class="docutils literal notranslate"><span class="pre">channels</span></code> available and used for connecting to the instrument, the <code class="docutils literal notranslate"><span class="pre">driver</span></code> with
+which <strong>tomato</strong> will manage this <em>device</em>, the <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> specifying the polling frequency
+with which the <strong>tomato</strong> daemon queries the worker job for data, and finally a list of the
+<code class="docutils literal notranslate"><span class="pre">capabilities</span></code> this <em>device</em> supports.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> here is an internal setting for <strong>tomato</strong> and defaults to 10 s. It
+is the frequency with which the <em>job</em> daemon supervising the <em>device</em> asks the <em>driver</em>
+for new data, <strong>not</strong> the frequency with which the <em>driver</em> asks the hardware for data!</p>
+</div>
+</section>
+<section id="pipelines-section">
+<h3><strong>pipelines</strong> section<a class="headerlink" href="#pipelines-section" title="Permalink to this headline"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span><span class="w"></span>
+<span class="hll"><span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-7-10</span><span class="w"></span>
+</span><span class="hll"><span class="linenos"> 3</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span><span class="w"></span>
+</span><span class="hll"><span class="linenos"> 4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2</span><span class="w"></span>
+</span><span class="hll"><span class="linenos"> 5</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-7</span><span class="w"></span>
+</span><span class="hll"><span class="linenos"> 6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
+</span><span class="linenos"> 7</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-8-*</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-8</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">each</span><span class="w"></span>
+</pre></div>
+</div>
+<p>In the example <code class="docutils literal notranslate"><span class="pre">pipelines</span></code> section above, we show two ways of defining <em>pipelines</em> in
+<strong>tomato</strong>. In the first entry on <code class="docutils literal notranslate"><span class="pre">lines</span> <span class="pre">2-6</span></code>, we define a <em>pipeline</em> by its <code class="docutils literal notranslate"><span class="pre">name</span></code>,
+and assign a list of <em>devices</em> into it, identified within the <em>pipeline</em> by their
+<code class="docutils literal notranslate"><span class="pre">tag</span></code>, and matched against the <code class="docutils literal notranslate"><span class="pre">devices</span></code> section using the <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">channel</span></code>.</p>
+<p>Alternatively, for multi-channel <em>devices</em>, such as the <code class="docutils literal notranslate"><span class="pre">MPG2-8</span></code> defined in the example
+above, a shorthand for defining a <em>pipeline</em> for each <code class="docutils literal notranslate"><span class="pre">channel</span></code> is shown in the second
+entry. The pipeline <code class="docutils literal notranslate"><span class="pre">name</span></code> will be generated by replacing the <code class="docutils literal notranslate"><span class="pre">*</span></code> with each <code class="docutils literal notranslate"><span class="pre">channel</span></code>.</p>
+<p>Multiple <em>devices</em> can be combined into a single <em>pipeline</em> using the above syntax.</p>
+</section>
+</section>
+<section id="payload-file">
+<span id="payfile"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Permalink to this headline"></a></h2>
+<p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the <em>queue</em>.
+The overall schema of the <em>payload</em> is defined in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas vmaster)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a>
+module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas vmaster)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload_0_2.</span></span><span class="sig-name descname"><span class="pre">Payload</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload" title="Permalink to this definition"></a></dt>
+<dd><p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Payload&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Version&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;0.2&quot;</span><span class="w"></span>
+<span class="w">         </span><span class="p">],</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;tomato&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/definitions/Tomato&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/definitions/Sample&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Method&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/definitions/Method&quot;</span><span class="w"></span>
+<span class="w">         </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="p">},</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;version&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;sample&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;method&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="p">],</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="nt">&quot;definitions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;Output&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Output&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Provide the ``path`` and ``prefix`` for the final FAIR-data archive of the *job*.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Prefix&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="p">},</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;Snapshot&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Snapshot&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Provide the ``frequency``, ``path`` and ``prefix`` to configure the snapshotting\nfunctionality of tomato.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Prefix&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Frequency&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="p">},</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;Tomato&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tomato&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Specification of *job* configuration for tomato.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;unlock_when_done&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unlock When Done&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;boolean&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;verbosity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Verbosity&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WARNING&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">                  </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="s2">&quot;WARNING&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="s2">&quot;ERROR&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                  </span><span class="s2">&quot;CRITICAL&quot;</span><span class="w"></span>
+<span class="w">               </span><span class="p">],</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;output&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/definitions/Output&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;snapshot&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/definitions/Snapshot&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="p">},</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;Sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sample&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional attributes for each :class:`Sample` may be required, depending on the\n:class:`Method` type.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="p">},</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;name&quot;</span><span class="w"></span>
+<span class="w">         </span><span class="p">]</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;Method&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Method&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The :class:`Method` schema is completely *device*- and ``technique``- dependent,\nwith extra arguments required by each ``technique`` defined by each device driver.&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;device&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Device&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;technique&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="p">},</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;device&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;technique&quot;</span><span class="w"></span>
+<span class="w">         </span><span class="p">]</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</details></p><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload.version">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'0.2'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload.version" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Validated by</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload.tomato">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tomato</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/dgbowl_schemas.tomato.payload_0_2.html#dgbowl_schemas.tomato.payload_0_2.tomato.Tomato" title="(in dgbowl-schemas vmaster)"><span class="pre">dgbowl_schemas.tomato.payload_0_2.tomato.Tomato</span></a></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload.tomato" title="Permalink to this definition"></a></dt>
+<dd><p>Additional configuration options for tomato.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload.sample">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/dgbowl_schemas.tomato.payload_0_2.html#dgbowl_schemas.tomato.payload_0_2.sample.Sample" title="(in dgbowl-schemas vmaster)"><span class="pre">dgbowl_schemas.tomato.payload_0_2.sample.Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload.sample" title="Permalink to this definition"></a></dt>
+<dd><p>Specification of the experimental sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload.method">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/dgbowl_schemas.tomato.payload_0_2.html#dgbowl_schemas.tomato.payload_0_2.method.Method" title="(in dgbowl-schemas vmaster)"><span class="pre">dgbowl_schemas.tomato.payload_0_2.method.Method</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload.method" title="Permalink to this definition"></a></dt>
+<dd><p>A sequence of the experimental methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Validated by</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_samplefile</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile" title="Permalink to this definition"></a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">samplefile</span></code> is provided in <code class="docutils literal notranslate"><span class="pre">values</span></code>, parse the file as <code class="docutils literal notranslate"><span class="pre">sample</span></code>.</p>
+</dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_methodfile</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile" title="Permalink to this definition"></a></dt>
+<dd><p>If <code class="docutils literal notranslate"><span class="pre">methodfile</span></code> is provided in <code class="docutils literal notranslate"><span class="pre">values</span></code>, parse the file as <code class="docutils literal notranslate"><span class="pre">method</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 - 2022, dgbowl authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Other Versions</span>
+      v: master
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"> 
+      <script src="../versions.js"></script>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
