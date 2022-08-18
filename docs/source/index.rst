@@ -4,11 +4,11 @@
 **tomato** is an instrument automation package, currently developed in the 
 `Materials for Energy Conversion <https://www.empa.ch/web/s501>`_ at Empa. 
 
-Currently supported hardware is:
+**tomato** includes:
 
-  - :mod:`~tomato.drivers.dummy`: driver for a dummy device, useful for testing
-  - :mod:`~tomato.drivers.biologic`: driver for BioLogic potentiostats via the EC-Lib library;
-    **Windows only**.
+- the job scheduler and queue, :mod:`tomato.daemon`, using a ``sqlite3`` backend for IPC;
+- the configuration utility :mod:`~tomato.ketchup`, modelled after PBS / SGE; 
+- a set of device drivers, see the :ref:`driver library`.
 
 
 .. toctree::
@@ -18,6 +18,8 @@ Currently supported hardware is:
    installation
    quickstart
    usage
+
+.. _driver library:
 
 .. toctree::
    :maxdepth: 1
