@@ -19,10 +19,18 @@ def _dummy_process(
             queue.put(None)
         if te >= ts + nd * delay:
             nd += 1
-            data = {
-                "time": te - ts,
-                "value": random.random() if tech == "random" else nd,
-            }
+            if tech == "random":
+                data = {
+                    "time": te - ts,
+                    "value": random.random(),
+                }
+            elif tech == "sequential":
+                data = {
+                    "time": te - ts,
+                    "value": nd,
+                }
+            else:
+                raise RuntimeError(f"technique '{tech}' not understood.")
             queue.put(data)
         time.sleep(1e-3)
         te = time.perf_counter()
@@ -129,13 +137,14 @@ def start_job(
     channel
         Numeric, 1-indexed ID of the channel.
 
+    jobqueue
+        :class:`multiprocessing.Queue` for passing job related data.
+    
+    logger
+        :class:`logging.Logger` instance for writing logs.
+
     payload
         A protocol describing the techniques to be executed and their order.
-
-    capacity
-        The capacity information for the studied battery cell. Only required for
-        battery-testing applications or for payloads where currents are specified
-        using C or D rates.
 
     Returns
     -------
