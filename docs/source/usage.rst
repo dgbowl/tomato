@@ -6,6 +6,9 @@ The **tomato** package consists of two key components:
   - the job scheduler in :mod:`tomato.daemon` executed by ``tomato``,
   - the queue management app :mod:`tomato.ketchup` executed by ``ketchup``.
 
+Starting :mod:`tomato.daemon`
+``````````````````````````````
+
 The job scheduler ``tomato`` can be started in verbose mode for diagnostic output:
 
 .. code:: bash
@@ -21,11 +24,19 @@ single experimental *payload*.
 .. note::
 
     Only one instance of the :mod:`tomato.daemon` can be running at a single PC at the
-    same time, excluding any test-suite jobs (executed with the ``-t`` switch).
+    same time, excluding any test-suite jobs (``tomato`` executed with the ``-t`` switch).
 
 .. note::
 
     For instructions on how to set **tomato** up for a first run, see the :ref:`quickstart`.
+
+
+.. warning::
+
+    Currently, all *jobs* are executed under the user that started the :mod:`tomato.daemon`.
+    This means that when the :mod:`tomato.daemon` is running under a different user than the 
+    current user who submits a *job*, this current user (if unpriviledged) will not be able to 
+    cancel their own *job*.
 
 Using :mod:`~tomato.ketchup`
 ````````````````````````````
@@ -34,7 +45,7 @@ The :mod:`~tomato.ketchup` executable is used to submit *payloads* to the *queue
 to check the status of and to cancel *jobs* in the *queue*, as well as to manage *pipelines* 
 by loading or ejecting *samples* and marking *pipelines* ready for execution.
 
-    1.  **To submit** a *job* using a *payload* contained in a :ref:`payfile` to the *queue*, run:
+    #.  **To submit** a *job* using a *payload* contained in a :ref:`payfile` to the *queue*, run:
 
         .. code-block:: bash
 
@@ -48,7 +59,7 @@ by loading or ejecting *samples* and marking *pipelines* ready for execution.
             For more information about how *jobs* are matched against *pipelines*, see the 
             documentation of the :mod:`~tomato.daemon` module.
 
-    2.  **To check the status** of a *job* with a known ``jobid``, run:
+    #.  **To check the status** of a *job* with a known ``jobid``, run:
 
         .. code-block:: bash
 
@@ -77,11 +88,57 @@ by loading or ejecting *samples* and marking *pipelines* ready for execution.
             The above command can process multiple ``jobids``, returning the information
             in a ``yaml``-formatted output.
 
-    3.  **To cancel** a submitted *job* with a known ``jobid``, run:
+    #.  **To cancel** a submitted *job* with a known ``jobid``, run:
 
         .. code-block:: bash
 
             >>> ketchup cancel <jobid>
+
+*Jobs* submitted to the *queue* will remain in the *queue* until a *pipeline* meets all
+of the following criteria:
+
+  - A *pipeline* which matches all of the ``techniques`` specified in the *payload* 
+    by its ``capabilities`` must exist. Once the :mod:`tomato.daemon` finds such a 
+    *pipeline*, the status of the *job* will change to ``qw``.
+  - The matching *pipeline* must contain a *sample* with a ``samplename`` that matches 
+    the name specified in the *payload*.
+  - The matching *pipeline* must be marked as ``ready``.
+
+To manage *samples* in the *pipelines*, use the following :mod:`~tomato.ketchup` commands:
+
+    #. **To load** the digital twin of a *sample* with a ``samplename`` into a selected
+       *pipeline*, run:
+
+       .. code-block:: bash
+
+           >>> ketchup load <samplename> <pipeline>
+
+       Trying to load a *sample* in a *pipeline* that already contains a *sample* will
+       fail with a warning. The *pipeline* must be emptied first.
+    
+    #. **To eject** a *sample* from the *pipeline*, run:
+    
+       .. code-block:: bash
+
+           >>> ketchup eject <pipeline>
+        
+       Attempting to eject a *sample* from a *pipeline* where a *job* is currently running
+       will fail with a warning. The *job* must finish or be cancelled first.
+    
+    #. **To mark** a *pipeline* as **ready**, run:
+
+       .. code-block:: bash
+
+           >>> ketchup ready <pipeline>
+    
+       This mechanism is implemented to allow for batch-loading of *samples* into *pipelines*,
+       without having to worry about *jobs* starting prematurely. By default, successfully 
+       completed *jobs* (status ``c``) will **not** mark the *pipeline* as ready. This 
+       behaviour can be configured in the ``tomato`` section of the *payload*. Jobs that 
+       have been cancelled (status ``cd``) or have errored out (status ``ce``) will never 
+       mark the *pipeline* as ready, even if configured to do so in the *payload*. This 
+       has been implemented to allow the user to investigate the *sample* and/or *pipeline*
+       for any faults.
 
 .. note::
 

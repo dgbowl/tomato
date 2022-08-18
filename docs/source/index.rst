@@ -21,7 +21,14 @@ Currently supported hardware is:
 
 .. toctree::
    :maxdepth: 1
+   :caption: tomato driver library
+
+   apidoc/tomato.drivers.dummy
+   apidoc/tomato.drivers.biologic
+
+.. toctree::
+   :maxdepth: 1
    :caption: tomato autodocs
    :hidden:
 
-   tomato
+   apidoc/tomato
