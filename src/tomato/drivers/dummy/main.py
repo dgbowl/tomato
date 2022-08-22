@@ -139,7 +139,7 @@ def start_job(
 
     jobqueue
         :class:`multiprocessing.Queue` for passing job related data.
-    
+
     logger
         :class:`logging.Logger` instance for writing logs.
 
