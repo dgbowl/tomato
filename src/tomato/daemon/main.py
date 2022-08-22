@@ -135,7 +135,7 @@ def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
                 elif psutil.POSIX:
                     sns = False if test else True
                     subprocess.Popen(
-                        ["tomato_job", str(jpath)], 
+                        ["tomato_job", str(jpath)],
                         start_new_session=sns,
                     )
                 break
