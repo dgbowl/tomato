@@ -135,6 +135,21 @@ def job_set_time(
     conn.close()
 
 
+def job_get_all_queued(
+    dbpath: str,
+    type: str = "sqlite3",
+) -> list[tuple]:
+    conn, cur = get_db_conn(dbpath, type)
+    cur.execute(
+        "SELECT jobid, jobname, payload, status "
+        "FROM queue "
+        f"WHERE status IN ('qw', 'q');"
+    )
+    ret = cur.fetchall()
+    conn.close()
+    return ret
+
+
 def job_get_all(
     dbpath: str,
     type: str = "sqlite3",
