@@ -229,7 +229,9 @@ def cancel(args: Namespace) -> None:
 
     .. note::
 
-        The :func:`~ketchup.functions.cancel` onl
+        The :func:`~ketchup.functions.cancel` only sets the status of the running
+        job to ``rd``; the actual job cancellation is performed in the
+        :func:`tomato.daemon.main.main_loop`.
 
     Examples
     --------

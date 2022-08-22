@@ -8,25 +8,26 @@ from .. import dbhandler
 
 log = logging.getLogger(__name__)
 
+
 def _kill_tomato_job(proc):
-        pc = proc.children()
-        log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
-        if psutil.WINDOWS:
-            for proc in pc:
-                if proc.name() in {"conhost.exe"}:
-                    continue
-                ppc = proc.children()
-                for proc in ppc:
-                    log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
-                    proc.terminate()
-                gone, alive = psutil.wait_procs(ppc, timeout=10)
-        elif psutil.POSIX:
-            for proc in pc:
+    pc = proc.children()
+    log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
+    if psutil.WINDOWS:
+        for proc in pc:
+            if proc.name() in {"conhost.exe"}:
+                continue
+            ppc = proc.children()
+            for proc in ppc:
                 log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
                 proc.terminate()
-            gone, alive = psutil.wait_procs(pc, timeout=10)
-        log.debug(f"{gone=}")
-        log.debug(f"{alive=}")
+            gone, alive = psutil.wait_procs(ppc, timeout=10)
+    elif psutil.POSIX:
+        for proc in pc:
+            log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
+            proc.terminate()
+        gone, alive = psutil.wait_procs(pc, timeout=10)
+    log.debug(f"{gone=}")
+    log.debug(f"{alive=}")
 
 
 def _find_matching_pipelines(pipelines: list, method: list[dict]) -> list[str]:

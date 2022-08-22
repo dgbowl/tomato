@@ -14,7 +14,7 @@ def get_db_conn(
         sql = sqlite3
     else:
         raise RuntimeError(f"database type '{type}' unsupported")
-    
+
     head, tail = os.path.split(dbpath)
     if head != "" and not os.path.exists(head):
         log.warning("making local data folder '%s'", head)

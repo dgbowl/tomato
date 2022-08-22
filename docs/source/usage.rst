@@ -31,13 +31,6 @@ single experimental *payload*.
     For instructions on how to set **tomato** up for a first run, see the :ref:`quickstart`.
 
 
-.. warning::
-
-    Currently, all *jobs* are executed under the user that started the :mod:`tomato.daemon`.
-    This means that when the :mod:`tomato.daemon` is running under a different user than the 
-    current user who submits a *job*, this current user (if unpriviledged) will not be able to 
-    cancel their own *job*.
-
 Using :mod:`~tomato.ketchup`
 ````````````````````````````
 
@@ -78,6 +71,7 @@ by loading or ejecting *samples* and marking *pipelines* ready for execution.
            q     Job has entered the queue.
            qw    Job is in the queue, waiting for a pipeline to be ready.
            r     Job is running.
+           rd    Job has been marked for cancellation.
            c     Job has completed successfully.
            ce    Job has completed with an error.
            cd    Job has been cancelled.
@@ -93,6 +87,9 @@ by loading or ejecting *samples* and marking *pipelines* ready for execution.
         .. code-block:: bash
 
             >>> ketchup cancel <jobid>
+
+        This will mark the `job` for cancellation by setting its status to ``rd``. The
+        :mod:`tomato.daemon` will then proceed with cancelling the `job`.
 
 *Jobs* submitted to the *queue* will remain in the *queue* until a *pipeline* meets all
 of the following criteria:
