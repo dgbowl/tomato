@@ -57,17 +57,22 @@ def submit(args: Namespace) -> None:
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     queue = settings["queue"]
-    assert os.path.exists(args.payload)
-    assert os.path.isfile(args.payload)
+    if os.path.exists(args.payload) and os.path.isfile(args.payload):
+        log.debug(f"attempting to open Payload at '{args.payload}'")
+    else:
+        log.error(f"Payload file '{args.payload} not found.")
+        return None
 
-    log.debug(f"attempting to open payload at '{args.payload}'")
     with open(args.payload, "r") as infile:
         if args.payload.endswith("json"):
             pldict = json.load(infile)
         elif args.payload.endswith("yml") or args.payload.endswith("yaml"):
             pldict = yaml.full_load(infile)
+        else:
+            log.error("Payload file name must end with one of: {json, yml, yaml}.")
+            return None
     payload = to_payload(**pldict)
-    log.debug("payload=Payload(%s)", payload)
+    log.debug("Payload=Payload(%s)", payload)
     if payload.tomato.output.path is None:
         cwd = str(Path().resolve())
         log.info("Output path not set. Setting output path to '%s'", cwd)
