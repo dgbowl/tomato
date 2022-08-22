@@ -6,6 +6,28 @@ import json
 import logging
 from .. import dbhandler
 
+log = logging.getLogger(__name__)
+
+def _kill_tomato_job(proc):
+        pc = proc.children()
+        log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
+        if psutil.WINDOWS:
+            for proc in pc:
+                if proc.name() in {"conhost.exe"}:
+                    continue
+                ppc = proc.children()
+                for proc in ppc:
+                    log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
+                    proc.terminate()
+                gone, alive = psutil.wait_procs(ppc, timeout=10)
+        elif psutil.POSIX:
+            for proc in pc:
+                log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
+                proc.terminate()
+            gone, alive = psutil.wait_procs(pc, timeout=10)
+        log.debug(f"{gone=}")
+        log.debug(f"{alive=}")
+
 
 def _find_matching_pipelines(pipelines: list, method: list[dict]) -> list[str]:
     req_names = set([item["device"] for item in method])
@@ -40,7 +62,6 @@ def _pipeline_ready_sample(ret: tuple, sample: dict) -> bool:
 
 
 def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
-    log = logging.getLogger(__name__)
     qup = settings["queue"]["path"]
     qut = settings["queue"]["type"]
     stp = settings["state"]["path"]
@@ -63,7 +84,7 @@ def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
         ret = dbhandler.job_get_all(qup, type=qut)
         for jobid, jobname, strpl, st in ret:
             payload = json.loads(strpl)
-            if st in ["q", "qw"]:
+            if st in {"q", "qw"}:
                 if st == "q":
                     log.info(f"checking whether job '{jobid}' can ever be matched")
                 matched_pips = _find_matching_pipelines(pipelines, payload["method"])
@@ -101,4 +122,12 @@ def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
                                 ["tomato_job", str(jpath)], start_new_session=sns
                             )
                         break
+            elif st in {"rd"}:
+                log.warning(f"cancelling a running job {jobid} with pid {pid}")
+                proc = psutil.Process(pid=pid)
+                log.debug(f"{proc=}")
+                _kill_tomato_job(proc)
+                log.info(f"setting job {jobid} to status 'cd'")
+                dbhandler.job_set_status(qup, "cd", jobid, type=qut)
+
         time.sleep(settings.get("main loop", 1))

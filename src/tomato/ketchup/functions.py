@@ -227,6 +227,10 @@ def cancel(args: Namespace) -> None:
     cancelled. Optional arguments include the verbose/quiet switches (``-v/-q``) and
     the testing switch (``-t``).
 
+    .. note::
+
+        The :func:`~ketchup.functions.cancel` onl
+
     Examples
     --------
 
@@ -247,27 +251,6 @@ def cancel(args: Namespace) -> None:
         Cancelling a completed job will do nothing.
 
     """
-
-    def kill_tomato_job(proc):
-        pc = proc.children()
-        log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
-        if psutil.WINDOWS:
-            for proc in pc:
-                if proc.name() in {"conhost.exe"}:
-                    continue
-                ppc = proc.children()
-                for proc in ppc:
-                    log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
-                    proc.terminate()
-                gone, alive = psutil.wait_procs(ppc, timeout=10)
-        elif psutil.POSIX:
-            for proc in pc:
-                log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
-                proc.terminate()
-            gone, alive = psutil.wait_procs(pc, timeout=10)
-        log.debug(f"{gone=}")
-        log.debug(f"{alive=}")
-
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     state = settings["state"]
@@ -286,10 +269,8 @@ def cancel(args: Namespace) -> None:
         running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
         for pip, pjobid, pid in running:
             if pjobid == jobid:
-                log.warning(f"cancelling a running job {jobid} with pid {pid}")
-                proc = psutil.Process(pid=pid)
-                log.debug(f"{proc=}")
-                kill_tomato_job(proc)
+                log.info(f"setting job {jobid} to status 'rd'")
+                dbhandler.job_set_status(queue["path"], "rd", jobid, type=queue["type"])
 
 
 def load(args: Namespace) -> None:
