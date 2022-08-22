@@ -236,6 +236,12 @@ quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/
 <p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.Namespace</span></code> has to contain the <code class="docutils literal notranslate"><span class="pre">&lt;jobid&gt;</span></code> of the job to be
 cancelled. Optional arguments include the verbose/quiet switches (<code class="docutils literal notranslate"><span class="pre">-v/-q</span></code>) and
 the testing switch (<code class="docutils literal notranslate"><span class="pre">-t</span></code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">cancel()</span></code> only sets the status of the running
+job to <code class="docutils literal notranslate"><span class="pre">rd</span></code>; the actual job cancellation is performed in the
+<a class="reference internal" href="tomato.daemon.html#tomato.daemon.main.main_loop" title="tomato.daemon.main.main_loop"><code class="xref py py-func docutils literal notranslate"><span class="pre">tomato.daemon.main.main_loop()</span></code></a>.</p>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a job:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">1</span>
