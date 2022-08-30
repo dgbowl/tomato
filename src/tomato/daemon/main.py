@@ -18,13 +18,19 @@ def _kill_tomato_job(proc):
                 continue
             ppc = proc.children()
             for proc in ppc:
-                log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
-                proc.terminate()
+                try:
+                    log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
+                    proc.terminate()
+                except psutil.NoSuchProcess:
+                    continue
             gone, alive = psutil.wait_procs(ppc, timeout=10)
     elif psutil.POSIX:
         for proc in pc:
-            log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
-            proc.terminate()
+            try:
+                log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
+                proc.terminate()
+            except psutil.NoSuchProcess:
+                continue
         gone, alive = psutil.wait_procs(pc, timeout=10)
     log.debug(f"{gone=}")
     log.debug(f"{alive=}")
