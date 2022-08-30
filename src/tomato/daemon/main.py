@@ -69,6 +69,7 @@ def _pipeline_ready_sample(ret: tuple, sample: dict) -> bool:
 
 
 def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
+    log.info("Entered 'main_loop'.")
     qup = settings["queue"]["path"]
     qut = settings["queue"]["type"]
     stp = settings["state"]["path"]
