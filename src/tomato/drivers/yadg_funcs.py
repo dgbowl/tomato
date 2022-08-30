@@ -15,7 +15,7 @@ _device_to_parser = {
 def get_yadg_preset(method: list[dict], pipeline: dict) -> dict:
     preset = {
         "metadata": {
-            "version": "4.1.1",
+            "version": "4.2",
             "provenance": {"type": "tomato"},
             "timezone": "localtime",
         },
