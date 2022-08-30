@@ -11,20 +11,32 @@ log = logging.getLogger(__name__)
 
 def _kill_tomato_job(proc):
     pc = proc.children()
-    log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
+    log.warning(
+        "killing proc: name='%s', pid=%d, children=%d", proc.name(), proc.pid, len(pc)
+    )
     if psutil.WINDOWS:
         for proc in pc:
             if proc.name() in {"conhost.exe"}:
                 continue
             ppc = proc.children()
             for proc in ppc:
-                log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
-                proc.terminate()
+                try:
+                    proc.terminate()
+                except psutil.NoSuchProcess:
+                    log.warning(
+                        "dead proc: name='%s', pid=%d", proc.name(), proc.pid
+                    )
+                    continue
             gone, alive = psutil.wait_procs(ppc, timeout=10)
     elif psutil.POSIX:
         for proc in pc:
-            log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
-            proc.terminate()
+            try:
+                proc.terminate()
+            except psutil.NoSuchProcess:
+                log.warning(
+                    "dead proc: name='%s', pid=%d", proc.name(), proc.pid
+                )
+                continue
         gone, alive = psutil.wait_procs(pc, timeout=10)
     log.debug(f"{gone=}")
     log.debug(f"{alive=}")
@@ -63,6 +75,7 @@ def _pipeline_ready_sample(ret: tuple, sample: dict) -> bool:
 
 
 def main_loop(settings: dict, pipelines: dict, test: bool = False) -> None:
+    log.info("Entered 'main_loop'.")
     qup = settings["queue"]["path"]
     qut = settings["queue"]["type"]
     stp = settings["state"]["path"]
