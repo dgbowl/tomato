@@ -11,7 +11,9 @@ log = logging.getLogger(__name__)
 
 def _kill_tomato_job(proc):
     pc = proc.children()
-    log.warning(f"{proc.name()=}, {proc.pid=}, {pc=}")
+    log.warning(
+        "killing proc: name='%s', pid=%d, children=%d", proc.name(), proc.pid, len(pc)
+    )
     if psutil.WINDOWS:
         for proc in pc:
             if proc.name() in {"conhost.exe"}:
@@ -19,21 +21,21 @@ def _kill_tomato_job(proc):
             ppc = proc.children()
             for proc in ppc:
                 try:
-                    log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
                     proc.terminate()
                 except psutil.NoSuchProcess:
                     log.warning(
-                         "dead process: "
-                        f"{proc.name()=}, {proc.pid=}, {proc.children()=}"
+                        "dead proc: name='%s', pid=%d", proc.name(), proc.pid
                     )
                     continue
             gone, alive = psutil.wait_procs(ppc, timeout=10)
     elif psutil.POSIX:
         for proc in pc:
             try:
-                log.debug(f"{proc.name()=}, {proc.pid=}, {proc.children()=}")
                 proc.terminate()
             except psutil.NoSuchProcess:
+                log.warning(
+                    "dead proc: name='%s', pid=%d", proc.name(), proc.pid
+                )
                 continue
         gone, alive = psutil.wait_procs(pc, timeout=10)
     log.debug(f"{gone=}")
