@@ -52,9 +52,6 @@ def get_settings(configpath: str, datapath: str) -> dict:
             type = 'sqlite3'
             path = '{os.path.join(datapath, 'database.db')}'
             storage = '{os.path.join(datapath, 'Jobs')}'
-            
-            [samples]
-            path = '{os.path.join(configpath, 'samples.yml')}'
 
             [devices]
             path = '{os.path.join(configpath, 'devices.yml')}'

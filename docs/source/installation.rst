@@ -17,11 +17,6 @@ environment.
     The optional targets ``[docs]`` and ``[testing]`` will install packages required 
     for building this documentation and running the test-suite, respectively.
 
-.. note::
-    
-    As currently **tomato** does not have a stable release, make sure to install 
-    the latest development version using the ``--pre`` argument to ``pip``.
-
 Testing the installation
 ````````````````````````
 To run the test-suite, you need to first install **tomato** using the above command,
