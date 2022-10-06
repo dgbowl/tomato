@@ -1,3 +1,6 @@
+Version history
+===============
+
 **tomato**-v0.2
 ---------------
 .. image:: https://img.shields.io/static/v1?label=tomato&message=v0.2&color=blue&logo=github
@@ -13,10 +16,12 @@ Developed in the Materials for Energy Conversion lab at Empa, in Dübendorf, wit
 contributions from the THEOS lab at EPFL, in Lausanne.
 
 First public release, corresponding to the code developed for the BIG-MAP Stakeholder
-Initiative Aurora, Deliverable D2. 
+Initiative Aurora, Deliverable D2. Includes:
 
-- support for :class:`pd.MultiIndex` in :class:`pd.DataFrames`;
-- the :mod:`~dgpost.transform.table` module of functions for basic operations on tables.
+- driver for BioLogic devices;
+- a dummy driver for testing;
+- basic scheduling/queueing functionality;
+- data snapshotting and parsing.
 
 .. codeauthor::
     Peter Kraus,
