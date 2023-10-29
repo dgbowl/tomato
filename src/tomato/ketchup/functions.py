@@ -273,6 +273,8 @@ def cancel(args: Namespace) -> None:
             if pjobid == jobid:
                 log.info(f"setting job {jobid} to status 'rd'")
                 dbhandler.job_set_status(queue["path"], "rd", jobid, type=queue["type"])
+    elif status == "rd":
+        log.info(f"job {jobid} has already been scheduled to cancel!")
 
 
 def load(args: Namespace) -> None:

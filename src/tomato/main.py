@@ -6,20 +6,346 @@ import argparse
 import logging
 import psutil
 import os
+import zmq
+import subprocess
 from importlib import metadata
+import appdirs
+import yaml
+import toml
+import textwrap
+from pathlib import Path
+from datetime import datetime, timezone
 
 from . import daemon
 from . import dbhandler
 from . import setlib
 from . import ketchup
+from . import passata
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+
+DEFAULT_PASSATA_PORT = 1234
+VERSION = metadata.version("tomato")
+
+
+def set_loglevel(delta: int):
+    loglevel = min(max(30 - (10 * delta), 10), 50)
+    logging.basicConfig(level=loglevel)
+    logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
+
+
+def sync_pipelines_to_state(
+    pipelines: list,
+    dbpath: str,
+    type: str = "sqlite3",
+) -> None:
+    pstate = dbhandler.pipeline_get_all(dbpath, type)
+    for pip in pipelines:
+        logger.debug(f"checking presence of pipeline '{pip['name']}' in 'state'")
+        if pip["name"] not in pstate:
+            dbhandler.pipeline_insert(dbpath, pip["name"], type)
+    pnames = [p["name"] for p in pipelines]
+    for pname in pstate:
+        if pname not in pnames:
+            dbhandler.pipeline_remove(dbpath, pname, type)
+    pstate = dbhandler.pipeline_get_all(dbpath, type)
+
+
+def tomato_status(
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    **kwargs: dict,
+) -> dict:
+    logger.debug(f"checking status of passata on port {port}")
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    req.send_json(dict(cmd="status"))
+
+    poller = zmq.Poller()
+    poller.register(req, zmq.POLLIN)
+    events = dict(poller.poll(timeout))
+    if req in events:
+        data = req.recv_json()
+        return dict(
+            success=True,
+            msg=f"passata running on port {port}",
+            data=data,
+        )
+    else:
+        req.setsockopt(zmq.LINGER, 0)
+        req.close()
+        return dict(
+            success=False,
+            msg=f"passata not running on port {port}",
+        )
+
+
+def tomato_start(
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    appdir: str,
+    **kwargs: dict,
+) -> dict:
+    logging.debug(f"checking for availability of port {port}.")
+    try:
+        rep = context.socket(zmq.REP)
+        rep.bind(f"tcp://127.0.0.1:{port}")
+        rep.unbind(f"tcp://127.0.0.1:{port}")
+    except zmq.error.ZMQError:
+        return dict(
+            success=False,
+            msg=f"required port {port} is already in use, choose a different one",
+        )
+
+    logger.debug(f"starting passata on port {port}")
+    cmd = ["passata", "--port", f"{port}"]
+    if psutil.WINDOWS:
+        cfs = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+        subprocess.Popen(cmd, creationflags=cfs)
+    elif psutil.POSIX:
+        subprocess.Popen(cmd, start_new_session=True)
+
+    status = tomato_status(port, timeout=1000, context=context)
+    if status["success"]:
+        return tomato_reload(port, timeout, context, appdir, **kwargs)
+    else:
+        return dict(
+            success=False,
+            msg=f"failed to start passata on port {port}",
+            data=status,
+        )
+
+
+def tomato_stop(
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    **kwargs: dict,
+):
+    status = tomato_status(port, timeout, context)
+    if status["success"]:
+        req = context.socket(zmq.REQ)
+        req.connect(f"tcp://127.0.0.1:{port}")
+        req.send_json(dict(cmd="stop"))
+        msg = req.recv_json()
+        if msg["status"] == "stop":
+            return dict(
+                success=True,
+                msg=f"passata on port {port} was instructed to stop",
+                data=msg,
+            )
+        else:
+            return dict(
+                success=False,
+                msg="unknown error",
+                data=msg,
+            )
+    else:
+        return status
+
+
+def tomato_init(
+    appdir: str,
+    datadir: str,
+    **kwargs: dict,
+) -> dict:
+    ddir = Path(datadir)
+    adir = Path(appdir)
+
+    defaults = textwrap.dedent(
+        f"""\
+        # Default settings for tomato-{VERSION}
+        # Generated on {str(datetime.now(timezone.utc))}
+        [state]
+        type = 'sqlite3'
+        path = '{ddir / 'database.db'}'
+
+        [queue]
+        type = 'sqlite3'
+        path = '{ddir / 'database.db'}'
+        storage = '{ddir / 'Jobs'}'
+
+        [devices]
+        path = '{adir / 'devices.yml'}'
+
+        [drivers]
+        """
+    )
+    if not adir.exists():
+        logging.debug(f"creating directory '{adir}'")
+        os.makedirs(adir)
+    with open(adir / "settings.toml", "w") as of:
+        of.write(defaults)
+    return dict(
+        success=True,
+        msg=f"wrote default settings into {Path(appdir) / 'settings.toml'}",
+    )
+
+
+def tomato_reload(
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    appdir: str,
+    **kwargs: dict,
+) -> dict:
+    logging.debug(f"Loading settings.toml file from {appdir}.")
+    try:
+        settings = toml.load(Path(appdir) / "settings.toml")
+    except FileNotFoundError:
+        return dict(
+            success=False,
+            msg=f"settings.toml file not found in {appdir}, run 'tomato init' to create one",
+        )
+
+    pipelines = setlib.get_pipelines(settings["devices"]["path"])
+
+    logger.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
+    dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
+    logger.debug(f"setting up 'state' table in '{settings['queue']['path']}'")
+    dbhandler.state_setup(settings["state"]["path"], type=settings["state"]["type"])
+    sync_pipelines_to_state(
+        pipelines, settings["state"]["path"], type=settings["state"]["type"]
+    )
+
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    req.send_json(dict(cmd="setup", settings=settings, pipelines=pipelines))
+    msg = req.recv_json()
+    if msg["status"] == "running":
+        return dict(
+            success=True,
+            msg=f"passata configured on port {port} with settings from {appdir}",
+            data=msg,
+        )
+    else:
+        return dict(
+            success=False,
+            msg=f"passata configuration on port {port} failed",
+            data=msg,
+        )
+
+
+def run_tomato():
+    dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
+    config_dir = dirs.user_config_dir
+    data_dir = dirs.user_data_dir
+
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s version {VERSION}",
+    )
+
+    verbose = argparse.ArgumentParser(add_help=False)
+
+    subparsers = parser.add_subparsers(dest="subcommand", required=True)
+
+    status = subparsers.add_parser("status")
+    status.set_defaults(func=tomato_status)
+
+    start = subparsers.add_parser("start")
+    start.set_defaults(func=tomato_start)
+
+    stop = subparsers.add_parser("stop")
+    stop.set_defaults(func=tomato_stop)
+
+    init = subparsers.add_parser("init")
+    init.set_defaults(func=tomato_init)
+
+    reload = subparsers.add_parser("reload")
+    reload.set_defaults(func=tomato_reload)
+
+    for p in [parser, verbose]:
+        p.add_argument(
+            "--verbose",
+            "-v",
+            action="count",
+            default=0,
+            help="Increase verbosity by one level.",
+        )
+        p.add_argument(
+            "--quiet",
+            "-q",
+            action="count",
+            default=0,
+            help="Decrease verbosity by one level.",
+        )
+
+    for p in [start, stop, init, status, reload]:
+        p.add_argument(
+            "--port",
+            "-p",
+            help="Port number of passata's reply socket",
+            default=DEFAULT_PASSATA_PORT,
+        )
+        p.add_argument(
+            "--timeout",
+            help="Timeout for the tomato command, in milliseconds",
+            type=int,
+            default=3000,
+        )
+        p.add_argument(
+            "--appdir",
+            help="Settings directory for tomato",
+            default=config_dir,
+        )
+        p.add_argument(
+            "--datadir",
+            help="Data directory for tomato",
+            default=data_dir,
+        )
+
+    # parse subparser args
+    args, extras = parser.parse_known_args()
+    # parse extras for verbose tags
+    args, extras = verbose.parse_known_args(extras, args)
+
+    set_loglevel(args.verbose - args.quiet)
+
+    context = zmq.Context()
+    if "func" in args:
+        ret = args.func(**vars(args), context=context)
+        print(yaml.dump(ret))
+
+
+def oldmain():
+    if psutil.WINDOWS:
+        pid = os.getppid()
+    elif psutil.POSIX:
+        pid = os.getpid()
+
+    procs = psutil.process_iter(["pid", "name"])
+    toms = [p.pid for p in procs if p.name() in {"tomato", "tomato.exe"}]
+    toms.pop(toms.index(pid))
+    if len(toms) > 0 and not args.test:
+        logging.critical("cannot run more than one instance of 'tomato'")
+        logging.info(f"'tomato' is currently running as pid {toms}")
+        return
+
+    dirs = setlib.get_dirs(args.test)
+    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    pipelines = setlib.get_pipelines(settings["devices"]["path"])
+    log.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
+    dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
+    log.debug(f"setting up 'state' table in '{settings['queue']['path']}'")
+    dbhandler.state_setup(settings["state"]["path"], type=settings["state"]["type"])
+    sync_pipelines_to_state(
+        pipelines, settings["state"]["path"], type=settings["state"]["type"]
+    )
+
+    daemon.main_loop(settings, pipelines, test=args.test)
+
+
 
 
 def _logging_setup(args):
     loglevel = min(max(30 + 10 * (args.quiet - args.verbose), 10), 50)
     logging.basicConfig(level=loglevel)
-    log.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
+    logger.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
 
 
 def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser]:
@@ -54,56 +380,6 @@ def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser
             help="Decrease verbosity by one level.",
         )
     return parser, verbose
-
-
-def sync_pipelines_to_state(
-    pipelines: list,
-    dbpath: str,
-    type: str = "sqlite3",
-) -> None:
-    pstate = dbhandler.pipeline_get_all(dbpath, type)
-    for pip in pipelines:
-        log.debug(f"checking presence of pipeline '{pip['name']}' in 'state'")
-        if pip["name"] not in pstate:
-            dbhandler.pipeline_insert(dbpath, pip["name"], type)
-    pnames = [p["name"] for p in pipelines]
-    for pname in pstate:
-        if pname not in pnames:
-            dbhandler.pipeline_remove(dbpath, pname, type)
-    pstate = dbhandler.pipeline_get_all(dbpath, type)
-
-
-def run_tomato():
-    parser, _ = _default_parsers()
-    args = parser.parse_args()
-    _logging_setup(args)
-
-    if psutil.WINDOWS:
-        pid = os.getppid()
-    elif psutil.POSIX:
-        pid = os.getpid()
-
-    procs = psutil.process_iter(['pid', 'name'])
-    toms = [p.pid for p in procs if p.name() in {"tomato", "tomato.exe"}]
-    toms.pop(toms.index(pid))
-    if len(toms) > 0 and not args.test:
-        logging.critical("cannot run more than one instance of 'tomato'")
-        logging.info(f"'tomato' is currently running as pid {toms}")
-        return
-
-    dirs = setlib.get_dirs(args.test)
-    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
-    pipelines = setlib.get_pipelines(settings["devices"]["path"])
-    log.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
-    dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
-    log.debug(f"setting up 'state' table in '{settings['queue']['path']}'")
-    dbhandler.state_setup(settings["state"]["path"], type=settings["state"]["type"])
-    sync_pipelines_to_state(
-        pipelines, settings["state"]["path"], type=settings["state"]["type"]
-    )
-
-    daemon.main_loop(settings, pipelines, test=args.test)
-
 
 def run_ketchup():
     parser, verbose = _default_parsers()
@@ -184,7 +460,7 @@ def run_ketchup():
 
     args, extras = parser.parse_known_args()
     args, extras = verbose.parse_known_args(extras, args)
-    _logging_setup(args)
+    #_logging_setup(args)
 
     if "func" in args:
         args.func(args)

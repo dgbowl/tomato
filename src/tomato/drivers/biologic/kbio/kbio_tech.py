@@ -73,9 +73,7 @@ def print_experiment_data(api, data):
     ix = 0
 
     for _ in range(data_info.NbRows):
-
         if tech_name == "OCV":
-
             # progress through record
             inx = ix + data_info.NbCols
 
@@ -107,7 +105,6 @@ def print_experiment_data(api, data):
                 parsed_row["Ece"] = Ece
 
         elif tech_name == "CP":
-
             inx = ix + data_info.NbCols
             t_high, t_low, *row = data_record[ix:inx]
 
@@ -133,7 +130,6 @@ def print_experiment_data(api, data):
             parsed_row = {"t": t, "Ewe": Ewe, "I": I, "cycle": cycle}
 
         else:
-
             # besides the previous 2 known techniques, this is provided
             # to show a raw dump of the record
             inx = ix + data_info.NbCols

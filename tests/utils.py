@@ -14,11 +14,17 @@ from tomato import dbhandler
 
 def tomato_setup():
     logger.debug("In 'tomato_setup'.")
+    logger.debug("Running 'tomato init'")
+    cmd = ["tomato", "init", "--datadir", ".", "--appdir", ".", "-vv"]
+    subprocess.Popen(cmd)
+    logger.debug("Running 'tomato start'")
+    cmd = ["tomato", "start", "-p", "12345", "--appdir", ".", "--datadir", ".", "-vv"]
     if psutil.WINDOWS:
         cfg = subprocess.CREATE_NEW_PROCESS_GROUP
-        proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
+        proc = subprocess.Popen(cmd, creationflags=cfg)
     elif psutil.POSIX:
-        proc = subprocess.Popen(["tomato", "-t", "-vv"], start_new_session=True)
+        proc = subprocess.Popen(cmd, start_new_session=True)
+    logger.debug("Waiting for database.db")
     p = psutil.Process(pid=proc.pid)
     while not os.path.exists("database.db"):
         time.sleep(0.1)
@@ -110,6 +116,7 @@ def run_casename(
             ketchup_setup(cn, jn, pip=pn)
     status = ketchup_loop(time.perf_counter(), inter_func)
     ketchup_kill(proc, p)
+    subprocess.run(["tomato", "stop", "-p", "12345"])
     return status
 
 
@@ -137,3 +144,23 @@ def search_job(jobname: str = "$MATCH"):
             assert line.split(":")[-1].strip() == "1"
         elif "status" in line:
             assert line.split(":")[-1].strip() == "r"
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=50)
+    status = run_casename("dummy_random_1_0.1")
+    print(f"{status=}")
+
+
+def old():
+
+    print("tomato_setup():")
+    ret = tomato_setup()
+    print(f"{ret=}")
+    
+    print("ketchup_setup():")
+    ret = ketchup_setup("dummy_random_1_0.1", "test")
+    print(f"{ret=}")
+
+    print("tomato stop")
+    subprocess.run(["tomato", "stop", "-p", "12345"])

@@ -209,7 +209,6 @@ def driver_worker(
     logfile: str,
     loglevel: int,
 ) -> None:
-
     jq = multiprocessing.Queue(maxsize=0)
 
     log = logging.getLogger(__name__)

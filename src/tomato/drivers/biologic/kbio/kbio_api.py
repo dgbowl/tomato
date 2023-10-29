@@ -47,7 +47,6 @@ class KBIO_api:
         return id_.value, info
 
     def USB_DeviceInfo(self, index):
-
         company = c_buffer(128)
         device = c_buffer(128)
         serial_number = c_buffer(128)
@@ -105,7 +104,6 @@ class KBIO_api:
         return info
 
     def LoadFirmware(self, id_, channels, firmware, fpga, force=True):
-
         results = KBIO.ResultsArray()
         ch_map = KBIO.ChannelsArray(*channels)
 
@@ -186,7 +184,6 @@ class KBIO_api:
         self.BL_StopChannel(id_, ch - 1)
 
     def StartChannels(self, id_, channels):
-
         results = KBIO.ResultsArray()
         ch_map = KBIO.ChannelsArray(*channels)
         self.BL_StartChannels(id_, ch_map, results, len(results))
@@ -207,7 +204,6 @@ class KBIO_api:
         return ok
 
     def StopChannels(self, id_, channels):
-
         results = KBIO.ResultsArray()
         ch_map = KBIO.ChannelsArray(*channels)
         self.BL_StopChannels(id_, ch_map, results, len(results))
@@ -233,7 +229,6 @@ class KBIO_api:
         return cv
 
     def GetData(self, id_, ch):
-
         pb = KBIO.DataBuffer()
         di = KBIO.DataInfo()
         cv = KBIO.CurrentValues()
@@ -290,7 +285,6 @@ class KBIO_api:
 
     @classmethod
     def _parse_device_serialization(cls, nb_devices, serialized):
-
         """Analyze a serialized instrument bundle and turn into a list of devices."""
 
         devices = list()
@@ -310,7 +304,6 @@ class KBIO_api:
         instruments = serialized.split(sep)
 
         for instrument in instruments:
-
             # separate instrument info into fragments
             all_frags = instrument.split("$")
             mode = all_frags[0]
@@ -318,7 +311,6 @@ class KBIO_api:
             fragments = [f for f in all_frags if f]
 
             if mode == "USB":
-
                 try:
                     # decode fragments into their repective fields
                     index, kind, serial = fragments[1:]
@@ -330,7 +322,6 @@ class KBIO_api:
                 device = KBIO.USB_device(index, kind, serial)
 
             elif mode == "Ethernet":
-
                 try:
                     # decode fragments into their repective fields :
                     # config = ip_address, gateway, netmask, mac_address
@@ -346,7 +337,6 @@ class KBIO_api:
                 )
 
             else:
-
                 raise RuntimeError(f"serialization not understood ({serialized})")
 
             devices.append(device)
@@ -369,7 +359,6 @@ class KBIO_api:
             return device.name
 
         def __str__(self):
-
             fragments = list()
 
             channels = self.NumberOfChannels
@@ -442,15 +431,12 @@ class KBIO_api:
             return max_IRange.name
 
         def __str__(self):
-
             fragments = list()
 
             if self.has_no_firmware:
-
                 fragments.append(f"{self.board} board, no firmware")
 
             elif self.is_kernel_loaded:
-
                 fragments.append(f"Channel: {self.Channel+1}")
                 fragments.append(f"{self.board} board, S/N {self.BoardSerialNumber}")
                 fragments.append(f"{'has a'if self.Lcboard else 'no'} LC head")
@@ -483,7 +469,6 @@ class KBIO_api:
                 )
 
             else:
-
                 version = self.FirmwareVersion / 100
                 vstr = f"{version*10:.2f}" if version < 1.0 else f"{version:.3f}"
                 fragments.append(
@@ -653,7 +638,6 @@ class KBIO_api:
     # ==========================================================================#
 
     class FindError(BL_Error):
-
         list_by_tag = {
             KBIO.FIND_ERROR.NO_ERROR: "no error",
             KBIO.FIND_ERROR.UNKNOWN_ERROR: "unknown error",
@@ -795,7 +779,6 @@ class KBIO_api:
         """Rebind api with wrapped ctype function, registering attribute types and error handling."""
 
         if dll is None:
-
             # if missing, force errors on each entry point
 
             def force_error(*args, abort=True):
@@ -808,7 +791,6 @@ class KBIO_api:
             setattr(self, name, force_error)
 
         else:
-
             # retrieve function by name
             function = dll[name]
             # set its argument types

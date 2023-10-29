@@ -36,7 +36,6 @@ DataBuffer = c_uint32 * 1000
 
 @dataclass
 class USB_device:
-
     index: int
     instrument: str
     serial: str
@@ -56,7 +55,6 @@ class USB_device:
 
 @dataclass
 class Ethernet_device:
-
     config: tuple
     instrument: str
     serial: str
