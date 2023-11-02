@@ -153,11 +153,10 @@ if __name__ == "__main__":
 
 
 def old():
-
     print("tomato_setup():")
     ret = tomato_setup()
     print(f"{ret=}")
-    
+
     print("ketchup_setup():")
     ret = ketchup_setup("dummy_random_1_0.1", "test")
     print(f"{ret=}")

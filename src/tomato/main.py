@@ -2,25 +2,24 @@
 Main module - executables for tomato.
 
 """
-import argparse
-import logging
-import psutil
 import os
-import zmq
 import subprocess
-from importlib import metadata
-import appdirs
-import yaml
-import toml
 import textwrap
 from pathlib import Path
 from datetime import datetime, timezone
+from importlib import metadata
 
-from . import daemon
+import argparse
+import logging
+import psutil
+import zmq
+import appdirs
+import yaml
+import toml
+
 from . import dbhandler
 from . import setlib
 from . import ketchup
-from . import passata
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +51,13 @@ def sync_pipelines_to_state(
 
 
 def tomato_status(
+    *,
     port: int,
     timeout: int,
     context: zmq.Context,
-    **kwargs: dict,
+    **_: dict,
 ) -> dict:
-    logger.debug(f"checking status of passata on port {port}")
+    logger.debug("checking status of passata on port %d", port)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_json(dict(cmd="status"))
@@ -82,13 +82,14 @@ def tomato_status(
 
 
 def tomato_start(
+    *,
     port: int,
     timeout: int,
     context: zmq.Context,
     appdir: str,
     **kwargs: dict,
 ) -> dict:
-    logging.debug(f"checking for availability of port {port}.")
+    logging.debug("checking for availability of port %d.", port)
     try:
         rep = context.socket(zmq.REP)
         rep.bind(f"tcp://127.0.0.1:{port}")
@@ -99,7 +100,7 @@ def tomato_start(
             msg=f"required port {port} is already in use, choose a different one",
         )
 
-    logger.debug(f"starting passata on port {port}")
+    logger.debug("starting passata on port %d", port)
     cmd = ["passata", "--port", f"{port}"]
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
@@ -107,9 +108,11 @@ def tomato_start(
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
 
-    status = tomato_status(port, timeout=1000, context=context)
+    status = tomato_status(port=port, timeout=1000, context=context)
     if status["success"]:
-        return tomato_reload(port, timeout, context, appdir, **kwargs)
+        return tomato_reload(
+            port=port, timeout=timeout, context=context, appdir=appdir, **kwargs
+        )
     else:
         return dict(
             success=False,
@@ -119,12 +122,13 @@ def tomato_start(
 
 
 def tomato_stop(
+    *,
     port: int,
     timeout: int,
     context: zmq.Context,
-    **kwargs: dict,
+    **_: dict,
 ):
-    status = tomato_status(port, timeout, context)
+    status = tomato_status(port=port, timeout=timeout, context=context)
     if status["success"]:
         req = context.socket(zmq.REQ)
         req.connect(f"tcp://127.0.0.1:{port}")
@@ -147,9 +151,10 @@ def tomato_stop(
 
 
 def tomato_init(
+    *,
     appdir: str,
     datadir: str,
-    **kwargs: dict,
+    **_: dict,
 ) -> dict:
     ddir = Path(datadir)
     adir = Path(appdir)
@@ -174,9 +179,9 @@ def tomato_init(
         """
     )
     if not adir.exists():
-        logging.debug(f"creating directory '{adir}'")
+        logging.debug("creating directory '%s'", adir)
         os.makedirs(adir)
-    with open(adir / "settings.toml", "w") as of:
+    with open(adir / "settings.toml", "w", encoding="utf-8") as of:
         of.write(defaults)
     return dict(
         success=True,
@@ -185,13 +190,13 @@ def tomato_init(
 
 
 def tomato_reload(
+    *,
     port: int,
-    timeout: int,
     context: zmq.Context,
     appdir: str,
-    **kwargs: dict,
+    **_: dict,
 ) -> dict:
-    logging.debug(f"Loading settings.toml file from {appdir}.")
+    logging.debug("Loading settings.toml file from %s.", appdir)
     try:
         settings = toml.load(Path(appdir) / "settings.toml")
     except FileNotFoundError:
@@ -312,36 +317,6 @@ def run_tomato():
         print(yaml.dump(ret))
 
 
-def oldmain():
-    if psutil.WINDOWS:
-        pid = os.getppid()
-    elif psutil.POSIX:
-        pid = os.getpid()
-
-    procs = psutil.process_iter(["pid", "name"])
-    toms = [p.pid for p in procs if p.name() in {"tomato", "tomato.exe"}]
-    toms.pop(toms.index(pid))
-    if len(toms) > 0 and not args.test:
-        logging.critical("cannot run more than one instance of 'tomato'")
-        logging.info(f"'tomato' is currently running as pid {toms}")
-        return
-
-    dirs = setlib.get_dirs(args.test)
-    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
-    pipelines = setlib.get_pipelines(settings["devices"]["path"])
-    log.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
-    dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
-    log.debug(f"setting up 'state' table in '{settings['queue']['path']}'")
-    dbhandler.state_setup(settings["state"]["path"], type=settings["state"]["type"])
-    sync_pipelines_to_state(
-        pipelines, settings["state"]["path"], type=settings["state"]["type"]
-    )
-
-    daemon.main_loop(settings, pipelines, test=args.test)
-
-
-
-
 def _logging_setup(args):
     loglevel = min(max(30 + 10 * (args.quiet - args.verbose), 10), 50)
     logging.basicConfig(level=loglevel)
@@ -380,6 +355,7 @@ def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser
             help="Decrease verbosity by one level.",
         )
     return parser, verbose
+
 
 def run_ketchup():
     parser, verbose = _default_parsers()
@@ -460,7 +436,7 @@ def run_ketchup():
 
     args, extras = parser.parse_known_args()
     args, extras = verbose.parse_known_args(extras, args)
-    #_logging_setup(args)
+    # _logging_setup(args)
 
     if "func" in args:
         args.func(args)

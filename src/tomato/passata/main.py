@@ -1,14 +1,19 @@
-import zmq
+"""passata"""
+import os
+import subprocess
 import logging
 import time
-import multiprocessing
 import argparse
 import json
-import os
+
+import zmq
 import psutil
-import subprocess
 from .. import dbhandler
-from ..daemon.main import _find_matching_pipelines, _pipeline_ready_sample, _kill_tomato_job
+from ..daemon.main import (
+    _find_matching_pipelines,
+    _pipeline_ready_sample,
+    _kill_tomato_job,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +27,10 @@ def run_passata():
         default=1234,
     )
     args = parser.parse_args()
-    
+
     context = zmq.Context()
     rep = context.socket(zmq.REP)
-    port_rep = rep.bind(f"tcp://127.0.0.1:{args.port}")
+    rep.bind(f"tcp://127.0.0.1:{args.port}")
 
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
@@ -53,7 +58,7 @@ def run_passata():
                 msg = dict(status=status)
             rep.send_json(msg)
 
-        ## Former main loop - split into job and pipeline managers
+        # Former main loop - split into job and pipeline managers
         if status == "running":
             qup = settings["queue"]["path"]
             qut = settings["queue"]["type"]
@@ -72,7 +77,9 @@ def run_passata():
                     _, _, st, _, _, _ = dbhandler.job_get_info(qup, jobid, type=qut)
                     print(f"{jobid=} {st=}")
                     if st in {"rd"}:
-                        logger.warning(f"cancelling a running job {jobid} with pid {pid}")
+                        logger.warning(
+                            f"cancelling a running job {jobid} with pid {pid}"
+                        )
                         proc = psutil.Process(pid=pid)
                         logger.debug(f"{proc=}")
                         _kill_tomato_job(proc)
@@ -120,7 +127,7 @@ def run_passata():
                     root = os.path.join(settings["queue"]["storage"], str(jobid))
                     os.makedirs(root)
                     jpath = os.path.join(root, "jobdata.json")
-                    with open(jpath, "w") as of:
+                    with open(jpath, "w", encoding="utf=8") as of:
                         json.dump(args, of, indent=1)
                     if psutil.WINDOWS:
                         cfs = subprocess.CREATE_NO_WINDOW
