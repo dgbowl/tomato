@@ -23,7 +23,7 @@ from . import ketchup
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_PASSATA_PORT = 1234
+DEFAULT_TOMATO_PORT = 1234
 VERSION = metadata.version("tomato")
 
 
@@ -57,7 +57,7 @@ def tomato_status(
     context: zmq.Context,
     **_: dict,
 ) -> dict:
-    logger.debug("checking status of passata on port %d", port)
+    logger.debug("checking status of tomato on port %d", port)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_json(dict(cmd="status"))
@@ -69,7 +69,7 @@ def tomato_status(
         data = req.recv_json()
         return dict(
             success=True,
-            msg=f"passata running on port {port}",
+            msg=f"tomato running on port {port}",
             data=data,
         )
     else:
@@ -77,7 +77,7 @@ def tomato_status(
         req.close()
         return dict(
             success=False,
-            msg=f"passata not running on port {port}",
+            msg=f"tomato not running on port {port}",
         )
 
 
@@ -100,8 +100,8 @@ def tomato_start(
             msg=f"required port {port} is already in use, choose a different one",
         )
 
-    logger.debug("starting passata on port %d", port)
-    cmd = ["passata", "--port", f"{port}"]
+    logger.debug("starting tomato on port %d", port)
+    cmd = ["tomato-daemon", "--port", f"{port}"]
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(cmd, creationflags=cfs)
@@ -116,7 +116,7 @@ def tomato_start(
     else:
         return dict(
             success=False,
-            msg=f"failed to start passata on port {port}",
+            msg=f"failed to start tomato on port {port}",
             data=status,
         )
 
@@ -137,7 +137,7 @@ def tomato_stop(
         if msg["status"] == "stop":
             return dict(
                 success=True,
-                msg=f"passata on port {port} was instructed to stop",
+                msg=f"tomato on port {port} was instructed to stop",
                 data=msg,
             )
         else:
@@ -222,13 +222,13 @@ def tomato_reload(
     if msg["status"] == "running":
         return dict(
             success=True,
-            msg=f"passata configured on port {port} with settings from {appdir}",
+            msg=f"tomato configured on port {port} with settings from {appdir}",
             data=msg,
         )
     else:
         return dict(
             success=False,
-            msg=f"passata configuration on port {port} failed",
+            msg=f"tomato configuration on port {port} failed",
             data=msg,
         )
 
@@ -284,8 +284,8 @@ def run_tomato():
         p.add_argument(
             "--port",
             "-p",
-            help="Port number of passata's reply socket",
-            default=DEFAULT_PASSATA_PORT,
+            help="Port number of tomato's reply socket",
+            default=DEFAULT_TOMATO_PORT,
         )
         p.add_argument(
             "--timeout",
