@@ -48,9 +48,9 @@ def tomato_setup():
 
 def ketchup_setup(casename, jobname, pip="dummy-10"):
     logger.debug("In 'ketchup_setup'.")
-    subprocess.run(["ketchup", "-t", "load", casename, pip, "-vv"])
-    subprocess.run(["ketchup", "-t", "ready", pip, "-vv"])
-    args = ["ketchup", "-t", "submit", f"{casename}.yml", "-vv"]
+    subprocess.run(["ketchup", "load", "--appdir", ".", casename, pip, "-vv"])
+    subprocess.run(["ketchup", "ready", "--appdir", ".", pip, "-vv"])
+    args = ["ketchup", "submit", "--appdir", ".", f"{casename}.yml", "-vv"]
     if jobname is not None:
         args.append("--jobname")
         args.append(jobname)
@@ -59,6 +59,7 @@ def ketchup_setup(casename, jobname, pip="dummy-10"):
 
 
 def ketchup_loop(start, inter_func):
+    print("In ketchup_loop")
     inter_exec = None
     end = False
     logger.debug("In 'ketchup_loop'.")
@@ -74,21 +75,22 @@ def ketchup_loop(start, inter_func):
         if not os.path.exists(os.path.join("Jobs", "1", "jobdata.log")):
             continue
         if inter_exec and inter_func is not None:
-            logger.debug("Running 'inter_func()'")
+            print("Running 'inter_func()'")
             inter_func()
             inter_exec = False
         ret = subprocess.run(
-            ["ketchup", "-t", "status", "1"],
+            ["ketchup", "status", "--appdir", ".", "--datadir", ".", "1"],
             capture_output=True,
             text=True,
         )
-        yml = yaml.safe_load(ret.stdout)
-        assert len(yml) == 1
-        status = yml[0]["status"]
-        if status.startswith("c"):
-            end = True
-        elif status.startswith("r") and inter_exec is None:
-            inter_exec = True
+        print(f"{ret.stdout}")
+        yml = yaml.safe_load(f"{ret.stdout}")
+        if yml["success"]:
+            status = yml["data"][0]["status"]
+            if status.startswith("c"):
+                end = True
+            elif status.startswith("r") and inter_exec is None:
+                inter_exec = True
     return status
 
 
@@ -121,19 +123,19 @@ def run_casename(
 
 
 def cancel_job(jobid: int = 1):
-    logger.debug("Running 'ketchup cancel'.")
-    subprocess.run(["ketchup", "-t", "cancel", f"{jobid}", "-vv"])
+    print("Running 'ketchup cancel'.")
+    subprocess.run(["ketchup", "cancel", "--appdir", ".", f"{jobid}", "-vv"])
 
 
 def snapshot_job(jobid: int = 1):
-    logger.debug("Running 'ketchup snapshot'.")
-    subprocess.run(["ketchup", "-t", "snapshot", f"{jobid}", "-vv"])
+    print("Running 'ketchup snapshot'.")
+    subprocess.run(["ketchup", "snapshot", "--appdir", ".", f"{jobid}", "-vv"])
 
 
 def search_job(jobname: str = "$MATCH"):
     logger.debug("Running 'ketchup search'.")
     ret = subprocess.run(
-        ["ketchup", "-t", "search", jobname, "-vv"],
+        ["ketchup", "--appdir", ".", "search", jobname, "-vv"],
         capture_output=True,
         text=True,
     )

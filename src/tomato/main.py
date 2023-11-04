@@ -57,7 +57,7 @@ def tomato_status(
     context: zmq.Context,
     **_: dict,
 ) -> dict:
-    logger.debug("checking status of tomato on port %d", port)
+    logger.debug(f"checking status of tomato on port {port}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_json(dict(cmd="status"))
@@ -89,7 +89,7 @@ def tomato_start(
     appdir: str,
     **kwargs: dict,
 ) -> dict:
-    logging.debug("checking for availability of port %d.", port)
+    logging.debug(f"checking for availability of port {port}.")
     try:
         rep = context.socket(zmq.REP)
         rep.bind(f"tcp://127.0.0.1:{port}")
@@ -100,7 +100,7 @@ def tomato_start(
             msg=f"required port {port} is already in use, choose a different one",
         )
 
-    logger.debug("starting tomato on port %d", port)
+    logger.debug(f"starting tomato on port {port}")
     cmd = ["tomato-daemon", "--port", f"{port}"]
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
@@ -358,7 +358,35 @@ def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser
 
 
 def run_ketchup():
-    parser, verbose = _default_parsers()
+    dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
+    config_dir = dirs.user_config_dir
+    data_dir = dirs.user_data_dir
+
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s version {VERSION}",
+    )
+
+    verbose = argparse.ArgumentParser(add_help=False)
+
+    for p in [parser, verbose]:
+        p.add_argument(
+            "--verbose",
+            "-v",
+            action="count",
+            default=0,
+            help="Increase verbosity by one level.",
+        )
+        p.add_argument(
+            "--quiet",
+            "-q",
+            action="count",
+            default=0,
+            help="Decrease verbosity by one level.",
+        )
+
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
     submit = subparsers.add_parser("submit")
@@ -377,20 +405,23 @@ def run_ketchup():
 
     status = subparsers.add_parser("status")
     status.add_argument(
-        "jobid",
+        "jobids",
         nargs="*",
         help=(
-            "The jobid of the requested job, "
-            "or 'queue' for the status of the queue,"
-            "or 'state' for the status of pipelines."
+            "The jobid(s) of the requested job(s), "
+            "defaults to the status of the whole queue."
         ),
-        default=["state"],
+        type=int,
+        default=None,
     )
     status.set_defaults(func=ketchup.status)
 
     cancel = subparsers.add_parser("cancel")
     cancel.add_argument(
-        "jobid", help="The jobid of the job to be cancelled.", default=None
+        "jobid", 
+        help="The jobid of the job to be cancelled.", 
+        type=int,
+        default=None,
     )
     cancel.set_defaults(func=ketchup.cancel)
 
@@ -434,9 +465,36 @@ def run_ketchup():
     )
     search.set_defaults(func=ketchup.search)
 
+    for p in [submit, status, cancel, load, eject, ready, snapshot, search]:
+        p.add_argument(
+            "--port",
+            "-p",
+            help="Port number of tomato's reply socket",
+            default=DEFAULT_TOMATO_PORT,
+        )
+        p.add_argument(
+            "--timeout",
+            help="Timeout for the ketchup command, in milliseconds",
+            type=int,
+            default=3000,
+        )
+        p.add_argument(
+            "--appdir",
+            help="Settings directory for tomato",
+            default=config_dir,
+        )
+        p.add_argument(
+            "--datadir",
+            help="Data directory for tomato",
+            default=data_dir,
+        )
+
     args, extras = parser.parse_known_args()
     args, extras = verbose.parse_known_args(extras, args)
-    # _logging_setup(args)
+
+    verbosity = args.verbose - args.quiet
+    set_loglevel(verbosity)
 
     if "func" in args:
-        args.func(args)
+        ret = args.func(**vars(args), verbosity=verbosity)
+        print(yaml.dump(ret))

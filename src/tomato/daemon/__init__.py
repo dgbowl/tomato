@@ -18,6 +18,7 @@ from .main import (
 
 logger = logging.getLogger(__name__)
 
+
 def run_daemon():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(

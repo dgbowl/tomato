@@ -72,7 +72,7 @@ def test_run_dummy_jobname(casename, jobname, search, datadir):
         status = utils.run_casename(casename, jobname=jobname)
     assert status == "c"
     ret = subprocess.run(
-        ["ketchup", "-t", "status", "1"],
+        ["ketchup", "status", "--appdir", ".", "1"],
         capture_output=True,
         text=True,
     )
@@ -116,13 +116,16 @@ def test_run_dummy_multiple(datadir):
     casenames = ["dummy_random_5_2", "dummy_random_1_0.1"]
     jobnames = ["job one", "job two"]
     utils.run_casename(casename=casenames, jobname=jobnames)
+    print(f"HERE!!!")
     ret = subprocess.run(
-        ["ketchup", "-t", "status", "1", "2"],
+        ["ketchup", "status", "--appdir", ".", "1", "2"],
         capture_output=True,
         text=True,
     )
+    print(f"HERE!!!!")
+    print(f"{ret.stdout}")
     yml = yaml.safe_load(ret.stdout)
-    assert len(yml) == 2
-    assert {1, 2} == set([i["jobid"] for i in yml])
-    assert set(jobnames) == set([i["jobname"] for i in yml])
-    assert {"c"} == set([i["status"] for i in yml])
+    assert len(yml["data"]) == 2
+    assert {1, 2} == set([i["jobid"] for i in yml["data"]])
+    assert set(jobnames) == set([i["jobname"] for i in yml["data"]])
+    assert {"c"} == set([i["status"] for i in yml["data"]])
