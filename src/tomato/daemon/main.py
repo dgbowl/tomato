@@ -25,7 +25,7 @@ def _kill_tomato_job(proc):
                 except psutil.NoSuchProcess:
                     log.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
                     continue
-            gone, alive = psutil.wait_procs(ppc, timeout=0)
+            #gone, alive = psutil.wait_procs(ppc, timeout=1)
     elif psutil.POSIX:
         for proc in pc:
             try:
@@ -33,9 +33,9 @@ def _kill_tomato_job(proc):
             except psutil.NoSuchProcess:
                 log.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
                 continue
-        gone, alive = psutil.wait_procs(pc, timeout=0)
-    log.debug(f"{gone=}")
-    log.debug(f"{alive=}")
+        #gone, alive = psutil.wait_procs(pc, timeout=1)
+    #log.debug(f"{gone=}")
+    #log.debug(f"{alive=}")
 
 
 def _find_matching_pipelines(pipelines: list, method: list[dict]) -> list[str]:
