@@ -1,6 +1,7 @@
 from setuptools import distutils
 import os
 import pytest
+import subprocess
 
 
 @pytest.fixture
@@ -21,3 +22,23 @@ def datadir(tmpdir, request):
         distutils.dir_util.copy_tree(common_dir, str(tmpdir))
     print(f"{tmpdir=}")
     return tmpdir
+
+
+@pytest.fixture(autouse=True, scope="function")
+def tomato_daemon(tmpdir):
+    # setup_stuff
+    os.chdir(tmpdir)
+    subprocess.run(["tomato", "init", "-p", "12345", "--appdir", ".", "--datadir", "."])
+    subprocess.run(
+        ["tomato", "start", "-p", "12345", "--appdir", ".", "--datadir", "."]
+    )
+    yield
+    # teardown_stuff
+    subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "1000"])
+
+@pytest.fixture(autouse=True, scope="session")
+def tomato_daemon_session():
+    # setup_stuff
+    yield
+    # teardown_stuff
+    subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "3000"])

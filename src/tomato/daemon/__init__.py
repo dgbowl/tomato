@@ -8,6 +8,7 @@ import json
 import zmq
 import psutil
 
+from .pipeline import Pipeline
 from .. import dbhandler
 
 from .main import (
@@ -17,6 +18,46 @@ from .main import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def merge_pipelines(
+    cur: dict[str, Pipeline], new: dict[str, Pipeline]
+) -> dict[str, Pipeline]:
+    ret = {}
+
+    for pname, pip in cur.items():
+        if pname not in new:
+            if pip.jobid is not None:
+                ret[pname] = pip
+        else:
+            if pip == new[pname]:
+                ret[pname] = pip
+            elif pip.jobid is None:
+                ret[pname] = new[pname]
+    for pname, pip in new.items():
+        if pname not in cur:
+            ret[pname] = pip
+    return ret
+
+
+def find_matching_pipelines(pipelines: dict, method: list[dict]) -> list[str]:
+    req_names = set([item["device"] for item in method])
+    req_capabs = set([item["technique"] for item in method])
+
+    candidates = []
+    for pip in pipelines.values():
+        dnames = set([device.tag for device in pip.devices])
+        if req_names.intersection(dnames) == req_names:
+            candidates.append(pip)
+
+    matched = []
+    for cd in candidates:
+        capabs = []
+        for device in cd.devices:
+            capabs += device.capabilities
+        if req_capabs.intersection(set(capabs)) == req_capabs:
+            matched.append(cd)
+    return matched
 
 
 def run_daemon():
@@ -41,7 +82,7 @@ def run_daemon():
     pipelines = {}
 
     while True:
-        socks = dict(poller.poll(0))
+        socks = dict(poller.poll(100))
         if rep in socks:
             msg = rep.recv_json()
             assert "cmd" in msg
@@ -51,46 +92,47 @@ def run_daemon():
                 msg = dict(status=status)
             elif cmd == "setup":
                 settings = msg.get("settings", settings)
-                pipelines = msg.get("pipelines", pipelines)
+                newpips = {p["name"]: Pipeline(**p) for p in msg.get("pipelines", {})}
+                pipelines = merge_pipelines(pipelines, newpips)
                 if status == "bootstrap":
                     status = "running"
-                msg = dict(status=status, pipelines=pipelines)
+                msg = dict(
+                    status=status, pipelines=[pip.dict() for pip in pipelines.values()]
+                )
+            elif cmd == "pipeline":
+                pname = msg.get("pipeline")
+                params = msg.get("params", {})
+                for k, v in params.items():
+                    setattr(pipelines[pname], k, v)
+                msg = dict(status=status, pipeline=pipelines[pname].dict())
             elif cmd == "status":
-                msg = dict(status=status)
+                msg = dict(
+                    status=status, pipelines=[pip.dict() for pip in pipelines.values()]
+                )
             rep.send_json(msg)
 
         # Former main loop - split into job and pipeline managers
         if status == "running":
             qup = settings["queue"]["path"]
             qut = settings["queue"]["type"]
-            stp = settings["state"]["path"]
-            stt = settings["state"]["type"]
 
             # check existing PIDs in state
-            ret = dbhandler.pipeline_get_running(stp, type=stt)
-            for pip, jobid, pid in ret:
-                logger.debug(f"checking PID of running job '{jobid}'")
-                if (
-                    psutil.pid_exists(pid)
-                    and "tomato_job" in psutil.Process(pid).name()
-                ):
-                    logger.debug(f"PID of running job '{jobid}' found")
-                    _, _, st, _, _, _ = dbhandler.job_get_info(qup, jobid, type=qut)
-                    print(f"{jobid=} {st=}")
-                    if st in {"rd"}:
-                        logger.warning(
-                            f"cancelling a running job {jobid} with pid {pid}"
-                        )
-                        proc = psutil.Process(pid=pid)
-                        logger.debug(f"{proc=}")
+            running = [pip for pip in pipelines.values() if pip.jobid is not None]
+
+            for pip in running:
+                if pip.pid is not None and psutil.pid_exists(pip.pid):
+                    ret = dbhandler.job_get_info(qup, pip.jobid, type=qut)
+                    st = ret[2]
+                    if st == "rd":
+                        proc = psutil.Process(pid=pip.pid)
                         _kill_tomato_job(proc)
-                        logger.info(f"setting job {jobid} to status 'cd'")
-                        dbhandler.job_set_status(qup, "cd", jobid, type=qut)
+                        dbhandler.job_set_status(qup, "cd", pip.jobid, type=qut)
                 else:
-                    logger.debug(f"PID of running job '{jobid}' not found")
-                    dbhandler.pipeline_reset_job(stp, pip, False, type=stt)
-                    dbhandler.job_set_status(qup, "ce", jobid, type=qut)
-                    dbhandler.job_set_time(qup, "completed_at", jobid, type=qut)
+                    dbhandler.job_set_status(qup, "ce", pip.jobid, type=qut)
+                    dbhandler.job_set_time(qup, "completed_at", pip.jobid, type=qut)
+                    pip.pid = None
+                    pip.jobid = None
+                    pip.ready = False
 
             # check queued jobs in queue, get their payloads and any matching pipelines
             ret = dbhandler.job_get_all_queued(qup, type=qut)
@@ -101,27 +143,23 @@ def run_daemon():
                 payload = json.loads(strpl)
                 payloads[jobid] = payload
                 jobids.append(jobid)
-                if st == "q":
-                    logger.info(f"checking whether job '{jobid}' can ever be matched")
-                matched_pips[jobid] = _find_matching_pipelines(
+                matched_pips[jobid] = find_matching_pipelines(
                     pipelines, payload["method"]
                 )
                 if len(matched_pips[jobid]) > 0 and st != "qw":
                     dbhandler.job_set_status(qup, "qw", jobid, type=qut)
-
             # iterate over sorted queued jobs and submit if pipeline with is loaded & ready
             for jobid in sorted(jobids):
                 payload = payloads[jobid]
-                logger.debug(f"checking whether job '{jobid}' can be queued")
                 for pip in matched_pips[jobid]:
-                    pipinfo = dbhandler.pipeline_get_info(stp, pip["name"], type=stt)
-                    if not _pipeline_ready_sample(pipinfo, payload["sample"]):
+                    if not pip.ready:
                         continue
-                    logger.info(f"queueing job '{jobid}' on pipeline '{pip['name']}'")
-                    dbhandler.pipeline_reset_job(stp, pip["name"], False, type=stt)
-                    args = {
+                    elif pip.sampleid != payload["sample"]["name"]:
+                        continue
+                    pip.ready = False
+                    jobargs = {
                         "settings": settings,
-                        "pipeline": pip,
+                        "pipeline": pip.dict(),
                         "payload": payload,
                         "jobid": jobid,
                     }
@@ -129,21 +167,21 @@ def run_daemon():
                     os.makedirs(root)
                     jpath = os.path.join(root, "jobdata.json")
                     with open(jpath, "w", encoding="utf=8") as of:
-                        json.dump(args, of, indent=1)
+                        json.dump(jobargs, of, indent=1)
                     if psutil.WINDOWS:
                         cfs = subprocess.CREATE_NO_WINDOW
                         cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
                         subprocess.Popen(
-                            ["tomato_job", str(jpath)],
+                            ["tomato_job", "--port", str(args.port), str(jpath)],
                             creationflags=cfs,
                         )
                     elif psutil.POSIX:
                         subprocess.Popen(
-                            ["tomato_job", str(jpath)],
+                            ["tomato_job", "--port", str(args.port), str(jpath)],
                             start_new_session=True,
                         )
                     break
         if status == "stop":
             break
-        else:
-            time.sleep(settings.get("main loop", 0.1))
+        #else:
+        #    time.sleep(settings.get("main loop", 0.5))

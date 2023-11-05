@@ -1,17 +1,12 @@
 import os
 import json
-import yaml
 import logging
-import signal
-import psutil
-import time
-import toml
-from argparse import Namespace
-from typing import List, Union
 from pathlib import Path
+import toml
+import yaml
+import zmq
 from dgbowl_schemas.tomato import to_payload
 
-from .. import setlib
 from .. import dbhandler
 from ..drivers import yadg_funcs
 
@@ -19,13 +14,7 @@ from ..drivers import yadg_funcs
 log = logging.getLogger(__name__)
 
 
-def submit(
-    *,
-    appdir: str,
-    payload: str,
-    jobname: str,
-    **_: dict,
-) -> dict:
+def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> dict:
     """
     Job submission function. Usage:
 
@@ -66,19 +55,19 @@ def submit(
     settings = toml.load(Path(appdir) / "settings.toml")
     queue = settings["queue"]
     if os.path.exists(payload) and os.path.isfile(payload):
-        log.debug(f"attempting to open Payload at '{payload}'")
+        pass
     else:
-        log.error(f"Payload file '{payload} not found.")
-        return None
+        return dict(success=False, msg=f"payload file {payload} not found")
 
-    with open(payload, "r") as infile:
+    with open(payload, "r", encoding="utf-8") as infile:
         if payload.endswith("json"):
             pldict = json.load(infile)
         elif payload.endswith("yml") or payload.endswith("yaml"):
             pldict = yaml.full_load(infile)
         else:
-            log.error("Payload file name must end with one of: {json, yml, yaml}.")
-            return None
+            return dict(
+                success=False, msg="payload file must end with one of {json, yml, yaml}"
+            )
     payload = to_payload(**pldict)
     log.debug("Payload=Payload(%s)", payload)
     if payload.tomato.output.path is None:
@@ -108,6 +97,8 @@ def status(
     appdir: str,
     jobids: list[int],
     verbosity: int,
+    context: zmq.Context,
+    status: dict,
     **_: dict,
 ) -> dict:
     """
@@ -167,23 +158,25 @@ def status(
     """
     settings = toml.load(Path(appdir) / "settings.toml")
     queue = settings["queue"]
-    state = settings["state"]
+    running = [
+        pip
+        for pip in status.get("data", {}).get("pipelines", [])
+        if pip["jobid"] is not None
+    ]
     ret = []
     if len(jobids) == 0:
         jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
-        running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
         for jobid, jobname, payload, status in jobs:
             if status.startswith("q"):
                 ret.append(dict(jobid=jobid, jobname=jobname, status=status))
             elif status.startswith("r"):
-                for pip, pjobid, pid in running:
-                    if pjobid == jobid:
+                for pip in running:
+                    if pip["jobid"] == jobid:
                         ret.append(
                             dict(
                                 jobid=jobid,
                                 jobname=jobname,
                                 status=status,
-                                pid=pid,
                                 pipeline=pip,
                             )
                         )
@@ -201,13 +194,9 @@ def status(
             )
             if status.startswith("r") or status.startswith("c"):
                 retitem["executed"] = executed_at
-                running = dbhandler.pipeline_get_running(
-                    state["path"], type=state["type"]
-                )
-                for pipeline, pjobid, pid in running:
-                    if pjobid == jobid:
-                        retitem["pipeline"] = pipeline
-                        retitem["pid"] = pid
+                for pip in running:
+                    if pip["jobid"] == jobid:
+                        retitem["pipeline"] = pip
                         break
             if status.startswith("c"):
                 retitem["completed"] = completed_at
@@ -222,10 +211,7 @@ def status(
 
 
 def cancel(
-    *,
-    appdir: str,
-    jobid: int,
-    **_: dict,
+    *, appdir: str, jobid: int, context: zmq.Context, status: dict, **_: dict
 ) -> dict:
     """
     Job cancellation function. Usage:
@@ -265,8 +251,12 @@ def cancel(
 
     """
     settings = toml.load(Path(appdir) / "settings.toml")
-    state = settings["state"]
     queue = settings["queue"]
+    running = [
+        pip
+        for pip in status.get("data", {}).get("pipelines", [])
+        if pip["jobid"] is not None
+    ]
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
     if jobinfo is None:
         return dict(success=False, msg=f"job with jobid {jobid} does not exist")
@@ -276,51 +266,12 @@ def cancel(
         dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
         return dict(success=True, msg=f"job {jobid} cancelled with status 'cd'")
     elif status == "r":
-        print(f"Status is R, cancelling")
-        running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
-        for pip, pjobid, pid in running:
-            print(f"{pip=} {pjobid=} {pid=}")
-            if pjobid == jobid:
+        for pip in running:
+            if pip["jobid"] == jobid:
                 dbhandler.job_set_status(queue["path"], "rd", jobid, type=queue["type"])
                 return dict(success=True, msg=f"job {jobid} cancelled with status 'rd'")
     elif status in {"rd", "cd"}:
         return dict(success=False, msg=f"job {jobid} has already been cancelled")
-
-
-def load(
-    *,
-    appdir: str,
-    pipeline: str,
-    sample: str,
-    **_: dict,
-) -> dict:
-    """
-    Load a sample into a pipeline. Usage:
-
-    .. code:: bash
-
-        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
-
-    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
-    Checks whether the pipeline exists and whether it is empty before loading
-    sample.
-
-    """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    state = settings["state"]
-
-    log.debug(f"checking whether pipeline '{pipeline}' exists.")
-    pips = dbhandler.pipeline_get_all(state["path"], type=state["type"])
-    assert pipeline in pips, f"pipeline '{pipeline}' not found."
-
-    sampleid, ready, jobid, pid = dbhandler.pipeline_get_info(
-        state["path"], pipeline, type=state["type"]
-    )
-    if sampleid is not None:
-        return dict(success=False, msg=f"pipeline {pipeline} is not empty, aborting")
-
-    dbhandler.pipeline_load_sample(state["path"], pipeline, sample, type=state["type"])
-    return dict(success=True, msg=f"loaded {sample} into {pipeline}")
 
 
 def eject(*, appdir: str, pipeline: str, **_: dict) -> dict:
@@ -480,7 +431,10 @@ def search(
     ret = []
     for jobid, jobn, payload, status in alljobs:
         if jobn is not None and jobname in jobn:
-            if status.startswith("c"):
-                ret.append(dict(jobid=jobid, jobname=jobname, status=status))
-
-    return ret
+            ret.append(dict(jobid=jobid, jobname=jobn, status=status))
+    if len(ret) > 0:
+        return dict(
+            success=True, msg=f"job with jobname matching {jobname} found", data=ret
+        )
+    else:
+        return dict(success=False, msg=f"no job with jobname matching {jobname} found")

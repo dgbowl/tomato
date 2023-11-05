@@ -20,4 +20,4 @@ Also includes *sample*/*pipeline* management functions:
 
 
 """
-from .functions import submit, status, cancel, load, eject, ready, snapshot, search
+from .functions import submit, status, cancel, snapshot, search

@@ -33,23 +33,6 @@ def set_loglevel(delta: int):
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
 
 
-def sync_pipelines_to_state(
-    pipelines: list,
-    dbpath: str,
-    type: str = "sqlite3",
-) -> None:
-    pstate = dbhandler.pipeline_get_all(dbpath, type)
-    for pip in pipelines:
-        logger.debug(f"checking presence of pipeline '{pip['name']}' in 'state'")
-        if pip["name"] not in pstate:
-            dbhandler.pipeline_insert(dbpath, pip["name"], type)
-    pnames = [p["name"] for p in pipelines]
-    for pname in pstate:
-        if pname not in pnames:
-            dbhandler.pipeline_remove(dbpath, pname, type)
-    pstate = dbhandler.pipeline_get_all(dbpath, type)
-
-
 def tomato_status(
     *,
     port: int,
@@ -67,6 +50,16 @@ def tomato_status(
     events = dict(poller.poll(timeout))
     if req in events:
         data = req.recv_json()
+        trimmed = []
+        for pip in data["pipelines"]:
+            shortpip = dict(
+                name=pip["name"],
+                ready=pip["ready"],
+                jobid=pip["jobid"],
+                sampleid=pip["sampleid"],
+            )
+            trimmed.append(shortpip)
+        data["pipelines"] = trimmed
         return dict(
             success=True,
             msg=f"tomato running on port {port}",
@@ -108,7 +101,7 @@ def tomato_start(
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
 
-    status = tomato_status(port=port, timeout=1000, context=context)
+    status = tomato_status(port=port, timeout=timeout, context=context)
     if status["success"]:
         return tomato_reload(
             port=port, timeout=timeout, context=context, appdir=appdir, **kwargs
@@ -121,13 +114,7 @@ def tomato_start(
         )
 
 
-def tomato_stop(
-    *,
-    port: int,
-    timeout: int,
-    context: zmq.Context,
-    **_: dict,
-):
+def tomato_stop(*, port: int, timeout: int, context: zmq.Context, **_: dict):
     status = tomato_status(port=port, timeout=timeout, context=context)
     if status["success"]:
         req = context.socket(zmq.REQ)
@@ -190,11 +177,7 @@ def tomato_init(
 
 
 def tomato_reload(
-    *,
-    port: int,
-    context: zmq.Context,
-    appdir: str,
-    **_: dict,
+    *, port: int, timeout: int, context: zmq.Context, appdir: str, **_: dict
 ) -> dict:
     logging.debug("Loading settings.toml file from %s.", appdir)
     try:
@@ -202,19 +185,17 @@ def tomato_reload(
     except FileNotFoundError:
         return dict(
             success=False,
-            msg=f"settings.toml file not found in {appdir}, run 'tomato init' to create one",
+            msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
     pipelines = setlib.get_pipelines(settings["devices"]["path"])
 
     logger.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
     dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
-    logger.debug(f"setting up 'state' table in '{settings['queue']['path']}'")
-    dbhandler.state_setup(settings["state"]["path"], type=settings["state"]["type"])
-    sync_pipelines_to_state(
-        pipelines, settings["state"]["path"], type=settings["state"]["type"]
-    )
 
+    status = tomato_status(port=port, timeout=timeout, context=context)
+    if not status["success"]:
+        return status
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_json(dict(cmd="setup", settings=settings, pipelines=pipelines))
@@ -231,6 +212,137 @@ def tomato_reload(
             msg=f"tomato configuration on port {port} failed",
             data=msg,
         )
+
+
+def tomato_pipeline_load(
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    appdir: str,
+    pipeline: str,
+    sampleid: str,
+    **_: dict,
+) -> dict:
+    """
+    Load a sample into a pipeline. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
+
+    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
+    Checks whether the pipeline exists and whether it is empty before loading
+    sample.
+
+    """
+    status = tomato_status(port=port, timeout=timeout, context=context)
+    if not status["success"]:
+        return status
+
+    pipnames = [pip["name"] for pip in status["data"]["pipelines"]]
+    if pipeline not in pipnames:
+        return dict(success=False, msg=f"pipeline {pipeline} not found on tomato")
+    pip = status["data"]["pipelines"][pipnames.index(pipeline)]
+
+    if pip["sampleid"] is not None:
+        return dict(success=False, msg=f"pipeline {pipeline} is not empty, aborting")
+
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    req.send_json(
+        dict(cmd="pipeline", pipeline=pipeline, params=dict(sampleid=sampleid))
+    )
+    msg = req.recv_json()
+    return dict(success=True, msg=f"loaded {sampleid} into {pipeline}", data=msg)
+
+
+def tomato_pipeline_eject(
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    appdir: str,
+    pipeline: str,
+    **_: dict,
+) -> dict:
+    """
+    Load a sample into a pipeline. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
+
+    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
+    Checks whether the pipeline exists and whether it is empty before loading
+    sample.
+
+    """
+    status = tomato_status(port=port, timeout=timeout, context=context)
+    if not status["success"]:
+        return status
+
+    pipnames = [pip["name"] for pip in status["data"]["pipelines"]]
+    if pipeline not in pipnames:
+        return dict(success=False, msg=f"pipeline {pipeline} not found on tomato")
+    pip = status["data"]["pipelines"][pipnames.index(pipeline)]
+
+    if pip["sampleid"] is None:
+        return dict(success=True, msg=f"pipeline {pipeline} was empty")
+
+    if pip["jobid"] is not None:
+        return dict(success=False, msg="cannot eject from a running pipeline")
+
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    req.send_json(
+        dict(cmd="pipeline", pipeline=pipeline, params=dict(sampleid=None, ready=False))
+    )
+    msg = req.recv_json()
+    return dict(success=True, msg=f"pipeline {pipeline} ejected succesffully", data=msg)
+
+
+def tomato_pipeline_ready(
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    appdir: str,
+    pipeline: str,
+    **_: dict,
+) -> dict:
+    """
+    Load a sample into a pipeline. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
+
+    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
+    Checks whether the pipeline exists and whether it is empty before loading
+    sample.
+
+    """
+    status = tomato_status(port=port, timeout=timeout, context=context)
+    if not status["success"]:
+        return status
+
+    pipnames = [pip["name"] for pip in status["data"]["pipelines"]]
+    if pipeline not in pipnames:
+        return dict(success=False, msg=f"pipeline {pipeline} not found on tomato")
+    pip = status["data"]["pipelines"][pipnames.index(pipeline)]
+
+    if pip["ready"] is None:
+        return dict(success=True, msg=f"pipeline {pipeline} was ready")
+
+    if pip["jobid"] is not None:
+        return dict(success=False, msg="cannot mark a running pipeline as ready")
+
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    req.send_json(dict(cmd="pipeline", pipeline=pipeline, params=dict(ready=True)))
+    msg = req.recv_json()
+    return dict(success=True, msg=f"pipeline {pipeline} set as ready", data=msg)
 
 
 def run_tomato():
@@ -264,6 +376,30 @@ def run_tomato():
     reload = subparsers.add_parser("reload")
     reload.set_defaults(func=tomato_reload)
 
+    pipeline = subparsers.add_parser("pipeline")
+    pipparsers = pipeline.add_subparsers(dest="subsubcommand", required=True)
+
+    pip_load = pipparsers.add_parser("load")
+    pip_load.set_defaults(func=tomato_pipeline_load)
+    pip_load.add_argument(
+        "pipeline",
+    )
+    pip_load.add_argument(
+        "sampleid",
+    )
+
+    pip_eject = pipparsers.add_parser("eject")
+    pip_eject.set_defaults(func=tomato_pipeline_eject)
+    pip_eject.add_argument(
+        "pipeline",
+    )
+
+    pip_ready = pipparsers.add_parser("ready")
+    pip_ready.set_defaults(func=tomato_pipeline_ready)
+    pip_ready.add_argument(
+        "pipeline",
+    )
+
     for p in [parser, verbose]:
         p.add_argument(
             "--verbose",
@@ -280,7 +416,7 @@ def run_tomato():
             help="Decrease verbosity by one level.",
         )
 
-    for p in [start, stop, init, status, reload]:
+    for p in [start, stop, init, status, reload, pip_load, pip_eject, pip_ready]:
         p.add_argument(
             "--port",
             "-p",
@@ -315,46 +451,6 @@ def run_tomato():
     if "func" in args:
         ret = args.func(**vars(args), context=context)
         print(yaml.dump(ret))
-
-
-def _logging_setup(args):
-    loglevel = min(max(30 + 10 * (args.quiet - args.verbose), 10), 50)
-    logging.basicConfig(level=loglevel)
-    logger.debug(f"loglevel set to '{logging._levelToName[loglevel]}'")
-
-
-def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser]:
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f'%(prog)s version {metadata.version("tomato")}',
-    )
-    parser.add_argument(
-        "-t",
-        "--test",
-        action="store_true",
-        default=False,
-        help="Launch tomato in test mode.",
-    )
-
-    verbose = argparse.ArgumentParser(add_help=False)
-    for p in [parser, verbose]:
-        p.add_argument(
-            "-v",
-            "--verbose",
-            action="count",
-            default=0,
-            help="Increase verbosity by one level.",
-        )
-        p.add_argument(
-            "-q",
-            "--quiet",
-            action="count",
-            default=0,
-            help="Decrease verbosity by one level.",
-        )
-    return parser, verbose
 
 
 def run_ketchup():
@@ -418,31 +514,12 @@ def run_ketchup():
 
     cancel = subparsers.add_parser("cancel")
     cancel.add_argument(
-        "jobid", 
-        help="The jobid of the job to be cancelled.", 
+        "jobid",
+        help="The jobid of the job to be cancelled.",
         type=int,
         default=None,
     )
     cancel.set_defaults(func=ketchup.cancel)
-
-    load = subparsers.add_parser("load")
-    load.add_argument("sample", help="Name of the sample to be loaded.", default=None)
-    load.add_argument(
-        "pipeline", help="Name of the pipeline to load the sample to.", default=None
-    )
-    load.set_defaults(func=ketchup.load)
-
-    eject = subparsers.add_parser("eject")
-    eject.add_argument(
-        "pipeline", help="Name of the pipeline to eject any sample from.", default=None
-    )
-    eject.set_defaults(func=ketchup.eject)
-
-    ready = subparsers.add_parser("ready")
-    ready.add_argument(
-        "pipeline", help="Name of the pipeline to mark as ready.", default=None
-    )
-    ready.set_defaults(func=ketchup.ready)
 
     snapshot = subparsers.add_parser("snapshot")
     snapshot.add_argument(
@@ -465,7 +542,7 @@ def run_ketchup():
     )
     search.set_defaults(func=ketchup.search)
 
-    for p in [submit, status, cancel, load, eject, ready, snapshot, search]:
+    for p in [submit, status, cancel, snapshot, search]:
         p.add_argument(
             "--port",
             "-p",
@@ -496,5 +573,12 @@ def run_ketchup():
     set_loglevel(verbosity)
 
     if "func" in args:
-        ret = args.func(**vars(args), verbosity=verbosity)
-        print(yaml.dump(ret))
+        context = zmq.Context()
+        status = tomato_status(**vars(args), context=context)
+        if not status["success"]:
+            print(yaml.dump(status))
+        else:
+            ret = args.func(
+                **vars(args), verbosity=verbosity, context=context, status=status
+            )
+            print(yaml.dump(ret))
