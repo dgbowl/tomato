@@ -180,7 +180,17 @@ def run_casenames(
 
 def job_status(jobid):
     ret = subprocess.run(
-        ["ketchup", "status", "--timeout", "3000", "-p", "12345", "--appdir", ".", str(jobid)],
+        [
+            "ketchup",
+            "status",
+            "--timeout",
+            "3000",
+            "-p",
+            "12345",
+            "--appdir",
+            ".",
+            str(jobid),
+        ],
         capture_output=True,
         text=True,
     )

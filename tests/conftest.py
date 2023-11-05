@@ -36,6 +36,7 @@ def tomato_daemon(tmpdir):
     # teardown_stuff
     subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "1000"])
 
+
 @pytest.fixture(autouse=True, scope="session")
 def tomato_daemon_session():
     # setup_stuff

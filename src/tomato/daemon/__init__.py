@@ -183,5 +183,5 @@ def run_daemon():
                     break
         if status == "stop":
             break
-        #else:
+        # else:
         #    time.sleep(settings.get("main loop", 0.5))
