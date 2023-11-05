@@ -111,6 +111,7 @@ def test_run_dummy_cancel(casename, datadir):
         if cancel and status == "r":
             subprocess.run(["ketchup", "cancel", "-p", "12345", "--appdir", ".", "1"])
             cancel = False
+            time.sleep(2)
         ret = utils.job_status(1)
         print(f"{ret=}")
         status = ret["data"][0]["status"]
