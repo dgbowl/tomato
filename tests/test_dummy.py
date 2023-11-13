@@ -106,6 +106,7 @@ def test_run_dummy_cancel(casename, datadir):
     cancel = True
     utils.run_casenames([casename], [None], ["dummy-10"])
     status = utils.job_status(1)["data"][0]["status"]
+    print(f"{status=}")
     while status in {"q", "qw", "r", "rd"}:
         time.sleep(2)
         if cancel and status == "r":
@@ -149,6 +150,7 @@ def test_run_dummy_multiple(datadir):
     pipelines = ["dummy-10", "dummy-5"]
     utils.run_casenames(casenames, jobnames, pipelines)
     status = utils.job_status(1)["data"][0]["status"]
+    print(f"{status=}")
     while status in {"q", "qw", "r"}:
         time.sleep(1)
         status = utils.job_status(1)["data"][0]["status"]

@@ -74,9 +74,8 @@ def tomato_job() -> None:
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{args.port}")
-    req.send_json(dict(cmd="pipeline", pipeline=pip, params=dict(jobid=jobid, pid=pid)))
-    msg = req.recv_json()
-    print(f"{msg=}")
+    req.send_pyobj(dict(cmd="pipeline", pipeline=pip, params=dict(jobid=jobid, pid=pid)))
+    msg = req.recv_pyobj()
     dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
 
@@ -117,12 +116,12 @@ def tomato_job() -> None:
         logger.info("==============================")
         ready = False
 
-    req.send_json(
+    req.send_pyobj(
         dict(
             cmd="pipeline", pipeline=pip, params=dict(jobid=None, pid=None, ready=ready)
         )
     )
-    msg = req.recv_json()
+    msg = req.recv_pyobj()
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
 
 

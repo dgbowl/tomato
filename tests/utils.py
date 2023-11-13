@@ -183,8 +183,6 @@ def job_status(jobid):
         [
             "ketchup",
             "status",
-            "--timeout",
-            "3000",
             "-p",
             "12345",
             "--appdir",

@@ -10,11 +10,12 @@ from dgbowl_schemas.tomato import to_payload
 from .. import dbhandler
 from ..drivers import yadg_funcs
 
+from tomato.models import Reply
 
 log = logging.getLogger(__name__)
 
 
-def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> dict:
+def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> Reply:
     """
     Job submission function. Usage:
 
@@ -57,7 +58,7 @@ def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> dict:
     if os.path.exists(payload) and os.path.isfile(payload):
         pass
     else:
-        return dict(success=False, msg=f"payload file {payload} not found")
+        return Reply(success=False, msg=f"payload file {payload} not found")
 
     with open(payload, "r", encoding="utf-8") as infile:
         if payload.endswith("json"):
@@ -65,7 +66,7 @@ def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> dict:
         elif payload.endswith("yml") or payload.endswith("yaml"):
             pldict = yaml.full_load(infile)
         else:
-            return dict(
+            return Reply(
                 success=False, msg="payload file must end with one of {json, yml, yaml}"
             )
     payload = to_payload(**pldict)
@@ -85,7 +86,7 @@ def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> dict:
     jobid = dbhandler.queue_payload(
         queue["path"], pstr, type=queue["type"], jobname=jobname
     )
-    return dict(
+    return Reply(
         success=True,
         msg="job submitted successfully",
         data=dict(jobid=jobid, jobname=jobname),
@@ -100,7 +101,7 @@ def status(
     context: zmq.Context,
     status: dict,
     **_: dict,
-) -> dict:
+) -> Reply:
     """
     Job, queue and pipeline status query function. Usage:
 
@@ -158,11 +159,7 @@ def status(
     """
     settings = toml.load(Path(appdir) / "settings.toml")
     queue = settings["queue"]
-    running = [
-        pip
-        for pip in status.get("data", {}).get("pipelines", [])
-        if pip["jobid"] is not None
-    ]
+    running = [pip for pip in status.data if pip.jobid is not None]
     ret = []
     if len(jobids) == 0:
         jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
@@ -171,7 +168,7 @@ def status(
                 ret.append(dict(jobid=jobid, jobname=jobname, status=status))
             elif status.startswith("r"):
                 for pip in running:
-                    if pip["jobid"] == jobid:
+                    if pip.jobid == jobid:
                         ret.append(
                             dict(
                                 jobid=jobid,
@@ -195,24 +192,24 @@ def status(
             if status.startswith("r") or status.startswith("c"):
                 retitem["executed"] = executed_at
                 for pip in running:
-                    if pip["jobid"] == jobid:
+                    if pip.jobid == jobid:
                         retitem["pipeline"] = pip
                         break
             if status.startswith("c"):
                 retitem["completed"] = completed_at
             ret.append(retitem)
     if len(ret) == 0:
-        return dict(
+        return Reply(
             success=False,
             msg="queue empty" if len(jobids) == 0 else "matching job not found",
         )
     else:
-        return dict(success=True, msg=f"status of {len(ret)} jobs returned", data=ret)
-
+        return Reply(success=True, msg=f"status of {len(ret)} jobs returned", data=ret)
+        
 
 def cancel(
     *, appdir: str, jobid: int, context: zmq.Context, status: dict, **_: dict
-) -> dict:
+) -> Reply:
     """
     Job cancellation function. Usage:
 
@@ -252,29 +249,25 @@ def cancel(
     """
     settings = toml.load(Path(appdir) / "settings.toml")
     queue = settings["queue"]
-    running = [
-        pip
-        for pip in status.get("data", {}).get("pipelines", [])
-        if pip["jobid"] is not None
-    ]
+    running = [pip for pip in status.data if pip.jobid is not None]
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
     if jobinfo is None:
-        return dict(success=False, msg=f"job with jobid {jobid} does not exist")
+        return Reply(success=False, msg=f"job with jobid {jobid} does not exist")
     status = jobinfo[2]
     log.debug(f"found job {jobid} with status '{status}'")
     if status in {"q", "qw"}:
         dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
-        return dict(success=True, msg=f"job {jobid} cancelled with status 'cd'")
+        return Reply(success=True, msg=f"job {jobid} cancelled with status 'cd'")
     elif status == "r":
         for pip in running:
-            if pip["jobid"] == jobid:
+            if pip.jobid == jobid:
                 dbhandler.job_set_status(queue["path"], "rd", jobid, type=queue["type"])
-                return dict(success=True, msg=f"job {jobid} cancelled with status 'rd'")
+                return Reply(success=True, msg=f"job {jobid} cancelled with status 'rd'")
     elif status in {"rd", "cd"}:
-        return dict(success=False, msg=f"job {jobid} has already been cancelled")
+        return Reply(success=False, msg=f"job {jobid} has already been cancelled")
 
 
-def snapshot(*, appdir: str, jobid: int, **_: dict) -> dict:
+def snapshot(*, appdir: str, jobid: int, **_: dict) -> Reply:
     """
     Create a snapshot of job data. Usage:
 
@@ -300,11 +293,11 @@ def snapshot(*, appdir: str, jobid: int, **_: dict) -> dict:
 
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
     if jobinfo is None:
-        return dict(success=False, msg=f"job {jobid} does not exist")
+        return Reply(success=False, msg=f"job {jobid} does not exist")
     status = jobinfo[2]
 
     if status.startswith("q"):
-        return dict(
+        return Reply(
             success=False, msg=f"job {jobid} is not yet running, cannot create snapshot"
         )
 
@@ -323,7 +316,7 @@ def snapshot(*, appdir: str, jobid: int, **_: dict) -> dict:
     yadg_funcs.process_yadg_preset(
         preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=jobdir
     )
-    return dict(success=True, msg=f"snapshot for job {jobid} created successfully")
+    return Reply(success=True, msg=f"snapshot for job {jobid} created successfully")
 
 
 def search(
@@ -331,7 +324,7 @@ def search(
     appdir: str,
     jobname: str,
     **_: dict,
-) -> list[dict]:
+) -> Reply:
     """
     Search the queue for a job that matches a given jobname. Usage:
 
@@ -363,8 +356,8 @@ def search(
         if jobn is not None and jobname in jobn:
             ret.append(dict(jobid=jobid, jobname=jobn, status=status))
     if len(ret) > 0:
-        return dict(
+        return Reply(
             success=True, msg=f"job with jobname matching {jobname} found", data=ret
         )
     else:
-        return dict(success=False, msg=f"no job with jobname matching {jobname} found")
+        return Reply(success=False, msg=f"no job with jobname matching {jobname} found")

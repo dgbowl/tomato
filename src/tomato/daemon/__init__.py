@@ -8,7 +8,7 @@ import json
 import zmq
 import psutil
 
-from .pipeline import Pipeline
+from tomato.models import Pipeline, Reply
 from .. import dbhandler
 
 from .main import (
@@ -41,6 +41,8 @@ def merge_pipelines(
 
 
 def find_matching_pipelines(pipelines: dict, method: list[dict]) -> list[str]:
+    print(f"{pipelines=}")
+    print(f"{method=}")
     req_names = set([item["device"] for item in method])
     req_capabs = set([item["technique"] for item in method])
 
@@ -57,6 +59,7 @@ def find_matching_pipelines(pipelines: dict, method: list[dict]) -> list[str]:
             capabs += device.capabilities
         if req_capabs.intersection(set(capabs)) == req_capabs:
             matched.append(cd)
+    print(f"{matched=}")
     return matched
 
 
@@ -83,33 +86,36 @@ def run_daemon():
 
     while True:
         socks = dict(poller.poll(100))
+        print(f"{socks=}")
         if rep in socks:
-            msg = rep.recv_json()
+            msg = rep.recv_pyobj()
+            print(f"{msg=}")
             assert "cmd" in msg
             cmd = msg["cmd"]
             if cmd == "stop":
                 status = "stop"
-                msg = dict(status=status)
+                msg = Reply(success=True, msg=status)
             elif cmd == "setup":
                 settings = msg.get("settings", settings)
                 newpips = {p["name"]: Pipeline(**p) for p in msg.get("pipelines", {})}
                 pipelines = merge_pipelines(pipelines, newpips)
                 if status == "bootstrap":
                     status = "running"
-                msg = dict(
-                    status=status, pipelines=[pip.dict() for pip in pipelines.values()]
+                msg = Reply(
+                    success=True, msg=status, data = [pip for pip in pipelines.values()]
                 )
             elif cmd == "pipeline":
                 pname = msg.get("pipeline")
                 params = msg.get("params", {})
                 for k, v in params.items():
                     setattr(pipelines[pname], k, v)
-                msg = dict(status=status, pipeline=pipelines[pname].dict())
+                msg = Reply(success=True, msg=status, data = pipelines[pname])
             elif cmd == "status":
-                msg = dict(
-                    status=status, pipelines=[pip.dict() for pip in pipelines.values()]
+                msg = Reply(
+                    success=True, msg=status, data = [pip for pip in pipelines.values()]
                 )
-            rep.send_json(msg)
+            print(f"{msg=}")
+            rep.send_pyobj(msg)
 
         # Former main loop - split into job and pipeline managers
         if status == "running":

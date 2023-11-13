@@ -21,6 +21,8 @@ from . import dbhandler
 from . import setlib
 from . import ketchup
 
+from tomato.models import Reply, Pipeline
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_TOMATO_PORT = 1234
@@ -43,32 +45,32 @@ def tomato_status(
     logger.debug(f"checking status of tomato on port {port}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_json(dict(cmd="status"))
+    req.send_pyobj(dict(cmd="status"))
 
     poller = zmq.Poller()
     poller.register(req, zmq.POLLIN)
     events = dict(poller.poll(timeout))
     if req in events:
-        data = req.recv_json()
+        rep = req.recv_pyobj()
         trimmed = []
-        for pip in data["pipelines"]:
-            shortpip = dict(
-                name=pip["name"],
-                ready=pip["ready"],
-                jobid=pip["jobid"],
-                sampleid=pip["sampleid"],
+        for pip in rep.data:
+            shortpip = Pipeline(
+                name = pip.name,
+                ready = pip.ready,
+                jobid = pip.jobid,
+                sampleid = pip.sampleid,
             )
             trimmed.append(shortpip)
-        data["pipelines"] = trimmed
-        return dict(
+        rep.data = trimmed
+        return Reply(
             success=True,
             msg=f"tomato running on port {port}",
-            data=data,
+            data=rep.data,
         )
     else:
         req.setsockopt(zmq.LINGER, 0)
         req.close()
-        return dict(
+        return Reply(
             success=False,
             msg=f"tomato not running on port {port}",
         )
@@ -88,7 +90,7 @@ def tomato_start(
         rep.bind(f"tcp://127.0.0.1:{port}")
         rep.unbind(f"tcp://127.0.0.1:{port}")
     except zmq.error.ZMQError:
-        return dict(
+        return Reply(
             success=False,
             msg=f"required port {port} is already in use, choose a different one",
         )
@@ -102,36 +104,35 @@ def tomato_start(
         subprocess.Popen(cmd, start_new_session=True)
 
     status = tomato_status(port=port, timeout=timeout, context=context)
-    if status["success"]:
+    if status.success:
         return tomato_reload(
             port=port, timeout=timeout, context=context, appdir=appdir, **kwargs
         )
     else:
-        return dict(
+        return Reply(
             success=False,
-            msg=f"failed to start tomato on port {port}",
-            data=status,
+            msg=f"failed to start tomato on port {port}: {status.msg}",
+            data=status.data,
         )
 
 
 def tomato_stop(*, port: int, timeout: int, context: zmq.Context, **_: dict):
     status = tomato_status(port=port, timeout=timeout, context=context)
-    if status["success"]:
+    if status.success:
         req = context.socket(zmq.REQ)
         req.connect(f"tcp://127.0.0.1:{port}")
-        req.send_json(dict(cmd="stop"))
-        msg = req.recv_json()
-        if msg["status"] == "stop":
-            return dict(
+        req.send_pyobj(dict(cmd="stop"))
+        rep = req.recv_pyobj()
+        if rep.msg == "stop":
+            return Reply(
                 success=True,
                 msg=f"tomato on port {port} was instructed to stop",
-                data=msg,
             )
         else:
-            return dict(
+            return Reply(
                 success=False,
-                msg="unknown error",
-                data=msg,
+                msg=f"unknown error: {rep.msg}",
+                data=rep.data,
             )
     else:
         return status
@@ -170,7 +171,7 @@ def tomato_init(
         os.makedirs(adir)
     with open(adir / "settings.toml", "w", encoding="utf-8") as of:
         of.write(defaults)
-    return dict(
+    return Reply(
         success=True,
         msg=f"wrote default settings into {Path(appdir) / 'settings.toml'}",
     )
@@ -183,7 +184,7 @@ def tomato_reload(
     try:
         settings = toml.load(Path(appdir) / "settings.toml")
     except FileNotFoundError:
-        return dict(
+        return Reply(
             success=False,
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
@@ -194,23 +195,23 @@ def tomato_reload(
     dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
 
     status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status["success"]:
+    if not status.success:
         return status
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_json(dict(cmd="setup", settings=settings, pipelines=pipelines))
-    msg = req.recv_json()
-    if msg["status"] == "running":
-        return dict(
+    req.send_pyobj(dict(cmd="setup", settings=settings, pipelines=pipelines))
+    rep = req.recv_pyobj()
+    if rep.msg == "running":
+        return Reply(
             success=True,
             msg=f"tomato configured on port {port} with settings from {appdir}",
-            data=msg,
+            data=rep.data,
         )
     else:
-        return dict(
+        return Reply(
             success=False,
-            msg=f"tomato configuration on port {port} failed",
-            data=msg,
+            msg=f"tomato configuration on port {port} failed: {rep.msg}",
+            data=rep.data,
         )
 
 
@@ -237,24 +238,32 @@ def tomato_pipeline_load(
 
     """
     status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status["success"]:
+    if not status.success:
         return status
 
-    pipnames = [pip["name"] for pip in status["data"]["pipelines"]]
+    pipnames = [pip.name for pip in status.data]
     if pipeline not in pipnames:
-        return dict(success=False, msg=f"pipeline {pipeline} not found on tomato")
-    pip = status["data"]["pipelines"][pipnames.index(pipeline)]
+        return Reply(success=False, msg=f"pipeline {pipeline} not found on tomato")
+    pip = status.data[pipnames.index(pipeline)]
 
-    if pip["sampleid"] is not None:
-        return dict(success=False, msg=f"pipeline {pipeline} is not empty, aborting")
+    if pip.sampleid is not None:
+        return Reply(
+            success=False, 
+            msg=f"pipeline {pipeline} is not empty, aborting",
+            data=pip
+        )
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_json(
+    req.send_pyobj(
         dict(cmd="pipeline", pipeline=pipeline, params=dict(sampleid=sampleid))
     )
-    msg = req.recv_json()
-    return dict(success=True, msg=f"loaded {sampleid} into {pipeline}", data=msg)
+    msg = req.recv_pyobj()
+    return Reply(
+        success=True, 
+        msg=f"loaded {sampleid} into {pipeline}", 
+        data=msg.data
+    )
 
 
 def tomato_pipeline_eject(
@@ -279,27 +288,37 @@ def tomato_pipeline_eject(
 
     """
     status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status["success"]:
+    if not status.success:
         return status
 
-    pipnames = [pip["name"] for pip in status["data"]["pipelines"]]
+    pipnames = [pip.name for pip in status.data]
     if pipeline not in pipnames:
-        return dict(success=False, msg=f"pipeline {pipeline} not found on tomato")
-    pip = status["data"]["pipelines"][pipnames.index(pipeline)]
+        return Reply(
+            success=False, 
+            msg=f"pipeline {pipeline} not found on tomato",
+            data=pipnames,
+        )
+    pip = status.data[pipnames.index(pipeline)]
 
-    if pip["sampleid"] is None:
-        return dict(success=True, msg=f"pipeline {pipeline} was empty")
+    if pip.sampleid is None:
+        return Reply(success=True, msg=f"pipeline {pipeline} was already empty")
 
-    if pip["jobid"] is not None:
-        return dict(success=False, msg="cannot eject from a running pipeline")
+    if pip.jobid is not None:
+        return Reply(
+            success=False, msg="cannot eject from a running pipeline", data=pip
+        )
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_json(
+    req.send_pyobj(
         dict(cmd="pipeline", pipeline=pipeline, params=dict(sampleid=None, ready=False))
     )
-    msg = req.recv_json()
-    return dict(success=True, msg=f"pipeline {pipeline} ejected succesffully", data=msg)
+    rep = req.recv_pyobj()
+    return Reply(
+        success=True, 
+        msg=f"pipeline {pipeline} ejected succesffully", 
+        data=rep.data
+    )
 
 
 def tomato_pipeline_ready(
@@ -324,25 +343,29 @@ def tomato_pipeline_ready(
 
     """
     status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status["success"]:
+    if not status.success:
         return status
 
-    pipnames = [pip["name"] for pip in status["data"]["pipelines"]]
+    pipnames = [pip.name for pip in status.data]
     if pipeline not in pipnames:
-        return dict(success=False, msg=f"pipeline {pipeline} not found on tomato")
-    pip = status["data"]["pipelines"][pipnames.index(pipeline)]
+        return Reply(
+            success=False, msg=f"pipeline {pipeline} not found on tomato", data=pipnames
+        )
+    pip = status.data[pipnames.index(pipeline)]
 
-    if pip["ready"] is None:
-        return dict(success=True, msg=f"pipeline {pipeline} was ready")
+    if pip.ready:
+        return Reply(success=True, msg=f"pipeline {pipeline} was already ready")
 
-    if pip["jobid"] is not None:
-        return dict(success=False, msg="cannot mark a running pipeline as ready")
+    if pip.jobid is not None:
+        return Reply(
+            success=False, msg="cannot mark a running pipeline as ready", data=pip
+        )
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_json(dict(cmd="pipeline", pipeline=pipeline, params=dict(ready=True)))
-    msg = req.recv_json()
-    return dict(success=True, msg=f"pipeline {pipeline} set as ready", data=msg)
+    req.send_pyobj(dict(cmd="pipeline", pipeline=pipeline, params=dict(ready=True)))
+    rep = req.recv_pyobj()
+    return Reply(success=True, msg=f"pipeline {pipeline} set as ready", data=rep.data)
 
 
 def run_tomato():
@@ -450,7 +473,7 @@ def run_tomato():
     context = zmq.Context()
     if "func" in args:
         ret = args.func(**vars(args), context=context)
-        print(yaml.dump(ret))
+        print(yaml.dump(ret.dict()))
 
 
 def run_ketchup():
@@ -575,10 +598,10 @@ def run_ketchup():
     if "func" in args:
         context = zmq.Context()
         status = tomato_status(**vars(args), context=context)
-        if not status["success"]:
-            print(yaml.dump(status))
+        if not status.success:
+            print(yaml.dump(status.dict()))
         else:
             ret = args.func(
                 **vars(args), verbosity=verbosity, context=context, status=status
             )
-            print(yaml.dump(ret))
+            print(yaml.dump(ret.dict()))
