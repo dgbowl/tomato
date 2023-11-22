@@ -33,7 +33,7 @@ from . import utils
         ),
     ],
 )
-def test_run_dummy_random(casename, npoints, prefix, datadir):
+def test_run_dummy_random(casename, npoints, prefix, datadir, tomato_daemon):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["dummy-10"])
     status = utils.job_status(1)["data"][0]["status"]
@@ -67,7 +67,7 @@ def test_run_dummy_random(casename, npoints, prefix, datadir):
         ("dummy_random_30_1", "$MATCH_custom_name", True),
     ],
 )
-def test_run_dummy_jobname(casename, jobname, search, datadir):
+def test_run_dummy_jobname(casename, jobname, search, datadir, tomato_daemon):
     os.chdir(datadir)
     utils.run_casenames([casename], [jobname], ["dummy-10"])
     status = utils.job_status(1)["data"][0]["status"]
@@ -101,7 +101,7 @@ def test_run_dummy_jobname(casename, jobname, search, datadir):
         "dummy_random_30_1",
     ],
 )
-def test_run_dummy_cancel(casename, datadir):
+def test_run_dummy_cancel(casename, datadir, tomato_daemon):
     os.chdir(datadir)
     cancel = True
     utils.run_casenames([casename], [None], ["dummy-10"])
@@ -127,7 +127,7 @@ def test_run_dummy_cancel(casename, datadir):
         ("dummy_sequential_snapshot_30_5", False),
     ],
 )
-def test_run_dummy_snapshot(casename, external, datadir):
+def test_run_dummy_snapshot(casename, external, datadir, tomato_daemon):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["dummy-10"])
     time.sleep(10)
@@ -143,7 +143,7 @@ def test_run_dummy_snapshot(casename, external, datadir):
     assert os.path.exists("snapshot.1.zip")
 
 
-def test_run_dummy_multiple(datadir):
+def test_run_dummy_multiple(datadir, tomato_daemon):
     os.chdir(datadir)
     casenames = ["dummy_random_5_2", "dummy_random_1_0.1"]
     jobnames = ["job one", "job two"]

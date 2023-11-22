@@ -55,10 +55,10 @@ def tomato_status(
         trimmed = []
         for pip in rep.data:
             shortpip = Pipeline(
-                name = pip.name,
-                ready = pip.ready,
-                jobid = pip.jobid,
-                sampleid = pip.sampleid,
+                name=pip.name,
+                ready=pip.ready,
+                jobid=pip.jobid,
+                sampleid=pip.sampleid,
             )
             trimmed.append(shortpip)
         rep.data = trimmed
@@ -248,9 +248,7 @@ def tomato_pipeline_load(
 
     if pip.sampleid is not None:
         return Reply(
-            success=False, 
-            msg=f"pipeline {pipeline} is not empty, aborting",
-            data=pip
+            success=False, msg=f"pipeline {pipeline} is not empty, aborting", data=pip
         )
 
     req = context.socket(zmq.REQ)
@@ -259,11 +257,7 @@ def tomato_pipeline_load(
         dict(cmd="pipeline", pipeline=pipeline, params=dict(sampleid=sampleid))
     )
     msg = req.recv_pyobj()
-    return Reply(
-        success=True, 
-        msg=f"loaded {sampleid} into {pipeline}", 
-        data=msg.data
-    )
+    return Reply(success=True, msg=f"loaded {sampleid} into {pipeline}", data=msg.data)
 
 
 def tomato_pipeline_eject(
@@ -294,14 +288,16 @@ def tomato_pipeline_eject(
     pipnames = [pip.name for pip in status.data]
     if pipeline not in pipnames:
         return Reply(
-            success=False, 
+            success=False,
             msg=f"pipeline {pipeline} not found on tomato",
             data=pipnames,
         )
     pip = status.data[pipnames.index(pipeline)]
 
     if pip.sampleid is None:
-        return Reply(success=True, msg=f"pipeline {pipeline} was already empty")
+        return Reply(
+            success=True, msg=f"pipeline {pipeline} was already empty", data=pip
+        )
 
     if pip.jobid is not None:
         return Reply(
@@ -315,9 +311,7 @@ def tomato_pipeline_eject(
     )
     rep = req.recv_pyobj()
     return Reply(
-        success=True, 
-        msg=f"pipeline {pipeline} ejected succesffully", 
-        data=rep.data
+        success=True, msg=f"pipeline {pipeline} ejected succesffully", data=rep.data
     )
 
 
@@ -354,7 +348,9 @@ def tomato_pipeline_ready(
     pip = status.data[pipnames.index(pipeline)]
 
     if pip.ready:
-        return Reply(success=True, msg=f"pipeline {pipeline} was already ready")
+        return Reply(
+            success=True, msg=f"pipeline {pipeline} was already ready", data=pip
+        )
 
     if pip.jobid is not None:
         return Reply(

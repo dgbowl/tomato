@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Union, Optional, Any
 
+
 class Device(BaseModel):
     name: str
     tag: str

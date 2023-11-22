@@ -102,17 +102,17 @@ def run_daemon():
                 if status == "bootstrap":
                     status = "running"
                 msg = Reply(
-                    success=True, msg=status, data = [pip for pip in pipelines.values()]
+                    success=True, msg=status, data=[pip for pip in pipelines.values()]
                 )
             elif cmd == "pipeline":
                 pname = msg.get("pipeline")
                 params = msg.get("params", {})
                 for k, v in params.items():
                     setattr(pipelines[pname], k, v)
-                msg = Reply(success=True, msg=status, data = pipelines[pname])
+                msg = Reply(success=True, msg=status, data=pipelines[pname])
             elif cmd == "status":
                 msg = Reply(
-                    success=True, msg=status, data = [pip for pip in pipelines.values()]
+                    success=True, msg=status, data=[pip for pip in pipelines.values()]
                 )
             print(f"{msg=}")
             rep.send_pyobj(msg)

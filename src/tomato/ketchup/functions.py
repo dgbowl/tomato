@@ -205,7 +205,7 @@ def status(
         )
     else:
         return Reply(success=True, msg=f"status of {len(ret)} jobs returned", data=ret)
-        
+
 
 def cancel(
     *, appdir: str, jobid: int, context: zmq.Context, status: dict, **_: dict
@@ -262,7 +262,9 @@ def cancel(
         for pip in running:
             if pip.jobid == jobid:
                 dbhandler.job_set_status(queue["path"], "rd", jobid, type=queue["type"])
-                return Reply(success=True, msg=f"job {jobid} cancelled with status 'rd'")
+                return Reply(
+                    success=True, msg=f"job {jobid} cancelled with status 'rd'"
+                )
     elif status in {"rd", "cd"}:
         return Reply(success=False, msg=f"job {jobid} has already been cancelled")
 
