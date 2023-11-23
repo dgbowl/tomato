@@ -17,10 +17,7 @@ import appdirs
 import yaml
 import toml
 
-from . import dbhandler
-from . import setlib
-from . import ketchup
-
+from tomato import dbhandler, setlib, ketchup
 from tomato.models import Reply, Pipeline
 
 logger = logging.getLogger(__name__)
@@ -35,7 +32,7 @@ def set_loglevel(delta: int):
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
 
 
-def tomato_status(
+def status(
     *,
     port: int,
     timeout: int,
@@ -76,7 +73,7 @@ def tomato_status(
         )
 
 
-def tomato_start(
+def start(
     *,
     port: int,
     timeout: int,
@@ -103,22 +100,22 @@ def tomato_start(
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
 
-    status = tomato_status(port=port, timeout=timeout, context=context)
-    if status.success:
-        return tomato_reload(
+    stat = status(port=port, timeout=timeout, context=context)
+    if stat.success:
+        return reload(
             port=port, timeout=timeout, context=context, appdir=appdir, **kwargs
         )
     else:
         return Reply(
             success=False,
-            msg=f"failed to start tomato on port {port}: {status.msg}",
-            data=status.data,
+            msg=f"failed to start tomato on port {port}: {stat.msg}",
+            data=stat.data,
         )
 
 
-def tomato_stop(*, port: int, timeout: int, context: zmq.Context, **_: dict):
-    status = tomato_status(port=port, timeout=timeout, context=context)
-    if status.success:
+def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict):
+    stat = status(port=port, timeout=timeout, context=context)
+    if stat.success:
         req = context.socket(zmq.REQ)
         req.connect(f"tcp://127.0.0.1:{port}")
         req.send_pyobj(dict(cmd="stop"))
@@ -135,10 +132,10 @@ def tomato_stop(*, port: int, timeout: int, context: zmq.Context, **_: dict):
                 data=rep.data,
             )
     else:
-        return status
+        return stat
 
 
-def tomato_init(
+def init(
     *,
     appdir: str,
     datadir: str,
@@ -177,7 +174,7 @@ def tomato_init(
     )
 
 
-def tomato_reload(
+def reload(
     *, port: int, timeout: int, context: zmq.Context, appdir: str, **_: dict
 ) -> dict:
     logging.debug("Loading settings.toml file from %s.", appdir)
@@ -194,9 +191,9 @@ def tomato_reload(
     logger.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
     dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
 
-    status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status.success:
-        return status
+    stat = status(port=port, timeout=timeout, context=context)
+    if not stat.success:
+        return stat
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_pyobj(dict(cmd="setup", settings=settings, pipelines=pipelines))
@@ -215,7 +212,7 @@ def tomato_reload(
         )
 
 
-def tomato_pipeline_load(
+def pipeline_load(
     *,
     port: int,
     timeout: int,
@@ -237,14 +234,14 @@ def tomato_pipeline_load(
     sample.
 
     """
-    status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status.success:
-        return status
+    stat = status(port=port, timeout=timeout, context=context)
+    if not stat.success:
+        return stat
 
-    pipnames = [pip.name for pip in status.data]
+    pipnames = [pip.name for pip in stat.data]
     if pipeline not in pipnames:
         return Reply(success=False, msg=f"pipeline {pipeline} not found on tomato")
-    pip = status.data[pipnames.index(pipeline)]
+    pip = stat.data[pipnames.index(pipeline)]
 
     if pip.sampleid is not None:
         return Reply(
@@ -260,7 +257,7 @@ def tomato_pipeline_load(
     return Reply(success=True, msg=f"loaded {sampleid} into {pipeline}", data=msg.data)
 
 
-def tomato_pipeline_eject(
+def pipeline_eject(
     *,
     port: int,
     timeout: int,
@@ -281,18 +278,18 @@ def tomato_pipeline_eject(
     sample.
 
     """
-    status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status.success:
-        return status
+    stat = status(port=port, timeout=timeout, context=context)
+    if not stat.success:
+        return stat
 
-    pipnames = [pip.name for pip in status.data]
+    pipnames = [pip.name for pip in stat.data]
     if pipeline not in pipnames:
         return Reply(
             success=False,
             msg=f"pipeline {pipeline} not found on tomato",
             data=pipnames,
         )
-    pip = status.data[pipnames.index(pipeline)]
+    pip = stat.data[pipnames.index(pipeline)]
 
     if pip.sampleid is None:
         return Reply(
@@ -315,7 +312,7 @@ def tomato_pipeline_eject(
     )
 
 
-def tomato_pipeline_ready(
+def pipeline_ready(
     *,
     port: int,
     timeout: int,
@@ -336,16 +333,16 @@ def tomato_pipeline_ready(
     sample.
 
     """
-    status = tomato_status(port=port, timeout=timeout, context=context)
-    if not status.success:
-        return status
+    stat = status(port=port, timeout=timeout, context=context)
+    if not stat.success:
+        return stat
 
-    pipnames = [pip.name for pip in status.data]
+    pipnames = [pip.name for pip in stat.data]
     if pipeline not in pipnames:
         return Reply(
             success=False, msg=f"pipeline {pipeline} not found on tomato", data=pipnames
         )
-    pip = status.data[pipnames.index(pipeline)]
+    pip = stat.data[pipnames.index(pipeline)]
 
     if pip.ready:
         return Reply(
@@ -362,242 +359,3 @@ def tomato_pipeline_ready(
     req.send_pyobj(dict(cmd="pipeline", pipeline=pipeline, params=dict(ready=True)))
     rep = req.recv_pyobj()
     return Reply(success=True, msg=f"pipeline {pipeline} set as ready", data=rep.data)
-
-
-def run_tomato():
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
-    config_dir = dirs.user_config_dir
-    data_dir = dirs.user_data_dir
-
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"%(prog)s version {VERSION}",
-    )
-
-    verbose = argparse.ArgumentParser(add_help=False)
-
-    subparsers = parser.add_subparsers(dest="subcommand", required=True)
-
-    status = subparsers.add_parser("status")
-    status.set_defaults(func=tomato_status)
-
-    start = subparsers.add_parser("start")
-    start.set_defaults(func=tomato_start)
-
-    stop = subparsers.add_parser("stop")
-    stop.set_defaults(func=tomato_stop)
-
-    init = subparsers.add_parser("init")
-    init.set_defaults(func=tomato_init)
-
-    reload = subparsers.add_parser("reload")
-    reload.set_defaults(func=tomato_reload)
-
-    pipeline = subparsers.add_parser("pipeline")
-    pipparsers = pipeline.add_subparsers(dest="subsubcommand", required=True)
-
-    pip_load = pipparsers.add_parser("load")
-    pip_load.set_defaults(func=tomato_pipeline_load)
-    pip_load.add_argument(
-        "pipeline",
-    )
-    pip_load.add_argument(
-        "sampleid",
-    )
-
-    pip_eject = pipparsers.add_parser("eject")
-    pip_eject.set_defaults(func=tomato_pipeline_eject)
-    pip_eject.add_argument(
-        "pipeline",
-    )
-
-    pip_ready = pipparsers.add_parser("ready")
-    pip_ready.set_defaults(func=tomato_pipeline_ready)
-    pip_ready.add_argument(
-        "pipeline",
-    )
-
-    for p in [parser, verbose]:
-        p.add_argument(
-            "--verbose",
-            "-v",
-            action="count",
-            default=0,
-            help="Increase verbosity by one level.",
-        )
-        p.add_argument(
-            "--quiet",
-            "-q",
-            action="count",
-            default=0,
-            help="Decrease verbosity by one level.",
-        )
-
-    for p in [start, stop, init, status, reload, pip_load, pip_eject, pip_ready]:
-        p.add_argument(
-            "--port",
-            "-p",
-            help="Port number of tomato's reply socket",
-            default=DEFAULT_TOMATO_PORT,
-        )
-        p.add_argument(
-            "--timeout",
-            help="Timeout for the tomato command, in milliseconds",
-            type=int,
-            default=3000,
-        )
-        p.add_argument(
-            "--appdir",
-            help="Settings directory for tomato",
-            default=config_dir,
-        )
-        p.add_argument(
-            "--datadir",
-            help="Data directory for tomato",
-            default=data_dir,
-        )
-
-    # parse subparser args
-    args, extras = parser.parse_known_args()
-    # parse extras for verbose tags
-    args, extras = verbose.parse_known_args(extras, args)
-
-    set_loglevel(args.verbose - args.quiet)
-
-    context = zmq.Context()
-    if "func" in args:
-        ret = args.func(**vars(args), context=context)
-        print(yaml.dump(ret.dict()))
-
-
-def run_ketchup():
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
-    config_dir = dirs.user_config_dir
-    data_dir = dirs.user_data_dir
-
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"%(prog)s version {VERSION}",
-    )
-
-    verbose = argparse.ArgumentParser(add_help=False)
-
-    for p in [parser, verbose]:
-        p.add_argument(
-            "--verbose",
-            "-v",
-            action="count",
-            default=0,
-            help="Increase verbosity by one level.",
-        )
-        p.add_argument(
-            "--quiet",
-            "-q",
-            action="count",
-            default=0,
-            help="Decrease verbosity by one level.",
-        )
-
-    subparsers = parser.add_subparsers(dest="subcommand", required=True)
-
-    submit = subparsers.add_parser("submit")
-    submit.add_argument(
-        "payload",
-        help="File containing the payload to be submitted to tomato.",
-        default=None,
-    )
-    submit.add_argument(
-        "-j",
-        "--jobname",
-        help="Set the job name of the submitted job to?",
-        default=None,
-    )
-    submit.set_defaults(func=ketchup.submit)
-
-    status = subparsers.add_parser("status")
-    status.add_argument(
-        "jobids",
-        nargs="*",
-        help=(
-            "The jobid(s) of the requested job(s), "
-            "defaults to the status of the whole queue."
-        ),
-        type=int,
-        default=None,
-    )
-    status.set_defaults(func=ketchup.status)
-
-    cancel = subparsers.add_parser("cancel")
-    cancel.add_argument(
-        "jobid",
-        help="The jobid of the job to be cancelled.",
-        type=int,
-        default=None,
-    )
-    cancel.set_defaults(func=ketchup.cancel)
-
-    snapshot = subparsers.add_parser("snapshot")
-    snapshot.add_argument(
-        "jobid", help="The jobid of the job to be snapshotted.", default=None
-    )
-    snapshot.set_defaults(func=ketchup.snapshot)
-
-    search = subparsers.add_parser("search")
-    search.add_argument(
-        "jobname",
-        help="The jobname of the searched job.",
-        default=None,
-    )
-    search.add_argument(
-        "-c",
-        "--complete",
-        action="store_true",
-        default=False,
-        help="Search also in completed jobs.",
-    )
-    search.set_defaults(func=ketchup.search)
-
-    for p in [submit, status, cancel, snapshot, search]:
-        p.add_argument(
-            "--port",
-            "-p",
-            help="Port number of tomato's reply socket",
-            default=DEFAULT_TOMATO_PORT,
-        )
-        p.add_argument(
-            "--timeout",
-            help="Timeout for the ketchup command, in milliseconds",
-            type=int,
-            default=3000,
-        )
-        p.add_argument(
-            "--appdir",
-            help="Settings directory for tomato",
-            default=config_dir,
-        )
-        p.add_argument(
-            "--datadir",
-            help="Data directory for tomato",
-            default=data_dir,
-        )
-
-    args, extras = parser.parse_known_args()
-    args, extras = verbose.parse_known_args(extras, args)
-
-    verbosity = args.verbose - args.quiet
-    set_loglevel(verbosity)
-
-    if "func" in args:
-        context = zmq.Context()
-        status = tomato_status(**vars(args), context=context)
-        if not status.success:
-            print(yaml.dump(status.dict()))
-        else:
-            ret = args.func(
-                **vars(args), verbosity=verbosity, context=context, status=status
-            )
-            print(yaml.dump(ret.dict()))
