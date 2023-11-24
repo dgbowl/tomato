@@ -1,16 +1,17 @@
 """
-**ketchup**: command line interface for tomato's queue management
------------------------------------------------------------------
+**ketchup**: command line interface to the tomato job queue
+-----------------------------------------------------------
 .. codeauthor:: 
     Peter Kraus
 
-Module of functions to interact with tomato. Includes job management functions:
+Module of functions to manage the job queue of :mod:`tomato`. Includes job management 
+functions:
 
-- :func:`.submit` to submit a *job* to *queue*
-- :func:`.status` to query the status of tomato's *pipelines*, its *queue*, or a *job*
-- :func:`.cancel` to cancel a queued or kill a running *job*
-- :func:`.snapshot` to create an up-to-date FAIR data archive of a running *job*
-- :func:`.search` to find a ``jobid`` of a *job* from ``jobname``
+- :func:`submit` to submit a *job* to *queue*
+- :func:`status` to query the status of tomato's *queue*, or a *job*
+- :func:`cancel` to cancel a queued or kill a running *job*
+- :func:`snapshot` to create an up-to-date FAIR data archive of a running *job*
+- :func:`search` to find a ``jobid`` of a *job* from ``jobname``
 
 """
 import os
@@ -117,45 +118,20 @@ def status(
     **_: dict,
 ) -> Reply:
     """
-    Job, queue and pipeline status query function. Usage:
+    Job or queue status query function. Usage:
 
     .. code:: bash
 
         ketchup [-t] [-v] [-q] status
-        ketchup [-t] [-v] [-q] status [queue|state]
         ketchup [-t] [-v] [-q] status <jobid>
 
     The :class:`argparse.Namespace` has to contain the ``<jobid>`` the status of
-    which is supposed to be queried. Alternatively, the status of the ``queue``
-    or ``state`` of tomato can be queried. Optional arguments include the verbose/
-    quiet switches (``-v/-q``) and the testing switch (``-t``).
+    which is supposed to be queried. If no ``<jobid>`` is provided, the status of the
+    whole ``queue`` of tomato is be queried.
 
     Examples
     --------
-
-    >>> # Get pipeline status of tomato:
-    >>> ketchup status
-    pipeline             ready jobid  (PID)     sampleid
-    ===================================================================
-    dummy-10             no    3      1035      dummy_sequential_1_0.05
-    dummy-5              no    None             None
-
-    >>> # Get queue status with queued & running jobs:
-    >>> ketchup status queue
-    jobid  status (PID)     pipeline
-    ==========================================
-    3      r      1035      dummy-10
-    4      q
-
-    >>> # Get queue status with all jobs:
-    >>> ketchup -v status queue
-    jobid  jobname              status (PID)     pipeline
-    ==============================================================
-    1      None                 c
-    2      custom_name          cd
-    3      None                 r      1035      dummy-10
-    4      other_name           q
-
+    
     .. note::
 
         Calling ``ketchup status`` with a single ``jobid`` will return a ``yaml``

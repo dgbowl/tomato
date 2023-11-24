@@ -4,13 +4,19 @@
 .. codeauthor:: 
     Peter Kraus
 
-Module of functions to interact with tomato. Includes job management functions:
+Module of functions to interact with tomato. Includes basic tomato daemon functions:
 
-- :func:`.submit` to submit a *job* to *queue*
-- :func:`.status` to query the status of tomato's *pipelines*, its *queue*, or a *job*
-- :func:`.cancel` to cancel a queued or kill a running *job*
-- :func:`.snapshot` to create an up-to-date FAIR data archive of a running *job*
-- :func:`.search` to find a ``jobid`` of a *job* from ``jobname``
+- :func:`status` to query the status of the tomato daemon
+- :func:`start` to start a new tomato daemon
+- :func:`stop` to stop a running tomato daemon
+- :func:`init` to create a default ``settings.toml`` file
+- :func:`reload` to process the ``settings.toml`` and ``devices.yml`` files again
+
+Also includes the following *pipeline* management functions:
+
+- :func:`pipeline_load` to load a sample into a pipeline
+- :func:`pipeline_eject` to eject any sample from a pipeline
+- :func:`pipeline_ready` to mark a pipeline as ready
 
 """
 import os
@@ -49,7 +55,7 @@ def status(
     timeout: int,
     context: zmq.Context,
     **_: dict,
-) -> dict:
+) -> Reply:
     logger.debug(f"checking status of tomato on port {port}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -91,7 +97,7 @@ def start(
     context: zmq.Context,
     appdir: str,
     **kwargs: dict,
-) -> dict:
+) -> Reply:
     logging.debug(f"checking for availability of port {port}.")
     try:
         rep = context.socket(zmq.REP)
@@ -124,7 +130,7 @@ def start(
         )
 
 
-def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict):
+def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict) -> Reply:
     stat = status(port=port, timeout=timeout, context=context)
     if stat.success:
         req = context.socket(zmq.REQ)
@@ -151,7 +157,7 @@ def init(
     appdir: str,
     datadir: str,
     **_: dict,
-) -> dict:
+) -> Reply:
     ddir = Path(datadir)
     adir = Path(appdir)
 
@@ -187,7 +193,7 @@ def init(
 
 def reload(
     *, port: int, timeout: int, context: zmq.Context, appdir: str, **_: dict
-) -> dict:
+) -> Reply:
     logging.debug("Loading settings.toml file from %s.", appdir)
     try:
         settings = toml.load(Path(appdir) / "settings.toml")
@@ -232,17 +238,13 @@ def pipeline_load(
     pipeline: str,
     sampleid: str,
     **_: dict,
-) -> dict:
+) -> Reply:
     """
     Load a sample into a pipeline. Usage:
 
     .. code:: bash
 
-        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
-
-    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
-    Checks whether the pipeline exists and whether it is empty before loading
-    sample.
+        tomato pipeline load <samplename> <pipeline>
 
     """
     stat = status(port=port, timeout=timeout, context=context)
@@ -276,17 +278,13 @@ def pipeline_eject(
     appdir: str,
     pipeline: str,
     **_: dict,
-) -> dict:
+) -> Reply:
     """
-    Load a sample into a pipeline. Usage:
+    Eject any sample present in a pipeline. Usage:
 
     .. code:: bash
 
-        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
-
-    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
-    Checks whether the pipeline exists and whether it is empty before loading
-    sample.
+        tomato pipeline eject <pipeline>
 
     """
     stat = status(port=port, timeout=timeout, context=context)
@@ -331,17 +329,13 @@ def pipeline_ready(
     appdir: str,
     pipeline: str,
     **_: dict,
-) -> dict:
+) -> Reply:
     """
-    Load a sample into a pipeline. Usage:
+    Mark pipeline as ready. Usage:
 
     .. code:: bash
 
-        ketchup [-t] [-v] [-q] load <samplename> <pipeline>
-
-    Assigns the sample with the provided ``samplename`` into the ``pipeline``.
-    Checks whether the pipeline exists and whether it is empty before loading
-    sample.
+        pipeline ready <pipeline>
 
     """
     stat = status(port=port, timeout=timeout, context=context)
