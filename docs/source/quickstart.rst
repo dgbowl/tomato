@@ -31,6 +31,8 @@ The easiest way to do create this file is using the provided ``tomato init`` com
 Where *appdir* is ``/home/kraus/.config/tomato/1.0a1/``. The *appdir* can be specified
 using the ``--appdir`` argument to **tomato**.
 
+.. _setfile:
+
 Settings file
 `````````````
 
