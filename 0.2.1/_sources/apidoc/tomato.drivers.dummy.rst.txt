@@ -1,0 +1,16 @@
+**dummy**: A dummy driver module
+================================
+
+.. automodule:: tomato.drivers.dummy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+
+.. automodule:: tomato.drivers.dummy.main
+   :members:
+   :undoc-members:
+   :show-inheritance:

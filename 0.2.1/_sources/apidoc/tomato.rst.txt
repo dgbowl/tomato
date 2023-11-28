@@ -1,0 +1,28 @@
+tomato package
+==============
+
+.. automodule:: tomato
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   tomato.daemon
+   tomato.dbhandler
+   tomato.drivers
+   tomato.ketchup
+   tomato.setlib
+
+Submodules
+----------
+
+
+.. automodule:: tomato.main
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage &mdash; tomato 0.2.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Version history" href="version.html" />
+    <link rel="prev" title="Quick start guide" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tomato
+              <img src="_static/tomato.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">tomato user manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#starting-tomato-daemon">Starting <code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-ketchup">Using <code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-output-data">Accessing output data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#final-job-data">Final job data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-snapshotting">Data snapshotting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.html">tomato package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tomato</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
+<p>The <strong>tomato</strong> package consists of two key components:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the job scheduler in <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> executed by <code class="docutils literal notranslate"><span class="pre">tomato</span></code>,</p></li>
+<li><p>the queue management app <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.ketchup</span></code></a> executed by <code class="docutils literal notranslate"><span class="pre">ketchup</span></code>.</p></li>
+</ul>
+</div></blockquote>
+<section id="starting-tomato-daemon">
+<h2>Starting <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a><a class="headerlink" href="#starting-tomato-daemon" title="Permalink to this headline"></a></h2>
+<p>The job scheduler <code class="docutils literal notranslate"><span class="pre">tomato</span></code> can be started in verbose mode for diagnostic output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>-vv
+</pre></div>
+</div>
+<p>It is used to schedule <em>jobs</em> from the <em>queue</em> onto <em>pipelines</em>, and tracks the overall
+<em>state</em> of the system. A <em>pipeline</em> is a way of organising one or many <em>devices</em> in a single,
+addressable unit, see <a class="reference internal" href="quickstart.html#devfile"><span class="std std-ref">Devices file</span></a> for more details. In general, a single <em>pipeline</em> represents
+a digital twin of an experimental set-up, composed of all <em>devices</em> neccessary to carry out a
+single experimental <em>payload</em>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only one instance of the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> can be running at a single PC at the
+same time, excluding any test-suite jobs (<code class="docutils literal notranslate"><span class="pre">tomato</span></code> executed with the <code class="docutils literal notranslate"><span class="pre">-t</span></code> switch).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For instructions on how to set <strong>tomato</strong> up for a first run, see the <a class="reference internal" href="quickstart.html#quickstart"><span class="std std-ref">Quick start guide</span></a>.</p>
+</div>
+</section>
+<section id="using-ketchup">
+<h2>Using <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a><a class="headerlink" href="#using-ketchup" title="Permalink to this headline"></a></h2>
+<p>The <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a> executable is used to submit <em>payloads</em> to the <em>queue</em>,
+to check the status of and to cancel <em>jobs</em> in the <em>queue</em>, as well as to manage <em>pipelines</em>
+by loading or ejecting <em>samples</em> and marking <em>pipelines</em> ready for execution.</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p><strong>To submit</strong> a <em>job</em> using a <em>payload</em> contained in a <a class="reference internal" href="quickstart.html#payfile"><span class="std std-ref">Payload file</span></a> to the <em>queue</em>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>submit<span class="w"> </span>&lt;payload&gt;
+jobid:<span class="w"> </span>&lt;jobid&gt;
+</pre></div>
+</div>
+<p>The <em>job</em> will enter the <em>queue</em> and wait for a suitable <em>pipeline</em> to begin execution.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information about how <em>jobs</em> are matched against <em>pipelines</em>, see the
+documentation of the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">daemon</span></code></a> module.</p>
+</div>
+</li>
+<li><p><strong>To check the status</strong> of a <em>job</em> with a known <code class="docutils literal notranslate"><span class="pre">jobid</span></code>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>status<span class="w"> </span>&lt;jobid&gt;
+-<span class="w"> </span>jobid:<span class="w"> </span>&lt;jobid&gt;
+<span class="w">  </span>jobname:<span class="w"> </span>null
+<span class="w">  </span>status:<span class="w"> </span>r
+<span class="w">  </span>submitted:<span class="w"> </span><span class="m">2022</span>-06-30<span class="w"> </span><span class="m">11</span>:18:21.538448+00:00
+<span class="w">  </span>executed:<span class="w"> </span><span class="m">2022</span>-06-30<span class="w"> </span><span class="m">11</span>:18:22.983600+00:00
+</pre></div>
+</div>
+<p>The list of possible <em>job</em> statuses is:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 88%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Status</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>q</p></td>
+<td><p>Job has entered the queue.</p></td>
+</tr>
+<tr class="row-odd"><td><p>qw</p></td>
+<td><p>Job is in the queue, waiting for a pipeline to be ready.</p></td>
+</tr>
+<tr class="row-even"><td><p>r</p></td>
+<td><p>Job is running.</p></td>
+</tr>
+<tr class="row-odd"><td><p>rd</p></td>
+<td><p>Job has been marked for cancellation.</p></td>
+</tr>
+<tr class="row-even"><td><p>c</p></td>
+<td><p>Job has completed successfully.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ce</p></td>
+<td><p>Job has completed with an error.</p></td>
+</tr>
+<tr class="row-even"><td><p>cd</p></td>
+<td><p>Job has been cancelled.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The above command can process multiple <code class="docutils literal notranslate"><span class="pre">jobids</span></code>, returning the information
+in a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted output.</p>
+</div>
+</li>
+<li><p><strong>To cancel</strong> a submitted <em>job</em> with a known <code class="docutils literal notranslate"><span class="pre">jobid</span></code>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>cancel<span class="w"> </span>&lt;jobid&gt;
+</pre></div>
+</div>
+<p>This will mark the <cite>job</cite> for cancellation by setting its status to <code class="docutils literal notranslate"><span class="pre">rd</span></code>. The
+<a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> will then proceed with cancelling the <cite>job</cite>.</p>
+</li>
+</ol>
+</div></blockquote>
+<p><em>Jobs</em> submitted to the <em>queue</em> will remain in the <em>queue</em> until a <em>pipeline</em> meets all
+of the following criteria:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>A <em>pipeline</em> which matches all of the <code class="docutils literal notranslate"><span class="pre">techniques</span></code> specified in the <em>payload</em>
+by its <code class="docutils literal notranslate"><span class="pre">capabilities</span></code> must exist. Once the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> finds such a
+<em>pipeline</em>, the status of the <em>job</em> will change to <code class="docutils literal notranslate"><span class="pre">qw</span></code>.</p></li>
+<li><p>The matching <em>pipeline</em> must contain a <em>sample</em> with a <code class="docutils literal notranslate"><span class="pre">samplename</span></code> that matches
+the name specified in the <em>payload</em>.</p></li>
+<li><p>The matching <em>pipeline</em> must be marked as <code class="docutils literal notranslate"><span class="pre">ready</span></code>.</p></li>
+</ul>
+</div></blockquote>
+<p>To manage <em>samples</em> in the <em>pipelines</em>, use the following <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a> commands:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p><strong>To load</strong> the digital twin of a <em>sample</em> with a <code class="docutils literal notranslate"><span class="pre">samplename</span></code> into a selected
+<em>pipeline</em>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>load<span class="w"> </span>&lt;samplename&gt;<span class="w"> </span>&lt;pipeline&gt;
+</pre></div>
+</div>
+<p>Trying to load a <em>sample</em> in a <em>pipeline</em> that already contains a <em>sample</em> will
+fail with a warning. The <em>pipeline</em> must be emptied first.</p>
+</li>
+<li><p><strong>To eject</strong> a <em>sample</em> from the <em>pipeline</em>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>eject<span class="w"> </span>&lt;pipeline&gt;
+</pre></div>
+</div>
+<p>Attempting to eject a <em>sample</em> from a <em>pipeline</em> where a <em>job</em> is currently running
+will fail with a warning. The <em>job</em> must finish or be cancelled first.</p>
+</li>
+<li><p><strong>To mark</strong> a <em>pipeline</em> as <strong>ready</strong>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>ready<span class="w"> </span>&lt;pipeline&gt;
+</pre></div>
+</div>
+<p>This mechanism is implemented to allow for batch-loading of <em>samples</em> into <em>pipelines</em>,
+without having to worry about <em>jobs</em> starting prematurely. By default, successfully
+completed <em>jobs</em> (status <code class="docutils literal notranslate"><span class="pre">c</span></code>) will <strong>not</strong> mark the <em>pipeline</em> as ready. This
+behaviour can be configured in the <code class="docutils literal notranslate"><span class="pre">tomato</span></code> section of the <em>payload</em>. Jobs that
+have been cancelled (status <code class="docutils literal notranslate"><span class="pre">cd</span></code>) or have errored out (status <code class="docutils literal notranslate"><span class="pre">ce</span></code>) will never
+mark the <em>pipeline</em> as ready, even if configured to do so in the <em>payload</em>. This
+has been implemented to allow the user to investigate the <em>sample</em> and/or <em>pipeline</em>
+for any faults.</p>
+</li>
+</ol>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Further information about <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a> is available in the documentation
+of the <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a> module.</p>
+</div>
+</section>
+<section id="accessing-output-data">
+<h2>Accessing output data<a class="headerlink" href="#accessing-output-data" title="Permalink to this headline"></a></h2>
+<section id="final-job-data">
+<h3>Final job data<a class="headerlink" href="#final-job-data" title="Permalink to this headline"></a></h3>
+<p>By default, all data in the <em>job</em> folder is processed using <code class="docutils literal notranslate"><span class="pre">yadg</span></code> to create
+a <em>datagram</em>, and zipped into a zip archive. This zip archive includes all raw
+data files, the log file of the <strong>tomato</strong> job, and a copy of the full <em>payload</em>
+in a <code class="docutils literal notranslate"><span class="pre">json</span></code> file. The <em>datagram</em> contains timestamped, unit-annotated raw data,
+and includes instrumental uncertainties.</p>
+<p>Unless specified within the <em>payload</em>, the default location where these output files
+will be placed is the <code class="docutils literal notranslate"><span class="pre">cwd()</span></code> where the <code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">submit</span></code> command was executed;
+the default filenames of the returned files are <code class="docutils literal notranslate"><span class="pre">results.&lt;jobid&gt;.[zip,json]</span></code>.</p>
+</section>
+<section id="data-snapshotting">
+<h3>Data snapshotting<a class="headerlink" href="#data-snapshotting" title="Permalink to this headline"></a></h3>
+<p>While the <em>job</em> is running, access to an up-to-date snapshot of the data is provided
+by <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>snapshot<span class="w"> </span>&lt;jobid&gt;
+</pre></div>
+</div>
+<p>This will create an up-to-date <code class="docutils literal notranslate"><span class="pre">snapshot.&lt;jobid&gt;.[zip,json]</span></code> in the <code class="docutils literal notranslate"><span class="pre">cwd()</span></code>.
+The files are overwritten on subsequent invocations of <code class="docutils literal notranslate"><span class="pre">ketchup</span> <span class="pre">snapshot</span></code>. An
+automated, periodic snapshotting can be further configured within the <em>payload</em>
+of the <em>job</em>.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quick start guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="version.html" class="btn btn-neutral float-right" title="Version history" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 - 2023, dgbowl authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Other Versions</span>
+      v: 0.2.1
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"> 
+      <script src="../versions.js"></script>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
