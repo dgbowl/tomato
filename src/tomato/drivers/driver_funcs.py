@@ -9,8 +9,7 @@ import json
 from datetime import datetime, timezone
 import logging
 import psutil
-
-from tomato.dbhandler.sqlite import pipeline_assign_job
+import zmq
 
 from .logger_funcs import log_listener_config, log_listener, log_worker_config
 from . import yadg_funcs
@@ -23,6 +22,12 @@ def tomato_job() -> None:
         "--version",
         action="version",
         version=f'%(prog)s version {metadata.version("tomato")}',
+    )
+    parser.add_argument(
+        "--port",
+        help="Path to a ketchup-processed payload json file.",
+        default=1234,
+        type=int,
     )
     parser.add_argument(
         "jobfile",
@@ -49,7 +54,6 @@ def tomato_job() -> None:
     jobid = jsdata["jobid"]
     settings = jsdata["settings"]
     queue = settings["queue"]
-    state = settings["state"]
     payload = jsdata["payload"]
     tomato = payload.get("tomato", {})
     pipeline = jsdata["pipeline"]
@@ -66,7 +70,14 @@ def tomato_job() -> None:
         pid = os.getpid()
 
     logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
-    dbhandler.pipeline_assign_job(state["path"], pip, jobid, pid, type=state["type"])
+
+    context = zmq.Context()
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{args.port}")
+    req.send_pyobj(
+        dict(cmd="pipeline", pipeline=pip, params=dict(jobid=jobid, pid=pid))
+    )
+    msg = req.recv_pyobj()
     dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
     dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
 
@@ -107,8 +118,12 @@ def tomato_job() -> None:
         logger.info("==============================")
         ready = False
 
-    logger.debug(f"setting pipeline '{pip}' as '{'ready' if ready else 'not ready'}'")
-    dbhandler.pipeline_reset_job(state["path"], pip, ready, type=state["type"])
+    req.send_pyobj(
+        dict(
+            cmd="pipeline", pipeline=pip, params=dict(jobid=None, pid=None, ready=ready)
+        )
+    )
+    msg = req.recv_pyobj()
     dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
 
 
@@ -209,7 +224,6 @@ def driver_worker(
     logfile: str,
     loglevel: int,
 ) -> None:
-
     jq = multiprocessing.Queue(maxsize=0)
 
     log = logging.getLogger(__name__)

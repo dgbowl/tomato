@@ -66,7 +66,7 @@ def queue_setup(
         conn.close()
 
 
-def state_setup(
+def _state_setup(
     dbpath: str,
     type: str = "sqlite3",
 ) -> None:
@@ -161,129 +161,6 @@ def job_get_all(
     return ret
 
 
-def pipeline_reset_job(
-    dbpath: str,
-    pip: str,
-    ready: bool = False,
-    type: str = "sqlite3",
-) -> None:
-    conn, cur = get_db_conn(dbpath, type)
-    r = int(ready)
-    cur.execute(
-        f"UPDATE state SET pid = NULL, jobid = NULL, ready = {r} "
-        f"WHERE pipeline = '{pip}';"
-    )
-    conn.commit()
-    conn.close()
-
-
-def pipeline_assign_job(
-    dbpath: str,
-    pip: str,
-    jobid: int,
-    pid: int,
-    type: str = "sqlite3",
-) -> None:
-    conn, cur = get_db_conn(dbpath, type)
-    cur.execute(
-        f"UPDATE state SET pid = {pid}, jobid = {jobid}, ready = 0 "
-        f"WHERE pipeline = '{pip}';"
-    )
-    conn.commit()
-    conn.close()
-
-
-def pipeline_get_running(
-    dbpath: str,
-    type: str = "sqlite3",
-) -> list[tuple]:
-    conn, cur = get_db_conn(dbpath, type)
-    cur.execute("SELECT pipeline, jobid, pid FROM state WHERE pid IS NOT NULL;")
-    ret = cur.fetchall()
-    conn.close()
-    return ret
-
-
-def pipeline_get_all(
-    dbpath: str,
-    type: str = "sqlite3",
-) -> list[tuple]:
-    conn, cur = get_db_conn(dbpath, type)
-    cur.execute("SELECT pipeline FROM state;")
-    ret = [i[0] for i in cur.fetchall()]
-    conn.close()
-    return ret
-
-
-def pipeline_get_info(
-    dbpath: str,
-    pip: str,
-    type: str = "sqlite3",
-) -> tuple:
-    conn, cur = get_db_conn(dbpath, type)
-    cur.execute(
-        f"SELECT sampleid, ready, jobid, pid FROM state WHERE pipeline='{pip}';"
-    )
-    ret = cur.fetchone()
-    conn.close()
-    return ret
-
-
-def pipeline_remove(
-    dbpath: str,
-    pip: str,
-    type: str = "sqlite3",
-) -> None:
-    conn, cur = get_db_conn(dbpath, type)
-    log.warning(f"deleting pipeline '{pip}' from 'state'")
-    cur.execute(f"DELETE FROM state WHERE pipeline='{pip}';")
-    conn.commit()
-    conn.close()
-
-
-def pipeline_insert(
-    dbpath: str,
-    pip: str,
-    type: str = "sqlite3",
-) -> None:
-    conn, cur = get_db_conn(dbpath, type)
-    log.info(f"creating pipeline '{pip}' in 'state'")
-    cur.execute(
-        "INSERT INTO state (pipeline, sampleid, jobid, ready)" "VALUES (?, ?, ?, ?);",
-        (pip, None, None, 0),
-    )
-    conn.commit()
-    conn.close()
-
-
-def pipeline_load_sample(
-    dbpath: str,
-    pip: str,
-    sampleid: str,
-    type: str = "sqlite3",
-) -> None:
-    conn, cur = get_db_conn(dbpath, type)
-    cur.execute(
-        f"UPDATE state SET sampleid = '{sampleid}', ready = 0 "
-        f"WHERE pipeline = '{pip}';"
-    )
-    conn.commit()
-    conn.close()
-
-
-def pipeline_eject_sample(
-    dbpath: str,
-    pip: str,
-    type: str = "sqlite3",
-) -> None:
-    conn, cur = get_db_conn(dbpath, type)
-    cur.execute(
-        f"UPDATE state SET sampleid = NULL, ready = 0 " f"WHERE pipeline = '{pip}';"
-    )
-    conn.commit()
-    conn.close()
-
-
 def queue_payload(
     dbpath: str,
     pstr: str,
@@ -291,7 +168,7 @@ def queue_payload(
     jobname: str = None,
 ) -> tuple:
     conn, cur = get_db_conn(dbpath, type)
-    log.info(f"inserting a new job into 'state'")
+    log.info(f"inserting a new job into 'queue'")
     submitted_at = str(datetime.now(timezone.utc))
     if jobname is None:
         cur.execute(

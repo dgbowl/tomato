@@ -1,88 +1,97 @@
 import subprocess
 import time
-import psutil
 import signal
 import os
 import yaml
 import logging
 from typing import Callable, Union, Sequence
+import psutil
 
 logger = logging.getLogger(__name__)
 
-from tomato import dbhandler
-
 
 def tomato_setup():
-    logger.debug("In 'tomato_setup'.")
+    cmd = ["tomato", "init", "--datadir", ".", "--appdir", "."]
+    subprocess.Popen(cmd)
+    cmd = ["tomato", "start", "-p", "12345", "--appdir", ".", "--datadir", "."]
     if psutil.WINDOWS:
         cfg = subprocess.CREATE_NEW_PROCESS_GROUP
-        proc = subprocess.Popen(["tomato", "-t", "-vv"], creationflags=cfg)
+        proc = subprocess.Popen(cmd, creationflags=cfg)
     elif psutil.POSIX:
-        proc = subprocess.Popen(["tomato", "-t", "-vv"], start_new_session=True)
+        proc = subprocess.Popen(cmd, start_new_session=True)
     p = psutil.Process(pid=proc.pid)
-    while not os.path.exists("database.db"):
-        time.sleep(0.1)
-    conn, cur = dbhandler.get_db_conn("database.db", type="sqlite3")
-    queue, state = False, False
-    while not queue or not state:
-        if not queue:
-            cur.execute(
-                "SELECT name FROM sqlite_master " "WHERE type='table' AND name='queue';"
-            )
-            queue = bool(len(cur.fetchall()))
-        if not state:
-            cur.execute(
-                "SELECT name FROM sqlite_master " "WHERE type='table' AND name='state';"
-            )
-            state = bool(len(cur.fetchall()))
-        time.sleep(0.1)
-    conn.close()
+    count = 0
+    while True:
+        ret = subprocess.run(
+            ["tomato", "status", "--appdir", ".", "--port", "12345"],
+            capture_output=True,
+            text=True,
+        )
+        ret = yaml.safe_load(ret.stdout)
+        if ret["success"] and ret["data"]["status"] == "running":
+            break
+        else:
+            time.sleep(0.1)
+            count += 1
+            assert count < 20
     return proc, p
 
 
-def ketchup_setup(casename, jobname, pip="dummy-10"):
+def sample_setup(casename, jobname, pip="dummy-10"):
     logger.debug("In 'ketchup_setup'.")
-    subprocess.run(["ketchup", "-t", "load", casename, pip, "-vv"])
-    subprocess.run(["ketchup", "-t", "ready", pip, "-vv"])
-    args = ["ketchup", "-t", "submit", f"{casename}.yml", "-vv"]
+    subprocess.run(
+        ["tomato", "pipeline", "load", "-p", "12345", "--appdir", ".", pip, casename]
+    )
+    subprocess.run(["tomato", "pipeline", "ready", "-p", "12345", "--appdir", ".", pip])
+    args = ["ketchup", "submit", "-p", "12345", "--appdir", ".", f"{casename}.yml"]
     if jobname is not None:
         args.append("--jobname")
         args.append(jobname)
-    print(args)
     subprocess.run(args)
 
 
 def ketchup_loop(start, inter_func):
+    print("In ketchup_loop")
     inter_exec = None
     end = False
-    logger.debug("In 'ketchup_loop'.")
     while True:
         time.sleep(1)
         dt = time.perf_counter() - start
         if end:
             logger.debug("Job complete in %d s. ", dt)
             break
-        if dt > 120:
+        if dt > 30:
             logger.warning("Job took more than 120 s. Aborting...")
             break
         if not os.path.exists(os.path.join("Jobs", "1", "jobdata.log")):
             continue
         if inter_exec and inter_func is not None:
-            logger.debug("Running 'inter_func()'")
+            print("Running 'inter_func()'")
             inter_func()
             inter_exec = False
         ret = subprocess.run(
-            ["ketchup", "-t", "status", "1"],
+            [
+                "ketchup",
+                "status",
+                "-p",
+                "12345",
+                "--appdir",
+                ".",
+                "--datadir",
+                ".",
+                "1",
+            ],
             capture_output=True,
             text=True,
         )
-        yml = yaml.safe_load(ret.stdout)
-        assert len(yml) == 1
-        status = yml[0]["status"]
-        if status.startswith("c"):
-            end = True
-        elif status.startswith("r") and inter_exec is None:
-            inter_exec = True
+        print(f"{ret.stdout}")
+        yml = yaml.safe_load(f"{ret.stdout}")
+        if yml["success"]:
+            status = yml["data"][0]["status"]
+            if status.startswith("c"):
+                end = True
+            elif status.startswith("r") and inter_exec is None:
+                inter_exec = True
     return status
 
 
@@ -98,35 +107,38 @@ def run_casename(
     jobname: Union[str, list[str]] = None,
     inter_func: Callable = None,
 ) -> str:
+    print("tomato_setup()")
     proc, p = tomato_setup()
     if isinstance(casename, str):
-        ketchup_setup(casename, jobname)
+        print("sample_setup()")
+        sample_setup(casename, jobname)
     elif isinstance(casename, Sequence):
         pnames = ["dummy-10", "dummy-5"]
         for idx, tup in enumerate(zip(casename, jobname)):
             cn, jn = tup
             pn = pnames[idx]
-            print(f"{cn=}, {jn=}, {pn=}")
-            ketchup_setup(cn, jn, pip=pn)
+            sample_setup(cn, jn, pip=pn)
+    print("ketchup_loop()")
     status = ketchup_loop(time.perf_counter(), inter_func)
+    print("ketchup_kill()")
     ketchup_kill(proc, p)
     return status
 
 
 def cancel_job(jobid: int = 1):
-    logger.debug("Running 'ketchup cancel'.")
-    subprocess.run(["ketchup", "-t", "cancel", f"{jobid}", "-vv"])
+    print("Running 'ketchup cancel'.")
+    subprocess.run(["ketchup", "cancel", "-p", "12345", "--appdir", ".", str(jobid)])
 
 
 def snapshot_job(jobid: int = 1):
-    logger.debug("Running 'ketchup snapshot'.")
-    subprocess.run(["ketchup", "-t", "snapshot", f"{jobid}", "-vv"])
+    print("Running 'ketchup snapshot'.")
+    subprocess.run(["ketchup", "snapshot", "-p", "12345", "--appdir", ".", f"{jobid}"])
 
 
 def search_job(jobname: str = "$MATCH"):
     logger.debug("Running 'ketchup search'.")
     ret = subprocess.run(
-        ["ketchup", "-t", "search", jobname, "-vv"],
+        ["ketchup", "search", "-p", "12345", "--appdir", ".", jobname],
         capture_output=True,
         text=True,
     )
@@ -137,3 +149,48 @@ def search_job(jobname: str = "$MATCH"):
             assert line.split(":")[-1].strip() == "1"
         elif "status" in line:
             assert line.split(":")[-1].strip() == "r"
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=50)
+    status = run_casename("dummy_random_1_0.1")
+    print(f"{status=}")
+
+
+def run_casenames(
+    casenames: list[str],
+    jobnames: list[str],
+    pipelines: list[str],
+    inter_func: Callable = None,
+) -> str:
+    for cn, jn, pip in zip(casenames, jobnames, pipelines):
+        subprocess.run(
+            ["tomato", "pipeline", "load", "-p", "12345", "--appdir", ".", pip, cn]
+        )
+        subprocess.run(
+            ["tomato", "pipeline", "ready", "-p", "12345", "--appdir", ".", pip]
+        )
+
+        args = ["ketchup", "submit", "-p", "12345", "--appdir", ".", f"{cn}.yml"]
+        if jn is not None:
+            args.append("--jobname")
+            args.append(jn)
+        subprocess.run(args)
+
+
+def job_status(jobid):
+    ret = subprocess.run(
+        [
+            "ketchup",
+            "status",
+            "-p",
+            "12345",
+            "--appdir",
+            ".",
+            str(jobid),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    yml = yaml.safe_load(ret.stdout)
+    return yml

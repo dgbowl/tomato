@@ -7,7 +7,7 @@ and can be installed using:
 
 .. code::
 
-    pip install --pre tomato[docs,testing]
+    pip install tomato[docs,testing]
 
 We strongly recommend installing **tomato** into a separate ``conda`` or ``venv``
 environment.
@@ -29,5 +29,9 @@ created ``tomato`` folder:
     cd tomato
     pytest -vv
 
-The test-suite currently contains tests using the :mod:`~tomato.drivers.dummy` driver,
-and therefore should work on all platforms.
+The test-suite currently contains the following unit tests:
+
+- :mod:`tomato.tomato` unit tests,
+- unit tests for the :mod:`tomato.drivers.dummy` driver,
+
+Therefore, the tests should work on all platforms.

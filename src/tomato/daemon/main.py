@@ -23,23 +23,19 @@ def _kill_tomato_job(proc):
                 try:
                     proc.terminate()
                 except psutil.NoSuchProcess:
-                    log.warning(
-                        "dead proc: name='%s', pid=%d", proc.name(), proc.pid
-                    )
+                    log.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
                     continue
-            gone, alive = psutil.wait_procs(ppc, timeout=10)
+            gone, alive = psutil.wait_procs(ppc, timeout=1)
     elif psutil.POSIX:
         for proc in pc:
             try:
                 proc.terminate()
             except psutil.NoSuchProcess:
-                log.warning(
-                    "dead proc: name='%s', pid=%d", proc.name(), proc.pid
-                )
+                log.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
                 continue
-        gone, alive = psutil.wait_procs(pc, timeout=10)
-    log.debug(f"{gone=}")
-    log.debug(f"{alive=}")
+        gone, alive = psutil.wait_procs(pc, timeout=1)
+    # log.debug(f"{gone=}")
+    # log.debug(f"{alive=}")
 
 
 def _find_matching_pipelines(pipelines: list, method: list[dict]) -> list[str]:
