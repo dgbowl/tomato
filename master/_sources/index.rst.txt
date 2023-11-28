@@ -7,14 +7,15 @@
 .. image:: https://badgen.net/github/tag/dgbowl/tomato/?icon=github
    :target: https://github.com/dgbowl/tomato
 
-**tomato** is an instrument automation package, currently developed in the 
+**tomato** is an instrument automation package, currently developed at the 
+`ConCat lab <https://tu.berlin/en/concat/>`_, and previously in the 
 `Materials for Energy Conversion <https://www.empa.ch/web/s501>`_ lab at Empa. 
 
 **tomato** includes:
 
-- the job scheduler and queue, :mod:`tomato.daemon`, using a ``sqlite3`` as a 
-  backend for IPC;
-- the configuration utility :mod:`~tomato.ketchup`, modelled after PBS / SGE; 
+- a daemon for pipeline management and job scheduling, :mod:`tomato.daemon`, using :mod:`zmq` and ``sqlite3``;
+- the daemon and pipeline configuration utility, :mod:`tomato.tomato`;
+- the job and job queue configuration utility, :mod:`~tomato.ketchup`; 
 - a set of device drivers, see the :ref:`driver library`.
 
 This project has received funding from the European Union’s Horizon 2020 research

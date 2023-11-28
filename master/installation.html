@@ -30,15 +30,19 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> tomato
-            <img src="_static/tomato.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tomato
+              <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 master
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -77,7 +81,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
@@ -92,7 +96,7 @@
 <span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
 <p>Pre-built wheels of <strong>tomato</strong> are available on <a class="reference external" href="https://pypi.org/project/tomato/">PyPI</a>
 and can be installed using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">pre</span> <span class="n">tomato</span><span class="p">[</span><span class="n">docs</span><span class="p">,</span><span class="n">testing</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">tomato</span><span class="p">[</span><span class="n">docs</span><span class="p">,</span><span class="n">testing</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>We strongly recommend installing <strong>tomato</strong> into a separate <code class="docutils literal notranslate"><span class="pre">conda</span></code> or <code class="docutils literal notranslate"><span class="pre">venv</span></code>
@@ -112,8 +116,12 @@ created <code class="docutils literal notranslate"><span class="pre">tomato</spa
 <span class="n">pytest</span> <span class="o">-</span><span class="n">vv</span>
 </pre></div>
 </div>
-<p>The test-suite currently contains tests using the <a class="reference internal" href="apidoc/tomato.drivers.dummy.html#module-tomato.drivers.dummy" title="tomato.drivers.dummy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dummy</span></code></a> driver,
-and therefore should work on all platforms.</p>
+<p>The test-suite currently contains the following unit tests:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.tomato</span></code></a> unit tests,</p></li>
+<li><p>unit tests for the <a class="reference internal" href="apidoc/tomato.drivers.dummy.html#module-tomato.drivers.dummy" title="tomato.drivers.dummy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.drivers.dummy</span></code></a> driver,</p></li>
+</ul>
+<p>Therefore, the tests should work on all platforms.</p>
 </section>
 </section>
 

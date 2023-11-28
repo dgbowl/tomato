@@ -17,12 +17,13 @@ Subpackages
    tomato.drivers
    tomato.ketchup
    tomato.setlib
+   tomato.tomato
 
 Submodules
 ----------
 
 
-.. automodule:: tomato.main
+.. automodule:: tomato.models
    :members:
    :undoc-members:
    :show-inheritance:

@@ -30,15 +30,19 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> tomato
-            <img src="../_static/tomato.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tomato
+              <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
                 master
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,9 +72,10 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.setlib.html">tomato.setlib package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.html#module-tomato.main">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#module-tomato.models">Submodules</a></li>
 </ul>
 </li>
 </ul>
@@ -88,7 +93,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="tomato.html">tomato package</a></li>
       <li class="breadcrumb-item active">tomato.dbhandler package</li>
       <li class="wy-breadcrumbs-aside">
@@ -117,16 +122,6 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.dbhandler.sqlite.queue_setup">
 <span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">queue_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.queue_setup" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.state_setup">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">state_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.state_setup" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
@@ -180,96 +175,6 @@
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_reset_job">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_reset_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ready</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_reset_job" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_assign_job">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_assign_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_assign_job" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_get_running">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_get_running</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_get_running" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_get_all">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_get_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_get_all" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_get_info">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_get_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_get_info" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_remove">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_remove" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_insert">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_insert" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_load_sample">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_load_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_load_sample" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.dbhandler.sqlite.pipeline_eject_sample">
-<span class="sig-prename descclassname"><span class="pre">tomato.dbhandler.sqlite.</span></span><span class="sig-name descname"><span class="pre">pipeline_eject_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sqlite3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.dbhandler.sqlite.pipeline_eject_sample" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
