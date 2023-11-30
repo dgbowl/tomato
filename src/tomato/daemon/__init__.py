@@ -9,13 +9,8 @@ import zmq
 import psutil
 
 from tomato.models import Pipeline, Reply
-from .. import dbhandler
+from tomato import dbhandler
 
-from .main import (
-    _find_matching_pipelines,
-    _pipeline_ready_sample,
-    _kill_tomato_job,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +56,33 @@ def find_matching_pipelines(pipelines: dict, method: list[dict]) -> list[str]:
             matched.append(cd)
     print(f"{matched=}")
     return matched
+
+
+def kill_tomato_job(proc):
+    pc = proc.children()
+    logger.warning(
+        "killing proc: name='%s', pid=%d, children=%d", proc.name(), proc.pid, len(pc)
+    )
+    if psutil.WINDOWS:
+        for proc in pc:
+            if proc.name() in {"conhost.exe"}:
+                continue
+            ppc = proc.children()
+            for proc in ppc:
+                try:
+                    proc.terminate()
+                except psutil.NoSuchProcess:
+                    logger.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
+                    continue
+            gone, alive = psutil.wait_procs(ppc, timeout=1)
+    elif psutil.POSIX:
+        for proc in pc:
+            try:
+                proc.terminate()
+            except psutil.NoSuchProcess:
+                logger.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
+                continue
+        gone, alive = psutil.wait_procs(pc, timeout=1)
 
 
 def run_daemon():
@@ -131,7 +153,7 @@ def run_daemon():
                     st = ret[2]
                     if st == "rd":
                         proc = psutil.Process(pid=pip.pid)
-                        _kill_tomato_job(proc)
+                        kill_tomato_job(proc)
                         dbhandler.job_set_status(qup, "cd", pip.jobid, type=qut)
                 else:
                     dbhandler.job_set_status(qup, "ce", pip.jobid, type=qut)
