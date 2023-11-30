@@ -137,7 +137,12 @@ def run_daemon():
         if rep in socks:
             msg = rep.recv_pyobj()
             logger.debug(f"received {msg=}")
-            assert "cmd" in msg
+            if "cmd" not in msg:
+                logger.error(f"received msg without cmd: {msg=}")
+                rep.send_pyobj(
+                    Reply(success=False, msg="received msg without cmd", data=msg)
+                )
+                continue
             cmd = msg["cmd"]
             if cmd == "stop":
                 status = "stop"
@@ -148,15 +153,22 @@ def run_daemon():
                 newpips = {p["name"]: Pipeline(**p) for p in msg.get("pipelines", {})}
                 pipelines = merge_pipelines(pipelines, newpips)
                 if status == "bootstrap":
+                    logger.info(
+                        f"tomato daemon setup successful with pipelines: {list(pipelines.keys())}"
+                    )
                     status = "running"
+                else:
+                    logger.info(
+                        f"tomato daemon reload successful with pipelines: {list(pipelines.keys())}"
+                    )
                 msg = Reply(
                     success=True, msg=status, data=[pip for pip in pipelines.values()]
                 )
             elif cmd == "pipeline":
                 pname = msg.get("pipeline")
                 params = msg.get("params", {})
-                logger.info(f"setting params for pipeline {pname}: {params=}")
                 for k, v in params.items():
+                    logger.info(f"setting {pname}.{k} to {v}")
                     setattr(pipelines[pname], k, v)
                 msg = Reply(success=True, msg=status, data=pipelines[pname])
             elif cmd == "status":

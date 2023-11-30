@@ -196,3 +196,14 @@ def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
 def test_tomato_log_verbosity_default(tomato_daemon, stop_tomato_daemon):
     assert Path("daemon_12345.log").exists()
     assert Path("daemon_12345.log").stat().st_size > 0
+
+
+def test_tomato_nocmd(tomato_daemon, stop_tomato_daemon):
+    context = zmq.Context()
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:12345")
+    req.send_pyobj(dict(cdm="typo"))
+    rep = req.recv_pyobj()
+    print(f"{rep=}")
+    assert rep.success is False
+    assert "msg without cmd" in rep.msg
