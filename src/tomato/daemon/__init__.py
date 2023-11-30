@@ -4,6 +4,7 @@ import logging
 import time
 import argparse
 import json
+from pathlib import Path
 
 import zmq
 import psutil
@@ -72,7 +73,9 @@ def kill_tomato_job(proc):
                 try:
                     proc.terminate()
                 except psutil.NoSuchProcess:
-                    logger.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
+                    logger.warning(
+                        "dead proc: name='%s', pid=%d", proc.name(), proc.pid
+                    )
                     continue
             gone, alive = psutil.wait_procs(ppc, timeout=1)
     elif psutil.POSIX:
@@ -93,10 +96,32 @@ def run_daemon():
         type=int,
         default=1234,
     )
+    parser.add_argument(
+        "--verbosity",
+        type=int,
+        default=logging.INFO,
+    )
+    parser.add_argument(
+        "--logdir",
+        type=str,
+        default=str(Path.cwd()),
+    )
     args = parser.parse_args()
+
+    logger = logging.getLogger(f"{__name__}.run_daemon")
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(Path(args.logdir) / f"daemon_{args.port}.log")
+    fh.setLevel(args.verbosity)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    logger.info(f"logging set up with verbosity {args.verbosity}")
 
     context = zmq.Context()
     rep = context.socket(zmq.REP)
+    logger.debug(f"binding zmq.REP socket on port {args.port}")
     rep.bind(f"tcp://127.0.0.1:{args.port}")
 
     poller = zmq.Poller()
@@ -106,16 +131,17 @@ def run_daemon():
     settings = {}
     pipelines = {}
 
+    logger.debug(f"entering main loop")
     while True:
         socks = dict(poller.poll(100))
-        print(f"{socks=}")
         if rep in socks:
             msg = rep.recv_pyobj()
-            print(f"{msg=}")
+            logger.debug(f"received {msg=}")
             assert "cmd" in msg
             cmd = msg["cmd"]
             if cmd == "stop":
                 status = "stop"
+                logger.critical(f"stopping tomato daemon")
                 msg = Reply(success=True, msg=status)
             elif cmd == "setup":
                 settings = msg.get("settings", settings)
@@ -129,6 +155,7 @@ def run_daemon():
             elif cmd == "pipeline":
                 pname = msg.get("pipeline")
                 params = msg.get("params", {})
+                logger.info(f"setting params for pipeline {pname}: {params=}")
                 for k, v in params.items():
                     setattr(pipelines[pname], k, v)
                 msg = Reply(success=True, msg=status, data=pipelines[pname])
@@ -136,7 +163,7 @@ def run_daemon():
                 msg = Reply(
                     success=True, msg=status, data=[pip for pip in pipelines.values()]
                 )
-            print(f"{msg=}")
+            logger.debug(f"reply with {msg=}")
             rep.send_pyobj(msg)
 
         # Former main loop - split into job and pipeline managers
@@ -152,10 +179,19 @@ def run_daemon():
                     ret = dbhandler.job_get_info(qup, pip.jobid, type=qut)
                     st = ret[2]
                     if st == "rd":
+                        logger.warning(
+                            f"job {pip.jobid} with pid {pip.pid} has been scheduled for termination"
+                        )
                         proc = psutil.Process(pid=pip.pid)
                         kill_tomato_job(proc)
+                        logger.debug(
+                            f"job {pip.jobid} with pid {pip.pid} has been terminated successfully"
+                        )
                         dbhandler.job_set_status(qup, "cd", pip.jobid, type=qut)
                 else:
+                    logging.warning(
+                        f"the pid {pip.pid} associated with job {pip.jobid} has not been found"
+                    )
                     dbhandler.job_set_status(qup, "ce", pip.jobid, type=qut)
                     dbhandler.job_set_time(qup, "completed_at", pip.jobid, type=qut)
                     pip.pid = None
@@ -175,6 +211,10 @@ def run_daemon():
                     pipelines, payload["method"]
                 )
                 if len(matched_pips[jobid]) > 0 and st != "qw":
+                    logger.info(
+                        f"job {jobid} can be queued onto pipelines: "
+                        f"{[pip.name for pip in matched_pips[jobid]]}"
+                    )
                     dbhandler.job_set_status(qup, "qw", jobid, type=qut)
             # iterate over sorted queued jobs and submit if pipeline with is loaded & ready
             for jobid in sorted(jobids):
@@ -196,6 +236,9 @@ def run_daemon():
                     jpath = os.path.join(root, "jobdata.json")
                     with open(jpath, "w", encoding="utf=8") as of:
                         json.dump(jobargs, of, indent=1)
+                    logger.info(
+                        f"launching job {jobid} on pipeline {pip.name} with job path {jpath}"
+                    )
                     if psutil.WINDOWS:
                         cfs = subprocess.CREATE_NO_WINDOW
                         cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
@@ -211,5 +254,3 @@ def run_daemon():
                     break
         if status == "stop":
             break
-        # else:
-        #    time.sleep(settings.get("main loop", 0.5))

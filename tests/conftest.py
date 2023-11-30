@@ -28,11 +28,9 @@ def datadir(tmpdir, request):
 def tomato_daemon(tmpdir: str, port: int = 12345):
     # setup_stuff
     os.chdir(tmpdir)
+    subprocess.run(["tomato", "init", "-p", f"{port}", "-A", ".", "-D", "."])
     subprocess.run(
-        ["tomato", "init", "-p", f"{port}", "--appdir", ".", "--datadir", "."]
-    )
-    subprocess.run(
-        ["tomato", "start", "-p", f"{port}", "--appdir", ".", "--datadir", "."]
+        ["tomato", "start", "-p", f"{port}", "-A", ".", "-D", ".", "-L", "."]
     )
     yield
     # teardown_stuff

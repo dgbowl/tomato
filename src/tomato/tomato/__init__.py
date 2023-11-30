@@ -96,6 +96,8 @@ def start(
     timeout: int,
     context: zmq.Context,
     appdir: str,
+    verbosity: int,
+    logdir: str,
     **kwargs: dict,
 ) -> Reply:
     logging.debug(f"checking for availability of port {port}.")
@@ -110,7 +112,15 @@ def start(
         )
 
     logger.debug(f"starting tomato on port {port}")
-    cmd = ["tomato-daemon", "--port", f"{port}"]
+    cmd = [
+        "tomato-daemon",
+        "--port",
+        f"{port}",
+        "--logdir",
+        f"{logdir}",
+        "--verbosity",
+        f"{verbosity}",
+    ]
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(cmd, creationflags=cfs)
