@@ -115,16 +115,6 @@ def status(
     events = dict(poller.poll(timeout))
     if req in events:
         rep = req.recv_pyobj()
-        trimmed = []
-        for pip in rep.data:
-            shortpip = Pipeline(
-                name=pip.name,
-                ready=pip.ready,
-                jobid=pip.jobid,
-                sampleid=pip.sampleid,
-            )
-            trimmed.append(shortpip)
-        rep.data = trimmed
         return Reply(
             success=True,
             msg=f"tomato running on port {port}",
@@ -306,10 +296,9 @@ def pipeline_load(
     if not stat.success:
         return stat
 
-    pipnames = [pip.name for pip in stat.data]
-    if pipeline not in pipnames:
+    if pipeline not in stat.data.pipelines:
         return Reply(success=False, msg=f"pipeline {pipeline} not found on tomato")
-    pip = stat.data[pipnames.index(pipeline)]
+    pip = stat.data.pipelines[pipeline]
 
     if pip.sampleid is not None:
         return Reply(
@@ -346,14 +335,13 @@ def pipeline_eject(
     if not stat.success:
         return stat
 
-    pipnames = [pip.name for pip in stat.data]
-    if pipeline not in pipnames:
+    if pipeline not in stat.data.pipelines:
         return Reply(
             success=False,
             msg=f"pipeline {pipeline} not found on tomato",
-            data=pipnames,
+            data=stat.data.pipelines,
         )
-    pip = stat.data[pipnames.index(pipeline)]
+    pip = stat.data.pipelines[pipeline]
 
     if pip.sampleid is None:
         return Reply(
@@ -397,12 +385,13 @@ def pipeline_ready(
     if not stat.success:
         return stat
 
-    pipnames = [pip.name for pip in stat.data]
-    if pipeline not in pipnames:
+    if pipeline not in stat.data.pipelines:
         return Reply(
-            success=False, msg=f"pipeline {pipeline} not found on tomato", data=pipnames
+            success=False,
+            msg=f"pipeline {pipeline} not found on tomato",
+            data=stat.data.pipelines,
         )
-    pip = stat.data[pipnames.index(pipeline)]
+    pip = stat.data.pipelines[pipeline]
 
     if pip.ready:
         return Reply(

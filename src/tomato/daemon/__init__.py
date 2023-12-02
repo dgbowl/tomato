@@ -15,7 +15,7 @@ from pathlib import Path
 import zmq
 import psutil
 
-from tomato.models import Pipeline, Reply
+from tomato.models import Pipeline, Reply, Daemon
 from tomato import dbhandler
 
 
@@ -94,6 +94,18 @@ def kill_tomato_job(proc):
         gone, alive = psutil.wait_procs(pc, timeout=1)
 
 
+def setup_logging(daemon: Daemon):
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(Path(daemon.logdir) / f"daemon_{daemon.port}.log")
+    fh.setLevel(daemon.verbosity)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+
 def run_daemon():
     """ """
     parser = argparse.ArgumentParser(add_help=False)
@@ -115,28 +127,20 @@ def run_daemon():
     )
     args = parser.parse_args()
 
+    daemon = Daemon(**vars(args), status="bootstrap")
+    setup_logging(daemon)
     logger = logging.getLogger(f"{__name__}.run_daemon")
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(Path(args.logdir) / f"daemon_{args.port}.log")
-    fh.setLevel(args.verbosity)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
-    logger.info(f"logging set up with verbosity {args.verbosity}")
+    logger.info(f"logging set up with verbosity {daemon.verbosity}")
+    logger.debug(f"{daemon=}")
 
     context = zmq.Context()
     rep = context.socket(zmq.REP)
-    logger.debug(f"binding zmq.REP socket on port {args.port}")
-    rep.bind(f"tcp://127.0.0.1:{args.port}")
+    logger.debug(f"binding zmq.REP socket on port {daemon.port}")
+    rep.bind(f"tcp://127.0.0.1:{daemon.port}")
 
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
-
-    status = "bootstrap"
     settings = {}
-    pipelines = {}
 
     logger.debug(f"entering main loop")
     while True:
@@ -152,46 +156,52 @@ def run_daemon():
                 continue
             cmd = msg["cmd"]
             if cmd == "stop":
-                status = "stop"
+                daemon.status = "stop"
                 logger.critical(f"stopping tomato daemon")
-                msg = Reply(success=True, msg=status)
+                msg = Reply(success=True, msg=daemon.status)
             elif cmd == "setup":
                 settings = msg.get("settings", settings)
                 newpips = {p["name"]: Pipeline(**p) for p in msg.get("pipelines", {})}
-                pipelines = merge_pipelines(pipelines, newpips)
-                if status == "bootstrap":
+                daemon.pipelines = merge_pipelines(daemon.pipelines, newpips)
+                if daemon.status == "bootstrap":
                     logger.info(
-                        f"tomato daemon setup successful with pipelines: {list(pipelines.keys())}"
+                        "tomato daemon setup successful with "
+                        f"pipelines: {list(daemon.pipelines.keys())}"
                     )
-                    status = "running"
+                    daemon.status = "running"
                 else:
                     logger.info(
-                        f"tomato daemon reload successful with pipelines: {list(pipelines.keys())}"
+                        "tomato daemon reload successful with "
+                        f"pipelines: {list(daemon.pipelines.keys())}"
                     )
                 msg = Reply(
-                    success=True, msg=status, data=[pip for pip in pipelines.values()]
+                    success=True,
+                    msg=daemon.status,
+                    data=daemon,
                 )
             elif cmd == "pipeline":
                 pname = msg.get("pipeline")
                 params = msg.get("params", {})
                 for k, v in params.items():
                     logger.info(f"setting {pname}.{k} to {v}")
-                    setattr(pipelines[pname], k, v)
-                msg = Reply(success=True, msg=status, data=pipelines[pname])
-            elif cmd == "status":
+                    setattr(daemon.pipelines[pname], k, v)
                 msg = Reply(
-                    success=True, msg=status, data=[pip for pip in pipelines.values()]
+                    success=True, msg=daemon.status, data=daemon.pipelines[pname]
                 )
+            elif cmd == "status":
+                msg = Reply(success=True, msg=daemon.status, data=daemon)
             logger.debug(f"reply with {msg=}")
             rep.send_pyobj(msg)
 
         # Former main loop - split into job and pipeline managers
-        if status == "running":
+        if daemon.status == "running":
             qup = settings["queue"]["path"]
             qut = settings["queue"]["type"]
 
             # check existing PIDs in state
-            running = [pip for pip in pipelines.values() if pip.jobid is not None]
+            running = [
+                pip for pip in daemon.pipelines.values() if pip.jobid is not None
+            ]
 
             for pip in running:
                 if pip.pid is not None and psutil.pid_exists(pip.pid):
@@ -227,7 +237,7 @@ def run_daemon():
                 payloads[jobid] = payload
                 jobids.append(jobid)
                 matched_pips[jobid] = find_matching_pipelines(
-                    pipelines, payload["method"]
+                    daemon.pipelines, payload["method"]
                 )
                 if len(matched_pips[jobid]) > 0 and st != "qw":
                     logger.info(
@@ -258,18 +268,13 @@ def run_daemon():
                     logger.info(
                         f"launching job {jobid} on pipeline {pip.name} with job path {jpath}"
                     )
+                    cmd = ["tomato_job", "--port", str(daemon.port), str(jpath)]
                     if psutil.WINDOWS:
                         cfs = subprocess.CREATE_NO_WINDOW
                         cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
-                        subprocess.Popen(
-                            ["tomato_job", "--port", str(args.port), str(jpath)],
-                            creationflags=cfs,
-                        )
+                        subprocess.Popen(cmd, creationflags=cfs)
                     elif psutil.POSIX:
-                        subprocess.Popen(
-                            ["tomato_job", "--port", str(args.port), str(jpath)],
-                            start_new_session=True,
-                        )
+                        subprocess.Popen(cmd, start_new_session=True)
                     break
-        if status == "stop":
+        if daemon.status == "stop":
             break
