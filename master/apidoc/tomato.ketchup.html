@@ -68,7 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.dbhandler.html">tomato.dbhandler package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.ketchup package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#ketchup-command-line-interface-to-the-tomato-job-queue"><strong>ketchup</strong>: command line interface to the tomato job queue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato-ketchup-command-line-interface-to-the-tomato-job-queue"><strong>tomato.ketchup</strong>: command line interface to the tomato job queue</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.setlib.html">tomato.setlib package</a></li>
@@ -107,8 +107,8 @@
              
   <section id="module-tomato.ketchup">
 <span id="tomato-ketchup-package"></span><h1>tomato.ketchup package<a class="headerlink" href="#module-tomato.ketchup" title="Permalink to this headline"></a></h1>
-<section id="ketchup-command-line-interface-to-the-tomato-job-queue">
-<h2><strong>ketchup</strong>: command line interface to the tomato job queue<a class="headerlink" href="#ketchup-command-line-interface-to-the-tomato-job-queue" title="Permalink to this headline"></a></h2>
+<section id="tomato-ketchup-command-line-interface-to-the-tomato-job-queue">
+<h2><strong>tomato.ketchup</strong>: command line interface to the tomato job queue<a class="headerlink" href="#tomato-ketchup-command-line-interface-to-the-tomato-job-queue" title="Permalink to this headline"></a></h2>
 <p><em>Code author: Peter Kraus</em></p>
 <p>Module of functions to manage the job queue of <a class="reference internal" href="tomato.html#module-tomato" title="tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>. Includes job management
 functions:</p>
@@ -209,7 +209,7 @@ the testing switch (<code class="docutils literal notranslate"><span class="pre"
 <p class="admonition-title">Note</p>
 <p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">cancel()</span></code> only sets the status of the running
 job to <code class="docutils literal notranslate"><span class="pre">rd</span></code>; the actual job cancellation is performed in the
-<a class="reference internal" href="tomato.daemon.html#tomato.daemon.main.main_loop" title="tomato.daemon.main.main_loop"><code class="xref py py-func docutils literal notranslate"><span class="pre">tomato.daemon.main.main_loop()</span></code></a>.</p>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">tomato.daemon.main.main_loop()</span></code>.</p>
 </div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a job:</span>
