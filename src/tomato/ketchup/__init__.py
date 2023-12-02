@@ -1,6 +1,6 @@
 """
-**ketchup**: command line interface to the tomato job queue
------------------------------------------------------------
+**tomato.ketchup**: command line interface to the tomato job queue
+------------------------------------------------------------------
 .. codeauthor:: 
     Peter Kraus
 
@@ -131,7 +131,7 @@ def status(
 
     Examples
     --------
-    
+
     .. note::
 
         Calling ``ketchup status`` with a single ``jobid`` will return a ``yaml``
@@ -353,4 +353,3 @@ def search(
         )
     else:
         return Reply(success=False, msg=f"no job with jobname matching {jobname} found")
-

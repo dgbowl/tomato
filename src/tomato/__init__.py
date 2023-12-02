@@ -13,20 +13,19 @@ import zmq
 import appdirs
 import yaml
 import toml
+
 sys.path += sys.modules["tomato"].__path__
 
-from . import _version
+from tomato import tomato, ketchup, _version
 
-from tomato import tomato
-from tomato import ketchup
 
 __version__ = _version.get_versions()["version"]
 VERSION = __version__
 DEFAULT_TOMATO_PORT = 1234
 logger = logging.getLogger(__name__)
 
-def set_loglevel(delta: int):
-    loglevel = min(max(30 - (10 * delta), 10), 50)
+
+def set_loglevel(loglevel: int):
     logging.basicConfig(level=loglevel)
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
 
@@ -35,6 +34,7 @@ def run_tomato():
     dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
     config_dir = dirs.user_config_dir
     data_dir = dirs.user_data_dir
+    log_dir = dirs.user_log_dir
 
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
@@ -67,24 +67,16 @@ def run_tomato():
 
     pip_load = pipparsers.add_parser("load")
     pip_load.set_defaults(func=tomato.pipeline_load)
-    pip_load.add_argument(
-        "pipeline",
-    )
-    pip_load.add_argument(
-        "sampleid",
-    )
+    pip_load.add_argument("pipeline")
+    pip_load.add_argument("sampleid")
 
     pip_eject = pipparsers.add_parser("eject")
     pip_eject.set_defaults(func=tomato.pipeline_eject)
-    pip_eject.add_argument(
-        "pipeline",
-    )
+    pip_eject.add_argument("pipeline")
 
     pip_ready = pipparsers.add_parser("ready")
     pip_ready.set_defaults(func=tomato.pipeline_ready)
-    pip_ready.add_argument(
-        "pipeline",
-    )
+    pip_ready.add_argument("pipeline")
 
     for p in [parser, verbose]:
         p.add_argument(
@@ -92,14 +84,14 @@ def run_tomato():
             "-v",
             action="count",
             default=0,
-            help="Increase verbosity by one level.",
+            help="Increase verbosity of tomato daemon by one level.",
         )
         p.add_argument(
             "--quiet",
             "-q",
             action="count",
             default=0,
-            help="Decrease verbosity by one level.",
+            help="Decrease verbosity of tomato daemon by one level.",
         )
 
     for p in [start, stop, init, status, reload, pip_load, pip_eject, pip_ready]:
@@ -117,12 +109,20 @@ def run_tomato():
         )
         p.add_argument(
             "--appdir",
+            "-A",
             help="Settings directory for tomato",
             default=config_dir,
         )
         p.add_argument(
             "--datadir",
+            "-D",
             help="Data directory for tomato",
+            default=data_dir,
+        )
+        p.add_argument(
+            "--logdir",
+            "-L",
+            help="Log directory for tomato",
             default=data_dir,
         )
 
@@ -131,11 +131,12 @@ def run_tomato():
     # parse extras for verbose tags
     args, extras = verbose.parse_known_args(extras, args)
 
-    set_loglevel(args.verbose - args.quiet)
+    verbosity = min(max((2 + args.verbose - args.quiet) * 10, 10), 50)
+    set_loglevel(verbosity)
 
     context = zmq.Context()
     if "func" in args:
-        ret = args.func(**vars(args), context=context)
+        ret = args.func(**vars(args), context=context, verbosity=verbosity)
         print(yaml.dump(ret.dict()))
 
 
