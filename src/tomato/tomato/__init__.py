@@ -224,10 +224,6 @@ def init(
         f"""\
         # Default settings for tomato-{VERSION}
         # Generated on {str(datetime.now(timezone.utc))}
-        [state]
-        type = 'sqlite3'
-        path = '{ddir / 'database.db'}'
-
         [queue]
         type = 'sqlite3'
         path = '{ddir / 'database.db'}'
