@@ -22,6 +22,8 @@ Also includes the following *pipeline* management functions:
 import os
 import subprocess
 import textwrap
+import json
+import copy
 from pathlib import Path
 from datetime import datetime, timezone
 from importlib import metadata
@@ -34,7 +36,7 @@ import appdirs
 import yaml
 import toml
 
-from tomato import dbhandler, setlib, ketchup
+from tomato import dbhandler, ketchup
 from tomato.models import Reply, Pipeline
 
 logger = logging.getLogger(__name__)
@@ -47,6 +49,53 @@ def set_loglevel(delta: int):
     loglevel = min(max(30 - (10 * delta), 10), 50)
     logging.basicConfig(level=loglevel)
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
+
+
+def get_pipelines(yamlpath: str) -> dict:
+    logger.debug(f"loading pipeline settings from '{yamlpath}'")
+    try:
+        with open(yamlpath, "r") as infile:
+            jsdata = yaml.safe_load(infile)
+    except FileNotFoundError:
+        logger.error(f"device settings not found. Running with default devices.")
+        devpath = Path(__file__).parent / ".." / "data" / "default_devices.json"
+        with devpath.open() as inp:
+            jsdata = json.load(inp)
+    devices = jsdata["devices"]
+    pipelines = jsdata["pipelines"]
+    ret = []
+    for pip in pipelines:
+        if "*" in pip["name"]:
+            data = {"name": pip["name"], "devices": []}
+            assert len(pip["devices"]) == 1
+            for ppars in pip["devices"]:
+                for dpars in devices:
+                    if dpars["name"] == ppars["name"]:
+                        break
+                dev = {k: v for k, v in dpars.items() if k != "channels"}
+                dev["tag"] = ppars["tag"]
+                data["devices"].append(dev)
+                for ch in dpars["channels"]:
+                    d = copy.deepcopy(data)
+                    d["devices"][0]["channel"] = ch
+                    d["name"] = d["name"].replace("*", f"{ch}")
+                    ret.append(d)
+        else:
+            data = {"name": pip["name"], "devices": []}
+            for ppars in pip["devices"]:
+                for dpars in devices:
+                    if dpars["name"] == ppars["name"]:
+                        break
+                dev = {k: v for k, v in dpars.items() if k != "channels"}
+                dev["tag"] = ppars["tag"]
+                if isinstance(ppars.get("channel"), int):
+                    assert ppars["channel"] in dpars["channels"]
+                    dev["channel"] = ppars["channel"]
+                else:
+                    assert "*" in pip["name"]
+                data["devices"].append(dev)
+            ret.append(data)
+    return ret
 
 
 def status(
@@ -213,7 +262,7 @@ def reload(
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
-    pipelines = setlib.get_pipelines(settings["devices"]["path"])
+    pipelines = get_pipelines(settings["devices"]["path"])
 
     logger.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
     dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])

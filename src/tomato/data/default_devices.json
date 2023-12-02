@@ -1,0 +1,20 @@
+{
+    "devices": [
+        {
+            "name": "dummy_device",
+            "address": null,
+            "channels": [5, 10],
+            "driver": "dummy",
+            "capabilities": ["random", "sequential"],
+            "pollrate": 1
+        }
+    ],
+    "pipelines": [
+        {
+            "name": "dummy-*",
+            "devices": [
+                {"tag": "worker", "name": "dummy_device", "channel": "each"}
+            ]
+        }
+    ]
+}
