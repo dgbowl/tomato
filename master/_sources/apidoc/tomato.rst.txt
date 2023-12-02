@@ -16,7 +16,6 @@ Subpackages
    tomato.dbhandler
    tomato.drivers
    tomato.ketchup
-   tomato.setlib
    tomato.tomato
 
 Submodules
