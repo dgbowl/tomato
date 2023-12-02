@@ -1,3 +1,9 @@
+"""
+**tomato.daemon**: module of functions comprising the tomato daemon
+-------------------------------------------------------------------
+.. codeauthor:: 
+    Peter Kraus
+"""
 import os
 import subprocess
 import logging
@@ -89,6 +95,7 @@ def kill_tomato_job(proc):
 
 
 def run_daemon():
+    """ """
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
         "--port",

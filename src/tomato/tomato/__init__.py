@@ -1,6 +1,6 @@
 """
-**tomato**: command line interface to the tomato daemon
--------------------------------------------------------
+**tomato.tomato**: command line interface to the tomato daemon
+--------------------------------------------------------------
 .. codeauthor:: 
     Peter Kraus
 

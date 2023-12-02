@@ -1,6 +1,6 @@
 """
-**ketchup**: command line interface to the tomato job queue
------------------------------------------------------------
+**tomato.ketchup**: command line interface to the tomato job queue
+------------------------------------------------------------------
 .. codeauthor:: 
     Peter Kraus
 
