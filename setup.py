@@ -30,6 +30,7 @@ setuptools.setup(
     ],
     package_dir={"": packagedir},
     packages=setuptools.find_packages(where=packagedir),
+    include_package_data=True,
     python_requires=">=3.9",
     install_requires=[
         "appdirs>=1.4.0",
