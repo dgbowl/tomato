@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Union, Optional, Any
+from pydantic import BaseModel, Field
+from typing import Union, Optional, Any, Mapping, Literal
 
 
 class Device(BaseModel):
@@ -21,7 +21,24 @@ class Pipeline(BaseModel):
     devices: Optional[list[Device]] = None
 
 
+class Job(BaseModel):
+    jobid: int
+    jobname: Optional[str] = None
+    pid: Optional[int] = None
+    status: Literal["q", "qw", ""] = "q"
+
+
 class Reply(BaseModel):
     success: bool
     msg: str
     data: Optional[Any] = None
+
+
+class Daemon(BaseModel):
+    status: Literal["bootstrap", "running", "stop"]
+    port: int
+    verbosity: int
+    logdir: str
+    pipelines: Mapping[str, Pipeline] = Field(default_factory=dict)
+    devices: Mapping[str, Device] = Field(default_factory=dict)
+    jobs: Mapping[int, Job] = Field(default_factory=dict)

@@ -149,7 +149,7 @@ def status(
     """
     settings = toml.load(Path(appdir) / "settings.toml")
     queue = settings["queue"]
-    running = [pip for pip in status.data if pip.jobid is not None]
+    running = [pip for pip in status.data.pipelines.values() if pip.jobid is not None]
     ret = []
     if len(jobids) == 0:
         jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
@@ -239,7 +239,7 @@ def cancel(
     """
     settings = toml.load(Path(appdir) / "settings.toml")
     queue = settings["queue"]
-    running = [pip for pip in status.data if pip.jobid is not None]
+    running = [pip for pip in status.data.pipelines.values() if pip.jobid is not None]
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
     if jobinfo is None:
         return Reply(success=False, msg=f"job with jobid {jobid} does not exist")
@@ -281,7 +281,7 @@ def snapshot(*, appdir: str, jobid: int, **_: dict) -> Reply:
 
     """
     settings = toml.load(Path(appdir) / "settings.toml")
-    state, queue = settings["state"], settings["queue"]
+    queue = settings["queue"]
 
     jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
     if jobinfo is None:
