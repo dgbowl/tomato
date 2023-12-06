@@ -10,10 +10,10 @@ from datetime import datetime, timezone
 import logging
 import psutil
 import zmq
+from pathlib import Path
 
 from .logger_funcs import log_listener_config, log_listener, log_worker_config
 from . import yadg_funcs
-from .. import dbhandler
 
 
 def tomato_job() -> None:
@@ -31,14 +31,21 @@ def tomato_job() -> None:
     )
     parser.add_argument(
         "jobfile",
+        type=Path,
         help="Path to a ketchup-processed payload json file.",
-        default=None,
     )
     args = parser.parse_args()
 
-    jobfolder, _ = os.path.split(os.path.abspath(args.jobfile))
-    logfile = args.jobfile.replace(".json", ".log")
+    with args.jobfile.open() as infile:
+        jsdata = json.load(infile)
+    payload = jsdata["payload"]
+    pipeline = jsdata["pipeline"]
+    job = jsdata["job"]
 
+    pip = pipeline["name"]
+    jobpath = Path(job["path"]).resolve()
+
+    logfile = jobpath / f"job-{job['id']}.log"
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s:%(levelname)-8s:%(processName)s:%(message)s",
@@ -46,19 +53,7 @@ def tomato_job() -> None:
     )
     logger = logging.getLogger(__name__)
 
-    logger.info("attempting to load jobfile '%s'", args.jobfile)
-    with open(args.jobfile, "r") as infile:
-        jsdata = json.load(infile)
-
-    logger.debug("parsing data from jobfile")
-    jobid = jsdata["jobid"]
-    settings = jsdata["settings"]
-    queue = settings["queue"]
-    payload = jsdata["payload"]
     tomato = payload.get("tomato", {})
-    pipeline = jsdata["pipeline"]
-    pip = pipeline["name"]
-
     verbosity = tomato.get("verbosity", "INFO")
     loglevel = logging._checkLevel(verbosity)
     logger.debug("setting logger verbosity to '%s'", verbosity)
@@ -69,62 +64,60 @@ def tomato_job() -> None:
     elif psutil.POSIX:
         pid = os.getpid()
 
-    logger.debug(f"assigning job '{jobid}' on pid '{pid}' into pipeline '{pip}'")
-
+    logger.debug(f"assigning job {job['id']} with pid '{pid}' into pipeline: {pip}")
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{args.port}")
-    req.send_pyobj(
-        dict(cmd="pipeline", pipeline=pip, params=dict(jobid=jobid, pid=pid))
-    )
+    params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
+    req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
     msg = req.recv_pyobj()
-    dbhandler.job_set_status(queue["path"], "r", jobid, type=queue["type"])
-    dbhandler.job_set_time(queue["path"], "executed_at", jobid, type=queue["type"])
-
+    
     logger.info("handing off to 'driver_worker'")
     logger.info("==============================")
-    ret = driver_worker(
-        settings, pipeline, payload, jobid, jobfolder, logfile, loglevel
-    )
-
+    ret = driver_worker(pipeline, payload, job["id"], jobpath, logfile, loglevel)
     logger.info("==============================")
 
     output = tomato["output"]
-    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
-    path = output["path"]
-    logger.debug("output path is '%s'", path)
-    if os.path.exists(path):
-        logger.debug("path exists, making sure it's a folder")
-        assert os.path.isdir(path)
+    prefix = f"results.{job['id']}" if output["prefix"] is None else output["prefix"]
+    path = Path(output["path"])
+    logger.debug(f"output folder is {path}")
+    if path.exists():
+        assert path.is_dir()
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(path)
-
+    
     preset = yadg_funcs.get_yadg_preset(payload["method"], pipeline)
     yadg_funcs.process_yadg_preset(
-        preset=preset, path=path, prefix=prefix, jobdir=jobfolder
+        preset=preset, path=path, prefix=prefix, jobdir=str(jobpath)
     )
-
+    logger.debug(f"here")
     ready = tomato.get("unlock_when_done", False)
     if ret is None:
         logger.info("job finished successfully, setting status to 'c'")
-        dbhandler.job_set_status(queue["path"], "c", jobid, type=queue["type"])
+        params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
+        req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
+        ret = req.recv_pyobj()
     else:
         logger.info("job was terminated, setting status to 'cd'")
-        dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
+        params = dict(status="cd")
+        req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
+        ret = req.recv_pyobj()
         logger.info("handing off to 'driver_reset'")
         logger.info("==============================")
-        driver_reset(settings, pipeline)
+        driver_reset(pipeline)
         logger.info("==============================")
         ready = False
-
-    req.send_pyobj(
-        dict(
-            cmd="pipeline", pipeline=pip, params=dict(jobid=None, pid=None, ready=ready)
-        )
-    )
-    msg = req.recv_pyobj()
-    dbhandler.job_set_time(queue["path"], "completed_at", jobid, type=queue["type"])
+    if not ret.success:
+        logger.error("could not set job status")
+        return 1
+    logger.info(f"resetting pipeline {pip}")
+    params=dict(jobid=None, ready=ready)
+    req.send_pyobj(dict(cmd="pipeline", pipeline=pip, params=params))
+    ret = req.recv_pyobj()
+    if not ret.success:
+        logger.error("could not reset pipeline")
+        return 1
 
 
 def driver_api(
@@ -216,11 +209,10 @@ def data_snapshot(
 
 
 def driver_worker(
-    settings: dict,
     pipeline: dict,
     payload: dict,
     jobid: int,
-    jobfolder: str,
+    jobpath: Path,
     logfile: str,
     loglevel: int,
 ) -> None:
@@ -238,13 +230,13 @@ def driver_worker(
     listener.start()
     log.debug(f"started 'log_listener' on pid {listener.pid}")
 
-    root = os.path.join(settings["queue"]["storage"], str(jobid))
     jobs = []
     for vi, v in enumerate(pipeline["devices"]):
         log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
         log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
-        dpar = settings["drivers"].get(drv, {})
+        #dpar = settings["drivers"].get(drv, {})
+        dpar = {}
         pl = [item for item in payload["method"] if item["device"] == v["tag"]]
         smpl = payload["sample"]
 
@@ -260,8 +252,7 @@ def driver_worker(
         metadata["uts"] = start_ts
 
         log.debug(f"{vi+1}: writing initial status")
-        fn = os.path.join(root, f"{tag}_status.json")
-        with open(fn, "w") as of:
+        with (jobpath / f"{tag}_status.json").open("w") as of:
             json.dump(metadata, of)
         kwargs = dpar
         kwargs.update({"pollrate": v.get("pollrate", 10)})
@@ -269,7 +260,7 @@ def driver_worker(
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{tag}",
             target=data_poller,
-            args=(drv, jq, lq, addr, ch, tag, root, loglevel, kwargs),
+            args=(drv, jq, lq, addr, ch, tag, jobpath, loglevel, kwargs),
         )
         jobs.append(p)
         p.start()
@@ -309,16 +300,14 @@ def driver_worker(
     return ret
 
 
-def driver_reset(
-    settings: dict,
-    pipeline: dict,
-) -> None:
+def driver_reset(pipeline: dict) -> None:
     log = logging.getLogger(__name__)
     for vi, v in enumerate(pipeline["devices"]):
         log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
         log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
-        dpar = settings["drivers"].get(drv, {})
+        #dpar = settings["drivers"].get(drv, {})
+        dpar = {}
 
         log.debug(f"{vi+1}: resetting device")
         driver_api(drv, "stop_job", None, log, addr, ch, **dpar)

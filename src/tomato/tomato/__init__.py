@@ -36,7 +36,7 @@ import appdirs
 import yaml
 import toml
 
-from tomato import dbhandler, ketchup
+from tomato import ketchup
 from tomato.models import Reply, Pipeline
 
 logger = logging.getLogger(__name__)
@@ -103,13 +103,13 @@ def status(
     port: int,
     timeout: int,
     context: zmq.Context,
+    with_data: bool = False,
     **_: dict,
 ) -> Reply:
     logger.debug(f"checking status of tomato on port {port}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="status"))
-
+    req.send_pyobj(dict(cmd="status", with_data=with_data))
     poller = zmq.Poller()
     poller.register(req, zmq.POLLIN)
     events = dict(poller.poll(timeout))
@@ -134,10 +134,10 @@ def start(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
+    appdir: Path,
+    logdir: Path,
     verbosity: int,
-    logdir: str,
-    **kwargs: dict,
+    **_: dict,
 ) -> Reply:
     logging.debug(f"checking for availability of port {port}.")
     try:
@@ -150,14 +150,22 @@ def start(
             msg=f"required port {port} is already in use, choose a different one",
         )
 
+    if not (appdir / "settings.toml").exists():
+        return Reply(
+            success=False,
+            msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
+        )
+
     logger.debug(f"starting tomato on port {port}")
     cmd = [
         "tomato-daemon",
-        "--port",
+        "-p",
         f"{port}",
-        "--logdir",
+        "-A",
+        f"{appdir}",
+        "-L",
         f"{logdir}",
-        "--verbosity",
+        "-V",
         f"{verbosity}",
     ]
     if psutil.WINDOWS:
@@ -165,12 +173,10 @@ def start(
         subprocess.Popen(cmd, creationflags=cfs)
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
-
-    stat = status(port=port, timeout=timeout, context=context)
+    kwargs = dict(port=port, timeout=timeout, context=context)
+    stat = status(**kwargs)
     if stat.success:
-        return reload(
-            port=port, timeout=timeout, context=context, appdir=appdir, **kwargs
-        )
+        return reload(**kwargs, appdir=appdir)
     else:
         return Reply(
             success=False,
@@ -203,55 +209,47 @@ def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict) -> Reply:
 
 def init(
     *,
-    appdir: str,
-    datadir: str,
+    appdir: Path,
+    datadir: Path,
     **_: dict,
 ) -> Reply:
-    ddir = Path(datadir)
-    adir = Path(appdir)
-
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
         # Generated on {str(datetime.now(timezone.utc))}
-        [queue]
-        type = 'sqlite3'
-        path = '{ddir / 'database.db'}'
-        storage = '{ddir / 'Jobs'}'
-
+        [jobs]
+        storage = "{datadir.resolve() / 'Jobs'}"
+        
         [devices]
-        path = '{adir / 'devices.yml'}'
+        config = "{appdir.resolve() / 'devices.yml'}"
 
         [drivers]
         """
     )
-    if not adir.exists():
+    if not appdir.exists():
         logging.debug("creating directory '%s'", adir)
-        os.makedirs(adir)
-    with open(adir / "settings.toml", "w", encoding="utf-8") as of:
+        os.makedirs(appdir)
+    with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
         of.write(defaults)
     return Reply(
         success=True,
-        msg=f"wrote default settings into {Path(appdir) / 'settings.toml'}",
+        msg=f"wrote default settings into {appdir / 'settings.toml'}",
     )
 
 
 def reload(
-    *, port: int, timeout: int, context: zmq.Context, appdir: str, **_: dict
+    *, port: int, timeout: int, context: zmq.Context, appdir: Path, **_: dict
 ) -> Reply:
     logging.debug("Loading settings.toml file from %s.", appdir)
     try:
-        settings = toml.load(Path(appdir) / "settings.toml")
+        settings = toml.load(appdir / "settings.toml")
     except FileNotFoundError:
         return Reply(
             success=False,
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
-    pipelines = get_pipelines(settings["devices"]["path"])
-
-    logger.debug(f"setting up 'queue' table in '{settings['queue']['path']}'")
-    dbhandler.queue_setup(settings["queue"]["path"], type=settings["queue"]["type"])
+    pipelines = get_pipelines(settings["devices"]["config"])
 
     stat = status(port=port, timeout=timeout, context=context)
     if not stat.success:
@@ -279,7 +277,6 @@ def pipeline_load(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
     pipeline: str,
     sampleid: str,
     **_: dict,
@@ -292,13 +289,13 @@ def pipeline_load(
         tomato pipeline load <samplename> <pipeline>
 
     """
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(port=port, timeout=timeout, context=context, with_data=True)
     if not stat.success:
         return stat
 
-    if pipeline not in stat.data.pipelines:
+    if pipeline not in stat.data.pips:
         return Reply(success=False, msg=f"pipeline {pipeline} not found on tomato")
-    pip = stat.data.pipelines[pipeline]
+    pip = stat.data.pips[pipeline]
 
     if pip.sampleid is not None:
         return Reply(
@@ -319,7 +316,6 @@ def pipeline_eject(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
     pipeline: str,
     **_: dict,
 ) -> Reply:
@@ -331,17 +327,17 @@ def pipeline_eject(
         tomato pipeline eject <pipeline>
 
     """
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(port=port, timeout=timeout, context=context, with_data=True)
     if not stat.success:
         return stat
 
-    if pipeline not in stat.data.pipelines:
+    if pipeline not in stat.data.pips:
         return Reply(
             success=False,
             msg=f"pipeline {pipeline} not found on tomato",
-            data=stat.data.pipelines,
+            data=stat.data.pips,
         )
-    pip = stat.data.pipelines[pipeline]
+    pip = stat.data.pips[pipeline]
 
     if pip.sampleid is None:
         return Reply(
@@ -369,7 +365,6 @@ def pipeline_ready(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
     pipeline: str,
     **_: dict,
 ) -> Reply:
@@ -381,17 +376,17 @@ def pipeline_ready(
         pipeline ready <pipeline>
 
     """
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(port=port, timeout=timeout, context=context, with_data=True)
     if not stat.success:
         return stat
 
-    if pipeline not in stat.data.pipelines:
+    if pipeline not in stat.data.pips:
         return Reply(
             success=False,
             msg=f"pipeline {pipeline} not found on tomato",
-            data=stat.data.pipelines,
+            data=stat.data.pips,
         )
-    pip = stat.data.pipelines[pipeline]
+    pip = stat.data.pips[pipeline]
 
     if pip.ready:
         return Reply(
