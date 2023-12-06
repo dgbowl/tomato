@@ -18,6 +18,7 @@ from tomato import tomato
 
 logger = logging.getLogger(__name__)
 
+
 def find_matching_pipelines(pipelines: dict, method: list[dict]) -> list[str]:
     req_names = set([item.device for item in method])
     req_capabs = set([item.technique for item in method])
@@ -96,7 +97,7 @@ def manage_running_pips(daemon: Daemon, req):
                 logger.error(f"could not set job {job.id} to status 'cd'")
                 continue
             logger.debug(f"pipeline {pip.name} will be reset")
-            params = dict(pid=None, jobid=None, ready=False)
+            params = dict(jobid=None, ready=False)
             req.send_pyobj(dict(cmd="pipeline", pipeline=pip.name, params=params))
             ret = req.recv_pyobj()
             if not ret.success:
@@ -142,20 +143,20 @@ def action_queued_jobs(daemon, matched, req):
                 continue
             else:
                 pip.ready = False
-            
+
             root = Path(daemon.settings["jobs"]["storage"]) / str(job.id)
             os.makedirs(root)
-            
+
             jpath = root / "jobdata.json"
             jobargs = {
                 "pipeline": pip.dict(),
                 "payload": job.payload.dict(),
-                "job": dict(id = job.id, path=str(root)),
+                "job": dict(id=job.id, path=str(root)),
             }
-            
+
             with jpath.open("w", encoding="UTF-8") as of:
                 json.dump(jobargs, of, indent=1)
-            
+
             cmd = ["tomato-job", "--port", str(daemon.port), str(jpath)]
             if psutil.WINDOWS:
                 cfs = subprocess.CREATE_NO_WINDOW
@@ -188,4 +189,3 @@ def manager(port: int, context: zmq.Context):
         matched_pips = check_queued_jobs(daemon, req)
         action_queued_jobs(daemon, matched_pips, req)
     logger.info(f"instructed to quit")
-

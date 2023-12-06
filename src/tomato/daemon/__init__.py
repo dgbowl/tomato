@@ -27,7 +27,6 @@ import tomato.daemon.job as job
 logger = logging.getLogger(__name__)
 
 
-
 def setup_logging(daemon: Daemon):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)

@@ -71,7 +71,7 @@ def tomato_job() -> None:
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
     req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
     msg = req.recv_pyobj()
-    
+
     logger.info("handing off to 'driver_worker'")
     logger.info("==============================")
     ret = driver_worker(pipeline, payload, job["id"], jobpath, logfile, loglevel)
@@ -86,7 +86,7 @@ def tomato_job() -> None:
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(path)
-    
+
     preset = yadg_funcs.get_yadg_preset(payload["method"], pipeline)
     yadg_funcs.process_yadg_preset(
         preset=preset, path=path, prefix=prefix, jobdir=str(jobpath)
@@ -112,7 +112,7 @@ def tomato_job() -> None:
         logger.error("could not set job status")
         return 1
     logger.info(f"resetting pipeline {pip}")
-    params=dict(jobid=None, ready=ready)
+    params = dict(jobid=None, ready=ready)
     req.send_pyobj(dict(cmd="pipeline", pipeline=pip, params=params))
     ret = req.recv_pyobj()
     if not ret.success:
@@ -235,7 +235,7 @@ def driver_worker(
         log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
         log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
-        #dpar = settings["drivers"].get(drv, {})
+        # dpar = settings["drivers"].get(drv, {})
         dpar = {}
         pl = [item for item in payload["method"] if item["device"] == v["tag"]]
         smpl = payload["sample"]
@@ -272,7 +272,7 @@ def driver_worker(
         sp = multiprocessing.Process(
             name=f"data_snapshot_{jobid}",
             target=data_snapshot,
-            args=(payload["method"], pipeline, shot, jobid, jobfolder, lq, loglevel),
+            args=(payload["method"], pipeline, shot, jobid, str(jobpath), lq, loglevel),
         )
         sp.start()
         log.info(f"started 'data_snapshot' on pid {sp.pid}")
@@ -306,7 +306,7 @@ def driver_reset(pipeline: dict) -> None:
         log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
         log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
         drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
-        #dpar = settings["drivers"].get(drv, {})
+        # dpar = settings["drivers"].get(drv, {})
         dpar = {}
 
         log.debug(f"{vi+1}: resetting device")

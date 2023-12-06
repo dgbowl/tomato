@@ -101,7 +101,7 @@ def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon
     assert len(ret.data) == 2
     assert ret.data[1].status == "qw"
     assert ret.data[2].status == "r"
-    
+
     time.sleep(5)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])

@@ -232,7 +232,12 @@ def cancel(
     return Reply(success=True, msg="cancelled jobs successfully", data=data)
 
 
-def snapshot(*, appdir: str, jobid: int, **_: dict) -> Reply:
+def snapshot(
+    *,
+    jobids: list[int],
+    status: Daemon,
+    **_: dict,
+) -> Reply:
     """
     Create a snapshot of job data. Usage:
 
@@ -253,41 +258,35 @@ def snapshot(*, appdir: str, jobid: int, **_: dict) -> Reply:
     snapshot.1.zip
 
     """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    queue = settings["queue"]
+    jobs = status.data.jobs
+    for jobid in jobids:
+        if jobid not in jobs:
+            return Reply(success=False, msg=f"job {jobid} does not exist")
+        if jobs[jobid].status in {"q", "qw"}:
+            return Reply(success=False, msg=f"job {jobid} is still queued")
 
-    jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
-    if jobinfo is None:
-        return Reply(success=False, msg=f"job {jobid} does not exist")
-    status = jobinfo[2]
-
-    if status.startswith("q"):
-        return Reply(
-            success=False, msg=f"job {jobid} is not yet running, cannot create snapshot"
+    jobdir = Path(status.data.settings["jobs"]["storage"])
+    for jobid in jobids:
+        job = jobs[jobid]
+        root = jobdir / str(jobid)
+        assert root.exists() and root.is_dir()
+        jobfile = root / "jobdata.json"
+        assert jobfile.exists() and jobfile.is_file()
+        with jobfile.open() as inf:
+            jobdata = json.load(inf)
+        method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
+        log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
+        preset = yadg_funcs.get_yadg_preset(method, pipeline)
+        yadg_funcs.process_yadg_preset(
+            preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=str(jobdir)
         )
-
-    jobdir = os.path.join(queue["storage"], f"{jobid}")
-    log.debug("processing jobdir '%s'", jobdir)
-    assert os.path.exists(jobdir) and os.path.isdir(jobdir)
-    jobfile = os.path.join(jobdir, "jobdata.json")
-    assert os.path.exists(jobfile) and os.path.isfile(jobfile)
-
-    with open(jobfile, "r") as inf:
-        jobdata = json.load(inf)
-
-    method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
-    log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
-    preset = yadg_funcs.get_yadg_preset(method, pipeline)
-    yadg_funcs.process_yadg_preset(
-        preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=jobdir
-    )
-    return Reply(success=True, msg=f"snapshot for job {jobid} created successfully")
+    return Reply(success=True, msg=f"snapshot for job(s) {jobids} created successfully")
 
 
 def search(
     *,
-    appdir: str,
     jobname: str,
+    status: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -312,17 +311,12 @@ def search(
       status: r
 
     """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    queue = settings["queue"]
-
-    alljobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
-    ret = []
-    for jobid, jobn, payload, status in alljobs:
-        if jobn is not None and jobname in jobn:
-            ret.append(dict(jobid=jobid, jobname=jobn, status=status))
+    jobs = status.data.jobs
+    ret = {}
+    for jobid, job in jobs.items():
+        if job.jobname is not None and jobname in job.jobname:
+            ret[jobid] = job
     if len(ret) > 0:
-        return Reply(
-            success=True, msg=f"job with jobname matching {jobname} found", data=ret
-        )
+        return Reply(success=True, msg=f"jobs matching {jobname} found", data=ret)
     else:
         return Reply(success=False, msg=f"no job with jobname matching {jobname} found")

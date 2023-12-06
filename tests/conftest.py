@@ -41,6 +41,8 @@ def stop_tomato_daemon_session():
     # teardown_stuff
     print(f"stop_tomato_daemon_session")
     subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "1000"])
+    subprocess.run(["killall", "tomato-job"])
+    subprocess.run(["killall", "tomato-daemon"])
 
 
 @pytest.fixture(scope="function")
@@ -50,4 +52,5 @@ def stop_tomato_daemon(port: int = 12345):
     # teardown_stuff
     print(f"stop_tomato_daemon")
     subprocess.run(["tomato", "stop", "-p", f"{port}", "--timeout", "1000"])
+    subprocess.run(["killall", "tomato-job"])
     subprocess.run(["killall", "tomato-daemon"])

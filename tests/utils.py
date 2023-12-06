@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def tomato_setup():
     cmd = ["tomato", "init", "--datadir", ".", "--appdir", "."]
     subprocess.Popen(cmd)
-    cmd = ["tomato", "start", "-p", "12345", "--appdir", ".", "--datadir", "."]
+    cmd = ["tomato", "start", "-p", "12345", "--appdir", ".", "--logdir", "."]
     if psutil.WINDOWS:
         cfg = subprocess.CREATE_NEW_PROCESS_GROUP
         proc = subprocess.Popen(cmd, creationflags=cfg)
@@ -23,11 +23,12 @@ def tomato_setup():
     count = 0
     while True:
         ret = subprocess.run(
-            ["tomato", "status", "--appdir", ".", "--port", "12345"],
+            ["tomato", "status", "--port", "12345"],
             capture_output=True,
             text=True,
         )
         ret = yaml.safe_load(ret.stdout)
+        print(f"{ret=}")
         if ret["success"] and ret["data"]["status"] == "running":
             break
         else:
@@ -108,7 +109,7 @@ def run_casename(
     inter_func: Callable = None,
 ) -> str:
     print("tomato_setup()")
-    proc, p = tomato_setup()
+    # proc, p = tomato_setup()
     if isinstance(casename, str):
         print("sample_setup()")
         sample_setup(casename, jobname)
@@ -164,14 +165,9 @@ def run_casenames(
     inter_func: Callable = None,
 ) -> str:
     for cn, jn, pip in zip(casenames, jobnames, pipelines):
-        subprocess.run(
-            ["tomato", "pipeline", "load", "-p", "12345", "--appdir", ".", pip, cn]
-        )
-        subprocess.run(
-            ["tomato", "pipeline", "ready", "-p", "12345", "--appdir", ".", pip]
-        )
-
-        args = ["ketchup", "submit", "-p", "12345", "--appdir", ".", f"{cn}.yml"]
+        subprocess.run(["tomato", "pipeline", "load", "-p", "12345", pip, cn])
+        subprocess.run(["tomato", "pipeline", "ready", "-p", "12345", pip])
+        args = ["ketchup", "submit", "-p", "12345", f"{cn}.yml"]
         if jn is not None:
             args.append("--jobname")
             args.append(jn)
@@ -180,15 +176,7 @@ def run_casenames(
 
 def job_status(jobid):
     ret = subprocess.run(
-        [
-            "ketchup",
-            "status",
-            "-p",
-            "12345",
-            "--appdir",
-            ".",
-            str(jobid),
-        ],
+        ["ketchup", "status", "-p", "12345", str(jobid)],
         capture_output=True,
         text=True,
     )

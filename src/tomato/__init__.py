@@ -148,10 +148,6 @@ def run_tomato():
 
 
 def run_ketchup():
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
-    config_dir = dirs.user_config_dir
-    data_dir = dirs.user_data_dir
-
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
         "--version",
@@ -251,6 +247,7 @@ def run_ketchup():
         p.add_argument(
             "--port",
             "-p",
+            type=int,
             help="Port number of tomato's reply socket",
             default=DEFAULT_TOMATO_PORT,
         )
@@ -259,16 +256,6 @@ def run_ketchup():
             help="Timeout for the ketchup command, in milliseconds",
             type=int,
             default=3000,
-        )
-        p.add_argument(
-            "--appdir",
-            help="Settings directory for tomato",
-            default=config_dir,
-        )
-        p.add_argument(
-            "--datadir",
-            help="Data directory for tomato",
-            default=data_dir,
         )
 
     args, extras = parser.parse_known_args()
@@ -279,7 +266,7 @@ def run_ketchup():
 
     if "func" in args:
         context = zmq.Context()
-        status = tomato.status(**vars(args), context=context)
+        status = tomato.status(**vars(args), context=context, with_data=True)
         if not status.success:
             print(yaml.dump(status.dict()))
         else:
