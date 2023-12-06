@@ -20,7 +20,7 @@ import zmq
 import psutil
 
 from tomato.models import Pipeline, Reply, Daemon, Job
-from tomato import dbhandler, tomato
+from tomato import tomato
 import tomato.daemon.cmd as cmd
 import tomato.daemon.job as job
 

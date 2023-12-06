@@ -14,7 +14,7 @@ import zmq
 import psutil
 
 from tomato.models import Pipeline, Reply, Daemon, Job
-from tomato import dbhandler, tomato
+from tomato import tomato
 
 logger = logging.getLogger(__name__)
 
