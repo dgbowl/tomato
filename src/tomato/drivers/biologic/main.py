@@ -2,9 +2,7 @@ import logging
 import multiprocessing
 import time
 from filelock import FileLock
-
 from datetime import datetime, timezone
-
 from .kbio_wrapper import (
     get_kbio_techpath,
     payload_to_ecc,
