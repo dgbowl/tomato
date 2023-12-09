@@ -181,6 +181,7 @@ def data_poller(
 
 
 def data_snapshot(
+    devices: dict,
     method: dict,
     pipeline: dict,
     snapshot: dict,
@@ -195,7 +196,7 @@ def data_snapshot(
         prefix = f"snapshot.{jobid}"
     else:
         prefix = snapshot["prefix"]
-    preset = yadg_funcs.get_yadg_preset(method, pipeline)
+    preset = yadg_funcs.get_yadg_preset(method, pipeline, devices)
     while True:
         if time.perf_counter() - start > snapshot["frequency"]:
             yadg_funcs.process_yadg_preset(
@@ -282,7 +283,7 @@ def driver_worker(
         sp = multiprocessing.Process(
             name=f"data_snapshot_{jobid}",
             target=data_snapshot,
-            args=(payload["method"], pipeline, shot, jobid, str(jobpath), lq, loglevel),
+            args=(devices, payload["method"], pipeline, shot, jobid, str(jobpath), lq, loglevel),
         )
         sp.start()
         log.info(f"started 'data_snapshot' on pid {sp.pid}")

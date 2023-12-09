@@ -274,9 +274,10 @@ def snapshot(
         assert jobfile.exists() and jobfile.is_file()
         with jobfile.open() as inf:
             jobdata = json.load(inf)
-        method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
         log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
-        preset = yadg_funcs.get_yadg_preset(method, pipeline)
+        preset = yadg_funcs.get_yadg_preset(
+            jobdata["payload"]["method"], jobdata["pipeline"], jobdata["devices"]
+        )
         yadg_funcs.process_yadg_preset(
             preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=str(jobdir)
         )
