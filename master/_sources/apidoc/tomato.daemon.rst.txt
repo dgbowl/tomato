@@ -5,3 +5,18 @@ tomato.daemon package
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
+
+
+.. automodule:: tomato.daemon.cmd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.job
+   :members:
+   :undoc-members:
+   :show-inheritance:

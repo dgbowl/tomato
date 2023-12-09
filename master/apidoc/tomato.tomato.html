@@ -64,7 +64,6 @@
 <li class="toctree-l1 current"><a class="reference internal" href="tomato.html">tomato package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.dbhandler.html">tomato.dbhandler package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.tomato package</a><ul>
@@ -128,8 +127,8 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.tomato.get_pipelines">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">get_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.get_pipelines" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.tomato.load_device_file">
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">load_device_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.load_device_file" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
@@ -138,8 +137,18 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="tomato.tomato.get_pipelines">
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">get_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.get_pipelines" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.status">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.status" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.status" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
@@ -149,7 +158,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.start">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.start" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.start" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
@@ -189,7 +198,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.pipeline_load">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleid</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.pipeline_load" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleid</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.pipeline_load" title="Permalink to this definition"></a></dt>
 <dd><p>Load a sample into a pipeline. Usage:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>pipeline<span class="w"> </span>load<span class="w"> </span>&lt;samplename&gt;<span class="w"> </span>&lt;pipeline&gt;
 </pre></div>
@@ -203,7 +212,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.pipeline_eject">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_eject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.pipeline_eject" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_eject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.pipeline_eject" title="Permalink to this definition"></a></dt>
 <dd><p>Eject any sample present in a pipeline. Usage:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>pipeline<span class="w"> </span>eject<span class="w"> </span>&lt;pipeline&gt;
 </pre></div>
@@ -217,7 +226,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.pipeline_ready">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.pipeline_ready" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.pipeline_ready" title="Permalink to this definition"></a></dt>
 <dd><p>Mark pipeline as ready. Usage:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pipeline<span class="w"> </span>ready<span class="w"> </span>&lt;pipeline&gt;
 </pre></div>

@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="tomato.dbhandler package" href="tomato.dbhandler.html" />
+    <link rel="next" title="tomato.drivers package" href="tomato.drivers.html" />
     <link rel="prev" title="tomato package" href="tomato.html" /> 
 </head>
 
@@ -66,9 +66,9 @@
 <li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.daemon package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tomato-daemon-module-of-functions-comprising-the-tomato-daemon"><strong>tomato.daemon</strong>: module of functions comprising the tomato daemon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tomato.daemon.cmd">Submodules</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.dbhandler.html">tomato.dbhandler package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a></li>
@@ -110,31 +110,6 @@
 <h2><strong>tomato.daemon</strong>: module of functions comprising the tomato daemon<a class="headerlink" href="#tomato-daemon-module-of-functions-comprising-the-tomato-daemon" title="Permalink to this headline"></a></h2>
 <p><em>Code author: Peter Kraus</em></p>
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.merge_pipelines">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.</span></span><span class="sig-name descname"><span class="pre">merge_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.merge_pipelines" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.find_matching_pipelines">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.</span></span><span class="sig-name descname"><span class="pre">find_matching_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.find_matching_pipelines" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.kill_tomato_job">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.</span></span><span class="sig-name descname"><span class="pre">kill_tomato_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.kill_tomato_job" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.setup_logging">
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.setup_logging" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -145,6 +120,109 @@
 <dd></dd></dl>
 
 </section>
+<section id="module-tomato.daemon.cmd">
+<span id="submodules"></span><h2>Submodules<a class="headerlink" href="#module-tomato.daemon.cmd" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.merge_pipelines">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">merge_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.cmd.merge_pipelines" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.status">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.cmd.status" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.stop">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jmgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.cmd.stop" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.setup">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.cmd.setup" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.pipeline">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.cmd.pipeline" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.job">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.cmd.job" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-tomato.daemon.job"></span><dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.find_matching_pipelines">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">find_matching_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.find_matching_pipelines" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.kill_tomato_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">kill_tomato_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.kill_tomato_job" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.manage_running_pips">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">manage_running_pips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.manage_running_pips" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.check_queued_jobs">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">check_queued_jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.check_queued_jobs" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.action_queued_jobs">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">action_queued_jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matched</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.action_queued_jobs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.manager">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.manager" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
 </section>
 
 
@@ -152,7 +230,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="tomato.html" class="btn btn-neutral float-left" title="tomato package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="tomato.dbhandler.html" class="btn btn-neutral float-right" title="tomato.dbhandler package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tomato.drivers.html" class="btn btn-neutral float-right" title="tomato.drivers package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
