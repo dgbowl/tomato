@@ -1,7 +1,7 @@
 """
 **tomato.tomato**: command line interface to the tomato daemon
 --------------------------------------------------------------
-.. codeauthor:: 
+.. codeauthor::
     Peter Kraus
 
 Module of functions to interact with tomato. Includes basic tomato daemon functions:
@@ -27,6 +27,7 @@ import copy
 from pathlib import Path
 from datetime import datetime, timezone
 from importlib import metadata
+import time
 
 import argparse
 import logging
@@ -139,7 +140,7 @@ def start(
     verbosity: int,
     **_: dict,
 ) -> Reply:
-    logging.debug(f"checking for availability of port {port}.")
+    logger.debug(f"checking for availability of port {port}.")
     try:
         rep = context.socket(zmq.REP)
         rep.bind(f"tcp://127.0.0.1:{port}")
@@ -169,8 +170,9 @@ def start(
         f"{verbosity}",
     ]
     if psutil.WINDOWS:
-        cfs = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+        cfs = subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(cmd, creationflags=cfs)
+        time.sleep(2)
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
     kwargs = dict(port=port, timeout=timeout, context=context)
@@ -218,16 +220,16 @@ def init(
         # Default settings for tomato-{VERSION}
         # Generated on {str(datetime.now(timezone.utc))}
         [jobs]
-        storage = "{datadir.resolve() / 'Jobs'}"
-        
+        storage = '{datadir.resolve() / 'Jobs'}'
+
         [devices]
-        config = "{appdir.resolve() / 'devices.yml'}"
+        config = '{appdir.resolve() / 'devices.yml'}'
 
         [drivers]
         """
     )
     if not appdir.exists():
-        logging.debug("creating directory '%s'", adir)
+        logging.debug(f"creating directory '{appdir.resolve()}'")
         os.makedirs(appdir)
     with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
         of.write(defaults)

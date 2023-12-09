@@ -2,7 +2,7 @@ from setuptools import distutils
 import os
 import pytest
 import subprocess
-import time
+import psutil
 
 
 @pytest.fixture
@@ -21,6 +21,7 @@ def datadir(tmpdir, request):
     common_dir = os.path.join(base_dir, "common")
     if os.path.isdir(common_dir):
         distutils.dir_util.copy_tree(common_dir, str(tmpdir))
+    print(f"{tmpdir=}")
     return tmpdir
 
 
@@ -41,8 +42,12 @@ def stop_tomato_daemon_session():
     # teardown_stuff
     print(f"stop_tomato_daemon_session")
     subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "1000"])
-    subprocess.run(["killall", "tomato-job"])
-    subprocess.run(["killall", "tomato-daemon"])
+    if psutil.WINDOWS:
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-job", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon", "/T"])
+    else:
+        subprocess.run(["killall", "tomato-job"])
+        subprocess.run(["killall", "tomato-daemon"])
 
 
 @pytest.fixture(scope="function")
@@ -52,5 +57,9 @@ def stop_tomato_daemon(port: int = 12345):
     # teardown_stuff
     print(f"stop_tomato_daemon")
     subprocess.run(["tomato", "stop", "-p", f"{port}", "--timeout", "1000"])
-    subprocess.run(["killall", "tomato-job"])
-    subprocess.run(["killall", "tomato-daemon"])
+    if psutil.WINDOWS:
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-job", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon", "/T"])
+    else:
+        subprocess.run(["killall", "tomato-job"])
+        subprocess.run(["killall", "tomato-daemon"])

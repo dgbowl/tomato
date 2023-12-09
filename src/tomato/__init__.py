@@ -138,7 +138,7 @@ def run_tomato():
     # parse extras for verbose tags
     args, extras = verbose.parse_known_args(extras, args)
 
-    verbosity = min(max((2 + args.verbose - args.quiet) * 10, 10), 50)
+    verbosity = min(max((2 + args.quiet - args.verbose) * 10, 10), 50)
     set_loglevel(verbosity)
 
     context = zmq.Context()
