@@ -283,7 +283,16 @@ def driver_worker(
         sp = multiprocessing.Process(
             name=f"data_snapshot_{jobid}",
             target=data_snapshot,
-            args=(devices, payload["method"], pipeline, shot, jobid, str(jobpath), lq, loglevel),
+            args=(
+                devices,
+                payload["method"],
+                pipeline,
+                shot,
+                jobid,
+                str(jobpath),
+                lq,
+                loglevel,
+            ),
         )
         sp.start()
         log.info(f"started 'data_snapshot' on pid {sp.pid}")
