@@ -2,6 +2,7 @@ from setuptools import distutils
 import os
 import pytest
 import subprocess
+import psutil
 
 
 @pytest.fixture
@@ -25,16 +26,13 @@ def datadir(tmpdir, request):
 
 
 @pytest.fixture(scope="function")
-def tomato_daemon(tmpdir: str, port: int = 12345):
+def start_tomato_daemon(tmpdir: str, port: int = 12345):
     # setup_stuff
     os.chdir(tmpdir)
     subprocess.run(["tomato", "init", "-p", f"{port}", "-A", ".", "-D", "."])
-    subprocess.run(
-        ["tomato", "start", "-p", f"{port}", "-A", ".", "-D", ".", "-L", "."]
-    )
+    subprocess.run(["tomato", "start", "-p", f"{port}", "-A", ".", "-L", "."])
     yield
     # teardown_stuff
-    subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "1000"])
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -42,7 +40,14 @@ def stop_tomato_daemon_session():
     # setup_stuff
     yield
     # teardown_stuff
+    print(f"stop_tomato_daemon_session")
     subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "1000"])
+    if psutil.WINDOWS:
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-job", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon", "/T"])
+    else:
+        subprocess.run(["killall", "tomato-job"])
+        subprocess.run(["killall", "tomato-daemon"])
 
 
 @pytest.fixture(scope="function")
@@ -50,5 +55,11 @@ def stop_tomato_daemon(port: int = 12345):
     # setup_stuff
     yield
     # teardown_stuff
-    print(f"Running Teardown")
+    print(f"stop_tomato_daemon")
     subprocess.run(["tomato", "stop", "-p", f"{port}", "--timeout", "1000"])
+    if psutil.WINDOWS:
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-job", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon", "/T"])
+    else:
+        subprocess.run(["killall", "tomato-job"])
+        subprocess.run(["killall", "tomato-daemon"])

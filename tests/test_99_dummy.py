@@ -11,39 +11,25 @@ from . import utils
 @pytest.mark.parametrize(
     "casename, npoints, prefix",
     [
-        (
-            "dummy_random_2_0.1",
-            20,
-            "results.1",
-        ),
-        (
-            "dummy_random_5_2",
-            3,
-            "results.1",
-        ),
-        (
-            "dummy_sequential_1_0.05",
-            20,
-            "data",
-        ),
-        (
-            "dummy_random_1_0.1",
-            10,
-            os.path.join("newfolder", "results.1"),
-        ),
+        ("dummy_random_2_0.1", 20, "results.1"),
+        ("dummy_random_5_2", 3, "results.1"),
+        ("dummy_sequential_1_0.05", 20, "data"),
+        ("dummy_random_1_0.1", 10, os.path.join("newfolder", "results.1")),
     ],
 )
-def test_run_dummy_random(casename, npoints, prefix, datadir, tomato_daemon):
+def test_run_dummy_random(
+    casename, npoints, prefix, datadir, start_tomato_daemon, stop_tomato_daemon
+):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["dummy-10"])
-    status = utils.job_status(1)["data"][0]["status"]
+    status = utils.job_status(1)["data"][1]["status"]
     while status in {"q", "qw", "r"}:
         time.sleep(1)
-        status = utils.job_status(1)["data"][0]["status"]
+        status = utils.job_status(1)["data"][1]["status"]
     assert status == "c"
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
-    assert "jobdata.log" in files
+    assert "job-1.log" in files
     data = []
     for file in files:
         if file.endswith("_data.json"):
@@ -67,32 +53,34 @@ def test_run_dummy_random(casename, npoints, prefix, datadir, tomato_daemon):
         ("dummy_random_30_1", "$MATCH_custom_name", True),
     ],
 )
-def test_run_dummy_jobname(casename, jobname, search, datadir, tomato_daemon):
+def test_run_dummy_jobname(
+    casename, jobname, search, datadir, start_tomato_daemon, stop_tomato_daemon
+):
     os.chdir(datadir)
     utils.run_casenames([casename], [jobname], ["dummy-10"])
-    status = utils.job_status(1)["data"][0]["status"]
+    status = utils.job_status(1)["data"][1]["status"]
     while status in {"q", "qw", "r"}:
         time.sleep(1)
         if search:
             ret = subprocess.run(
-                ["ketchup", "search", "-p", "12345", "--appdir", ".", "$MATCH"],
+                ["ketchup", "search", "-p", "12345", "$MATCH"],
                 capture_output=True,
                 text=True,
             )
             yml = yaml.safe_load(ret.stdout)
             print(f"{yml=}")
-            assert yml["data"][0]["jobname"] == jobname
+            assert yml["data"][1]["jobname"] == jobname
             search = False
-        status = utils.job_status(1)["data"][0]["status"]
+        status = utils.job_status(1)["data"][1]["status"]
     assert status == "c"
     ret = subprocess.run(
-        ["ketchup", "status", "-p", "12345", "--appdir", ".", "1"],
+        ["ketchup", "status", "-p", "12345", "1"],
         capture_output=True,
         text=True,
     )
     yml = yaml.safe_load(ret.stdout)
     print(f"{yml=}")
-    assert yml["data"][0]["jobname"] == jobname
+    assert yml["data"][1]["jobname"] == jobname
 
 
 @pytest.mark.parametrize(
@@ -101,22 +89,20 @@ def test_run_dummy_jobname(casename, jobname, search, datadir, tomato_daemon):
         "dummy_random_30_1",
     ],
 )
-def test_run_dummy_cancel(casename, datadir, tomato_daemon):
+def test_run_dummy_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
     cancel = True
     utils.run_casenames([casename], [None], ["dummy-10"])
-    status = utils.job_status(1)["data"][0]["status"]
-    print(f"{status=}")
+    ret = utils.job_status(1)
+    status = ret["data"][1]["status"]
     while status in {"q", "qw", "r", "rd"}:
         time.sleep(2)
         if cancel and status == "r":
-            subprocess.run(["ketchup", "cancel", "-p", "12345", "--appdir", ".", "1"])
+            subprocess.run(["ketchup", "cancel", "-p", "12345", "1"])
             cancel = False
             time.sleep(2)
         ret = utils.job_status(1)
-        print(f"{ret=}")
-        status = ret["data"][0]["status"]
-
+        status = ret["data"][1]["status"]
     assert status == "cd"
 
 
@@ -127,40 +113,42 @@ def test_run_dummy_cancel(casename, datadir, tomato_daemon):
         ("dummy_sequential_snapshot_30_5", False),
     ],
 )
-def test_run_dummy_snapshot(casename, external, datadir, tomato_daemon):
+def test_run_dummy_snapshot(
+    casename, external, datadir, start_tomato_daemon, stop_tomato_daemon
+):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["dummy-10"])
     time.sleep(10)
-    status = utils.job_status(1)["data"][0]["status"]
+    status = utils.job_status(1)["data"][1]["status"]
     while status in {"q", "qw", "r"}:
         time.sleep(1)
         if external and status == "r":
-            subprocess.run(["ketchup", "snapshot", "-p", "12345", "--appdir", ".", "1"])
+            subprocess.run(["ketchup", "snapshot", "-p", "12345", "1"])
             external = False
-        status = utils.job_status(1)["data"][0]["status"]
+        status = utils.job_status(1)["data"][1]["status"]
     assert status == "c"
     assert os.path.exists("snapshot.1.json")
     assert os.path.exists("snapshot.1.zip")
 
 
-def test_run_dummy_multiple(datadir, tomato_daemon):
+def test_run_dummy_multiple(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
     casenames = ["dummy_random_5_2", "dummy_random_1_0.1"]
     jobnames = ["job one", "job two"]
     pipelines = ["dummy-10", "dummy-5"]
     utils.run_casenames(casenames, jobnames, pipelines)
-    status = utils.job_status(1)["data"][0]["status"]
+    status = utils.job_status(1)["data"][1]["status"]
     print(f"{status=}")
     while status in {"q", "qw", "r"}:
         time.sleep(1)
-        status = utils.job_status(1)["data"][0]["status"]
+        status = utils.job_status(1)["data"][1]["status"]
     ret = subprocess.run(
-        ["ketchup", "status", "-p", "12345", "--appdir", ".", "1", "2"],
+        ["ketchup", "status", "-p", "12345", "1", "2"],
         capture_output=True,
         text=True,
     )
     yml = yaml.safe_load(ret.stdout)
     assert len(yml["data"]) == 2
-    assert {1, 2} == set([i["jobid"] for i in yml["data"]])
-    assert set(jobnames) == set([i["jobname"] for i in yml["data"]])
-    assert {"c"} == set([i["status"] for i in yml["data"]])
+    assert {1, 2} == set([i for i in yml["data"]])
+    assert set(jobnames) == set([i["jobname"] for i in yml["data"].values()])
+    assert {"c"} == set([i["status"] for i in yml["data"].values()])

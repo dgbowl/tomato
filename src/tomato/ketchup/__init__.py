@@ -23,14 +23,21 @@ import yaml
 import zmq
 from dgbowl_schemas.tomato import to_payload
 
-from tomato import dbhandler
 from tomato.drivers import yadg_funcs
-from tomato.models import Reply
+from tomato.models import Reply, Daemon
 
 log = logging.getLogger(__name__)
 
 
-def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> Reply:
+def submit(
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    payload: str,
+    jobname: str,
+    **_: dict,
+) -> Reply:
     """
     Job submission function. Usage:
 
@@ -68,53 +75,51 @@ def submit(*, appdir: str, payload: str, jobname: str, **_: dict) -> Reply:
     jobname: dummy_random_2_0.1
 
     """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    queue = settings["queue"]
-    if os.path.exists(payload) and os.path.isfile(payload):
+    payload = Path(payload)
+    if payload.exists() and payload.is_file():
         pass
     else:
         return Reply(success=False, msg=f"payload file {payload} not found")
 
-    with open(payload, "r", encoding="utf-8") as infile:
-        if payload.endswith("json"):
-            pldict = json.load(infile)
-        elif payload.endswith("yml") or payload.endswith("yaml"):
-            pldict = yaml.full_load(infile)
+    with payload.open() as inf:
+        if payload.suffix == ".json":
+            pldict = json.load(inf)
+        elif payload.suffix in {".yml", ".yaml"}:
+            pldict = yaml.full_load(inf)
         else:
-            return Reply(
-                success=False, msg="payload file must end with one of {json, yml, yaml}"
-            )
+            return Reply(success=False, msg="payload must be a yaml or a json file")
+
     payload = to_payload(**pldict)
-    log.debug("Payload=Payload(%s)", payload)
     if payload.tomato.output.path is None:
         cwd = str(Path().resolve())
-        log.info("Output path not set. Setting output path to '%s'", cwd)
+        log.info(f"Output path not set. Setting output path to {cwd}")
         payload.tomato.output.path = cwd
     if hasattr(payload.tomato, "snapshot"):
-        if payload.tomato.snapshot is not None:
-            if payload.tomato.snapshot.path is None:
-                cwd = str(Path().resolve())
-                log.info("Snapshot path not set. Setting output path to '%s'", cwd)
-                payload.tomato.snapshot.path = cwd
-    pstr = payload.json()
+        if payload.tomato.snapshot is not None and payload.tomato.snapshot.path is None:
+            cwd = str(Path().resolve())
+            log.info(f"Snapshot path not set. Setting output path to {cwd}")
+            payload.tomato.snapshot.path = cwd
+
     log.info("queueing 'payload' into 'queue'")
-    jobid = dbhandler.queue_payload(
-        queue["path"], pstr, type=queue["type"], jobname=jobname
-    )
-    return Reply(
-        success=True,
-        msg="job submitted successfully",
-        data=dict(jobid=jobid, jobname=jobname),
-    )
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    params = dict(payload=payload, jobname=jobname)
+    req.send_pyobj(dict(cmd="job", id=None, params=params))
+    ret = req.recv_pyobj()
+    if ret.success:
+        return Reply(success=True, msg="job submitted successfully", data=ret.data)
+    else:
+        return Reply(success=False, msg="unknown error", data=ret.data)
 
 
 def status(
     *,
-    appdir: str,
-    jobids: list[int],
-    verbosity: int,
+    port: int,
+    timeout: int,
     context: zmq.Context,
-    status: dict,
+    verbosity: int,
+    jobids: list[int],
+    status: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -147,58 +152,24 @@ def status(
       completed: 2022-06-02 06:49:08.229213+00:00
 
     """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    queue = settings["queue"]
-    running = [pip for pip in status.data.pipelines.values() if pip.jobid is not None]
-    ret = []
-    if len(jobids) == 0:
-        jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
-        for jobid, jobname, payload, status in jobs:
-            if status.startswith("q"):
-                ret.append(dict(jobid=jobid, jobname=jobname, status=status))
-            elif status.startswith("r"):
-                for pip in running:
-                    if pip.jobid == jobid:
-                        ret.append(
-                            dict(
-                                jobid=jobid,
-                                jobname=jobname,
-                                status=status,
-                                pipeline=pip,
-                            )
-                        )
-            elif status.startswith("c") and verbosity > 0:
-                ret.append(dict(jobid=jobid, jobname=jobname, status=status))
+    jobs = status.data.jobs
+    if len(jobs) == 0:
+        return Reply(success=False, msg="job queue is empty")
+    elif len(jobids) == 0:
+        return Reply(success=True, msg=f"found {len(jobs)} queued jobs", data=jobs)
     else:
-        for jobid in jobids:
-            ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
-            if ji is None:
-                log.error("job with jobid '%s' does not exist.", jobid)
-                return []
-            jobname, payload, status, submitted_at, executed_at, completed_at = ji
-            retitem = dict(
-                jobid=jobid, jobname=jobname, status=status, submitted=submitted_at
-            )
-            if status.startswith("r") or status.startswith("c"):
-                retitem["executed"] = executed_at
-                for pip in running:
-                    if pip.jobid == jobid:
-                        retitem["pipeline"] = pip
-                        break
-            if status.startswith("c"):
-                retitem["completed"] = completed_at
-            ret.append(retitem)
-    if len(ret) == 0:
-        return Reply(
-            success=False,
-            msg="queue empty" if len(jobids) == 0 else "matching job not found",
-        )
-    else:
-        return Reply(success=True, msg=f"status of {len(ret)} jobs returned", data=ret)
+        rets = {job.id: job for job in jobs.values() if job.id in jobids}
+        return Reply(success=True, msg=f"found {len(rets)} queued jobs", data=rets)
 
 
 def cancel(
-    *, appdir: str, jobid: int, context: zmq.Context, status: dict, **_: dict
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    jobids: list[int],
+    status: Daemon,
+    **_: dict,
 ) -> Reply:
     """
     Job cancellation function. Usage:
@@ -237,29 +208,36 @@ def cancel(
         Cancelling a completed job will do nothing.
 
     """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    queue = settings["queue"]
-    running = [pip for pip in status.data.pipelines.values() if pip.jobid is not None]
-    jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
-    if jobinfo is None:
-        return Reply(success=False, msg=f"job with jobid {jobid} does not exist")
-    status = jobinfo[2]
-    log.debug(f"found job {jobid} with status '{status}'")
-    if status in {"q", "qw"}:
-        dbhandler.job_set_status(queue["path"], "cd", jobid, type=queue["type"])
-        return Reply(success=True, msg=f"job {jobid} cancelled with status 'cd'")
-    elif status == "r":
-        for pip in running:
-            if pip.jobid == jobid:
-                dbhandler.job_set_status(queue["path"], "rd", jobid, type=queue["type"])
-                return Reply(
-                    success=True, msg=f"job {jobid} cancelled with status 'rd'"
-                )
-    elif status in {"rd", "cd"}:
-        return Reply(success=False, msg=f"job {jobid} has already been cancelled")
+    jobs = status.data.jobs
+    for jobid in jobids:
+        if jobid not in jobs:
+            return Reply(success=False, msg=f"job with jobid {jobid} does not exist")
+
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    data = {}
+    for jobid in jobids:
+        if jobs[jobid].status in {"q", "qw"}:
+            params = dict(status="cd")
+        elif jobs[jobid].status in {"r"}:
+            params = dict(status="rd")
+        elif jobs[jobid].status in {"cd", "ce"}:
+            continue
+        req.send_pyobj(dict(cmd="job", id=jobid, params=params))
+        ret = req.recv_pyobj()
+        if ret.success:
+            data[jobid] = ret.data
+        else:
+            return Reply(success=False, msg="unknown error", data=ret.data)
+    return Reply(success=True, msg="cancelled jobs successfully", data=data)
 
 
-def snapshot(*, appdir: str, jobid: int, **_: dict) -> Reply:
+def snapshot(
+    *,
+    jobids: list[int],
+    status: Daemon,
+    **_: dict,
+) -> Reply:
     """
     Create a snapshot of job data. Usage:
 
@@ -280,41 +258,36 @@ def snapshot(*, appdir: str, jobid: int, **_: dict) -> Reply:
     snapshot.1.zip
 
     """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    queue = settings["queue"]
+    jobs = status.data.jobs
+    for jobid in jobids:
+        if jobid not in jobs:
+            return Reply(success=False, msg=f"job {jobid} does not exist")
+        if jobs[jobid].status in {"q", "qw"}:
+            return Reply(success=False, msg=f"job {jobid} is still queued")
 
-    jobinfo = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
-    if jobinfo is None:
-        return Reply(success=False, msg=f"job {jobid} does not exist")
-    status = jobinfo[2]
-
-    if status.startswith("q"):
-        return Reply(
-            success=False, msg=f"job {jobid} is not yet running, cannot create snapshot"
+    jobdir = Path(status.data.settings["jobs"]["storage"])
+    for jobid in jobids:
+        job = jobs[jobid]
+        root = jobdir / str(jobid)
+        assert root.exists() and root.is_dir()
+        jobfile = root / "jobdata.json"
+        assert jobfile.exists() and jobfile.is_file()
+        with jobfile.open() as inf:
+            jobdata = json.load(inf)
+        log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
+        preset = yadg_funcs.get_yadg_preset(
+            jobdata["payload"]["method"], jobdata["pipeline"], jobdata["devices"]
         )
-
-    jobdir = os.path.join(queue["storage"], f"{jobid}")
-    log.debug("processing jobdir '%s'", jobdir)
-    assert os.path.exists(jobdir) and os.path.isdir(jobdir)
-    jobfile = os.path.join(jobdir, "jobdata.json")
-    assert os.path.exists(jobfile) and os.path.isfile(jobfile)
-
-    with open(jobfile, "r") as inf:
-        jobdata = json.load(inf)
-
-    method, pipeline = jobdata["payload"]["method"], jobdata["pipeline"]
-    log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
-    preset = yadg_funcs.get_yadg_preset(method, pipeline)
-    yadg_funcs.process_yadg_preset(
-        preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=jobdir
-    )
-    return Reply(success=True, msg=f"snapshot for job {jobid} created successfully")
+        yadg_funcs.process_yadg_preset(
+            preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=str(jobdir)
+        )
+    return Reply(success=True, msg=f"snapshot for job(s) {jobids} created successfully")
 
 
 def search(
     *,
-    appdir: str,
     jobname: str,
+    status: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -339,17 +312,12 @@ def search(
       status: r
 
     """
-    settings = toml.load(Path(appdir) / "settings.toml")
-    queue = settings["queue"]
-
-    alljobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
-    ret = []
-    for jobid, jobn, payload, status in alljobs:
-        if jobn is not None and jobname in jobn:
-            ret.append(dict(jobid=jobid, jobname=jobn, status=status))
+    jobs = status.data.jobs
+    ret = {}
+    for jobid, job in jobs.items():
+        if job.jobname is not None and jobname in job.jobname:
+            ret[jobid] = job
     if len(ret) > 0:
-        return Reply(
-            success=True, msg=f"job with jobname matching {jobname} found", data=ret
-        )
+        return Reply(success=True, msg=f"jobs matching {jobname} found", data=ret)
     else:
         return Reply(success=False, msg=f"no job with jobname matching {jobname} found")

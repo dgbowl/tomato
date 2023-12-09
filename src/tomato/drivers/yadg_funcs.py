@@ -12,7 +12,7 @@ _device_to_parser = {
 }
 
 
-def get_yadg_preset(method: list[dict], pipeline: dict) -> dict:
+def get_yadg_preset(method: list[dict], pipeline: dict, devices: dict) -> dict:
     preset = {
         "metadata": {
             "version": "4.2",
@@ -21,12 +21,11 @@ def get_yadg_preset(method: list[dict], pipeline: dict) -> dict:
         },
         "steps": [],
     }
-
-    devices = {item["tag"]: item["driver"] for item in pipeline["devices"]}
+    drivertable = {v["role"]: devices[k]["driver"] for k, v in pipeline["devs"].items()}
     for dev in set([item["device"] for item in method]):
         step = {
             "tag": dev,
-            "parser": _device_to_parser[devices[dev]],
+            "parser": _device_to_parser[drivertable[dev]],
             "input": {"folders": ["."], "prefix": dev, "suffix": "data.json"},
             "parameters": {"filetype": "tomato.json"},
             "externaldate": {

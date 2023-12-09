@@ -32,10 +32,6 @@ def set_loglevel(loglevel: int):
 
 def run_tomato():
     dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
-    config_dir = dirs.user_config_dir
-    data_dir = dirs.user_data_dir
-    log_dir = dirs.user_log_dir
-
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
         "--version",
@@ -48,6 +44,12 @@ def run_tomato():
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
     status = subparsers.add_parser("status")
+    status.add_argument(
+        "--with-data",
+        action="store_true",
+        default=False,
+        help="Return full daemon status. If false, only daemon.status will be returned",
+    )
     status.set_defaults(func=tomato.status)
 
     start = subparsers.add_parser("start")
@@ -107,23 +109,28 @@ def run_tomato():
             type=int,
             default=3000,
         )
+
+    for p in [start, init]:
         p.add_argument(
             "--appdir",
             "-A",
+            type=Path,
             help="Settings directory for tomato",
-            default=config_dir,
+            default=Path(dirs.user_config_dir),
         )
         p.add_argument(
             "--datadir",
             "-D",
+            type=Path,
             help="Data directory for tomato",
-            default=data_dir,
+            default=Path(dirs.user_data_dir),
         )
         p.add_argument(
             "--logdir",
             "-L",
+            type=Path,
             help="Log directory for tomato",
-            default=data_dir,
+            default=Path(dirs.user_log_dir),
         )
 
     # parse subparser args
@@ -131,7 +138,7 @@ def run_tomato():
     # parse extras for verbose tags
     args, extras = verbose.parse_known_args(extras, args)
 
-    verbosity = min(max((2 + args.verbose - args.quiet) * 10, 10), 50)
+    verbosity = min(max((2 + args.quiet - args.verbose) * 10, 10), 50)
     set_loglevel(verbosity)
 
     context = zmq.Context()
@@ -141,10 +148,6 @@ def run_tomato():
 
 
 def run_ketchup():
-    dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
-    config_dir = dirs.user_config_dir
-    data_dir = dirs.user_data_dir
-
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument(
         "--version",
@@ -191,8 +194,8 @@ def run_ketchup():
         "jobids",
         nargs="*",
         help=(
-            "The jobid(s) of the requested job(s), "
-            "defaults to the status of the whole queue."
+            "The job.id(s) of the job(s) to be checked. "
+            "Defaults to the status of the whole queue."
         ),
         type=int,
         default=None,
@@ -201,8 +204,12 @@ def run_ketchup():
 
     cancel = subparsers.add_parser("cancel")
     cancel.add_argument(
-        "jobid",
-        help="The jobid of the job to be cancelled.",
+        "jobids",
+        nargs="+",
+        help=(
+            "The job.id(s) of the job(s) to be cancelled. "
+            "At least one job.id has to be provided."
+        ),
         type=int,
         default=None,
     )
@@ -210,7 +217,14 @@ def run_ketchup():
 
     snapshot = subparsers.add_parser("snapshot")
     snapshot.add_argument(
-        "jobid", help="The jobid of the job to be snapshotted.", default=None
+        "jobids",
+        nargs="+",
+        help=(
+            "The job.id(s) of the job(s) to be snapshotted. "
+            "At least one job.id has to be provided."
+        ),
+        type=int,
+        default=None,
     )
     snapshot.set_defaults(func=ketchup.snapshot)
 
@@ -233,6 +247,7 @@ def run_ketchup():
         p.add_argument(
             "--port",
             "-p",
+            type=int,
             help="Port number of tomato's reply socket",
             default=DEFAULT_TOMATO_PORT,
         )
@@ -241,16 +256,6 @@ def run_ketchup():
             help="Timeout for the ketchup command, in milliseconds",
             type=int,
             default=3000,
-        )
-        p.add_argument(
-            "--appdir",
-            help="Settings directory for tomato",
-            default=config_dir,
-        )
-        p.add_argument(
-            "--datadir",
-            help="Data directory for tomato",
-            default=data_dir,
         )
 
     args, extras = parser.parse_known_args()
@@ -261,7 +266,7 @@ def run_ketchup():
 
     if "func" in args:
         context = zmq.Context()
-        status = tomato.status(**vars(args), context=context)
+        status = tomato.status(**vars(args), context=context, with_data=True)
         if not status.success:
             print(yaml.dump(status.dict()))
         else:
