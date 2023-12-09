@@ -79,6 +79,7 @@ def run_daemon():
                     jmgr.join()
                     logger.info("job manager thread joined successfully")
             elif msg["cmd"] == "setup":
+                settings = msg["settings"]
                 ret = cmd.setup(msg, daemon)
                 if jmgr is None:
                     jmgr = Thread(target=job.manager, args=(daemon.port, context))

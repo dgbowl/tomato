@@ -40,6 +40,7 @@ def tomato_job() -> None:
         jsdata = json.load(infile)
     payload = jsdata["payload"]
     pipeline = jsdata["pipeline"]
+    devices = jsdata["devices"]
     job = jsdata["job"]
 
     pip = pipeline["name"]
@@ -74,7 +75,9 @@ def tomato_job() -> None:
 
     logger.info("handing off to 'driver_worker'")
     logger.info("==============================")
-    ret = driver_worker(pipeline, payload, job["id"], jobpath, logfile, loglevel)
+    ret = driver_worker(
+        devices, pipeline, payload, job["id"], jobpath, logfile, loglevel
+    )
     logger.info("==============================")
 
     output = tomato["output"]
@@ -87,7 +90,7 @@ def tomato_job() -> None:
         logger.debug("path does not exist, creating")
         os.makedirs(path)
 
-    preset = yadg_funcs.get_yadg_preset(payload["method"], pipeline)
+    preset = yadg_funcs.get_yadg_preset(payload["method"], pipeline, devices)
     yadg_funcs.process_yadg_preset(
         preset=preset, path=path, prefix=prefix, jobdir=str(jobpath)
     )
@@ -99,10 +102,7 @@ def tomato_job() -> None:
         req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
         ret = req.recv_pyobj()
     else:
-        logger.info("job was terminated, setting status to 'cd'")
-        params = dict(status="cd")
-        req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
-        ret = req.recv_pyobj()
+        logger.info("job was terminated, status should be 'cd'")
         logger.info("handing off to 'driver_reset'")
         logger.info("==============================")
         driver_reset(pipeline)
@@ -209,6 +209,7 @@ def data_snapshot(
 
 
 def driver_worker(
+    devices: dict,
     pipeline: dict,
     payload: dict,
     jobid: int,
@@ -231,32 +232,41 @@ def driver_worker(
     log.debug(f"started 'log_listener' on pid {listener.pid}")
 
     jobs = []
-    for vi, v in enumerate(pipeline["devices"]):
-        log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
-        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
-        drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
-        # dpar = settings["drivers"].get(drv, {})
-        dpar = {}
-        pl = [item for item in payload["method"] if item["device"] == v["tag"]]
+    print(f"{devices=}")
+    print(f"{pipeline['devs']=}")
+    for cname, comp in pipeline["devs"].items():
+        dev = devices[cname]
+        log.info(f"device id: {cname}")
+        log.info(
+            f"{cname}: processing device '{comp['role']}' of type '{dev['driver']}'"
+        )
+        drv, addr, ch, tag = (
+            dev["driver"],
+            dev["address"],
+            comp["channel"],
+            comp["role"],
+        )
+        dpar = dev["settings"]
+        pl = [item for item in payload["method"] if item["device"] == comp["role"]]
         smpl = payload["sample"]
 
-        log.debug(f"{vi+1}: getting status")
+        log.debug(f"{cname}: getting status")
         ts, ready, metadata = driver_api(drv, "get_status", jq, log, addr, ch, **dpar)
         log.debug(f"{ready=}")
         assert ready, f"Failed: device '{tag}' is not ready."
 
-        log.debug(f"{vi+1}: starting payload")
+        log.debug(f"{cname}: starting payload")
         start_ts = driver_api(
             drv, "start_job", jq, log, addr, ch, **dpar, payload=pl, **smpl
         )
         metadata["uts"] = start_ts
 
-        log.debug(f"{vi+1}: writing initial status")
+        log.debug(f"{cname}: writing initial status")
         with (jobpath / f"{tag}_status.json").open("w") as of:
             json.dump(metadata, of)
         kwargs = dpar
-        kwargs.update({"pollrate": v.get("pollrate", 10)})
-        log.info(f"{vi+1}: starting 'data_poller': every {kwargs['pollrate']}s")
+        kwargs.update({"pollrate": dev.get("pollrate", 10)})
+        log.info(f"{cname}: starting 'data_poller': every {kwargs['pollrate']}s")
         p = multiprocessing.Process(
             name=f"data_poller_{jobid}_{tag}",
             target=data_poller,
@@ -264,7 +274,7 @@ def driver_worker(
         )
         jobs.append(p)
         p.start()
-        log.info(f"{vi+1}: started 'data_poller' on pid {p.pid}")
+        log.info(f"{cname}: started 'data_poller' on pid {p.pid}")
 
     shot = payload.get("tomato", {}).get("snapshot", None)
     if shot is not None:

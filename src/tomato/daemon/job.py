@@ -19,21 +19,21 @@ from tomato import tomato
 logger = logging.getLogger(__name__)
 
 
-def find_matching_pipelines(pipelines: dict, method: list[dict]) -> list[str]:
+def find_matching_pipelines(daemon: Daemon, method: list[dict]) -> list[str]:
     req_names = set([item.device for item in method])
     req_capabs = set([item.technique for item in method])
 
     candidates = []
-    for pip in pipelines.values():
-        dnames = set([device.tag for device in pip.devices])
+    for pip in daemon.pips.values():
+        dnames = set([comp.role for comp in pip.devs.values()])
         if req_names.intersection(dnames) == req_names:
             candidates.append(pip)
 
     matched = []
     for cd in candidates:
         capabs = []
-        for device in cd.devices:
-            capabs += device.capabilities
+        for devname in cd.devs.keys():
+            capabs += daemon.devs[devname].capabilities
         if req_capabs.intersection(set(capabs)) == req_capabs:
             matched.append(cd)
     return matched
@@ -59,13 +59,15 @@ def kill_tomato_job(proc):
                     continue
             gone, alive = psutil.wait_procs(ppc, timeout=1)
     elif psutil.POSIX:
-        for proc in pc:
+        for child in pc:
             try:
-                proc.terminate()
+                child.terminate()
             except psutil.NoSuchProcess:
-                logger.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
+                logger.warning("dead proc: name='%s', pid=%d", child.name(), child.pid)
                 continue
         gone, alive = psutil.wait_procs(pc, timeout=1)
+    logger.debug(f"{gone=}")
+    logger.debug(f"{alive=}")
 
 
 def manage_running_pips(daemon: Daemon, req):
@@ -110,7 +112,7 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, Pipeline]:
     matched = {}
     queue = [job for job in daemon.jobs.values() if job.status in {"q", "qw"}]
     for job in queue:
-        matched[job.id] = find_matching_pipelines(daemon.pips, job.payload.method)
+        matched[job.id] = find_matching_pipelines(daemon, job.payload.method)
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
                 f"job {job.id} can queue on pips: {[p.name for p in matched[job.id]]}"
@@ -151,6 +153,7 @@ def action_queued_jobs(daemon, matched, req):
             jobargs = {
                 "pipeline": pip.dict(),
                 "payload": job.payload.dict(),
+                "devices": {dname: dev.dict() for dname, dev in daemon.devs.items()},
                 "job": dict(id=job.id, path=str(root)),
             }
 

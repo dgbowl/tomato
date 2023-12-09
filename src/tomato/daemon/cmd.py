@@ -41,8 +41,8 @@ def stop(msg: dict, daemon: Daemon, jmgr: Thread = None) -> Reply:
 
 
 def setup(msg: dict, daemon: Daemon) -> Reply:
-    newpips = {p["name"]: Pipeline(**p) for p in msg.get("pipelines", {})}
-    daemon.pips = merge_pipelines(daemon.pips, newpips)
+    daemon.devs = msg["devs"]
+    daemon.pips = merge_pipelines(daemon.pips, msg["pips"])
     if daemon.status == "bootstrap":
         logger.info(f"setup successful with pipelines: {list(daemon.pips.keys())}")
         daemon.status = "running"

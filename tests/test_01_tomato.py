@@ -63,10 +63,19 @@ def test_tomato_reload(datadir, stop_tomato_daemon):
     ret = tomato.status(**kwargs, with_data=True)
     assert ret.success
     assert len(ret.data.pips) == 2
+
     ret = tomato.reload(**kwargs, appdir=Path())
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.pips) == 1
+    assert ret.data.devs["dummy_device"].settings == {}
+
+    with open("settings.toml", "a") as inf:
+        inf.write("dummy.testpar = 1")
+    ret = tomato.reload(**kwargs, appdir=Path())
+    print(f"{ret=}")
+    assert ret.success
+    assert ret.data.devs["dummy_device"].settings["testpar"] == 1
 
 
 def test_tomato_pipeline(datadir, stop_tomato_daemon):

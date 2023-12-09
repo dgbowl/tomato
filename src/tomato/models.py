@@ -1,25 +1,29 @@
 from pydantic import BaseModel, Field
-from typing import Union, Optional, Any, Mapping, Literal
+from typing import Union, Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
 import toml
 
 
 class Device(BaseModel):
     name: str
-    tag: str
     driver: str
     address: Union[str, None]
-    channel: Union[int, None]
-    capabilities: list[str]
+    channels: Optional[Sequence[int]] = None
+    capabilities: Sequence[str]
     pollrate: int = 1
+    settings: Mapping[str, Any] = Field(default_factory=dict)
 
 
 class Pipeline(BaseModel):
+    class Component(BaseModel):
+        channel: int
+        role: str
+
     name: str
     ready: bool = False
     jobid: Optional[int] = None
     sampleid: Optional[str] = None
-    devices: Optional[list[Device]] = None
+    devs: Mapping[str, Component] = Field(default_factory=dict)
 
 
 class Job(BaseModel):

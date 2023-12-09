@@ -38,7 +38,7 @@ import yaml
 import toml
 
 from tomato import ketchup
-from tomato.models import Reply, Pipeline
+from tomato.models import Reply, Pipeline, Device
 
 logger = logging.getLogger(__name__)
 
@@ -52,51 +52,51 @@ def set_loglevel(delta: int):
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
 
 
-def get_pipelines(yamlpath: str) -> dict:
-    logger.debug(f"loading pipeline settings from '{yamlpath}'")
+def load_device_file(yamlpath: Path) -> dict:
+    logger.debug(f"loading device file from '{yamlpath}'")
     try:
-        with open(yamlpath, "r") as infile:
+        with yamlpath.open("r") as infile:
             jsdata = yaml.safe_load(infile)
     except FileNotFoundError:
         logger.error(f"device settings not found. Running with default devices.")
         devpath = Path(__file__).parent / ".." / "data" / "default_devices.json"
         with devpath.open() as inp:
             jsdata = json.load(inp)
-    devices = jsdata["devices"]
-    pipelines = jsdata["pipelines"]
-    ret = []
+    return jsdata
+
+
+def get_pipelines(devs: dict[str, Device], pipelines: list) -> dict[str, Pipeline]:
+    pips = {}
     for pip in pipelines:
+        print(f"{pip=}")
         if "*" in pip["name"]:
-            data = {"name": pip["name"], "devices": []}
-            assert len(pip["devices"]) == 1
-            for ppars in pip["devices"]:
-                for dpars in devices:
-                    if dpars["name"] == ppars["name"]:
-                        break
-                dev = {k: v for k, v in dpars.items() if k != "channels"}
-                dev["tag"] = ppars["tag"]
-                data["devices"].append(dev)
-                for ch in dpars["channels"]:
-                    d = copy.deepcopy(data)
-                    d["devices"][0]["channel"] = ch
-                    d["name"] = d["name"].replace("*", f"{ch}")
-                    ret.append(d)
+            data = {"name": pip["name"], "devs": {}}
+            if len(pip["devices"]) > 1:
+                logger.error("more than one component in a wildcard pipeline")
+                continue
+            for comp in pip["devices"]:
+                if comp["name"] not in devs:
+                    logger.error(f"component {comp['name']} not found among devices")
+                    break
+                dev = devs[comp["name"]]
+                for ch in dev.channels:
+                    name = pip["name"].replace("*", f"{ch}")
+                    d = {dev.name: dict(role=comp["tag"], channel=ch)}
+                    p = dict(name=name, devs=d)
+                    pips[name] = Pipeline(**p)
         else:
-            data = {"name": pip["name"], "devices": []}
-            for ppars in pip["devices"]:
-                for dpars in devices:
-                    if dpars["name"] == ppars["name"]:
-                        break
-                dev = {k: v for k, v in dpars.items() if k != "channels"}
-                dev["tag"] = ppars["tag"]
-                if isinstance(ppars.get("channel"), int):
-                    assert ppars["channel"] in dpars["channels"]
-                    dev["channel"] = ppars["channel"]
-                else:
-                    assert "*" in pip["name"]
-                data["devices"].append(dev)
-            ret.append(data)
-    return ret
+            data = {"name": pip["name"], "devs": {}}
+            for comp in pip["devices"]:
+                if comp["name"] not in devs:
+                    logger.error(f"component {comp['name']} not found among devices")
+                    break
+                dev = devs[comp["name"]]
+                if comp["channel"] not in dev.channels:
+                    logger.error(f"channel {comp['channel']} not found among channels")
+                    break
+                data["devs"][dev.name] = dict(role=comp["tag"], channel=comp["channel"])
+            pips[pip["name"]] = data
+    return pips
 
 
 def status(
@@ -251,14 +251,20 @@ def reload(
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
-    pipelines = get_pipelines(settings["devices"]["config"])
+    devicefile = load_device_file(Path(settings["devices"]["config"]))
+    devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
+    for dev in devs.values():
+        if dev.driver in settings["drivers"]:
+            dev.settings.update(settings["drivers"][dev.driver])
+
+    pips = get_pipelines(devs, devicefile["pipelines"])
 
     stat = status(port=port, timeout=timeout, context=context)
     if not stat.success:
         return stat
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="setup", settings=settings, pipelines=pipelines))
+    req.send_pyobj(dict(cmd="setup", settings=settings, pips=pips, devs=devs))
     rep = req.recv_pyobj()
     if rep.msg == "running":
         return Reply(
