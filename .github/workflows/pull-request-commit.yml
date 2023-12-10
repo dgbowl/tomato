@@ -3,7 +3,10 @@ on:
     pull_request:
         branches: ['master']
 jobs:
+    call-lint:
+        uses: ./.github/workflows/workflow-lint.yml
     call-build:
+        needs: [call-lint]
         strategy:
             matrix:
                 pyver: ['3.9', '3.10', '3.11']
