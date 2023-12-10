@@ -40,11 +40,11 @@ def stop_tomato_daemon_session():
     # setup_stuff
     yield
     # teardown_stuff
-    print(f"stop_tomato_daemon_session")
+    print("stop_tomato_daemon_session")
     subprocess.run(["tomato", "stop", "-p", "12345", "--timeout", "1000"])
     if psutil.WINDOWS:
-        subprocess.run(["taskkill", "/F", "/IM", "tomato-job", "/T"])
-        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-job.exe", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon.exe", "/T"])
     else:
         subprocess.run(["killall", "tomato-job"])
         subprocess.run(["killall", "tomato-daemon"])
@@ -55,11 +55,11 @@ def stop_tomato_daemon(port: int = 12345):
     # setup_stuff
     yield
     # teardown_stuff
-    print(f"stop_tomato_daemon")
+    print("stop_tomato_daemon")
     subprocess.run(["tomato", "stop", "-p", f"{port}", "--timeout", "1000"])
     if psutil.WINDOWS:
-        subprocess.run(["taskkill", "/F", "/IM", "tomato-job", "/T"])
-        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-job.exe", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon.exe", "/T"])
     else:
         subprocess.run(["killall", "tomato-job"])
         subprocess.run(["killall", "tomato-daemon"])

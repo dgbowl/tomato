@@ -315,6 +315,6 @@ def search(
         if job.jobname is not None and jobname in job.jobname:
             ret[jobid] = job
     if len(ret) > 0:
-        return Reply(success=True, msg=f"jobs matching {jobname} found", data=ret)
+        return Reply(success=True, msg=f"jobs matching {jobname!r} found", data=ret)
     else:
-        return Reply(success=False, msg=f"no job with jobname matching {jobname} found")
+        return Reply(success=False, msg=f"no job matching {jobname!r} found")
