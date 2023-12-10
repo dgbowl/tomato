@@ -1,26 +1,18 @@
 """
 **tomato.daemon**: module of functions comprising the tomato daemon
 -------------------------------------------------------------------
-.. codeauthor:: 
+.. codeauthor::
     Peter Kraus
 """
-import os
-import subprocess
 import logging
-import time
 import argparse
-import json
-import copy
-from threading import Thread, currentThread
-from datetime import datetime, timezone
+from threading import Thread
 from pathlib import Path
 import toml
 
 import zmq
-import psutil
 
-from tomato.models import Pipeline, Reply, Daemon, Job
-from tomato import tomato
+from tomato.models import Reply, Daemon
 import tomato.daemon.cmd as cmd
 import tomato.daemon.job as job
 
@@ -60,7 +52,7 @@ def run_daemon():
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
 
-    logger.debug(f"entering main loop")
+    logger.debug("entering main loop")
     jmgr = None
     while True:
         socks = dict(poller.poll(100))

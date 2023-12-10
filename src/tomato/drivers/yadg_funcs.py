@@ -1,4 +1,3 @@
-from cgi import print_form
 import json
 import logging
 import subprocess

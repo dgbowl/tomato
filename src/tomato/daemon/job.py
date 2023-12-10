@@ -1,20 +1,15 @@
 import os
 import subprocess
 import logging
-import time
-import argparse
 import json
-import copy
-from threading import Thread, currentThread
 from datetime import datetime, timezone
 from pathlib import Path
-import toml
+from threading import currentThread
 
 import zmq
 import psutil
 
-from tomato.models import Pipeline, Reply, Daemon, Job
-from tomato import tomato
+from tomato.models import Pipeline, Daemon
 
 logger = logging.getLogger(__name__)
 
@@ -174,7 +169,7 @@ def action_queued_jobs(daemon, matched, req):
 def manager(port: int, context: zmq.Context):
     logger = logging.getLogger(f"{__name__}.manager")
     thread = currentThread()
-    logger.info(f"launched successfully")
+    logger.info("launched successfully")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     poller = zmq.Poller()
@@ -191,4 +186,4 @@ def manager(port: int, context: zmq.Context):
         manage_running_pips(daemon, req)
         matched_pips = check_queued_jobs(daemon, req)
         action_queued_jobs(daemon, matched_pips, req)
-    logger.info(f"instructed to quit")
+    logger.info("instructed to quit")
