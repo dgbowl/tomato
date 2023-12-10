@@ -87,7 +87,7 @@ def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon
     test_ketchup_submit_two(*args)
     tomato.pipeline_load(**kwargs, pipeline="dummy-5", sampleid="dummy_random_5_2")
     tomato.pipeline_ready(**kwargs, pipeline="dummy-5")
-    time.sleep(1)
+    time.sleep(2)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1, 2])
     print(f"{ret=}")
