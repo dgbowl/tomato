@@ -25,6 +25,7 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
@@ -34,17 +35,17 @@ setuptools.setup(
     python_requires=">=3.9",
     install_requires=[
         "appdirs>=1.4.0",
-        "toml",
-        "pyyaml",
-        "psutil",
+        "toml~=0.10",
+        "pyyaml~=6.0",
+        "psutil~=5.9",
         "yadg==4.2.4",
         "dgbowl_schemas>=108",
-        "filelock",
-        "pyzmq",
+        "filelock~=3.12",
+        "pyzmq~=25.1",
     ],
     extras_require={
         "testing": [
-            "pytest",
+            "pytest~=7.4",
         ],
         "docs": [
             "sphinx==4.5.0",
