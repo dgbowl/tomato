@@ -215,6 +215,8 @@ def init(
         f"""\
         # Default settings for tomato-{VERSION}
         # Generated on {str(datetime.now(timezone.utc))}
+        datadir = '{datadir.resolve()}'
+
         [jobs]
         storage = '{datadir.resolve() / 'Jobs'}'
 
