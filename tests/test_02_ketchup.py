@@ -124,3 +124,34 @@ def test_ketchup_cancel(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])
     print(f"{ret=}")
     assert ret.data[2].status == "cd"
+
+
+def test_ketchup_snapshot(datadir, start_tomato_daemon, stop_tomato_daemon):
+    args = [datadir, start_tomato_daemon, stop_tomato_daemon]
+    test_ketchup_status_running(*args)
+    status = tomato.status(**kwargs, with_data=True)
+    ret = ketchup.snapshot(jobids=[2], status=status)
+    print(f"{ret=}")
+    assert ret.success
+    assert os.path.exists("snapshot.2.json")
+
+
+def test_ketchup_search(datadir, start_tomato_daemon, stop_tomato_daemon):
+    args = [datadir, start_tomato_daemon, stop_tomato_daemon]
+    test_ketchup_submit_two(*args)
+    status = tomato.status(**kwargs, with_data=True)
+    ret = ketchup.search(jobname="2", status=status)
+    print(f"{ret=}")
+    assert ret.success
+    assert len(ret.data) == 1
+
+    status = tomato.status(**kwargs, with_data=True)
+    ret = ketchup.search(jobname="job", status=status)
+    print(f"{ret=}")
+    assert ret.success
+    assert len(ret.data) == 2
+
+    status = tomato.status(**kwargs, with_data=True)
+    ret = ketchup.search(jobname="wrong", status=status)
+    print(f"{ret=}")
+    assert ret.success is False
