@@ -61,7 +61,7 @@ def submit(
 
     >>> # Increased verbosity:
     >>> ketchup -v submit dummy_random_2_0.1.yml
-    INFO:tomato.ketchup.functions:Output path not set. Setting output path to 'C:\[...]'
+    INFO:tomato.ketchup.functions:Output path not set. Setting output path to '[...]'
     INFO:tomato.ketchup.functions:queueing 'payload' into 'queue'
     INFO:tomato.dbhandler.sqlite:inserting a new job into 'state'
     jobid: 4
