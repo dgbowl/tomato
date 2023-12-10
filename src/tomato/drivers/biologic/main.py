@@ -1,6 +1,5 @@
 import logging
 import multiprocessing
-import time
 from filelock import FileLock
 
 from datetime import datetime, timezone
@@ -46,7 +45,7 @@ def get_status(
     api = get_kbio_api(dllpath)
     metadata = {}
     metadata["dll_version"] = api.GetLibVersion()
-    with FileLock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60):
         try:
             logger.info(f"connecting to '{address}:{channel}'")
             id_, device_info = api.Connect(address)
@@ -103,7 +102,7 @@ def get_data(
 
     """
     api = get_kbio_api(dllpath)
-    with FileLock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60):
         try:
             logger.info(f"connecting to '{address}:{channel}'")
             id_, device_info = api.Connect(address)
@@ -166,7 +165,7 @@ def start_job(
     logger.debug("translating payload to ECC")
     eccpars = payload_to_ecc(api, payload, capacity)
     ntechs = len(eccpars)
-    with FileLock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60):
         try:
             first = True
             last = False
@@ -227,13 +226,12 @@ def stop_job(
 
     """
     api = get_kbio_api(dllpath)
-    with FileLock(lockpath, timeout=60) as fh:
+    with FileLock(lockpath, timeout=60):
         try:
             logger.info(f"connecting to '{address}:{channel}'")
             id_, device_info = api.Connect(address)
             logger.info(f"stopping run on '{address}:{channel}'")
             api.StopChannel(id_, channel)
-            logger.info(f"run stopped at '{dt}'")
             api.Disconnect(id_)
         except Exception as e:
             logger.critical(f"{e=}")
@@ -242,4 +240,5 @@ def stop_job(
     else:
         pass
     dt = datetime.now(timezone.utc)
+    logger.info(f"run stopped at '{dt}'")
     return dt.timestamp()

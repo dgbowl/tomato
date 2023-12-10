@@ -71,7 +71,7 @@ def tomato_job() -> None:
     req.connect(f"tcp://127.0.0.1:{args.port}")
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
     req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
-    msg = req.recv_pyobj()
+    req.recv_pyobj()
 
     logger.info("handing off to 'driver_worker'")
     logger.info("==============================")
@@ -94,7 +94,7 @@ def tomato_job() -> None:
     yadg_funcs.process_yadg_preset(
         preset=preset, path=path, prefix=prefix, jobdir=str(jobpath)
     )
-    logger.debug(f"here")
+    logger.debug("here")
     ready = tomato.get("unlock_when_done", False)
     if ret is None:
         logger.info("job finished successfully, setting status to 'c'")
@@ -176,7 +176,7 @@ def data_poller(
             cont = False
         else:
             time.sleep(pollrate)
-    log.info(f"rejoining main thread")
+    log.info("rejoining main thread")
     return
 
 

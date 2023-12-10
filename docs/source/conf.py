@@ -20,7 +20,7 @@ version = "master"
 # -- Project information -----------------------------------------------------
 
 project = "tomato"
-copyright = "2021 - 2022, dgbowl authors"
+copyright = "2021 - 2023, dgbowl authors"
 author = "Peter Kraus"
 release = version
 

@@ -23,21 +23,17 @@ import os
 import subprocess
 import textwrap
 import json
-import copy
 from pathlib import Path
 from datetime import datetime, timezone
 from importlib import metadata
 import time
 
-import argparse
 import logging
 import psutil
 import zmq
-import appdirs
 import yaml
 import toml
 
-from tomato import ketchup
 from tomato.models import Reply, Pipeline, Device
 
 logger = logging.getLogger(__name__)
@@ -58,7 +54,7 @@ def load_device_file(yamlpath: Path) -> dict:
         with yamlpath.open("r") as infile:
             jsdata = yaml.safe_load(infile)
     except FileNotFoundError:
-        logger.error(f"device settings not found. Running with default devices.")
+        logger.error("device file not found. Running with default devices.")
         devpath = Path(__file__).parent / ".." / "data" / "default_devices.json"
         with devpath.open() as inp:
             jsdata = json.load(inp)

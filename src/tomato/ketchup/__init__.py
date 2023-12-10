@@ -1,10 +1,10 @@
 """
 **tomato.ketchup**: command line interface to the tomato job queue
 ------------------------------------------------------------------
-.. codeauthor:: 
+.. codeauthor::
     Peter Kraus
 
-Module of functions to manage the job queue of :mod:`tomato`. Includes job management 
+Module of functions to manage the job queue of :mod:`tomato`. Includes job management
 functions:
 
 - :func:`submit` to submit a *job* to *queue*
@@ -14,11 +14,9 @@ functions:
 - :func:`search` to find a ``jobid`` of a *job* from ``jobname``
 
 """
-import os
 import json
 import logging
 from pathlib import Path
-import toml
 import yaml
 import zmq
 from dgbowl_schemas.tomato import to_payload
@@ -57,20 +55,20 @@ def submit(
     --------
 
     >>> # Submit a job:
-    >>> ketchup submit .\dummy_random_2_0.1.yml
+    >>> ketchup submit dummy_random_2_0.1.yml
     jobid: 2
     jobname: null
 
     >>> # Increased verbosity:
-    >>> ketchup -v submit .\dummy_random_2_0.1.yml
-    INFO:tomato.ketchup.functions:Output path not set. Setting output path to 'C:\[...]'
+    >>> ketchup -v submit dummy_random_2_0.1.yml
+    INFO:tomato.ketchup.functions:Output path not set. Setting output path to '[...]'
     INFO:tomato.ketchup.functions:queueing 'payload' into 'queue'
     INFO:tomato.dbhandler.sqlite:inserting a new job into 'state'
     jobid: 4
     jobname: null
 
     >>> # With a job name:
-    >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
+    >>> ketchup submit dummy_random_2_0.1.yml -j dummy_random_2_0.1
     jobid: 5
     jobname: dummy_random_2_0.1
 
@@ -267,7 +265,6 @@ def snapshot(
 
     jobdir = Path(status.data.settings["jobs"]["storage"])
     for jobid in jobids:
-        job = jobs[jobid]
         root = jobdir / str(jobid)
         assert root.exists() and root.is_dir()
         jobfile = root / "jobdata.json"
@@ -305,7 +302,7 @@ def search(
     --------
 
     >>> # Create a snapshot in current working directory:
-    >>> ketchup submit .\dummy_random_2_0.1.yml -j dummy_random_2_0.1
+    >>> ketchup submit dummy_random_2_0.1.yml -j dummy_random_2_0.1
     >>> ketchup search dummy_random_2
     - jobid: 1
       jobname: dummy_random_2_0.1

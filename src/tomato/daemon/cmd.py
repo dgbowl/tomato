@@ -34,7 +34,7 @@ def status(msg: dict, daemon: Daemon) -> Reply:
 
 def stop(msg: dict, daemon: Daemon, jmgr: Thread = None) -> Reply:
     daemon.status = "stop"
-    logger.critical(f"stopping daemon")
+    logger.critical("stopping daemon")
     if jmgr is not None:
         jmgr.do_run = False
     return Reply(success=True, msg=daemon.status)

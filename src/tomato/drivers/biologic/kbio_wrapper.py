@@ -3,8 +3,6 @@ from typing import Union
 
 import logging
 
-log = logging.getLogger(__name__)
-
 from .kbio.kbio_api import KBIO_api
 from .kbio.kbio_types import PROG_STATE, VMP3_FAMILY, EccParams
 from .kbio.tech_types import TECH_ID
@@ -12,6 +10,8 @@ from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms, ECC_parm
 from .kbio.c_utils import c_is_64b
 
 from .tech_params import named_params, techfiles, datatypes, I_ranges, E_ranges
+
+log = logging.getLogger(__name__)
 
 
 def get_test_magic(
@@ -124,8 +124,8 @@ def translate(technique: dict, capacity: float) -> dict:
         }
         ci = 1
         if technique["technique"].endswith("current"):
-            I = current(technique["current"], capacity)
-            tech["Current_step"] = pad_steps(I, ns)
+            amps = current(technique["current"], capacity)
+            tech["Current_step"] = pad_steps(amps, ns)
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
         elif technique["technique"].endswith("voltage"):
             tech["Voltage_step"] = pad_steps(technique["voltage"], ns)
@@ -177,8 +177,8 @@ def translate(technique: dict, capacity: float) -> dict:
                     tech[f"Test{ci}_Value"] = pad_steps(val, ns)
                     ci += 1
         if technique["technique"].endswith("current"):
-            I = current(technique["current"], capacity)
-            tech["Current_step"] = pad_steps(I, ns)
+            amps = current(technique["current"], capacity)
+            tech["Current_step"] = pad_steps(amps, ns)
             tech["Begin_measuring_E"] = technique.get("scan_start", 0.0)
             tech["End_measuring_E"] = technique.get("scan_end", 1.0)
             tech["Record_every_dI"] = technique.get("record_every_dI", 0.001)

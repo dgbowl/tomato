@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Union, Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
-import toml
 
 
 class Device(BaseModel):

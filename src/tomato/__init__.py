@@ -1,23 +1,15 @@
 import sys
-import os
-import subprocess
-import textwrap
 from pathlib import Path
-from datetime import datetime, timezone
-from importlib import metadata
 
 import argparse
 import logging
-import psutil
 import zmq
 import appdirs
 import yaml
-import toml
-
-sys.path += sys.modules["tomato"].__path__
 
 from tomato import tomato, ketchup, _version
 
+sys.path += sys.modules["tomato"].__path__
 
 __version__ = _version.get_versions()["version"]
 VERSION = __version__
