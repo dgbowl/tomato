@@ -2,12 +2,9 @@ import json
 import os
 from pathlib import Path
 import yaml
-import subprocess
-import pytest
 import zmq
 
 from tomato import tomato
-from tomato.models import Reply
 
 PORT = 12345
 CTXT = zmq.Context()
@@ -18,7 +15,7 @@ kwargs = dict(port=PORT, context=CTXT, timeout=timeout)
 def test_tomato_status_down():
     ret = tomato.status(**kwargs)
     print(f"{ret=}")
-    assert ret.success == False
+    assert ret.success is False
     assert "tomato not running" in ret.msg
 
 
@@ -33,7 +30,7 @@ def test_tomato_start_no_init(datadir, stop_tomato_daemon):
     os.chdir(datadir)
     ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     print(f"{ret=}")
-    assert ret.success == False
+    assert ret.success is False
     assert "settings file not found" in ret.msg
 
 
@@ -50,7 +47,7 @@ def test_tomato_start_double(datadir, stop_tomato_daemon):
     test_tomato_start_with_init(datadir, stop_tomato_daemon)
     ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     print(f"{ret=}")
-    assert ret.success == False
+    assert ret.success is False
     assert f"port {PORT} is already in use" in ret.msg
 
 
@@ -84,11 +81,11 @@ def test_tomato_pipeline(datadir, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert ret.data.sampleid == "test"
-    assert ret.data.ready == False
+    assert ret.data.ready is False
 
     ret = tomato.pipeline_load(**kwargs, pipeline="dummy-5", sampleid="abcdefg")
     print(f"{ret=}")
-    assert ret.success == False
+    assert ret.success is False
     assert "pipeline dummy-5 is not empty" in ret.msg
     assert ret.data.sampleid == "test"
 
@@ -108,30 +105,30 @@ def test_tomato_pipeline(datadir, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert ret.data.sampleid is None
-    assert ret.data.ready == False
+    assert ret.data.ready is False
 
     ret = tomato.pipeline_eject(**kwargs, pipeline="dummy-5")
     print(f"{ret=}")
     assert ret.success
     assert ret.data.sampleid is None
-    assert ret.data.ready == False
+    assert ret.data.ready is False
 
 
 def test_tomato_pipeline_invalid(datadir, stop_tomato_daemon):
     test_tomato_start_with_init(datadir, stop_tomato_daemon)
     ret = tomato.pipeline_load(**kwargs, pipeline="bogus", sampleid="test")
     print(f"{ret=}")
-    assert ret.success == False
+    assert ret.success is False
     assert "pipeline bogus not found" in ret.msg
 
     ret = tomato.pipeline_eject(**kwargs, pipeline="bogus")
     print(f"{ret=}")
-    assert ret.success == False
+    assert ret.success is False
     assert "pipeline bogus not found" in ret.msg
 
     ret = tomato.pipeline_ready(**kwargs, pipeline="bogus")
     print(f"{ret=}")
-    assert ret.success == False
+    assert ret.success is False
     assert "pipeline bogus not found" in ret.msg
 
 
@@ -149,7 +146,7 @@ def test_tomato_log_verbosity_default(start_tomato_daemon, stop_tomato_daemon):
 def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
     context = zmq.Context()
     req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:12345")
+    req.connect("tcp://127.0.0.1:12345")
     req.send_pyobj(dict(cdm="typo"))
     rep = req.recv_pyobj()
     print(f"{rep=}")

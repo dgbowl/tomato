@@ -1,14 +1,9 @@
-import json
 import os
-from pathlib import Path
-import yaml
-import subprocess
 import pytest
 import zmq
 import time
 
 from tomato import ketchup, tomato
-from tomato.models import Reply
 
 PORT = 12345
 CTXT = zmq.Context()
@@ -105,7 +100,7 @@ def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon
 
 def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon)
+    test_ketchup_status_running(*args)
     time.sleep(10)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])
@@ -116,7 +111,7 @@ def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemo
 
 def test_ketchup_cancel(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon)
+    test_ketchup_status_running(*args)
     time.sleep(1)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1, 2])
