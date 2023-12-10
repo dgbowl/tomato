@@ -15,7 +15,7 @@ def merge_pipelines(
             if pip.jobid is not None:
                 ret[pname] = pip
         else:
-            if pip == new[pname]:
+            if pip.devs == new[pname].devs:
                 ret[pname] = pip
             elif pip.jobid is None:
                 ret[pname] = new[pname]

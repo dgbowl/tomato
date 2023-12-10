@@ -23,3 +23,4 @@ def load(daemon: Daemon):
     daemon.jobs = loaded.jobs
     daemon.pips = loaded.pips
     daemon.devs = loaded.devs
+    daemon.nextjob = loaded.nextjob

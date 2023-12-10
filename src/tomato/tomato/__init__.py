@@ -64,7 +64,6 @@ def load_device_file(yamlpath: Path) -> dict:
 def get_pipelines(devs: dict[str, Device], pipelines: list) -> dict[str, Pipeline]:
     pips = {}
     for pip in pipelines:
-        print(f"{pip=}")
         if "*" in pip["name"]:
             data = {"name": pip["name"], "devs": {}}
             if len(pip["devices"]) > 1:
@@ -106,7 +105,7 @@ def status(
     logger.debug(f"checking status of tomato on port {port}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="status", with_data=with_data))
+    req.send_pyobj(dict(cmd="status", with_data=with_data, sender=f"{__name__}.status"))
     poller = zmq.Poller()
     poller.register(req, zmq.POLLIN)
     events = dict(poller.poll(timeout))

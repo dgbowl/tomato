@@ -2,6 +2,7 @@ import os
 import subprocess
 import logging
 import json
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import currentThread
@@ -176,7 +177,7 @@ def manager(port: int, context: zmq.Context):
     poller.register(req, zmq.POLLIN)
     timeout = 1000
     while getattr(thread, "do_run"):
-        req.send_pyobj(dict(cmd="status", with_data=True))
+        req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
         events = dict(poller.poll(timeout))
         if req not in events:
             logger.warning(f"could not contact daemon in {timeout} ms")
@@ -186,4 +187,5 @@ def manager(port: int, context: zmq.Context):
         manage_running_pips(daemon, req)
         matched_pips = check_queued_jobs(daemon, req)
         action_queued_jobs(daemon, matched_pips, req)
+        time.sleep(0.5)
     logger.info("instructed to quit")
