@@ -1,0 +1,36 @@
+---
+name: Test
+on:
+    workflow_call:
+        inputs:
+            os:
+                required: true
+                type: string
+            pyver:
+                required: true
+                type: string
+
+jobs:
+    test:
+        runs-on: ${{ inputs.os }}
+        steps:
+          - uses: actions/checkout@v4
+          - uses: actions/setup-python@v4
+            with:
+                python-version: ${{ inputs.pyver }}
+          - uses: actions/download-artifact@v3
+            with:
+                name: dist-${{ inputs.os }}-${{ inputs.pyver }}
+          - uses: jannekem/run-python-script-action@v1
+            with:
+                script: |
+                    import os
+                    import subprocess
+                    fn = [f for f in os.listdir() if f.endswith('whl') and f.startswith('tomato')][0]
+                    subprocess.run(["pip", "install", f"{fn}[testing]"])
+          - name: Print version
+            shell: bash
+            run: tomato --version
+          - name: Run pytest
+            shell: bash
+            run: pytest -vv
