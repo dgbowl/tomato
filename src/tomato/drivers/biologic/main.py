@@ -51,8 +51,6 @@ def safe_api_connect(api,
         except Exception as e:
             time.sleep(timeout)
     raise Exception(f"Failed to connect after {retries} retries")
-
-
 def safe_api_disconnect(api,
                         id_,
                         retries: int = 100,
@@ -133,7 +131,6 @@ def get_status(
             safe_api_disconnect(api, id_)
         except Exception as e:
             logger.critical(f"{e=}")
-            raise
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
@@ -190,7 +187,6 @@ def get_data(
             safe_api_disconnect(api, id_)
         except Exception as e:
             logger.critical(f"{e=}")
-            raise
     dt = datetime.now(timezone.utc)
     data = parse_raw_data(api, data, device_info.model)
     return dt.timestamp(), data["technique"]["data_rows"], data
@@ -265,7 +261,6 @@ def start_job(
             safe_api_disconnect(api, id_)
         except Exception as e:
             logger.critical(f"{e=}")
-            raise
     dt = datetime.now(timezone.utc)
     logger.info(f"run started at '{dt}'")
     return dt.timestamp()
@@ -312,7 +307,6 @@ def stop_job(
             safe_api_disconnect(api, id_)
         except Exception as e:
             logger.critical(f"{e=}")
-            raise
     if jobqueue:
         jobqueue.close()
     else:
