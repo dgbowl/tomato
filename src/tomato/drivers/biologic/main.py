@@ -10,11 +10,10 @@ from .kbio_wrapper import (
     get_kbio_api,
 )
 
-def safe_api_connect(api,
-                    address: str,
-                    retries: int = 100,
-                    timeout: int = 10
-                    ) -> tuple:
+
+def safe_api_connect(
+    api, address: str, lockpath: str, retries: int = 100, time_sleep: int = 10
+) -> tuple:
     """
     Attempt to establish a connection with the device, retrying if necessary.
 
@@ -30,7 +29,7 @@ def safe_api_connect(api,
         The IP address of the device to connect to.
     retries : int, optional
         The number of times to retry the connection attempt. Default is 100.
-    timeout : int, optional
+    time_sleep : int, optional
         The time in seconds to wait between retries. Default is 10.
 
     Returns
@@ -46,15 +45,17 @@ def safe_api_connect(api,
     """
     for _ in range(retries):
         try:
-            id_, device_info = api.Connect(address)
-            return id_, device_info
+            with FileLock(lockpath, timeout=60):
+                id_, device_info = api.Connect(address)
+                return id_, device_info
         except Exception as e:
-            time.sleep(timeout)
+            time.sleep(time_sleep)
     raise Exception(f"Failed to connect after {retries} retries")
-def safe_api_disconnect(api,
-                        id_,
-                        retries: int = 100,
-                        timeout: int = 10):
+
+
+def safe_api_disconnect(
+    api, id_, lockpath: str, retries: int = 100, time_sleep: int = 10
+):
     """
     Attempt to disconnect from the device, retrying if necessary.
 
@@ -70,7 +71,7 @@ def safe_api_disconnect(api,
         The ID of the device to disconnect from.
     retries : int, optional
         The number of times to retry the disconnection attempt. Default is 100.
-    timeout : int, optional
+    time_sleep : int, optional
         The time in seconds to wait between retries. Default is 10.
 
     Raises
@@ -81,12 +82,11 @@ def safe_api_disconnect(api,
     """
     for _ in range(retries):
         try:
-            api.Disconnect(id_)
-            return
+            with FileLock(lockpath, timeout=60):
+                api.Disconnect(id_)
         except Exception as e:
-            time.sleep(timeout)
+            time.sleep(time_sleep)
     raise Exception(f"Failed to disconnect after {retries} retries")
-
 
 
 def get_status(
@@ -97,7 +97,7 @@ def get_status(
     dllpath: str = None,
     lockpath: str = None,
     **kwargs: dict,
-    ) -> tuple[float, dict]:
+) -> tuple[float, dict]:
     """
     Get the current status of the device.
 
@@ -121,16 +121,15 @@ def get_status(
     api = get_kbio_api(dllpath)
     metadata = {}
     metadata["dll_version"] = api.GetLibVersion()
-    with FileLock(lockpath, timeout=60) as fh:
-        try:
-            logger.info(f"connecting to '{address}:{channel}'")
-            id_, device_info = safe_api_connect(api, address)
-            logger.info(f"getting status of '{address}:{channel}'")
-            channel_info = api.GetChannelInfo(id_, channel)
-            logger.info(f"disconnecting from '{address}:{channel}'")
-            safe_api_disconnect(api, id_)
-        except Exception as e:
-            logger.critical(f"{e=}")
+    try:
+        logger.info(f"connecting to '{address}:{channel}'")
+        id_, device_info = safe_api_connect(api, address, lockpath)
+        logger.info(f"getting status of '{address}:{channel}'")
+        channel_info = api.GetChannelInfo(id_, channel)
+        logger.info(f"disconnecting from '{address}:{channel}'")
+        safe_api_disconnect(api, id_, lockpath)
+    except Exception as e:
+        logger.critical(f"{e=}")
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
@@ -147,6 +146,7 @@ def get_status(
     dt = datetime.now(timezone.utc)
     return dt.timestamp(), ready, metadata
 
+
 def get_data(
     address: str,
     channel: int,
@@ -155,7 +155,7 @@ def get_data(
     dllpath: str = None,
     lockpath: str = None,
     **kwargs: dict,
-    ) -> tuple[float, dict]:
+) -> tuple[float, dict]:
     """
     Get cached data from the device.
 
@@ -177,19 +177,19 @@ def get_data(
 
     """
     api = get_kbio_api(dllpath)
-    with FileLock(lockpath, timeout=60) as fh:
-        try:
-            logger.info(f"connecting to '{address}:{channel}'")
-            id_, device_info = safe_api_connect(api, address)
-            logger.info(f"getting data from '{address}:{channel}'")
-            data = api.GetData(id_, channel)
-            logger.info(f"disconnecting from '{address}:{channel}'")
-            safe_api_disconnect(api, id_)
-        except Exception as e:
-            logger.critical(f"{e=}")
+    try:
+        logger.info(f"connecting to '{address}:{channel}'")
+        id_, device_info = safe_api_connect(api, address)
+        logger.info(f"getting data from '{address}:{channel}'")
+        data = api.GetData(id_, channel)
+        logger.info(f"disconnecting from '{address}:{channel}'")
+        safe_api_disconnect(api, id_)
+    except Exception as e:
+        logger.critical(f"{e=}")
     dt = datetime.now(timezone.utc)
     data = parse_raw_data(api, data, device_info.model)
     return dt.timestamp(), data["technique"]["data_rows"], data
+
 
 def start_job(
     address: str,
@@ -201,7 +201,7 @@ def start_job(
     lockpath: str = None,
     capacity: float = 0.0,
     **kwargs: dict,
-    ) -> float:
+) -> float:
     """
     Start a job on the device.
 
@@ -238,32 +238,32 @@ def start_job(
     logger.debug("translating payload to ECC")
     eccpars = payload_to_ecc(api, payload, capacity)
     ntechs = len(eccpars)
-    with FileLock(lockpath, timeout=60) as fh:
-        try:
-            first = True
-            last = False
-            ti = 1
-            logger.info(f"connecting to '{address}:{channel}'")
-            id_, device_info = safe_api_connect(api, address)
-            for techname, pars in eccpars:
-                if ti == ntechs:
-                    last = True
-                techfile = get_kbio_techpath(dllpath, techname, device_info.model)
-                logger.info(f"loading technique {ti}: '{techname}'")
-                api.LoadTechnique(
-                    id_, channel, techfile, pars, first=first, last=last, display=False
-                )
-                ti += 1
-                first = False
-            logger.info(f"starting run on '{address}:{channel}'")
-            api.StartChannel(id_, channel)
-            logger.info(f"disconnecting from '{address}:{channel}'")
-            safe_api_disconnect(api, id_)
-        except Exception as e:
-            logger.critical(f"{e=}")
+    try:
+        first = True
+        last = False
+        ti = 1
+        logger.info(f"connecting to '{address}:{channel}'")
+        id_, device_info = safe_api_connect(api, address)
+        for techname, pars in eccpars:
+            if ti == ntechs:
+                last = True
+            techfile = get_kbio_techpath(dllpath, techname, device_info.model)
+            logger.info(f"loading technique {ti}: '{techname}'")
+            api.LoadTechnique(
+                id_, channel, techfile, pars, first=first, last=last, display=False
+            )
+            ti += 1
+            first = False
+        logger.info(f"starting run on '{address}:{channel}'")
+        api.StartChannel(id_, channel)
+        logger.info(f"disconnecting from '{address}:{channel}'")
+        safe_api_disconnect(api, id_)
+    except Exception as e:
+        logger.critical(f"{e=}")
     dt = datetime.now(timezone.utc)
     logger.info(f"run started at '{dt}'")
     return dt.timestamp()
+
 
 def stop_job(
     address: str,
@@ -273,7 +273,7 @@ def stop_job(
     dllpath: str = None,
     lockpath: str = None,
     **kwargs: dict,
-    ) -> float:
+) -> float:
     """
     Stop a job running on the device.
 
@@ -297,16 +297,15 @@ def stop_job(
         A timestamp corresponding to the start of the job execution.
     """
     api = get_kbio_api(dllpath)
-    with FileLock(lockpath, timeout=60) as fh:
-        try:
-            logger.info(f"connecting to '{address}:{channel}'")
-            id_, device_info = safe_api_connect(api, address)
-            logger.info(f"stopping run on '{address}:{channel}'")
-            api.StopChannel(id_, channel)
-            logger.info(f"run stopped at '{dt}'")
-            safe_api_disconnect(api, id_)
-        except Exception as e:
-            logger.critical(f"{e=}")
+    try:
+        logger.info(f"connecting to '{address}:{channel}'")
+        id_, device_info = safe_api_connect(api, address)
+        logger.info(f"stopping run on '{address}:{channel}'")
+        api.StopChannel(id_, channel)
+        logger.info(f"run stopped at '{dt}'")
+        safe_api_disconnect(api, id_)
+    except Exception as e:
+        logger.critical(f"{e=}")
     if jobqueue:
         jobqueue.close()
     else:
