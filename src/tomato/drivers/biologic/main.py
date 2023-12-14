@@ -12,7 +12,7 @@ from .kbio_wrapper import (
 
 
 def safe_api_connect(
-    api, address: str, lockpath: str, retries: int = 100, time_sleep: int = 10
+    api, address: str, lockpath: str, retries: int, time_sleep: int
 ) -> tuple:
     """
     Attempt to establish a connection with the device, retrying if necessary.
@@ -27,10 +27,11 @@ def safe_api_connect(
         The API object used for making the connection.
     address : str
         The IP address of the device to connect to.
-    retries : int, optional
-        The number of times to retry the connection attempt. Default is 100.
-    time_sleep : int, optional
-        The time in seconds to wait between retries. Default is 10.
+    retries : int
+        The number of times to retry the connection attempt. This value can be specified from the setting.toml file
+        where tomato is installed.
+    time_sleep : int
+        The time in seconds to wait between retries.
 
     Returns
     -------
@@ -53,9 +54,7 @@ def safe_api_connect(
     raise Exception(f"Failed to connect after {retries} retries")
 
 
-def safe_api_disconnect(
-    api, id_, lockpath: str, retries: int = 100, time_sleep: int = 10
-):
+def safe_api_disconnect(api, id_, lockpath: str, retries: int, time_sleep: int):
     """
     Attempt to disconnect from the device, retrying if necessary.
 
@@ -69,10 +68,11 @@ def safe_api_disconnect(
         The API object used for disconnecting.
     id_
         The ID of the device to disconnect from.
-    retries : int, optional
-        The number of times to retry the disconnection attempt. Default is 100.
-    time_sleep : int, optional
-        The time in seconds to wait between retries. Default is 10.
+    retries : int
+        The number of times to retry the disconnection attempt. This value can be specified from the setting.toml file
+        where tomato is installed.
+    time_sleep : int
+        The time in seconds to wait between retries.
 
     Raises
     ------
@@ -96,6 +96,8 @@ def get_status(
     logger: logging.Logger,
     dllpath: str = None,
     lockpath: str = None,
+    retries: int = 10,
+    time_sleep: int = 10,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -123,11 +125,11 @@ def get_status(
     metadata["dll_version"] = api.GetLibVersion()
     try:
         logger.info(f"connecting to '{address}:{channel}'")
-        id_, device_info = safe_api_connect(api, address, lockpath)
+        id_, device_info = safe_api_connect(api, address, lockpath, retries, time_sleep)
         logger.info(f"getting status of '{address}:{channel}'")
         channel_info = api.GetChannelInfo(id_, channel)
         logger.info(f"disconnecting from '{address}:{channel}'")
-        safe_api_disconnect(api, id_, lockpath)
+        safe_api_disconnect(api, id_, lockpath, retries, time_sleep)
     except Exception as e:
         logger.critical(f"{e=}")
     metadata["device_model"] = device_info.model
@@ -154,6 +156,8 @@ def get_data(
     logger: logging.Logger,
     dllpath: str = None,
     lockpath: str = None,
+    retries: int = 10,
+    time_sleep: int = 10,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -179,11 +183,11 @@ def get_data(
     api = get_kbio_api(dllpath)
     try:
         logger.info(f"connecting to '{address}:{channel}'")
-        id_, device_info = safe_api_connect(api, address)
+        id_, device_info = safe_api_connect(api, address, lockpath, retries, time_sleep)
         logger.info(f"getting data from '{address}:{channel}'")
         data = api.GetData(id_, channel)
         logger.info(f"disconnecting from '{address}:{channel}'")
-        safe_api_disconnect(api, id_)
+        safe_api_disconnect(api, id_, lockpath, retries, time_sleep)
     except Exception as e:
         logger.critical(f"{e=}")
     dt = datetime.now(timezone.utc)
@@ -199,6 +203,8 @@ def start_job(
     payload: list[dict],
     dllpath: str = None,
     lockpath: str = None,
+    retries: int = 10,
+    time_sleep: int = 10,
     capacity: float = 0.0,
     **kwargs: dict,
 ) -> float:
@@ -243,7 +249,7 @@ def start_job(
         last = False
         ti = 1
         logger.info(f"connecting to '{address}:{channel}'")
-        id_, device_info = safe_api_connect(api, address)
+        id_, device_info = safe_api_connect(api, address, lockpath, retries, time_sleep)
         for techname, pars in eccpars:
             if ti == ntechs:
                 last = True
@@ -257,7 +263,7 @@ def start_job(
         logger.info(f"starting run on '{address}:{channel}'")
         api.StartChannel(id_, channel)
         logger.info(f"disconnecting from '{address}:{channel}'")
-        safe_api_disconnect(api, id_)
+        safe_api_disconnect(api, id_, lockpath, retries, time_sleep)
     except Exception as e:
         logger.critical(f"{e=}")
     dt = datetime.now(timezone.utc)
@@ -272,6 +278,8 @@ def stop_job(
     logger: multiprocessing.Queue,
     dllpath: str = None,
     lockpath: str = None,
+    retries: int = 10,
+    time_sleep: int = 10,
     **kwargs: dict,
 ) -> float:
     """
@@ -299,11 +307,11 @@ def stop_job(
     api = get_kbio_api(dllpath)
     try:
         logger.info(f"connecting to '{address}:{channel}'")
-        id_, device_info = safe_api_connect(api, address)
+        id_, device_info = safe_api_connect(api, address, lockpath, retries, time_sleep)
         logger.info(f"stopping run on '{address}:{channel}'")
         api.StopChannel(id_, channel)
         logger.info(f"run stopped at '{dt}'")
-        safe_api_disconnect(api, id_)
+        safe_api_disconnect(api, id_, lockpath, retries, time_sleep)
     except Exception as e:
         logger.critical(f"{e=}")
     if jobqueue:
