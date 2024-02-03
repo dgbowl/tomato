@@ -47,11 +47,11 @@ setuptools.setup(
         "testing": [
             "pytest~=7.4",
         ],
-        "docs": [
-            "sphinx==4.5.0",
-            "sphinx-rtd-theme",
-            "sphinx-autodoc-typehints",
-            "autodoc-pydantic",
+        "docs":  [
+            "sphinx~=7.2",
+            "sphinx-rtd-theme~=1.3.0",
+            "sphinx-autodoc-typehints < 1.20.0",
+            "autodoc-pydantic>=2.0.0",
         ],
     },
     entry_points={
