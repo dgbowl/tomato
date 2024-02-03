@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Usage &mdash; tomato master documentation</title>
@@ -14,10 +14,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=30d551ce"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -100,7 +101,7 @@
            <div itemprop="articleBody">
              
   <section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
 <p>The <strong>tomato</strong> package consists of two user-facing utilities:</p>
 <blockquote>
 <div><ul class="simple">
@@ -109,7 +110,7 @@
 </ul>
 </div></blockquote>
 <section id="starting-tomato-daemon">
-<h2>Starting <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a><a class="headerlink" href="#starting-tomato-daemon" title="Permalink to this headline"></a></h2>
+<h2>Starting <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a><a class="headerlink" href="#starting-tomato-daemon" title="Link to this heading"></a></h2>
 <p>Provided a <em>settings file</em> exists, the job scheduler <code class="docutils literal notranslate"><span class="pre">tomato</span></code> can be started on the
 default <em>port</em> using:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>start
@@ -133,7 +134,7 @@ and <code class="docutils literal notranslate"><span class="pre">ketchup</span><
 </div>
 </section>
 <section id="using-tomato">
-<h2>Using <a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a><a class="headerlink" href="#using-tomato" title="Permalink to this headline"></a></h2>
+<h2>Using <a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a><a class="headerlink" href="#using-tomato" title="Link to this heading"></a></h2>
 <p>The <a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.tomato</span></code></a> executable is used to configure, start, and manage the
 <strong>tomato</strong> daemon, as well as load / eject samples to / from <em>pipelines</em> and mark them
 ready.</p>
@@ -218,7 +219,7 @@ if the <em>pipeline</em> has a job running.</p>
 </div></blockquote>
 </section>
 <section id="using-ketchup">
-<h2>Using <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a><a class="headerlink" href="#using-ketchup" title="Permalink to this headline"></a></h2>
+<h2>Using <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a><a class="headerlink" href="#using-ketchup" title="Link to this heading"></a></h2>
 <p>The <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.ketchup</span></code></a> executable is used to submit <em>payloads</em> to the <em>queue</em>, and
 to check the status of and to cancel <em>jobs</em> in the <em>queue</em>.</p>
 <blockquote>
@@ -246,10 +247,6 @@ documentation of the <a class="reference internal" href="apidoc/tomato.daemon.ht
 </div>
 <p>The list of possible <em>job</em> statuses is:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 12%" />
-<col style="width: 88%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Status</p></th>
 <th class="head"><p>Meaning</p></th>
@@ -313,9 +310,9 @@ of the <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tom
 </div>
 </section>
 <section id="accessing-output-data">
-<h2>Accessing output data<a class="headerlink" href="#accessing-output-data" title="Permalink to this headline"></a></h2>
+<h2>Accessing output data<a class="headerlink" href="#accessing-output-data" title="Link to this heading"></a></h2>
 <section id="final-job-data">
-<h3>Final job data<a class="headerlink" href="#final-job-data" title="Permalink to this headline"></a></h3>
+<h3>Final job data<a class="headerlink" href="#final-job-data" title="Link to this heading"></a></h3>
 <p>By default, all data in the <em>job</em> folder is processed using <code class="docutils literal notranslate"><span class="pre">yadg</span></code> to create
 a <em>datagram</em>, and zipped into a zip archive. This zip archive includes all raw
 data files, the log file of the <strong>tomato</strong> job, and a copy of the full <em>payload</em>
@@ -326,7 +323,7 @@ will be placed is the <code class="docutils literal notranslate"><span class="pr
 the default filenames of the returned files are <code class="docutils literal notranslate"><span class="pre">results.&lt;jobid&gt;.[zip,json]</span></code>.</p>
 </section>
 <section id="data-snapshotting">
-<h3>Data snapshotting<a class="headerlink" href="#data-snapshotting" title="Permalink to this headline"></a></h3>
+<h3>Data snapshotting<a class="headerlink" href="#data-snapshotting" title="Link to this heading"></a></h3>
 <p>While the <em>job</em> is running, access to an up-to-date snapshot of the data is provided
 by <a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>ketchup<span class="w"> </span>snapshot<span class="w"> </span>&lt;jobid&gt;
