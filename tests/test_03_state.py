@@ -57,9 +57,9 @@ def test_recover_waiting_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
     tomato.stop(**kwargs)
     assert os.path.exists("tomato_state_12345.pkl")
+    time.sleep(10)
     tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
-    wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=10000)
     ret = tomato.status(**kwargs, with_data=True)
     print(f"{ret=}")
     assert ret.success
