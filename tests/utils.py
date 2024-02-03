@@ -7,7 +7,7 @@ import logging
 from typing import Callable, Union, Sequence
 import psutil
 import zmq
-from tomato import tomato
+from tomato import tomato, ketchup
 
 logger = logging.getLogger(__name__)
 
@@ -186,10 +186,38 @@ def job_status(jobid):
     return yml
 
 
-def wait_until_tomato_running(port: int, timeout: int, context: zmq.Context):
+def wait_until_tomato_running(port: int, timeout: int):
     t0 = time.perf_counter()
-    while time.perf_counter() - t0 < timeout:
-        ret = tomato.status(port=port, timeout=1000, context=context)
-        if ret.success:
-            return ret
-    return ret
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        ret = subprocess.run(
+            ["tomato", "status", "-p", f"{port}"],
+            capture_output=True,
+            text=True,
+        )
+        data = yaml.safe_load(ret.stdout)
+        if data["success"]:
+           return True
+        print(f"{data=}")
+        time.sleep(timeout / 20000)
+    return False
+
+
+def wait_until_ketchup_status(
+    jobid: int,
+    status: str,
+    port: int,
+    timeout: int,
+):
+    t0 = time.perf_counter()
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        ret = subprocess.run(
+            ["ketchup", "status", "-p", f"{port}", f"{jobid}"],
+            capture_output=True,
+            text=True,
+        )
+        data = yaml.safe_load(ret.stdout)["data"]
+        if data[jobid]["status"] == status:
+           return True
+        print(f"{data=}")
+        time.sleep(timeout / 20000)
+    return False
