@@ -38,7 +38,7 @@ setuptools.setup(
         "toml~=0.10",
         "pyyaml~=6.0",
         "psutil~=5.9",
-        "yadg~=5.0",
+        "yadg==4.2.4",
         "dgbowl_schemas>=108",
         "filelock~=3.12",
         "pyzmq~=25.1",
@@ -51,7 +51,7 @@ setuptools.setup(
             "sphinx~=7.2",
             "sphinx-rtd-theme~=1.3.0",
             "sphinx-autodoc-typehints < 1.20.0",
-            "autodoc-pydantic>=2.0.0",
+            "autodoc-pydantic~=1.0.0",
         ],
     },
     entry_points={
