@@ -20,8 +20,8 @@ def test_recover_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     ketchup.submit(payload="dummy_random_5_2.yml", jobname="job-1", **kwargs)
     ketchup.submit(payload="dummy_random_5_2.yml", jobname="job-2", **kwargs)
     tomato.stop(**kwargs)
-    assert os.path.exists("tomato_state_12345.pkl")
     assert not wait_until_tomato_running(port=PORT, timeout=100)
+    assert os.path.exists("tomato_state_12345.pkl")
 
     tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
@@ -40,8 +40,8 @@ def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.pipeline_ready(**kwargs, pipeline="dummy-5")
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
     tomato.stop(**kwargs)
-    assert os.path.exists("tomato_state_12345.pkl")
     assert not wait_until_tomato_running(port=PORT, timeout=100)
+    assert os.path.exists("tomato_state_12345.pkl")
 
     tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
@@ -61,8 +61,8 @@ def test_recover_waiting_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.pipeline_ready(**kwargs, pipeline="dummy-5")
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
     tomato.stop(**kwargs)
-    assert os.path.exists("tomato_state_12345.pkl")
     assert not wait_until_tomato_running(port=PORT, timeout=100)
+    assert os.path.exists("tomato_state_12345.pkl")
 
     time.sleep(10)
 
@@ -86,8 +86,8 @@ def test_prune_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.status(**kwargs, with_data=True)
     print(f"{ret=}")
     tomato.stop(**kwargs)
-    assert os.path.exists("tomato_state_12345.pkl")
     assert not wait_until_tomato_running(port=PORT, timeout=100)
+    assert os.path.exists("tomato_state_12345.pkl")
 
     proc = psutil.Process(pid=ret.data.jobs[1].pid)
     proc.terminate()
