@@ -6,8 +6,6 @@ import yaml
 import logging
 from typing import Callable, Union, Sequence
 import psutil
-import zmq
-from tomato import tomato, ketchup
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +194,7 @@ def wait_until_tomato_running(port: int, timeout: int):
         )
         data = yaml.safe_load(ret.stdout)
         if data["success"]:
-           return True
+            return True
         print(f"{data=}")
         time.sleep(timeout / 20000)
     return False
@@ -217,7 +215,7 @@ def wait_until_ketchup_status(
         )
         data = yaml.safe_load(ret.stdout)["data"]
         if data[jobid]["status"] == status:
-           return True
+            return True
         print(f"{data=}")
         time.sleep(timeout / 20000)
     return False
