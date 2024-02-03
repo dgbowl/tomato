@@ -1,9 +1,9 @@
 import os
 import pytest
 import zmq
-import time
 
 from tomato import ketchup, tomato
+from .utils import wait_until_tomato_running, wait_until_ketchup_status
 
 PORT = 12345
 CTXT = zmq.Context()
@@ -19,6 +19,7 @@ kwargs = dict(port=PORT, timeout=1000, context=CTXT)
     ],
 )
 def test_ketchup_submit_one(pl, jn, datadir, start_tomato_daemon, stop_tomato_daemon):
+    assert wait_until_tomato_running(port=PORT, timeout=5000)
     os.chdir(datadir)
     ret = ketchup.submit(**kwargs, payload=pl, jobname=jn)
     print(f"{ret=}")
@@ -38,7 +39,7 @@ def test_ketchup_submit_two(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_ketchup_status_empty(start_tomato_daemon, stop_tomato_daemon):
-    kwargs = dict(port=PORT, timeout=1000, context=CTXT)
+    assert wait_until_tomato_running(port=PORT, timeout=5000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[])
     print(f"{ret=}")
@@ -87,7 +88,7 @@ def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon
     test_ketchup_submit_two(*args)
     tomato.pipeline_load(**kwargs, pipeline="dummy-5", sampleid="dummy_random_5_2")
     tomato.pipeline_ready(**kwargs, pipeline="dummy-5")
-    time.sleep(2)
+    wait_until_ketchup_status(jobid=2, status="r", port=PORT, timeout=5000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1, 2])
     print(f"{ret=}")
@@ -101,7 +102,7 @@ def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon
 def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_status_running(*args)
-    time.sleep(10)
+    wait_until_ketchup_status(jobid=2, status="c", port=PORT, timeout=30000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])
     print(f"{ret=}")
@@ -112,14 +113,13 @@ def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemo
 def test_ketchup_cancel(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_status_running(*args)
-    time.sleep(1)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1, 2])
     print(f"{ret=}")
     assert ret.success
     assert ret.data[1].status == "cd"
     assert ret.data[2].status == "rd"
-    time.sleep(5)
+    wait_until_ketchup_status(jobid=2, status="cd", port=PORT, timeout=5000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])
     print(f"{ret=}")
