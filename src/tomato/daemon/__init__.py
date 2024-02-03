@@ -4,6 +4,7 @@
 .. codeauthor::
     Peter Kraus
 """
+
 import logging
 import argparse
 from threading import Thread

@@ -19,6 +19,7 @@ Also includes the following *pipeline* management functions:
 - :func:`pipeline_ready` to mark a pipeline as ready
 
 """
+
 import os
 import subprocess
 import textwrap
