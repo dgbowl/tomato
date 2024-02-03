@@ -4,17 +4,19 @@
 .. codeauthor::
     Peter Kraus
 """
+
 import logging
 import argparse
 from threading import Thread
 from pathlib import Path
 import toml
-
+import time
 import zmq
 
 from tomato.models import Reply, Daemon
 import tomato.daemon.cmd as cmd
 import tomato.daemon.job as job
+import tomato.daemon.io as io
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +47,10 @@ def run_daemon():
     setup_logging(daemon)
     logger.info(f"logging set up with verbosity {daemon.verbosity}")
 
+    logger.debug("attempting to restore daemon state")
+    io.load(daemon)
+    logger.debug(f"{daemon=}")
+
     context = zmq.Context()
     rep = context.socket(zmq.REP)
     logger.debug(f"binding zmq.REP socket on port {daemon.port}")
@@ -54,6 +60,7 @@ def run_daemon():
 
     logger.debug("entering main loop")
     jmgr = None
+    t0 = time.process_time()
     while True:
         socks = dict(poller.poll(100))
         if rep in socks:
@@ -85,4 +92,9 @@ def run_daemon():
             logger.debug(f"reply with {ret=}")
             rep.send_pyobj(ret)
         if daemon.status == "stop":
+            io.store(daemon)
             break
+        tN = time.process_time()
+        if tN - t0 > 10:
+            io.store(daemon)
+            t0 = tN

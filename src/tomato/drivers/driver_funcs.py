@@ -233,8 +233,6 @@ def driver_worker(
     log.debug(f"started 'log_listener' on pid {listener.pid}")
 
     jobs = []
-    print(f"{devices=}")
-    print(f"{pipeline['devs']=}")
     for cname, comp in pipeline["devs"].items():
         dev = devices[cname]
         log.info(f"device id: {cname}")

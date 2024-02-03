@@ -14,6 +14,7 @@ functions:
 - :func:`search` to find a ``jobid`` of a *job* from ``jobname``
 
 """
+
 import json
 import logging
 from pathlib import Path

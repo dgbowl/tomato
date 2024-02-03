@@ -40,7 +40,6 @@ def wait_until_tomato_running(port: int, timeout: int):
         data = yaml.safe_load(ret.stdout)
         if data["success"]:
             return True
-        print(f"{data=}")
         time.sleep(timeout / 20000)
     return False
 
@@ -56,6 +55,5 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
         data = yaml.safe_load(ret.stdout)["data"]
         if data[jobid]["status"] == status:
             return True
-        print(f"{data=}")
         time.sleep(timeout / 20000)
     return False
