@@ -6,6 +6,8 @@ import yaml
 import logging
 from typing import Callable, Union, Sequence
 import psutil
+import zmq
+from tomato import tomato
 
 logger = logging.getLogger(__name__)
 
@@ -182,3 +184,12 @@ def job_status(jobid):
     )
     yml = yaml.safe_load(ret.stdout)
     return yml
+
+
+def wait_until_tomato_running(port: int, timeout: int, context: zmq.Context):
+    t0 = time.perf_counter()
+    while time.perf_counter() - t0 < timeout:
+        ret = tomato.status(port=port, timeout=1000, context=context)
+        if ret.success:
+            return ret
+    return ret

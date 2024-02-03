@@ -5,6 +5,7 @@ import yaml
 import zmq
 
 from tomato import tomato
+from .utils import wait_until_tomato_running
 
 PORT = 12345
 CTXT = zmq.Context()
@@ -139,13 +140,14 @@ def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
 
 
 def test_tomato_log_verbosity_default(start_tomato_daemon, stop_tomato_daemon):
+    assert wait_until_tomato_running(**kwargs).success
     assert Path("daemon_12345.log").exists()
     assert Path("daemon_12345.log").stat().st_size > 0
 
 
 def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
-    context = zmq.Context()
-    req = context.socket(zmq.REQ)
+    assert wait_until_tomato_running(**kwargs).success
+    req = CTXT.socket(zmq.REQ)
     req.connect("tcp://127.0.0.1:12345")
     req.send_pyobj(dict(cdm="typo"))
     rep = req.recv_pyobj()
