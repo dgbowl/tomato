@@ -2,6 +2,11 @@ from pydantic import BaseModel, Field
 from typing import Union, Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
 
+class Driver(BaseModel):
+    name: str
+    port: Optional[int] = None
+    pid: Optional[int] = None
+
 
 class Device(BaseModel):
     name: str
@@ -45,6 +50,7 @@ class Daemon(BaseModel, arbitrary_types_allowed=True):
     settings: dict
     pips: Mapping[str, Pipeline] = Field(default_factory=dict)
     devs: Mapping[str, Device] = Field(default_factory=dict)
+    drvs: Mapping[str, Driver] = Field(default_factory=dict)
     jobs: Mapping[int, Job] = Field(default_factory=dict)
     nextjob: int = 1
 
