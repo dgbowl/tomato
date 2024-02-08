@@ -17,6 +17,7 @@ from tomato.models import Reply, Daemon
 import tomato.daemon.cmd as cmd
 import tomato.daemon.job as job
 import tomato.daemon.io as io
+import tomato.daemon.driver as driver
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ def run_daemon():
 
     logger.debug("entering main loop")
     jmgr = None
+    dmgr = None
     t0 = time.process_time()
     while True:
         socks = dict(poller.poll(100))
@@ -72,11 +74,7 @@ def run_daemon():
             elif msg["cmd"] == "status":
                 ret = cmd.status(msg, daemon)
             elif msg["cmd"] == "stop":
-                ret = cmd.stop(msg, daemon)
-                if jmgr is not None:
-                    jmgr.do_run = False
-                    jmgr.join()
-                    logger.info("job manager thread joined successfully")
+                ret = cmd.stop(msg, daemon, jmgr, dmgr)
             elif msg["cmd"] == "setup":
                 settings = msg["settings"]
                 ret = cmd.setup(msg, daemon)
@@ -84,16 +82,32 @@ def run_daemon():
                     jmgr = Thread(target=job.manager, args=(daemon.port, context))
                     jmgr.do_run = True
                     jmgr.start()
-                    logger.info("job manager thread started")
+                if dmgr is None:
+                    dmgr = Thread(target=driver.manager, args=(daemon.port, context))
+                    dmgr.do_run = True
+                    dmgr.start()
             elif msg["cmd"] == "pipeline":
                 ret = cmd.pipeline(msg, daemon)
             elif msg["cmd"] == "job":
                 ret = cmd.job(msg, daemon)
+            elif msg["cmd"] == "driver":
+                ret = cmd.driver(msg, daemon)
             logger.debug(f"reply with {ret=}")
             rep.send_pyobj(ret)
         if daemon.status == "stop":
-            io.store(daemon)
-            break
+            if jmgr is not None:
+                jmgr.join(1e-3)
+                if not jmgr.is_alive():
+                    jmgr = None
+                    logger.info("job manager thread joined")
+            if dmgr is not None:
+                dmgr.join(1e-3)
+                if not dmgr.is_alive():
+                    dmgr = None
+                    logger.info("driver manager thread joined")
+            if jmgr is None and dmgr is None:
+                io.store(daemon)
+                break
         tN = time.process_time()
         if tN - t0 > 10:
             io.store(daemon)

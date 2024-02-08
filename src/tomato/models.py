@@ -2,10 +2,18 @@ from pydantic import BaseModel, Field
 from typing import Union, Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
 
+class Param(BaseModel):
+    name: str
+    rw: bool = False
+    status: bool = False
+
+
 class Driver(BaseModel):
     name: str
     port: Optional[int] = None
     pid: Optional[int] = None
+    spawned_at: Optional[str] = None
+    connected_at: Optional[str] = None
 
 
 class Device(BaseModel):

@@ -5,7 +5,7 @@ import yaml
 import zmq
 
 from tomato import tomato
-from .utils import wait_until_tomato_running
+from .utils import wait_until_tomato_running, wait_until_tomato_stopped
 
 PORT = 12345
 CTXT = zmq.Context()
@@ -154,3 +154,17 @@ def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
     print(f"{rep=}")
     assert rep.success is False
     assert "msg without cmd" in rep.msg
+
+
+def test_tomato_stop(start_tomato_daemon, stop_tomato_daemon):
+    #test_tomato_start_with_init(datadir, stop_tomato_daemon)
+    assert wait_until_tomato_running(port=PORT, timeout=5000)
+    ret = tomato.stop(**kwargs)
+    assert ret.success
+    wait_until_tomato_stopped(port=PORT, timeout=5000)
+
+    assert Path("daemon_12345.log").exists()
+    with Path("daemon_12345.log").open() as logf:
+        text = logf.read()
+    assert 'driver manager thread joined' in text
+    assert 'job manager thread joined' in text

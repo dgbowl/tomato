@@ -1,4 +1,4 @@
-from tomato.models import Daemon, Reply, Pipeline, Job
+from tomato.models import Daemon, Driver, Reply, Pipeline, Job
 from copy import deepcopy
 from threading import Thread
 import logging
@@ -32,11 +32,13 @@ def status(msg: dict, daemon: Daemon) -> Reply:
         return Reply(success=True, msg=daemon.status)
 
 
-def stop(msg: dict, daemon: Daemon, jmgr: Thread = None) -> Reply:
+def stop(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -> Reply:
     daemon.status = "stop"
     logger.critical("stopping daemon")
-    if jmgr is not None:
-        jmgr.do_run = False
+    for mgr, label in [(jmgr, "job"), (dmgr, "driver")]:
+        if mgr is not None:
+            logger.debug(f"stopping {label} manager thread")
+            mgr.do_run = False
     return Reply(success=True, msg=daemon.status)
 
 
@@ -70,3 +72,17 @@ def job(msg: dict, daemon: Daemon) -> Reply:
             logger.info(f"setting job {jobid}.{k} to {v}")
             setattr(daemon.jobs[jobid], k, v)
     return Reply(success=True, msg=daemon.status, data=daemon.jobs[jobid])
+
+
+def driver(msg: dict, daemon: Daemon) -> Reply:
+    name = msg.get("name", None)
+    if name is None:
+        logger.error()
+        return Reply(success=False, msg=msg)
+    if name not in daemon.drvs:
+        daemon.drvs[name] = Driver(name=name, **msg.get("params", {}))
+    else:
+        for k, v in msg.get("params", {}).items():
+            logger.info(f"setting driver {name}.{k} to {v}")
+            setattr(daemon.drvs[name], k, v)
+    return Reply(success=True, msg=daemon.status, data=daemon.drvs[name])

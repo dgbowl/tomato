@@ -44,6 +44,21 @@ def wait_until_tomato_running(port: int, timeout: int):
     return False
 
 
+def wait_until_tomato_stopped(port: int, timeout: int):
+    t0 = time.perf_counter()
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        ret = subprocess.run(
+            ["tomato", "status", "-p", f"{port}"],
+            capture_output=True,
+            text=True,
+        )
+        data = yaml.safe_load(ret.stdout)
+        if not data["success"]:
+            return True
+        time.sleep(timeout / 20000)
+    return False
+
+
 def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
     t0 = time.perf_counter()
     while (time.perf_counter() - t0) < (timeout / 1000):
