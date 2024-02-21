@@ -2,11 +2,6 @@ from pydantic import BaseModel, Field
 from typing import Union, Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
 
-class Param(BaseModel):
-    name: str
-    rw: bool = False
-    status: bool = False
-
 
 class Driver(BaseModel):
     name: str
@@ -14,6 +9,7 @@ class Driver(BaseModel):
     pid: Optional[int] = None
     spawned_at: Optional[str] = None
     connected_at: Optional[str] = None
+    settings: Mapping[str, Any] = Field(default_factory=dict)
 
 
 class Device(BaseModel):
@@ -23,7 +19,6 @@ class Device(BaseModel):
     channels: Optional[Sequence[int]] = None
     capabilities: Sequence[str]
     pollrate: int = 1
-    settings: Mapping[str, Any] = Field(default_factory=dict)
 
 
 class Pipeline(BaseModel):

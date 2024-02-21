@@ -76,16 +76,7 @@ def run_daemon():
             elif msg["cmd"] == "stop":
                 ret = cmd.stop(msg, daemon, jmgr, dmgr)
             elif msg["cmd"] == "setup":
-                settings = msg["settings"]
-                ret = cmd.setup(msg, daemon)
-                if jmgr is None:
-                    jmgr = Thread(target=job.manager, args=(daemon.port, context))
-                    jmgr.do_run = True
-                    jmgr.start()
-                if dmgr is None:
-                    dmgr = Thread(target=driver.manager, args=(daemon.port, context))
-                    dmgr.do_run = True
-                    dmgr.start()
+                ret, jmgr, dmgr = cmd.setup(msg, daemon, jmgr, dmgr)
             elif msg["cmd"] == "pipeline":
                 ret = cmd.pipeline(msg, daemon)
             elif msg["cmd"] == "job":

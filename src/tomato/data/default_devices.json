@@ -7,13 +7,21 @@
             "driver": "dummy",
             "capabilities": ["random", "sequential"],
             "pollrate": 1
+        },
+        {
+            "name": "dev-counter",
+            "driver": "example_counter",
+            "address": null,
+            "channels": [1],
+            "capabilities": ["count"],
+            "pollrate": 2
         }
     ],
     "pipelines": [
         {
-            "name": "dummy-*",
+            "name": "pip-counter",
             "devices": [
-                {"tag": "worker", "name": "dummy_device", "channel": "each"}
+                {"tag": "counter", "name": "dev-counter", "channel": 1}
             ]
         }
     ]

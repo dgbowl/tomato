@@ -167,7 +167,8 @@ def action_queued_jobs(daemon, matched, req):
             break
 
 
-def manager(port: int, context: zmq.Context):
+def manager(port: int):
+    context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
     thread = currentThread()
     logger.info("launched successfully")

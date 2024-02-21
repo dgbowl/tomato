@@ -2,6 +2,7 @@ from tomato.models import Daemon, Driver, Reply, Pipeline, Job
 from copy import deepcopy
 from threading import Thread
 import logging
+import tomato.daemon.job, tomato.daemon.driver
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ def merge_pipelines(
     for pname, pip in new.items():
         if pname not in cur:
             ret[pname] = pip
+    logger.critical(f"{ret=}")
     return ret
 
 
@@ -42,15 +44,24 @@ def stop(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) ->
     return Reply(success=True, msg=daemon.status)
 
 
-def setup(msg: dict, daemon: Daemon) -> Reply:
+def setup(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -> Reply:
     daemon.devs = msg["devs"]
     daemon.pips = merge_pipelines(daemon.pips, msg["pips"])
     if daemon.status == "bootstrap":
+        if jmgr is None:
+            jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,))
+            jmgr.do_run = True
+            jmgr.start()
+        if dmgr is None:
+            dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,))
+            dmgr.do_run = True
+            dmgr.start()
         logger.info(f"setup successful with pipelines: {list(daemon.pips.keys())}")
+        logger.critical(f"{daemon.pips=}")
         daemon.status = "running"
     else:
         logger.info(f"reload successful with pipelines: {list(daemon.pips.keys())}")
-    return Reply(success=True, msg=daemon.status, data=daemon)
+    return Reply(success=True, msg=daemon.status, data=daemon), jmgr, dmgr
 
 
 def pipeline(msg: dict, daemon: Daemon) -> Reply:
@@ -83,6 +94,9 @@ def driver(msg: dict, daemon: Daemon) -> Reply:
         daemon.drvs[name] = Driver(name=name, **msg.get("params", {}))
     else:
         for k, v in msg.get("params", {}).items():
+            if v is None or v == getattr(daemon.drvs[name], k):
+                continue
             logger.info(f"setting driver {name}.{k} to {v}")
+
             setattr(daemon.drvs[name], k, v)
     return Reply(success=True, msg=daemon.status, data=daemon.drvs[name])
