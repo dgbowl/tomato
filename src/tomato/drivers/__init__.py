@@ -9,15 +9,10 @@ import psutil
 if psutil.WINDOWS:
     from . import biologic
 
-from .driver_funcs import driver_api, driver_worker, driver_reset, tomato_job
+from .driver_funcs import tomato_job
 
 __all__ = [
-    "dummy",
-    "example_counter",
-    "driver_api",
-    "driver_worker",
-    "driver_reset",
-    "tomato_job",
+   "tomato_job",
 ]
 
 if psutil.WINDOWS:

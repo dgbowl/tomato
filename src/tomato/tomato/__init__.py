@@ -344,7 +344,7 @@ def reload(
                         capabilities=dev.capabilities,
                     )
                     ret = _updater(
-                        context, daemon.drvs[drv.name].port, "register", params
+                        context, daemon.drvs[drv.name].port, "dev_register", params
                     )
                     if ret.success is False:
                         return ret

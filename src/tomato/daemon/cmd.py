@@ -27,6 +27,7 @@ def merge_pipelines(
 
 
 def status(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.status")
     if msg.get("with_data", False):
         return Reply(success=True, msg=daemon.status, data=deepcopy(daemon))
     else:
@@ -34,6 +35,7 @@ def status(msg: dict, daemon: Daemon) -> Reply:
 
 
 def stop(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -> Reply:
+    logger = logging.getLogger(f"{__name__}.stop")
     daemon.status = "stop"
     logger.critical("stopping daemon")
     for mgr, label in [(jmgr, "job"), (dmgr, "driver")]:
@@ -44,6 +46,7 @@ def stop(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) ->
 
 
 def setup(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -> Reply:
+    logger = logging.getLogger(f"{__name__}.setup")
     for key in ["drvs", "devs", "pips"]:
         if key in msg:
             setattr(daemon, key, msg[key])
@@ -64,6 +67,7 @@ def setup(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -
 
 
 def pipeline(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.pipeline")
     pname = msg.get("pipeline")
     for k, v in msg.get("params", {}).items():
         logger.info(f"setting pipeline {pname}.{k} to {v}")
@@ -72,10 +76,12 @@ def pipeline(msg: dict, daemon: Daemon) -> Reply:
 
 
 def job(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.job")
     jobid = msg.get("id", None)
     if jobid is None:
         jobid = daemon.nextjob
         daemon.jobs[jobid] = Job(id=jobid, **msg.get("params", {}))
+        logger.info(f"received job {jobid}")
         daemon.nextjob += 1
     else:
         for k, v in msg.get("params", {}).items():
@@ -85,6 +91,7 @@ def job(msg: dict, daemon: Daemon) -> Reply:
 
 
 def driver(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.driver")
     drv = msg["params"]
     if drv["name"] is None:
         logger.error()
@@ -99,6 +106,7 @@ def driver(msg: dict, daemon: Daemon) -> Reply:
 
 
 def device(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.device")
     dev = msg["params"]
     if dev["name"] is None:
         logger.error()

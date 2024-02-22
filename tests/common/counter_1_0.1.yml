@@ -1,0 +1,8 @@
+version: "0.2"
+sample:
+    name: counter_1_0.1
+method:
+  - device: "counter"
+    technique: "count"
+    time: 1
+    delay: 0.1

@@ -28,8 +28,8 @@ def find_matching_pipelines(daemon: Daemon, method: list[dict]) -> list[str]:
     matched = []
     for cd in candidates:
         capabs = []
-        for devname in cd.devs.keys():
-            capabs += daemon.devs[devname].capabilities
+        for dev in cd.devs.values():
+            capabs += daemon.devs[dev.name].capabilities
         if req_capabs.intersection(set(capabs)) == req_capabs:
             matched.append(cd)
     return matched

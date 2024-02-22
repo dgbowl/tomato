@@ -21,13 +21,14 @@ class Device(BaseModel):
     pollrate: int = 1
 
 
-class Pipeline(BaseModel):
-    class Component(BaseModel):
-        name: str
-        address: str
-        channel: int
-        role: str
+class Component(BaseModel):
+    name: str
+    address: str
+    channel: int
+    role: str
 
+
+class Pipeline(BaseModel):
     name: str
     ready: bool = False
     jobid: Optional[int] = None

@@ -7,7 +7,6 @@
 
 import logging
 import argparse
-from threading import Thread
 from pathlib import Path
 import toml
 import time

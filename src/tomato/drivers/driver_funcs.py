@@ -15,6 +15,10 @@ from pathlib import Path
 from .logger_funcs import log_listener_config, log_listener, log_worker_config
 from . import yadg_funcs
 
+import xarray as xr
+from threading import Thread
+from tomato.models import Component, Device, Driver
+
 
 def tomato_job() -> None:
     parser = argparse.ArgumentParser()
@@ -25,7 +29,7 @@ def tomato_job() -> None:
     )
     parser.add_argument(
         "--port",
-        help="Path to a ketchup-processed payload json file.",
+        help="Port on which tomato-daemon is listening.",
         default=1234,
         type=int,
     )
@@ -39,14 +43,11 @@ def tomato_job() -> None:
     with args.jobfile.open() as infile:
         jsdata = json.load(infile)
     payload = jsdata["payload"]
-    pipeline = jsdata["pipeline"]
-    devices = jsdata["devices"]
-    job = jsdata["job"]
+    pip = jsdata["pipeline"]["name"]
+    jobid = jsdata["job"]["id"]
+    jobpath = Path(jsdata["job"]["path"]).resolve()
 
-    pip = pipeline["name"]
-    jobpath = Path(job["path"]).resolve()
-
-    logfile = jobpath / f"job-{job['id']}.log"
+    logfile = jobpath / f"job-{jobid}.log"
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s:%(levelname)-8s:%(processName)s:%(message)s",
@@ -65,23 +66,21 @@ def tomato_job() -> None:
     elif psutil.POSIX:
         pid = os.getpid()
 
-    logger.debug(f"assigning job {job['id']} with pid '{pid}' into pipeline: {pip}")
+    logger.debug(f"assigning job {jobid} with pid {pid} into pipeline {pip!r}")
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{args.port}")
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
-    req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
+    req.send_pyobj(dict(cmd="job", id=jobid, params=params))
     req.recv_pyobj()
 
-    logger.info("handing off to 'driver_worker'")
+    logger.info("handing off to 'job_worker'")
     logger.info("==============================")
-    ret = driver_worker(
-        devices, pipeline, payload, job["id"], jobpath, logfile, loglevel
-    )
+    ret = job_worker(context, args.port, payload["method"], pip, jobpath)
     logger.info("==============================")
 
     output = tomato["output"]
-    prefix = f"results.{job['id']}" if output["prefix"] is None else output["prefix"]
+    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
     path = Path(output["path"])
     logger.debug(f"output folder is {path}")
     if path.exists():
@@ -90,22 +89,16 @@ def tomato_job() -> None:
         logger.debug("path does not exist, creating")
         os.makedirs(path)
 
-    preset = yadg_funcs.get_yadg_preset(payload["method"], pipeline, devices)
-    yadg_funcs.process_yadg_preset(
-        preset=preset, path=path, prefix=prefix, jobdir=str(jobpath)
-    )
-    logger.debug("here")
-    ready = tomato.get("unlock_when_done", False)
     if ret is None:
         logger.info("job finished successfully, setting status to 'c'")
         params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
-        req.send_pyobj(dict(cmd="job", id=job["id"], params=params))
+        req.send_pyobj(dict(cmd="job", id=jobid, params=params))
         ret = req.recv_pyobj()
     else:
         logger.info("job was terminated, status should be 'cd'")
         logger.info("handing off to 'driver_reset'")
         logger.info("==============================")
-        driver_reset(pipeline)
+        #driver_reset(pip)
         logger.info("==============================")
         ready = False
     if not ret.success:
@@ -120,216 +113,130 @@ def tomato_job() -> None:
         return 1
 
 
-def driver_api(
-    driver: str,
-    command: str,
-    jobqueue: multiprocessing.Queue,
-    logger: logging.Logger,
-    address: str,
-    channel: int,
-    **kwargs: dict,
-) -> Any:
-    m = importlib.import_module(f"tomato.drivers.{driver}")
-    func = getattr(m, command)
-    return func(address, channel, jobqueue, logger, **kwargs)
+def data_to_netcdf(data: list, path: Path):
+    vars = {}
+    for ii, item in enumerate(data):
+        for k, v in item.items():
+            if k not in vars:
+                vars[k] = [None] * ii
+            vars[k].append(v)
 
-
-def data_poller(
-    driver: str,
-    jq: multiprocessing.Queue,
-    lq: multiprocessing.Queue,
-    address: str,
-    channel: int,
-    device: str,
-    root: str,
-    loglevel: int,
-    kwargs: dict,
-) -> None:
-    log_worker_config(lq, loglevel)
-    log = logging.getLogger()
-    pollrate = kwargs.pop("pollrate", 10)
-    log.debug(f"in 'data_poller', {pollrate=}")
-    cont = True
-    previous = None
-    while cont:
-        ts, done, _ = driver_api(
-            driver, "get_status", jq, log, address, channel, **kwargs
-        )
-        ts, nrows, data = driver_api(
-            driver, "get_data", jq, log, address, channel, **kwargs
-        )
-        data["previous"] = previous
-        previous = data["current"]
-        while nrows > 0:
-            isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
-            isots = isots.replace(":", "")
-            fn = os.path.join(root, f"{device}_{isots}_data.json")
-            log.debug(f"found {nrows} data rows, writing into '{fn}'")
-            with open(fn, "w") as of:
-                json.dump(data, of)
-            ts, nrows, data = driver_api(
-                driver, "get_data", jq, log, address, channel, **kwargs
-            )
-            data["previous"] = previous
-            previous = data["current"]
-        if done:
-            cont = False
+    data_vars = {}
+    for k, v in vars.items():
+        if "uts" in vars:
+            data_vars[k] = ("uts", v, None)
         else:
-            time.sleep(pollrate)
-    log.info("rejoining main thread")
-    return
+            data_vars[k] = (None, v, None)
+
+    ds = xr.Dataset(data_vars=data_vars)
+    if path.exists():
+        oldds = xr.load_dataset(path)
+        ds = xr.concat([oldds, ds], dim="uts")
+    ds.to_netcdf(path)
 
 
-def data_snapshot(
-    devices: dict,
-    method: dict,
-    pipeline: dict,
-    snapshot: dict,
-    jobid: int,
-    jobfolder: str,
-    lq: multiprocessing.Queue,
-    loglevel: int,
-) -> None:
-    log_worker_config(lq, loglevel)
-    start = time.perf_counter()
-    if snapshot["prefix"] is None:
-        prefix = f"snapshot.{jobid}"
-    else:
-        prefix = snapshot["prefix"]
-    preset = yadg_funcs.get_yadg_preset(method, pipeline, devices)
-    while True:
-        if time.perf_counter() - start > snapshot["frequency"]:
-            yadg_funcs.process_yadg_preset(
-                preset=preset,
-                path=snapshot["path"],
-                prefix=prefix,
-                jobdir=jobfolder,
-            )
-            start = time.perf_counter()
-        time.sleep(1)
-
-
-def driver_worker(
-    devices: dict,
-    pipeline: dict,
-    payload: dict,
-    jobid: int,
+def job_thread(
+    context: zmq.Context,
+    tasks: list,
+    component: Component,
+    device: Device,
+    driver: Driver,
     jobpath: Path,
-    logfile: str,
-    loglevel: int,
+):
+    sender = f"{__name__}.job_thread"
+    logger = logging.getLogger(sender)
+    logger.debug(f"in job thread of {component.role!r}")
+
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{driver.port}")
+    logger.debug(f"connected")
+    kwargs = dict(address=component.address, channel=component.channel)
+
+    datapath = jobpath / f"{component.role}.nc"
+
+    for task in tasks:
+        logger.debug(f"{task=}")
+        while True:
+            req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
+            ret = req.recv_pyobj()
+            logger.debug(f"{ret=}")
+            if ret.success and ret.msg == "ready":
+                break
+
+        req.send_pyobj(dict(cmd="task_start", params={**task, **kwargs}))
+        ret = req.recv_pyobj()
+        logger.debug(f"{ret=}")
+
+        t0 = time.perf_counter()
+        while True:
+            tN = time.perf_counter()
+            if tN - t0 > device.pollrate:
+                req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
+                ret = req.recv_pyobj()
+                data_to_netcdf(ret.data, datapath)
+                t0 += device.pollrate
+            req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
+            ret = req.recv_pyobj()
+            logger.debug(f"{ret=}")
+            if ret.success and ret.msg == "ready":
+                break
+            time.sleep(device.pollrate / 10)
+        req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
+        ret = req.recv_pyobj()
+        data_to_netcdf(ret.data, datapath)
+
+
+def job_worker(
+    context: zmq.Context,
+    port: int,
+    method: dict,
+    pipname: str,
+    jobpath: Path,
 ) -> None:
-    jq = multiprocessing.Queue(maxsize=0)
+    sender = f"{__name__}.job_worker"
+    logger = logging.getLogger(sender)
 
-    log = logging.getLogger(__name__)
-    log.setLevel(loglevel)
-    log.debug("starting 'log_listener'")
-    lq = multiprocessing.Queue(maxsize=0)
-    listener = multiprocessing.Process(
-        target=log_listener,
-        name="log_listener",
-        args=(lq, log_listener_config, logfile),
-    )
-    listener.start()
-    log.debug(f"started 'log_listener' on pid {listener.pid}")
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
 
-    jobs = []
-    for cname, comp in pipeline["devs"].items():
-        dev = devices[cname]
-        log.info(f"device id: {cname}")
-        log.info(
-            f"{cname}: processing device '{comp['role']}' of type '{dev['driver']}'"
+    req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
+    daemon = req.recv_pyobj().data
+
+    pipeline = daemon.pips[pipname]
+    logger.debug(f"{pipeline=}")
+
+    # collate steps by role
+    plan = {}
+    for step in method:
+        if step["device"] not in plan:
+            plan[step["device"]] = []
+        task = {k: v for k, v in step.items()}
+        del task["device"]
+        task["task"] = task.pop("technique")
+        plan[step["device"]].append(task)
+    logger.debug(f"{plan=}")
+
+    # distribute plan into threads
+    threads = {}
+    for role, tasks in plan.items():
+        component = pipeline.devs[role]
+        logger.debug(f"{component=}")
+        device = daemon.devs[component.name]
+        logger.debug(f"{device=}")
+        driver = daemon.drvs[device.driver]
+        logger.debug(f"{driver=}")
+        threads[role] = Thread(
+            target=job_thread,
+            args=(context, tasks, component, device, driver, jobpath),
         )
-        drv, addr, ch, tag = (
-            dev["driver"],
-            dev["address"],
-            comp["channel"],
-            comp["role"],
-        )
-        dpar = dev["settings"]
-        pl = [item for item in payload["method"] if item["device"] == comp["role"]]
-        smpl = payload["sample"]
+        threads[role].do_run = True
+        threads[role].start()
 
-        log.debug(f"{cname}: getting status")
-        ts, ready, metadata = driver_api(drv, "get_status", jq, log, addr, ch, **dpar)
-        log.debug(f"{ready=}")
-        assert ready, f"Failed: device '{tag}' is not ready."
-
-        log.debug(f"{cname}: starting payload")
-        start_ts = driver_api(
-            drv, "start_job", jq, log, addr, ch, **dpar, payload=pl, **smpl
-        )
-        metadata["uts"] = start_ts
-
-        log.debug(f"{cname}: writing initial status")
-        with (jobpath / f"{tag}_status.json").open("w") as of:
-            json.dump(metadata, of)
-        kwargs = dpar
-        kwargs.update({"pollrate": dev.get("pollrate", 10)})
-        log.info(f"{cname}: starting 'data_poller': every {kwargs['pollrate']}s")
-        p = multiprocessing.Process(
-            name=f"data_poller_{jobid}_{tag}",
-            target=data_poller,
-            args=(drv, jq, lq, addr, ch, tag, jobpath, loglevel, kwargs),
-        )
-        jobs.append(p)
-        p.start()
-        log.info(f"{cname}: started 'data_poller' on pid {p.pid}")
-
-    shot = payload.get("tomato", {}).get("snapshot", None)
-    if shot is not None:
-        log.info(f"starting 'data_snapshot': shot every {shot['frequency']}s")
-        sp = multiprocessing.Process(
-            name=f"data_snapshot_{jobid}",
-            target=data_snapshot,
-            args=(
-                devices,
-                payload["method"],
-                pipeline,
-                shot,
-                jobid,
-                str(jobpath),
-                lq,
-                loglevel,
-            ),
-        )
-        sp.start()
-        log.info(f"started 'data_snapshot' on pid {sp.pid}")
-
-    log.info("waiting for all 'data_poller' jobs to join")
-    log.info("------------------------------------------")
-    ret = None
-    for p in jobs:
-        p.join()
-        log.debug(f"{p=}")
-        if p.exitcode == 0:
-            log.info(f"'data_poller' with pid {p.pid} closed successfully")
+    # wait until threads join
+    while True:
+        joined = [not thread.is_alive() for thread in threads.values()]
+        logger.debug(f"{joined=}")
+        if all(joined):
+            break
         else:
-            log.critical(f"'data_poller' with pid {p.pid} was terminated")
-            ret = 1
-
-    log.info("-----------------------")
-    log.info("quitting 'log_listener'")
-    if shot is not None:
-        log.info("quitting 'data_snapshot'")
-        sp.terminate()
-    lq.put_nowait(None)
-    listener.join()
-    jq.close()
-    return ret
-
-
-def driver_reset(pipeline: dict) -> None:
-    log = logging.getLogger(__name__)
-    for vi, v in enumerate(pipeline["devices"]):
-        log.info(f"device id: {vi+1} out of {len(pipeline['devices'])}")
-        log.info(f"{vi+1}: processing device '{v['tag']}' of type '{v['driver']}'")
-        drv, addr, ch, tag = v["driver"], v["address"], v["channel"], v["tag"]
-        # dpar = settings["drivers"].get(drv, {})
-        dpar = {}
-
-        log.debug(f"{vi+1}: resetting device")
-        driver_api(drv, "stop_job", None, log, addr, ch, **dpar)
-
-        log.debug(f"{vi+1}: getting status")
-        ts, ready, metadata = driver_api(drv, "get_status", None, log, addr, ch, **dpar)
-        assert ready, f"Failed: device '{tag}' is not ready."
+            time.sleep(1)

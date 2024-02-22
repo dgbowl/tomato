@@ -81,7 +81,7 @@ def tomato_driver() -> None:
     for dev in daemon.devs.values():
         if dev.driver == args.driver:
             for channel in dev.channels:
-                driver.register(address=dev.address, channel=channel)
+                driver.dev_register(address=dev.address, channel=channel)
     logger.debug(f"{driver.devmap=}")
 
     logger.info(f"driver {args.driver!r} bootstrapped successfully")
@@ -136,23 +136,29 @@ def tomato_driver() -> None:
                     msg=f"settings received",
                     data=msg.get("params"),
                 )
-            elif msg["cmd"] == "register":
-                driver.register(**msg["params"])
+            elif msg["cmd"] == "dev_register":
+                driver.dev_register(**msg["params"])
                 ret = Reply(
                     success=True,
                     msg=f"device registered",
                     data=msg.get("params"),
                 )
+            elif msg["cmd"] == "task_status":
+                ret = driver.task_status(**msg["params"])
+            elif msg["cmd"] == "task_start":
+                ret = driver.task_start(**msg["params"])
+            elif msg["cmd"] == "task_data":
+                ret = driver.task_data(**msg["params"])
             logger.debug(f"{ret=}")
             rep.send_pyobj(ret)
         if status == "stop":
             break
 
-    logger.debug("main loop done")
+    logger.info(f"driver {args.driver!r} is beginning teardown")
 
     driver.teardown()
 
-    logger.critical("quitting")
+    logger.critical(f"driver {args.driver!r} is quitting")
 
 
 def spawn_tomato_driver(port: int, driver: str, req):

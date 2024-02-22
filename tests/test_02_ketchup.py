@@ -14,8 +14,8 @@ kwargs = dict(port=PORT, timeout=1000, context=CTXT)
 @pytest.mark.parametrize(
     "pl, jn",
     [
-        ("dummy_random_1_0.1.yml", None),
-        ("dummy_random_1_0.1.yml", "dummy_random"),
+        ("counter_1_0.1.yml", None),
+        ("counter_1_0.1.yml", "counter"),
     ],
 )
 def test_ketchup_submit_one(pl, jn, datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -30,8 +30,8 @@ def test_ketchup_submit_one(pl, jn, datadir, start_tomato_daemon, stop_tomato_da
 
 def test_ketchup_submit_two(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_submit_one("dummy_random_1_0.1.yml", "job-1", *args)
-    ret = ketchup.submit(payload="dummy_random_5_2.yml", jobname="job-2", **kwargs)
+    test_ketchup_submit_one("counter_1_0.1.yml", "job-1", *args)
+    ret = ketchup.submit(payload="counter_5_1.yml", jobname="job-2", **kwargs)
     print(f"{ret=}")
     assert ret.success
     assert ret.data.id == 2
@@ -86,8 +86,8 @@ def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_dae
 def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_submit_two(*args)
-    tomato.pipeline_load(**kwargs, pipeline="dummy-5", sampleid="dummy_random_5_2")
-    tomato.pipeline_ready(**kwargs, pipeline="dummy-5")
+    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_1")
+    tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     wait_until_ketchup_status(jobid=2, status="r", port=PORT, timeout=5000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1, 2])
