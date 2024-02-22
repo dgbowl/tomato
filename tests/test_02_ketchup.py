@@ -108,6 +108,7 @@ def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemo
     print(f"{ret=}")
     assert ret.success
     assert ret.data[2].status == "c"
+    assert os.path.exists("results.2.nc")
 
 
 def test_ketchup_cancel(datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -133,7 +134,7 @@ def test_ketchup_snapshot(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = ketchup.snapshot(jobids=[2], status=status)
     print(f"{ret=}")
     assert ret.success
-    assert os.path.exists("snapshot.2.json")
+    assert os.path.exists("snapshot.2.nc")
 
 
 def test_ketchup_search(datadir, start_tomato_daemon, stop_tomato_daemon):

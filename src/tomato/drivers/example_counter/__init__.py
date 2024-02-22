@@ -7,6 +7,7 @@ from functools import wraps
 
 from tomato.drivers.example_counter.counter import Counter
 from tomato.models import Reply
+from xarray import Dataset, DataArray
 
 logger = logging.getLogger(__name__)
 
@@ -140,10 +141,25 @@ class Driver:
         key = (address, channel)
         self.devmap[key].conn.send(("data", None, None))
         data = self.devmap[key].conn.recv()
+        data_vars = {}
+        for ii, item in enumerate(data):
+            for k, v in item.items():
+                if k not in data_vars:
+                    data_vars[k] = [None] * ii
+                data_vars[k].append(v)
+            for k in data_vars:
+                if k not in item:
+                    data_vars[k].append(None)
+
+        uts = {"uts": data_vars.pop("uts")}
+        data_vars = {k: ("uts", v) for k, v in data_vars.items()}
+
+        ds = Dataset(data_vars=data_vars, coords=uts)
+
         return Reply(
             success=True,
             msg=f"found {len(data)} new datapoints",
-            data=data,
+            data=ds,
         )
 
     def status(self):

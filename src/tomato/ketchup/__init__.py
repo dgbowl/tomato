@@ -22,7 +22,7 @@ import yaml
 import zmq
 from dgbowl_schemas.tomato import to_payload
 
-from tomato.drivers import yadg_funcs
+from tomato.drivers.driver_funcs import merge_netcdfs
 from tomato.models import Reply, Daemon
 
 log = logging.getLogger(__name__)
@@ -266,19 +266,7 @@ def snapshot(
 
     jobdir = Path(status.data.settings["jobs"]["storage"])
     for jobid in jobids:
-        root = jobdir / str(jobid)
-        assert root.exists() and root.is_dir()
-        jobfile = root / "jobdata.json"
-        assert jobfile.exists() and jobfile.is_file()
-        with jobfile.open() as inf:
-            jobdata = json.load(inf)
-        log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
-        preset = yadg_funcs.get_yadg_preset(
-            jobdata["payload"]["method"], jobdata["pipeline"], jobdata["devices"]
-        )
-        yadg_funcs.process_yadg_preset(
-            preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=str(jobdir)
-        )
+        merge_netcdfs(jobdir / str(jobid), Path(f"snapshot.{jobid}.nc"))
     return Reply(success=True, msg=f"snapshot for job(s) {jobids} created successfully")
 
 

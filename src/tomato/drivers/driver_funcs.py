@@ -1,9 +1,6 @@
-from typing import Any
 from importlib import metadata
-import importlib
 import argparse
 import time
-import multiprocessing
 import os
 import json
 from datetime import datetime, timezone
@@ -11,10 +8,6 @@ import logging
 import psutil
 import zmq
 from pathlib import Path
-
-from .logger_funcs import log_listener_config, log_listener, log_worker_config
-from . import yadg_funcs
-
 import xarray as xr
 from threading import Thread
 from tomato.models import Component, Device, Driver
@@ -81,13 +74,15 @@ def tomato_job() -> None:
 
     output = tomato["output"]
     prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
-    path = Path(output["path"])
-    logger.debug(f"output folder is {path}")
-    if path.exists():
-        assert path.is_dir()
+    outpath = Path(output["path"])
+    logger.debug(f"output folder is {outpath}")
+    if outpath.exists():
+        assert outpath.is_dir()
     else:
         logger.debug("path does not exist, creating")
-        os.makedirs(path)
+        os.makedirs(outpath)
+
+    merge_netcdfs(jobpath, outpath / f"{prefix}.nc")
 
     if ret is None:
         logger.info("job finished successfully, setting status to 'c'")
@@ -98,7 +93,7 @@ def tomato_job() -> None:
         logger.info("job was terminated, status should be 'cd'")
         logger.info("handing off to 'driver_reset'")
         logger.info("==============================")
-        #driver_reset(pip)
+        # driver_reset(pip)
         logger.info("==============================")
         ready = False
     if not ret.success:
@@ -113,22 +108,14 @@ def tomato_job() -> None:
         return 1
 
 
-def data_to_netcdf(data: list, path: Path):
-    vars = {}
-    for ii, item in enumerate(data):
-        for k, v in item.items():
-            if k not in vars:
-                vars[k] = [None] * ii
-            vars[k].append(v)
+def merge_netcdfs(jobpath: Path, outpath: Path):
+    fns = [fn for fn in os.listdir(jobpath) if fn.endswith(".nc")]
+    datasets = [xr.load_dataset(jobpath / fn) for fn in fns]
+    ds = xr.concat(datasets, dim="uts")
+    ds.to_netcdf(outpath)
 
-    data_vars = {}
-    for k, v in vars.items():
-        if "uts" in vars:
-            data_vars[k] = ("uts", v, None)
-        else:
-            data_vars[k] = (None, v, None)
 
-    ds = xr.Dataset(data_vars=data_vars)
+def data_to_netcdf(ds: xr.Dataset, path: Path):
     if path.exists():
         oldds = xr.load_dataset(path)
         ds = xr.concat([oldds, ds], dim="uts")
