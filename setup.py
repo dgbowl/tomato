@@ -38,7 +38,6 @@ setuptools.setup(
         "toml~=0.10",
         "pyyaml~=6.0",
         "psutil~=5.9",
-        "yadg==4.2.4",
         "dgbowl_schemas>=108",
         "filelock~=3.12",
         "pyzmq~=25.1",
