@@ -42,6 +42,7 @@ setuptools.setup(
         "dgbowl_schemas>=108",
         "filelock~=3.12",
         "pyzmq~=25.1",
+        "xarray~=2024.2",
     ],
     extras_require={
         "testing": [
