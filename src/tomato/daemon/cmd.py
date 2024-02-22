@@ -1,4 +1,4 @@
-from tomato.models import Daemon, Driver, Reply, Pipeline, Job
+from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job
 from copy import deepcopy
 from threading import Thread
 import logging
@@ -23,7 +23,6 @@ def merge_pipelines(
     for pname, pip in new.items():
         if pname not in cur:
             ret[pname] = pip
-    logger.critical(f"{ret=}")
     return ret
 
 
@@ -45,8 +44,9 @@ def stop(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) ->
 
 
 def setup(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -> Reply:
-    daemon.devs = msg["devs"]
-    daemon.pips = merge_pipelines(daemon.pips, msg["pips"])
+    for key in ["drvs", "devs", "pips"]:
+        if key in msg:
+            setattr(daemon, key, msg[key])
     if daemon.status == "bootstrap":
         if jmgr is None:
             jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,))
@@ -57,7 +57,6 @@ def setup(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -
             dmgr.do_run = True
             dmgr.start()
         logger.info(f"setup successful with pipelines: {list(daemon.pips.keys())}")
-        logger.critical(f"{daemon.pips=}")
         daemon.status = "running"
     else:
         logger.info(f"reload successful with pipelines: {list(daemon.pips.keys())}")
@@ -80,23 +79,34 @@ def job(msg: dict, daemon: Daemon) -> Reply:
         daemon.nextjob += 1
     else:
         for k, v in msg.get("params", {}).items():
-            logger.info(f"setting job {jobid}.{k} to {v}")
+            logger.debug(f"setting job {jobid}.{k} to {v}")
             setattr(daemon.jobs[jobid], k, v)
     return Reply(success=True, msg=daemon.status, data=daemon.jobs[jobid])
 
 
 def driver(msg: dict, daemon: Daemon) -> Reply:
-    name = msg.get("name", None)
-    if name is None:
+    drv = msg["params"]
+    if drv["name"] is None:
         logger.error()
-        return Reply(success=False, msg=msg)
-    if name not in daemon.drvs:
-        daemon.drvs[name] = Driver(name=name, **msg.get("params", {}))
+        return Reply(success=False, msg="no driver name supplied", data=msg)
+    if drv["name"] not in daemon.drvs:
+        daemon.drvs[drv["name"]] = Driver(**drv)
     else:
-        for k, v in msg.get("params", {}).items():
-            if v is None or v == getattr(daemon.drvs[name], k):
-                continue
-            logger.info(f"setting driver {name}.{k} to {v}")
+        for k, v in drv.items():
+            logger.debug(f"setting driver '{drv['name']}.{k}' to {v}")
+            setattr(daemon.drvs[drv["name"]], k, v)
+    return Reply(success=True, msg=daemon.status, data=daemon.drvs[drv["name"]])
 
-            setattr(daemon.drvs[name], k, v)
-    return Reply(success=True, msg=daemon.status, data=daemon.drvs[name])
+
+def device(msg: dict, daemon: Daemon) -> Reply:
+    dev = msg["params"]
+    if dev["name"] is None:
+        logger.error()
+        return Reply(success=False, msg="no device name supplied", data=msg)
+    if dev["name"] not in daemon.devs:
+        daemon.devs[dev["name"]] = Device(**dev)
+    else:
+        for k, v in dev.items():
+            logger.debug(f"setting device '{dev['name']}.{k}' to {v}")
+            setattr(daemon.devs[dev["name"]], k, v)
+    return Reply(success=True, msg=daemon.status, data=daemon.devs[dev["name"]])

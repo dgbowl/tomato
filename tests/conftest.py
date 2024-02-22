@@ -45,9 +45,11 @@ def stop_tomato_daemon_session():
     if psutil.WINDOWS:
         subprocess.run(["taskkill", "/F", "/IM", "tomato-job.exe", "/T"])
         subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon.exe", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-driver.exe", "/T"])
     else:
         subprocess.run(["killall", "tomato-job"])
         subprocess.run(["killall", "tomato-daemon"])
+        subprocess.run(["killall", "tomato-driver"])
 
 
 @pytest.fixture(scope="function")
@@ -60,6 +62,8 @@ def stop_tomato_daemon(port: int = 12345):
     if psutil.WINDOWS:
         subprocess.run(["taskkill", "/F", "/IM", "tomato-job.exe", "/T"])
         subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon.exe", "/T"])
+        subprocess.run(["taskkill", "/F", "/IM", "tomato-driver.exe", "/T"])
     else:
         subprocess.run(["killall", "tomato-job"])
         subprocess.run(["killall", "tomato-daemon"])
+        subprocess.run(["killall", "tomato-driver"])

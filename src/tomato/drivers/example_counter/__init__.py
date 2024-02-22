@@ -1,9 +1,12 @@
 import time
+import logging
 from multiprocessing import Process, Pipe
 from multiprocessing.connection import Connection
 from typing import Any
 
 from tomato.drivers.example_counter.counter import Counter
+
+logger = logging.getLogger(__name__)
 
 
 class Driver:
@@ -18,7 +21,7 @@ class Driver:
             self.conn, conn = Pipe()
             self.proc = Process(target=self.dev.run_counter, args=(conn,))
 
-    devmap: dict[str, Device]
+    devmap: dict[tuple, Device]
     settings: dict
 
     attrs: dict = dict(
@@ -29,50 +32,40 @@ class Driver:
 
     def __init__(self, settings=None):
         self.devmap = {}
-        self.settings = settings
+        self.settings = settings if settings is not None else {}
 
-    def register(self, address: str = "", **kwargs):
-        self.devmap[address] = self.Device()
-        self.devmap[address].proc.start()
+    def register(self, address: str, channel: int, **kwargs):
+        key = (address, channel)
+        self.devmap[key] = self.Device()
+        self.devmap[key].proc.start()
 
-    def set(self, attr: str, val: Any, address: str = "", **kwargs):
+    def set(self, attr: str, val: Any, address: str, channel: int, **kwargs):
+        key = (address, channel)
         if attr in self.attrs:
             if self.attrs[attr]["rw"] and isinstance(val, self.attrs[attr]["type"]):
-                self.devmap[address].conn.send(("set", attr, val))
+                self.devmap[key].conn.send(("set", attr, val))
 
-    def get(self, attr: str, address: str = "", **kwargs):
+    def get(self, attr: str, address: str, channel: int, **kwargs):
+        key = (address, channel)
         if attr in self.attrs:
-            self.devmap[address].conn.send(("get", attr, None))
-            return self.devmap[address].conn.recv()
+            self.devmap[key].conn.send(("get", attr, None))
+            return self.devmap[key].conn.recv()
 
-    def status(self, address: str = "", **kwargs):
-        self.devmap[address].conn.send(("status", None, None))
-        return self.devmap[address].conn.recv()
+    def status(self, address: str, channel: int, **kwargs):
+        key = (address, channel)
+        self.devmap[key].conn.send(("status", None, None))
+        return self.devmap[key].conn.recv()
 
-    def data(self, address: str = ""):
-        self.devmap[address].conn.send(("data", None, None))
-        return self.devmap[address].conn.recv()
+    def data(self, address: str, channel: int, **kwargs):
+        key = (address, channel)
+        self.devmap[key].conn.send(("data", None, None))
+        return self.devmap[key].conn.recv()
 
-    def teardown(self):
-        for dev in self.devmap.values():
+    def teardown(self, **kwargs):
+        for key, dev in self.devmap.items():
             dev.conn.send(("stop", None, None))
-
-
-if __name__ == "__main__":
-    dev = Driver()
-    dev.register(address="")
-    time.sleep(1)
-    print(f"{dev.status()=}")
-    print(f"{dev.attrs=}")
-    print(f"{dev.get('delay')=}")
-    print(f"{dev.set('delay', 0.1)=}")
-    print(f"{dev.get('delay')=}")
-    print(f"{dev.set('started', True)=}")
-    time.sleep(2)
-    print(f"{dev.status()=}")
-    print(f"{dev.data()=}")
-    print(f"{dev.set('started', False)=}")
-    time.sleep(2)
-    print(f"{dev.status()=}")
-    print(f"{dev.data()=}")
-    print(f"{dev.teardown()=}")
+            dev.proc.join(1)
+            if dev.proc.is_alive():
+                logger.error(f"device {key!r} is still alive")
+            else:
+                logger.debug(f"device {key!r} successfully closed")

@@ -32,7 +32,7 @@ class Counter:
                     t0 += self.delay
 
             cmd = None
-            if conn.poll(1e-9):
+            if conn.poll(1e-6):
                 cmd, attr, val = conn.recv()
 
             if cmd == "set":

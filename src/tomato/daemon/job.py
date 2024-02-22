@@ -167,7 +167,7 @@ def action_queued_jobs(daemon, matched, req):
             break
 
 
-def manager(port: int):
+def manager(port: int, timeout: int = 500):
     context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
     thread = currentThread()
@@ -176,17 +176,19 @@ def manager(port: int):
     req.connect(f"tcp://127.0.0.1:{port}")
     poller = zmq.Poller()
     poller.register(req, zmq.POLLIN)
-    timeout = 1000
+    to = timeout
     while getattr(thread, "do_run"):
         req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
-        events = dict(poller.poll(timeout))
+        events = dict(poller.poll(to))
         if req not in events:
-            logger.warning(f"could not contact daemon in {timeout} ms")
-            timeout = timeout * 2
+            logger.warning(f"could not contact daemon in {to} ms")
+            to = to * 2
             continue
+        elif to > timeout:
+            to = timeout
         daemon = req.recv_pyobj().data
         manage_running_pips(daemon, req)
         matched_pips = check_queued_jobs(daemon, req)
         action_queued_jobs(daemon, matched_pips, req)
-        time.sleep(0.5)
+        time.sleep(timeout / 1e3)
     logger.info("instructed to quit")

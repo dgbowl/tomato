@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def tomato_driver() -> None:
+    ## ARGUMENT PARSING
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version",
@@ -38,6 +39,7 @@ def tomato_driver() -> None:
     )
     args = parser.parse_args()
 
+    ## LOGFILE
     logfile = f"drivers_{args.port}.log"
     logger = logging.getLogger(f"tomato.drivers.{args.driver}")
     logging.basicConfig(
@@ -46,43 +48,61 @@ def tomato_driver() -> None:
         handlers=[logging.FileHandler(logfile, mode="a"), logging.StreamHandler()],
     )
 
+    ## PORTS
+    context = zmq.Context()
+    rep = context.socket(zmq.REP)
+    port = rep.bind_to_random_port("tcp://127.0.0.1")
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{args.port}")
+
+    logger.debug("getting pid")
     if psutil.WINDOWS:
         pid = os.getppid()
     elif psutil.POSIX:
         pid = os.getpid()
-    logger.debug(f"{pid=}")
-
-    context = zmq.Context()
-
-    rep = context.socket(zmq.REP)
-    port = rep.bind_to_random_port("tcp://127.0.0.1")
-    logger.debug(f"{port=}")
 
     logger.debug("getting daemon status")
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{args.port}")
     req.send_pyobj(
-        dict(cmd="status", with_data=True, sender=f"tomato.drivers.{args.driver}")
+        dict(cmd="status", with_data=True, sender=f"{__name__}.tomato_driver_bootstrap")
     )
     daemon = req.recv_pyobj().data
     logger.debug(f"{daemon=}")
 
     logger.info(f"attempting to spawn driver {args.driver!r}")
-    if hasattr(tomato.drivers, args.driver):
-        driver = getattr(tomato.drivers, args.driver).Driver()
-        logger.info(f"{driver=}")
+    if not hasattr(tomato.drivers, args.driver):
+        logger.critical(f"library of driver {args.driver!r} not found")
+        return
 
-    params = dict(pid=pid, port=port, connected_at=str(datetime.now(timezone.utc)))
-    req.send_pyobj(
-        dict(
-            cmd="driver",
-            name=args.driver,
-            params=params,
-            sender=f"tomato.drivers.{args.driver}",
-        )
+    driver = getattr(tomato.drivers, args.driver).Driver(
+        settings=daemon.drvs[args.driver].settings
     )
-    logger.debug(f"{req.recv_pyobj()=}")
-    # time.sleep(10)
+
+    logger.info(f"registering devices in driver {args.driver!r}")
+    for dev in daemon.devs.values():
+        if dev.driver == args.driver:
+            for channel in dev.channels:
+                driver.register(address=dev.address, channel=channel)
+    logger.debug(f"{driver.devmap=}")
+
+    logger.info(f"driver {args.driver!r} bootstrapped successfully")
+
+    params = dict(
+        name=args.driver,
+        port=port,
+        pid=pid,
+        connected_at=str(datetime.now(timezone.utc)),
+        settings=driver.settings,
+    )
+    req.send_pyobj(
+        dict(cmd="driver", params=params, sender=f"{__name__}.tomato_driver")
+    )
+    ret = req.recv_pyobj()
+    if not ret.success:
+        logger.error(f"could not push driver {args.driver!r} state to tomato-daemon")
+        logger.debug(f"{ret=}")
+        return
+
+    logger.info(f"driver {args.driver!r} is entering main loop")
 
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
@@ -98,27 +118,40 @@ def tomato_driver() -> None:
             elif msg["cmd"] == "status":
                 ret = Reply(
                     success=True,
-                    msg=f"status of driver {args.driver!r} is {status!r}",
-                    data=dict(status=status, driver=args.driver),
+                    msg=f"status of driver {params['name']!r} is {status!r}",
+                    data=dict(**params, status=status),
                 )
             elif msg["cmd"] == "stop":
                 status = "stop"
-                logger.debug("here")
                 ret = Reply(
                     success=True,
                     msg=f"stopping driver {args.driver!r}",
                     data=dict(status=status, driver=args.driver),
                 )
             elif msg["cmd"] == "settings":
+                driver.settings = msg["params"]
+                params["settings"] = driver.settings
                 ret = Reply(
                     success=True,
                     msg=f"settings received",
+                    data=msg.get("params"),
+                )
+            elif msg["cmd"] == "register":
+                driver.register(**msg["params"])
+                ret = Reply(
+                    success=True,
+                    msg=f"device registered",
                     data=msg.get("params"),
                 )
             logger.debug(f"{ret=}")
             rep.send_pyobj(ret)
         if status == "stop":
             break
+
+    logger.debug("main loop done")
+
+    driver.teardown()
+
     logger.critical("quitting")
 
 
@@ -130,11 +163,10 @@ def spawn_tomato_driver(port: int, driver: str, req):
         subprocess.Popen(cmd, creationflags=cfs)
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
-    params = dict(spawned_at=str(datetime.now(timezone.utc)))
+    params = dict(name=driver, spawned_at=str(datetime.now(timezone.utc)))
     req.send_pyobj(
         dict(
             cmd="driver",
-            name=driver,
             params=params,
             sender=f"{__name__}.spawn_tomato_driver",
         )
@@ -171,7 +203,7 @@ def manager(port: int, timeout: int = 1000):
             logger.warning(f"could not contact tomato-daemon in {to} ms")
             to = to * 2
             continue
-        else:
+        elif to > timeout:
             to = timeout
         daemon = req.recv_pyobj().data
         drivers_needed = {v.driver for v in daemon.devs.values()}
@@ -192,7 +224,7 @@ def manager(port: int, timeout: int = 1000):
                     if (datetime.now(timezone.utc) - tspawn).seconds > 10:
                         logger.warning(f"respawning late driver {driver!r}")
                         spawn_tomato_driver(daemon.port, driver, req)
-        time.sleep(0.1)
+        time.sleep(timeout / 1e3)
 
     logger.info("instructed to quit")
     req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
@@ -202,6 +234,6 @@ def manager(port: int, timeout: int = 1000):
         ret = stop_tomato_driver(driver.port, context)
         logger.debug(f"{ret=}")
         if ret.success:
-            logger.debug(f"stopped driver {driver.name!r}")
+            logger.info(f"stopped driver {driver.name!r}")
         else:
             logger.warning(f"could not stop driver {driver.name!r}")

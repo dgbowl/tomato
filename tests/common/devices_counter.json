@@ -4,16 +4,16 @@
             "name": "dev-counter",
             "driver": "example_counter",
             "address": "example-addr",
-            "channels": [1],
+            "channels": [1, 2, 3, 4],
             "capabilities": ["count"],
             "pollrate": 2
         }
     ],
     "pipelines": [
         {
-            "name": "pip-counter",
+            "name": "pip-counter-*",
             "devices": [
-                {"tag": "counter", "name": "dev-counter", "channel": 1}
+                {"tag": "counter", "name": "dev-counter", "channel": "each"}
             ]
         }
     ]

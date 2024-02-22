@@ -83,6 +83,8 @@ def run_daemon():
                 ret = cmd.job(msg, daemon)
             elif msg["cmd"] == "driver":
                 ret = cmd.driver(msg, daemon)
+            elif msg["cmd"] == "device":
+                ret = cmd.device(msg, daemon)
             logger.debug(f"reply with {ret=}")
             rep.send_pyobj(ret)
         if daemon.status == "stop":

@@ -15,14 +15,16 @@ class Driver(BaseModel):
 class Device(BaseModel):
     name: str
     driver: str
-    address: Union[str, None]
-    channels: Optional[Sequence[int]] = None
+    address: str
+    channels: Sequence[int]
     capabilities: Sequence[str]
     pollrate: int = 1
 
 
 class Pipeline(BaseModel):
     class Component(BaseModel):
+        name: str
+        address: str
         channel: int
         role: str
 
@@ -34,7 +36,7 @@ class Pipeline(BaseModel):
 
 
 class Job(BaseModel):
-    id: int
+    id: Optional[int] = None
     payload: Any
     jobname: Optional[str] = None
     pid: Optional[int] = None
