@@ -9,7 +9,10 @@ import psutil
 import zmq
 from pathlib import Path
 import xarray as xr
-from threading import Thread
+import signal
+
+# from threading import Thread, currentThread
+from multiprocessing import Process
 from tomato.models import Component, Device, Driver
 
 
@@ -89,6 +92,9 @@ def tomato_job() -> None:
         params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
         req.send_pyobj(dict(cmd="job", id=jobid, params=params))
         ret = req.recv_pyobj()
+        if not ret.success:
+            logger.error("could not set job status")
+            return 1
     else:
         logger.info("job was terminated, status should be 'cd'")
         logger.info("handing off to 'driver_reset'")
@@ -96,9 +102,6 @@ def tomato_job() -> None:
         # driver_reset(pip)
         logger.info("==============================")
         ready = False
-    if not ret.success:
-        logger.error("could not set job status")
-        return 1
     logger.info(f"resetting pipeline {pip}")
     params = dict(jobid=None, ready=ready)
     req.send_pyobj(dict(cmd="pipeline", pipeline=pip, params=params))
@@ -110,20 +113,20 @@ def tomato_job() -> None:
 
 def merge_netcdfs(jobpath: Path, outpath: Path):
     fns = [fn for fn in os.listdir(jobpath) if fn.endswith(".nc")]
-    datasets = [xr.load_dataset(jobpath / fn) for fn in fns]
-    ds = xr.concat(datasets, dim="uts")
-    ds.to_netcdf(outpath)
+    datasets = [xr.load_dataset(jobpath / fn, engine="h5netcdf") for fn in fns]
+    if len(datasets) > 0:
+        ds = xr.concat(datasets, dim="uts")
+        ds.to_netcdf(outpath, engine="h5netcdf")
 
 
 def data_to_netcdf(ds: xr.Dataset, path: Path):
     if path.exists():
-        oldds = xr.load_dataset(path)
+        oldds = xr.load_dataset(path, engine="h5netcdf")
         ds = xr.concat([oldds, ds], dim="uts")
-    ds.to_netcdf(path)
+    ds.to_netcdf(path, engine="h5netcdf")
 
 
-def job_thread(
-    context: zmq.Context,
+def job_process(
     tasks: list,
     component: Component,
     device: Device,
@@ -134,6 +137,7 @@ def job_thread(
     logger = logging.getLogger(sender)
     logger.debug(f"in job thread of {component.role!r}")
 
+    context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
     logger.debug(f"connected")
@@ -160,7 +164,8 @@ def job_thread(
             if tN - t0 > device.pollrate:
                 req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
                 ret = req.recv_pyobj()
-                data_to_netcdf(ret.data, datapath)
+                if ret.success:
+                    data_to_netcdf(ret.data, datapath)
                 t0 += device.pollrate
             req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
             ret = req.recv_pyobj()
@@ -170,7 +175,12 @@ def job_thread(
             time.sleep(device.pollrate / 10)
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
-        data_to_netcdf(ret.data, datapath)
+        if ret.success:
+            data_to_netcdf(ret.data, datapath)
+
+        # if getattr(thread, "do_run") is False:
+        #    logger.critical(f"stopping job thread of {component.role!r}")
+        #    break
 
 
 def job_worker(
@@ -204,7 +214,7 @@ def job_worker(
     logger.debug(f"{plan=}")
 
     # distribute plan into threads
-    threads = {}
+    processes = {}
     for role, tasks in plan.items():
         component = pipeline.devs[role]
         logger.debug(f"{component=}")
@@ -212,18 +222,48 @@ def job_worker(
         logger.debug(f"{device=}")
         driver = daemon.drvs[device.driver]
         logger.debug(f"{driver=}")
-        threads[role] = Thread(
-            target=job_thread,
-            args=(context, tasks, component, device, driver, jobpath),
+        processes[role] = Process(
+            target=job_process,
+            args=(tasks, component, device, driver, jobpath),
         )
-        threads[role].do_run = True
-        threads[role].start()
+        # threads[role].do_run = True
+        processes[role].start()
 
-    # wait until threads join
+    # abort = AbortNow()
+
+    # wait until threads join or we're killed
     while True:
-        joined = [not thread.is_alive() for thread in threads.values()]
-        logger.debug(f"{joined=}")
+        joined = [proc.is_alive() is False for proc in processes.values()]
         if all(joined):
             break
+        # elif abort.now:
+        #
+        #    logger.debug("Received termination signal")
+        #    for thread in threads.values():
+        #        thread.do_run = False
+        #    time.sleep(0.1)
         else:
             time.sleep(1)
+    logger.debug(f"{[proc.exitcode for proc in processes.values()]}")
+    for proc in processes.values():
+        if proc.exitcode != 0:
+            return proc.exitcode
+
+    # if any([proc.exitcode != 0 for proc in processes.values()]):
+    #    return 1
+    # if abort.now:
+    #    return 1
+
+
+class AbortNow:
+    now = False
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit)
+        signal.signal(signal.SIGTERM, self.exit)
+        if psutil.WINDOWS:
+            signal.signal(signal.CTRL_BREAK_EVENT, self.exit)
+            signal.signal(signal.CTRL_C_EVENT, self.exit)
+
+    def exit(self, signum, frame):
+        self.now = True

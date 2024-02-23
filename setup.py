@@ -41,6 +41,7 @@ setuptools.setup(
         "dgbowl_schemas>=108",
         "filelock~=3.12",
         "pyzmq~=25.1",
+        "h5netcdf~=1.3",
         "xarray~=2024.2",
         "pydantic~=1.0",
     ],

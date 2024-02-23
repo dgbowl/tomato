@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import currentThread
 
+import signal
 import zmq
 import psutil
 
@@ -35,33 +36,20 @@ def find_matching_pipelines(daemon: Daemon, method: list[dict]) -> list[str]:
     return matched
 
 
-def kill_tomato_job(proc):
-    pc = proc.children()
-    logger.warning(
-        "killing proc: name='%s', pid=%d, children=%d", proc.name(), proc.pid, len(pc)
-    )
+def kill_tomato_job(process: psutil.Process):
+    logger = logging.getLogger(f"{__name__}.kill_tomato_job")
     if psutil.WINDOWS:
-        for proc in pc:
-            if proc.name() in {"conhost.exe"}:
-                continue
-            ppc = proc.children()
-            for proc in ppc:
-                try:
-                    proc.terminate()
-                except psutil.NoSuchProcess:
-                    logger.warning(
-                        "dead proc: name='%s', pid=%d", proc.name(), proc.pid
-                    )
-                    continue
-            gone, alive = psutil.wait_procs(ppc, timeout=1)
-    elif psutil.POSIX:
+        pc = [p for p in process.children() if p.name() not in {"conhost.exe"}]
+        to_kill = []
         for child in pc:
-            try:
-                child.terminate()
-            except psutil.NoSuchProcess:
-                logger.warning("dead proc: name='%s', pid=%d", child.name(), child.pid)
-                continue
-        gone, alive = psutil.wait_procs(pc, timeout=1)
+            to_kill += child.children()
+    elif psutil.POSIX:
+        to_kill = [p for p in process.children()]
+    for proc in to_kill:
+        logger.warning(f"killing process {proc.name()!r} with pid {proc.pid}")
+        # os.kill(proc.pid, sig)
+        proc.terminate()
+    gone, alive = psutil.wait_procs(to_kill, timeout=1)
     logger.debug(f"{gone=}")
     logger.debug(f"{alive=}")
 

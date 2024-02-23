@@ -6,7 +6,7 @@
             "address": "example-addr",
             "channels": [1],
             "capabilities": ["count"],
-            "pollrate": 2
+            "pollrate": 1
         }
     ],
     "pipelines": [

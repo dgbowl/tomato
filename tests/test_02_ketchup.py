@@ -1,6 +1,7 @@
 import os
 import pytest
 import zmq
+import time
 
 from tomato import ketchup, tomato
 from .utils import wait_until_tomato_running, wait_until_ketchup_status
@@ -31,7 +32,7 @@ def test_ketchup_submit_one(pl, jn, datadir, start_tomato_daemon, stop_tomato_da
 def test_ketchup_submit_two(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_submit_one("counter_1_0.1.yml", "job-1", *args)
-    ret = ketchup.submit(payload="counter_5_1.yml", jobname="job-2", **kwargs)
+    ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs)
     print(f"{ret=}")
     assert ret.success
     assert ret.data.id == 2
@@ -86,7 +87,7 @@ def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_dae
 def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_submit_two(*args)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_1")
+    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     wait_until_ketchup_status(jobid=2, status="r", port=PORT, timeout=5000)
     status = tomato.status(**kwargs, with_data=True)
@@ -114,6 +115,7 @@ def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemo
 def test_ketchup_cancel(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_status_running(*args)
+    time.sleep(1)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1, 2])
     print(f"{ret=}")
@@ -125,11 +127,13 @@ def test_ketchup_cancel(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])
     print(f"{ret=}")
     assert ret.data[2].status == "cd"
+    assert os.path.exists("results.2.nc")
 
 
 def test_ketchup_snapshot(datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_status_running(*args)
+    time.sleep(1)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.snapshot(jobids=[2], status=status)
     print(f"{ret=}")

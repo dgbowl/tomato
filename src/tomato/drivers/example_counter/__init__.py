@@ -141,6 +141,10 @@ class Driver:
         key = (address, channel)
         self.devmap[key].conn.send(("data", None, None))
         data = self.devmap[key].conn.recv()
+
+        if len(data) == 0:
+            return Reply(success=False, msg=f"found no new datapoints")
+
         data_vars = {}
         for ii, item in enumerate(data):
             for k, v in item.items():
@@ -153,14 +157,8 @@ class Driver:
 
         uts = {"uts": data_vars.pop("uts")}
         data_vars = {k: ("uts", v) for k, v in data_vars.items()}
-
         ds = Dataset(data_vars=data_vars, coords=uts)
-
-        return Reply(
-            success=True,
-            msg=f"found {len(data)} new datapoints",
-            data=ds,
-        )
+        return Reply(success=True, msg=f"found {len(data)} new datapoints", data=ds)
 
     def status(self):
         devkeys = self.devmap.keys()
