@@ -46,10 +46,14 @@ def test_tomato_start_with_init(datadir, stop_tomato_daemon):
 
 def test_tomato_start_double(datadir, stop_tomato_daemon):
     test_tomato_start_with_init(datadir, stop_tomato_daemon)
+    assert wait_until_tomato_running(port=PORT, timeout=5000)
     ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert ret.success is False
-    assert f"port {PORT} is already in use" in ret.msg
+    assert (
+        f"port {PORT} is already in use" in ret.msg
+        or f"already running on port {PORT}" in ret.msg
+    )
 
 
 def test_tomato_reload(datadir, stop_tomato_daemon):

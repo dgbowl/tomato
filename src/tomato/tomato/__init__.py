@@ -161,9 +161,15 @@ def start(
     try:
         rep = context.socket(zmq.REP)
         rep.bind(f"tcp://127.0.0.1:{port}")
+        stat = status(port=port, timeout=1000, context=context)
         rep.unbind(f"tcp://127.0.0.1:{port}")
         rep.setsockopt(zmq.LINGER, 0)
         rep.close()
+        if stat.success:
+            return Reply(
+                success=False,
+                msg=f"tomato-daemon already running on port {port}",
+            )
     except zmq.error.ZMQError:
         return Reply(
             success=False,
