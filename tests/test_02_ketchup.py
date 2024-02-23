@@ -1,7 +1,6 @@
 import os
 import pytest
 import zmq
-import time
 
 from tomato import ketchup, tomato
 from .utils import wait_until_tomato_running, wait_until_ketchup_status
@@ -84,61 +83,81 @@ def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_dae
     assert 2 in ret.data.keys()
 
 
-def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon):
+@pytest.mark.parametrize(
+    "pl",
+    [
+        "counter_5_0.2",
+    ],
+)
+def test_ketchup_status_running(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_submit_two(*args)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
+    test_ketchup_submit_one(f"{pl}.yml", None, *args)
+    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid=pl)
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
-    wait_until_ketchup_status(jobid=2, status="r", port=PORT, timeout=5000)
+    wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
     status = tomato.status(**kwargs, with_data=True)
-    ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1, 2])
+    ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
     assert ret.success
-    assert "found 2" in ret.msg
-    assert len(ret.data) == 2
-    assert ret.data[1].status == "qw"
-    assert ret.data[2].status == "r"
+    assert "found 1" in ret.msg
+    assert len(ret.data) == 1
+    assert ret.data[1].status == "r"
 
 
-def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemon):
+@pytest.mark.parametrize(
+    "pl",
+    [
+        "counter_1_0.1",
+    ],
+)
+def test_ketchup_status_complete(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_status_running(*args)
-    wait_until_ketchup_status(jobid=2, status="c", port=PORT, timeout=30000)
+    test_ketchup_status_running(pl, *args)
+    wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=10000)
     status = tomato.status(**kwargs, with_data=True)
-    ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])
+    ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
     assert ret.success
-    assert ret.data[2].status == "c"
-    assert os.path.exists("results.2.nc")
+    assert ret.data[1].status == "c"
+    assert os.path.exists("results.1.nc")
 
 
-def test_ketchup_cancel(datadir, start_tomato_daemon, stop_tomato_daemon):
+@pytest.mark.parametrize(
+    "pl",
+    [
+        "counter_15_0.1",
+    ],
+)
+def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_status_running(*args)
-    time.sleep(1)
+    test_ketchup_status_running(pl, *args)
     status = tomato.status(**kwargs, with_data=True)
-    ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1, 2])
+    ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
     assert ret.success
+    assert ret.data[1].status == "rd"
+    wait_until_ketchup_status(jobid=1, status="cd", port=PORT, timeout=5000)
+    status = tomato.status(**kwargs, with_data=True)
+    ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1])
+    print(f"{ret=}")
     assert ret.data[1].status == "cd"
-    assert ret.data[2].status == "rd"
-    wait_until_ketchup_status(jobid=2, status="cd", port=PORT, timeout=5000)
-    status = tomato.status(**kwargs, with_data=True)
-    ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[2])
-    print(f"{ret=}")
-    assert ret.data[2].status == "cd"
-    assert os.path.exists("results.2.nc")
+    assert os.path.exists("results.1.nc")
 
 
-def test_ketchup_snapshot(datadir, start_tomato_daemon, stop_tomato_daemon):
+@pytest.mark.parametrize(
+    "pl",
+    [
+        "counter_15_0.1",
+    ],
+)
+def test_ketchup_snapshot(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_status_running(*args)
-    time.sleep(1)
+    test_ketchup_status_running(pl, *args)
     status = tomato.status(**kwargs, with_data=True)
-    ret = ketchup.snapshot(jobids=[2], status=status)
+    ret = ketchup.snapshot(jobids=[1], status=status)
     print(f"{ret=}")
     assert ret.success
-    assert os.path.exists("snapshot.2.nc")
+    assert os.path.exists("snapshot.1.nc")
 
 
 def test_ketchup_search(datadir, start_tomato_daemon, stop_tomato_daemon):

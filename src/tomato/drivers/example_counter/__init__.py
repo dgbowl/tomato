@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class Driver:
-
     class Device:
         dev: Counter
         conn: Connection
@@ -52,7 +51,6 @@ class Driver:
         self.settings = settings if settings is not None else {}
 
     def in_devmap(func):
-
         @wraps(func)
         def wrapper(self, **kwargs):
             address = kwargs.get("address")

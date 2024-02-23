@@ -1,10 +1,10 @@
 version: "0.2"
 sample:
-    name: counter_1_0.1
+    name: counter_15_0.1
 method:
   - device: "counter"
     technique: "count"
-    time: 1.0
+    time: 15.0
     delay: 0.1
 tomato:
-    verbosity: "WARNING"
+    verbosity: "DEBUG"
