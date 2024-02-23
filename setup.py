@@ -42,6 +42,7 @@ setuptools.setup(
         "filelock~=3.12",
         "pyzmq~=25.1",
         "xarray~=2024.2",
+        "pydantic~=1.0",
     ],
     extras_require={
         "testing": [
