@@ -23,4 +23,6 @@ def load(daemon: Daemon):
     daemon.jobs = loaded.jobs
     daemon.pips = loaded.pips
     daemon.devs = loaded.devs
+    daemon.drvs = loaded.drvs
     daemon.nextjob = loaded.nextjob
+#    daemon.status = loaded.status

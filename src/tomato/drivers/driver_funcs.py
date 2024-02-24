@@ -103,8 +103,8 @@ def tomato_job() -> None:
         logger.info("==============================")
         ready = False
     logger.info(f"resetting pipeline {pip}")
-    params = dict(jobid=None, ready=ready)
-    req.send_pyobj(dict(cmd="pipeline", pipeline=pip, params=params))
+    params = dict(jobid=None, ready=ready, name=pip)
+    req.send_pyobj(dict(cmd="pipeline", params=params))
     ret = req.recv_pyobj()
     if not ret.success:
         logger.error("could not reset pipeline")
@@ -140,7 +140,7 @@ def job_process(
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
-    logger.debug(f"connected")
+    logger.debug("connected")
     kwargs = dict(address=component.address, channel=component.channel)
 
     datapath = jobpath / f"{component.role}.nc"

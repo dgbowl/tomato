@@ -312,13 +312,13 @@ def reload(
         while True:
             if any([drv.port is None for drv in daemon.drvs.values()]):
                 retries += 1
-                logger.warning(f"not all drivers are online yet, waiting")
+                logger.warning("not all tomato-drivers are online yet, waiting")
                 logger.debug(f"{retries=}")
                 time.sleep(timeout / 1000)
                 daemon = status(**kwargs, with_data=True).data
             elif retries == 10:
                 return Reply(
-                    success=False, msg=f"tomato drivers are not online", data=daemon
+                    success=False, msg="tomato-drivers are not online", data=daemon
                 )
             else:
                 break
@@ -358,22 +358,24 @@ def reload(
                 ret = _updater(context, port, "device", params)
                 logger.critical(f"{ret=}")
             elif dev != daemon.devs[dev.name]:
-                logger.error(f"updating devices not yet implemented")
+                logger.error("updating devices not yet implemented")
         for devname in daemon.devs:
             if devname not in devs:
-                logger.error(f"removing devices not yet implemented")
+                logger.error("removing devices not yet implemented")
         # check changes in pipelines
+        for pip in pips.values():
+            if pip.name not in daemon.pips:
+                ret = _updater(context, port, "pipeline", pip.dict())
+                logger.critical(f"{ret=}")
+            else:
+                logger.error("updating pipelines not yet implemented")
+        for pip in daemon.pips.values():
+            if pip.name not in pips:
+                params = dict(name=pip.name, delete=True)
+                ret = _updater(context, port, "pipeline", params)
+                logger.critical(f"{ret=}")
 
-        req.send_pyobj(
-            dict(
-                cmd="setup",
-                settings=settings,
-                pips=pips,
-                # devs=devs,
-                # drvs=drvs,
-                sender=f"{__name__}.reload",
-            )
-        )
+        req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.reload"))
         rep = req.recv_pyobj()
 
     if rep.msg == "running":
@@ -425,9 +427,8 @@ def pipeline_load(
     req.send_pyobj(
         dict(
             cmd="pipeline",
-            pipeline=pipeline,
-            params=dict(sampleid=sampleid),
-            sender="tomato.tomato.pipeline_load",
+            params=dict(sampleid=sampleid, name=pipeline),
+            sender=f"{__name__}.pipeline_load",
         ),
     )
     msg = req.recv_pyobj()
@@ -479,9 +480,8 @@ def pipeline_eject(
     req.send_pyobj(
         dict(
             cmd="pipeline",
-            pipeline=pipeline,
-            params=dict(sampleid=None, ready=False),
-            sender="tomato.tomato.pipeline_eject",
+            params=dict(sampleid=None, ready=False, name=pipeline),
+            sender=f"{__name__}.pipeline_eject",
         )
     )
     rep = req.recv_pyobj()
@@ -533,9 +533,8 @@ def pipeline_ready(
     req.send_pyobj(
         dict(
             cmd="pipeline",
-            pipeline=pipeline,
-            params=dict(ready=True),
-            sender="tomato.tomato.pipeline_ready",
+            params=dict(ready=True, name=pipeline),
+            sender=f"{__name__}.pipeline_ready",
         )
     )
     rep = req.recv_pyobj()

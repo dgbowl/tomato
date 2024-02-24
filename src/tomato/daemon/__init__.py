@@ -8,15 +8,16 @@
 import logging
 import argparse
 from pathlib import Path
+from threading import Thread
 import toml
 import time
 import zmq
 
 from tomato.models import Reply, Daemon
 import tomato.daemon.cmd as cmd
-import tomato.daemon.job as job
+import tomato.daemon.job
+import tomato.daemon.driver
 import tomato.daemon.io as io
-import tomato.daemon.driver as driver
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +60,12 @@ def run_daemon():
     poller.register(rep, zmq.POLLIN)
 
     logger.debug("entering main loop")
-    jmgr = None
-    dmgr = None
+    jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,))
+    jmgr.do_run = True
+    jmgr.start()
+    dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,))
+    dmgr.do_run = True
+    dmgr.start()
     t0 = time.process_time()
     while True:
         socks = dict(poller.poll(100))
@@ -73,9 +78,9 @@ def run_daemon():
             elif msg["cmd"] == "status":
                 ret = cmd.status(msg, daemon)
             elif msg["cmd"] == "stop":
-                ret = cmd.stop(msg, daemon, jmgr, dmgr)
+                ret = cmd.stop(msg, daemon)
             elif msg["cmd"] == "setup":
-                ret, jmgr, dmgr = cmd.setup(msg, daemon, jmgr, dmgr)
+                ret = cmd.setup(msg, daemon)
             elif msg["cmd"] == "pipeline":
                 ret = cmd.pipeline(msg, daemon)
             elif msg["cmd"] == "job":
@@ -87,6 +92,10 @@ def run_daemon():
             logger.debug(f"reply with {ret=}")
             rep.send_pyobj(ret)
         if daemon.status == "stop":
+            for mgr, label in [(jmgr, "job"), (dmgr, "driver")]:
+                if mgr is not None and mgr.do_run:
+                    logger.debug(f"stopping {label} manager thread")
+                    mgr.do_run = False
             if jmgr is not None:
                 jmgr.join(1e-3)
                 if not jmgr.is_alive():

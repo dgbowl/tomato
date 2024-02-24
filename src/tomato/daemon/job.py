@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import currentThread
 
-import signal
 import zmq
 import psutil
 
@@ -57,6 +56,7 @@ def kill_tomato_job(process: psutil.Process):
 def manage_running_pips(daemon: Daemon, req):
     logger = logging.getLogger(f"{__name__}.manage_running_pips")
     running = [pip for pip in daemon.pips.values() if pip.jobid is not None]
+    logger.debug(f"{running=}")
     for pip in running:
         job = daemon.jobs[pip.jobid]
         if job.pid is None:
@@ -83,8 +83,8 @@ def manage_running_pips(daemon: Daemon, req):
                 logger.error(f"could not set job {job.id} to status 'cd'")
                 continue
             logger.debug(f"pipeline {pip.name} will be reset")
-            params = dict(jobid=None, ready=False)
-            req.send_pyobj(dict(cmd="pipeline", pipeline=pip.name, params=params))
+            params = dict(jobid=None, ready=False, name=pip.name)
+            req.send_pyobj(dict(cmd="pipeline", params=params))
             ret = req.recv_pyobj()
             if not ret.success:
                 logger.error(f"could not set params {params} on pip: {pip.name!r}")
@@ -121,8 +121,8 @@ def action_queued_jobs(daemon, matched, req):
             elif pip.sampleid != job.payload.sample.name:
                 continue
             logger.info(f"job {job.id} found a matched & ready pip: {pip.name!r}")
-            params = dict(jobid=job.id, ready=False)
-            req.send_pyobj(dict(cmd="pipeline", pipeline=pip.name, params=params))
+            params = dict(jobid=job.id, ready=False, name=pip.name)
+            req.send_pyobj(dict(cmd="pipeline", params=params))
             ret = req.recv_pyobj()
             if not ret.success:
                 logger.error(f"could not set params {params} on pip: {pip.name!r}")
@@ -166,10 +166,11 @@ def manager(port: int, timeout: int = 500):
     poller.register(req, zmq.POLLIN)
     to = timeout
     while getattr(thread, "do_run"):
+        logger.debug("tick")
         req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
         events = dict(poller.poll(to))
         if req not in events:
-            logger.warning(f"could not contact daemon in {to} ms")
+            logger.warning(f"could not contact tomato-daemon in {to} ms")
             to = to * 2
             continue
         elif to > timeout:

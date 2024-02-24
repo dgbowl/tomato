@@ -1,8 +1,6 @@
 from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job
 from copy import deepcopy
-from threading import Thread
 import logging
-import tomato.daemon.job, tomato.daemon.driver
 
 logger = logging.getLogger(__name__)
 
@@ -27,52 +25,51 @@ def merge_pipelines(
 
 
 def status(msg: dict, daemon: Daemon) -> Reply:
-    logger = logging.getLogger(f"{__name__}.status")
     if msg.get("with_data", False):
         return Reply(success=True, msg=daemon.status, data=deepcopy(daemon))
     else:
         return Reply(success=True, msg=daemon.status)
 
 
-def stop(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -> Reply:
+def stop(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.stop")
     daemon.status = "stop"
     logger.critical("stopping daemon")
-    for mgr, label in [(jmgr, "job"), (dmgr, "driver")]:
-        if mgr is not None:
-            logger.debug(f"stopping {label} manager thread")
-            mgr.do_run = False
     return Reply(success=True, msg=daemon.status)
 
 
-def setup(msg: dict, daemon: Daemon, jmgr: Thread = None, dmgr: Thread = None) -> Reply:
+def setup(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.setup")
-    for key in ["drvs", "devs", "pips"]:
-        if key in msg:
-            setattr(daemon, key, msg[key])
     if daemon.status == "bootstrap":
-        if jmgr is None:
-            jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,))
-            jmgr.do_run = True
-            jmgr.start()
-        if dmgr is None:
-            dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,))
-            dmgr.do_run = True
-            dmgr.start()
+        for key in ["drvs", "devs", "pips"]:
+            if key in msg:
+                setattr(daemon, key, msg[key])
         logger.info(f"setup successful with pipelines: {list(daemon.pips.keys())}")
         daemon.status = "running"
     else:
         logger.info(f"reload successful with pipelines: {list(daemon.pips.keys())}")
-    return Reply(success=True, msg=daemon.status, data=daemon), jmgr, dmgr
+    return Reply(success=True, msg=daemon.status, data=daemon)
 
 
 def pipeline(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.pipeline")
-    pname = msg.get("pipeline")
-    for k, v in msg.get("params", {}).items():
-        logger.info(f"setting pipeline {pname}.{k} to {v}")
-        setattr(daemon.pips[pname], k, v)
-    return Reply(success=True, msg=daemon.status, data=daemon.pips[pname])
+    pip = msg["params"]
+    if pip["name"] is None:
+        logger.error()
+        return Reply(success=False, msg="no pipeline name supplied", data=msg)
+    if pip["name"] not in daemon.pips:
+        daemon.pips[pip["name"]] = Pipeline(**pip)
+    elif pip.get("delete", False) and daemon.pips[pip["name"]].jobid is None:
+        logger.warning(f"deleting pipeline {pip['name']!r}")
+        del daemon.pips[pip["name"]]
+    elif pip.get("delete", False):
+        logger.error(f"cannot delete pipeline {pip['name']!r} as a job is running")
+        return Reply(success=False, msg=daemon.status, data=daemon.pips[pip["name"]])
+    else:
+        for k, v in pip.items():
+            logger.debug(f"setting pipeline '{pip['name']}.{k}' to {v}")
+            setattr(daemon.pips[pip["name"]], k, v)
+    return Reply(success=True, msg=daemon.status, data=daemon.pips.get(pip["name"]))
 
 
 def job(msg: dict, daemon: Daemon) -> Reply:
