@@ -54,7 +54,7 @@ def tomato_job() -> None:
     logfile = jobpath / f"job-{jobid}.log"
     logging.basicConfig(
         level=logging.DEBUG,
-        format="%(asctime)s:%(levelname)-8s:%(processName)s:%(message)s",
+        format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
         handlers=[logging.FileHandler(logfile, mode="a"), logging.StreamHandler()],
     )
     logger = logging.getLogger(__name__)
@@ -84,20 +84,21 @@ def tomato_job() -> None:
     else:
         logger.warning(f"could not contact tomato-daemon in {TIMEOUT/1000} s")
 
-    logger.info("handing off to 'job_worker'")
-    logger.info("==============================")
-    ret = job_worker(context, args.port, payload["method"], pip, jobpath)
-    logger.info("==============================")
-
     output = tomato["output"]
     prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
     outpath = Path(output["path"])
+    snappath = outpath / f"snapshot.{jobid}.nc"
     logger.debug(f"output folder is {outpath}")
     if outpath.exists():
         assert outpath.is_dir()
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(outpath)
+
+    logger.info("handing off to 'job_worker'")
+    logger.info("==============================")
+    ret = job_worker(context, args.port, payload, pip, jobpath, snappath)
+    logger.info("==============================")
 
     merge_netcdfs(jobpath, outpath / f"{prefix}.nc")
 
