@@ -1,25 +1,23 @@
 import os
 import subprocess
 import logging
-import json
 import time
 import argparse
 from importlib import metadata
 from datetime import datetime, timezone
-from pathlib import Path
 from threading import currentThread
 
 import zmq
 import psutil
 
 import tomato.drivers
-from tomato.models import Pipeline, Daemon, Reply
+from tomato.models import Reply
 
 logger = logging.getLogger(__name__)
 
 
 def tomato_driver() -> None:
-    ## ARGUMENT PARSING
+    # ARGUMENT PARSING
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version",
@@ -39,7 +37,7 @@ def tomato_driver() -> None:
     )
     args = parser.parse_args()
 
-    ## LOGFILE
+    # LOGFILE
     logfile = f"drivers_{args.port}.log"
     logger = logging.getLogger(f"tomato.drivers.{args.driver}")
     logging.basicConfig(
@@ -48,7 +46,7 @@ def tomato_driver() -> None:
         handlers=[logging.FileHandler(logfile, mode="a"), logging.StreamHandler()],
     )
 
-    ## PORTS
+    # PORTS
     context = zmq.Context()
     rep = context.socket(zmq.REP)
     port = rep.bind_to_random_port("tcp://127.0.0.1")
@@ -133,14 +131,14 @@ def tomato_driver() -> None:
                 params["settings"] = driver.settings
                 ret = Reply(
                     success=True,
-                    msg=f"settings received",
+                    msg="settings received",
                     data=msg.get("params"),
                 )
             elif msg["cmd"] == "dev_register":
                 driver.dev_register(**msg["params"])
                 ret = Reply(
                     success=True,
-                    msg=f"device registered",
+                    msg="device registered",
                     data=msg.get("params"),
                 )
             elif msg["cmd"] == "task_status":
