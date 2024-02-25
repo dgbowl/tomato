@@ -112,7 +112,9 @@ def test_ketchup_status_running(pl, datadir, start_tomato_daemon, stop_tomato_da
 )
 def test_ketchup_status_complete(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
-    test_ketchup_status_running(pl, *args)
+    test_ketchup_submit_one(f"{pl}.yml", None, *args)
+    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid=pl)
+    tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=10000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1])

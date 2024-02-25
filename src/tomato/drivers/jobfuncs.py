@@ -103,8 +103,14 @@ def job_worker(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
 
-    req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
-    daemon = req.recv_pyobj().data
+    while True:
+        req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
+        daemon = req.recv_pyobj().data
+        if all([drv.port is not None for drv in daemon.drvs.values()]):
+            break
+        else:
+            logger.debug("not all tomato-drivers have a port, waiting")
+            time.sleep(1)
 
     pipeline = daemon.pips[pipname]
     logger.debug(f"{pipeline=}")

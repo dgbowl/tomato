@@ -383,8 +383,7 @@ def reload(
 
         req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.reload"))
         rep = req.recv_pyobj()
-    logger.critical("HERE CRASH")
-    logger.critical(f"{rep=}")
+
     if rep.msg == "running":
         return Reply(
             success=True,
