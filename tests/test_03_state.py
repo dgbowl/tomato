@@ -53,8 +53,8 @@ def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon
 def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     os.chdir(datadir)
-    ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
+    ketchup.submit(payload="counter_15_0.1.yml", jobname="job-1", **kwargs)
+    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_15_0.1")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
 
@@ -79,7 +79,7 @@ def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert ret.data.nextjob == 2
     assert ret.data.jobs[1].status == "r"
 
-    wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
+    wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=15000)
     ret = tomato.status(**kwargs, with_data=True)
     print(f"{ret=}")
     assert ret.success
