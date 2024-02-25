@@ -31,13 +31,14 @@ def job_process(
     driver: Driver,
     jobpath: Path,
 ):
-    sender = f"{__name__}.job_thread"
+    sender = f"{__name__}.job_process"
     logger = logging.getLogger(sender)
-    logger.debug(f"in job thread of {component.role!r}")
+    logger.debug(f"in job process of {component.role!r}")
 
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
+    logger.debug(f"job process of {component.role!r} connected to tomato-daemon")
 
     kwargs = dict(address=component.address, channel=component.channel)
 

@@ -13,7 +13,14 @@ import zmq
 from pathlib import Path
 from tomato.drivers.jobfuncs import job_worker, merge_netcdfs
 
+from tomato.drivers import example_counter
+
 TIMEOUT = 1000
+
+__all__ = [
+    "tomato_job",
+    "example_counter",
+]
 
 
 def tomato_job() -> None:
