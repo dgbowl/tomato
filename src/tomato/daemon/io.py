@@ -25,4 +25,4 @@ def load(daemon: Daemon):
     daemon.devs = loaded.devs
     daemon.drvs = loaded.drvs
     daemon.nextjob = loaded.nextjob
-#    daemon.status = loaded.status
+    daemon.status = "running"

@@ -2,6 +2,8 @@ from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job
 from copy import deepcopy
 import logging
 
+import tomato.daemon.io as io
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,9 +35,14 @@ def status(msg: dict, daemon: Daemon) -> Reply:
 
 def stop(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.stop")
-    daemon.status = "stop"
-    logger.critical("stopping daemon")
-    return Reply(success=True, msg=daemon.status)
+    io.store(daemon)
+    if any([job.pid is not None for job in daemon.jobs.values()]):
+        logger.error("cannot stop tomato-daemon as jobs are running")
+        return Reply(success=False, msg=daemon.status, data=daemon)
+    else:
+        daemon.status = "stop"
+        logger.critical("stopping tomato-daemon")
+        return Reply(success=True, msg=daemon.status)
 
 
 def setup(msg: dict, daemon: Daemon) -> Reply:

@@ -7,4 +7,4 @@ method:
     time: 1.0
     delay: 0.1
 tomato:
-    verbosity: "WARNING"
+    verbosity: "DEBUG"

@@ -221,7 +221,13 @@ def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict) -> Reply:
         if rep.msg == "stop":
             return Reply(
                 success=True,
-                msg=f"tomato on port {port} was instructed to stop",
+                msg=f"tomato-daemon on port {port} was instructed to stop",
+            )
+        elif rep.msg == "running":
+            return Reply(
+                success=False,
+                msg=f"tomato-daemon on port {port} cannot stop as jobs are running",
+                data=rep.data,
             )
         else:
             return Reply(
@@ -283,7 +289,6 @@ def reload(
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
     pips = get_pipelines(devs, devicefile["pipelines"])
     drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
-    logger.critical(f"{drvs=}")
     for drv in drvs.values():
         if drv.name in settings["drivers"]:
             drv.settings.update(settings["drivers"][drv.name])
@@ -292,7 +297,8 @@ def reload(
     if not stat.success:
         return stat
     daemon = stat.data
-
+    logger.critical(f"{daemon.status=}")
+    logger.critical(f"{daemon.pips=}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     if daemon.status == "bootstrap":
@@ -377,7 +383,8 @@ def reload(
 
         req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.reload"))
         rep = req.recv_pyobj()
-
+    logger.critical("HERE CRASH")
+    logger.critical(f"{rep=}")
     if rep.msg == "running":
         return Reply(
             success=True,

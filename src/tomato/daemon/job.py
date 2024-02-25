@@ -59,9 +59,11 @@ def manage_running_pips(daemon: Daemon, req):
     logger.debug(f"{running=}")
     for pip in running:
         job = daemon.jobs[pip.jobid]
+        logger.debug(f"{job=}")
         if job.pid is None:
             continue
         pidexists = psutil.pid_exists(job.pid)
+        logger.debug(f"{pidexists=}")
         reset = False
         # running jobs scheduled for killing (status == 'rd') should be killed
         if pidexists and job.status == "rd":
@@ -80,9 +82,9 @@ def manage_running_pips(daemon: Daemon, req):
             req.send_pyobj(dict(cmd="job", id=job.id, params=params))
             ret = req.recv_pyobj()
             if not ret.success:
-                logger.error(f"could not set job {job.id} to status 'cd'")
+                logger.error(f"could not set job {job.id} status {params['status']!r}")
                 continue
-            logger.debug(f"pipeline {pip.name} will be reset")
+            logger.debug(f"pipeline {pip.name!r} will be reset")
             params = dict(jobid=None, ready=False, name=pip.name)
             req.send_pyobj(dict(cmd="pipeline", params=params))
             ret = req.recv_pyobj()

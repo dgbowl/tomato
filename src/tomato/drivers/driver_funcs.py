@@ -11,9 +11,11 @@ from pathlib import Path
 import xarray as xr
 import signal
 
-# from threading import Thread, currentThread
+
 from multiprocessing import Process
 from tomato.models import Component, Device, Driver
+
+TIMEOUT = 100
 
 
 def tomato_job() -> None:
@@ -39,6 +41,7 @@ def tomato_job() -> None:
     with args.jobfile.open() as infile:
         jsdata = json.load(infile)
     payload = jsdata["payload"]
+    ready = payload["tomato"].get("unlock_when_done", False)
     pip = jsdata["pipeline"]["name"]
     jobid = jsdata["job"]["id"]
     jobpath = Path(jsdata["job"]["path"]).resolve()
@@ -66,9 +69,15 @@ def tomato_job() -> None:
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{args.port}")
+    poller = zmq.Poller()
+    poller.register(req, zmq.POLLIN)
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
     req.send_pyobj(dict(cmd="job", id=jobid, params=params))
-    req.recv_pyobj()
+    events = dict(poller.poll(TIMEOUT))
+    if req in events:
+        req.recv_pyobj()
+    else:
+        logger.warning(f"could not contact tomato-daemon in {TIMEOUT/1000} s")
 
     logger.info("handing off to 'job_worker'")
     logger.info("==============================")
@@ -88,13 +97,23 @@ def tomato_job() -> None:
     merge_netcdfs(jobpath, outpath / f"{prefix}.nc")
 
     if ret is None:
-        logger.info("job finished successfully, setting status to 'c'")
+        logger.info("job finished successfully, attempting to set status to 'c'")
         params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
         req.send_pyobj(dict(cmd="job", id=jobid, params=params))
-        ret = req.recv_pyobj()
-        if not ret.success:
-            logger.error("could not set job status")
-            return 1
+        events = dict(poller.poll(TIMEOUT))
+        if req not in events:
+            logger.warning(f"could not contact tomato-daemon in {TIMEOUT/1000} s")
+            req.setsockopt(zmq.LINGER, 0)
+            req.close()
+            poller.unregister(req)
+            req = context.socket(zmq.REQ)
+            req.connect(f"tcp://127.0.0.1:{args.port}")
+        else:
+            ret = req.recv_pyobj()
+            logger.debug(f"{ret=}")
+            if ret.success is False:
+                logger.error("could not set job status for unknown reason")
+                return 1
     else:
         logger.info("job was terminated, status should be 'cd'")
         logger.info("handing off to 'driver_reset'")
@@ -102,13 +121,20 @@ def tomato_job() -> None:
         # driver_reset(pip)
         logger.info("==============================")
         ready = False
-    logger.info(f"resetting pipeline {pip}")
+    logger.info(f"resetting pipeline {pip!r}")
     params = dict(jobid=None, ready=ready, name=pip)
     req.send_pyobj(dict(cmd="pipeline", params=params))
-    ret = req.recv_pyobj()
-    if not ret.success:
-        logger.error("could not reset pipeline")
+    events = dict(poller.poll(TIMEOUT))
+    if req in events:
+        ret = req.recv_pyobj()
+        logger.debug(f"{ret=}")
+        if not ret.success:
+            logger.error(f"could not reset pipeline {pip!r}")
+            return 1
+    else:
+        logger.error(f"could not contact tomato-daemon in {TIMEOUT/1000} s")
         return 1
+    logger.info("exiting tomato-job")
 
 
 def merge_netcdfs(jobpath: Path, outpath: Path):
@@ -140,11 +166,11 @@ def job_process(
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
-    logger.debug("connected")
+
     kwargs = dict(address=component.address, channel=component.channel)
 
     datapath = jobpath / f"{component.role}.nc"
-
+    logger.debug("distributing tasks:")
     for task in tasks:
         logger.debug(f"{task=}")
         while True:
@@ -177,10 +203,6 @@ def job_process(
         ret = req.recv_pyobj()
         if ret.success:
             data_to_netcdf(ret.data, datapath)
-
-        # if getattr(thread, "do_run") is False:
-        #    logger.critical(f"stopping job thread of {component.role!r}")
-        #    break
 
 
 def job_worker(
