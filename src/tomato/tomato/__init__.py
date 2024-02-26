@@ -38,8 +38,6 @@ import toml
 from tomato.models import Reply, Pipeline, Device, Driver
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_TOMATO_PORT = 1234
 VERSION = metadata.version("tomato")
 
 
@@ -211,7 +209,13 @@ def start(
         )
 
 
-def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict) -> Reply:
+def stop(
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    **_: dict,
+) -> Reply:
     stat = status(port=port, timeout=timeout, context=context)
     if stat.success:
         req = context.socket(zmq.REQ)
@@ -273,7 +277,12 @@ def init(
 
 
 def reload(
-    *, port: int, timeout: int, context: zmq.Context, appdir: Path, **_: dict
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    appdir: Path,
+    **_: dict,
 ) -> Reply:
     kwargs = dict(port=port, timeout=timeout, context=context)
     logger.debug("Loading settings.toml file from %s.", appdir)
