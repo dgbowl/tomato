@@ -18,7 +18,7 @@ def merge_netcdfs(jobpath: Path, outpath: Path):
     for fn in jobpath.glob("*.pkl"):
         with pickle.load(fn.open("rb")) as ds:
             datasets.append(ds)
-    logger.debug("merging datasets")
+    logger.debug(f"merging {datasets=}")
     if len(datasets) > 0:
         ds = xr.concat(datasets, dim="uts")
         ds.to_netcdf(outpath, engine="h5netcdf")
