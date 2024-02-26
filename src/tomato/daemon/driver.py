@@ -90,14 +90,10 @@ def tomato_driver() -> None:
         connected_at=str(datetime.now(timezone.utc)),
         settings=driver.settings,
     )
-    try:
-        req.send_pyobj(
-            dict(cmd="driver", params=params, sender=f"{__name__}.tomato_driver")
-        )
-        ret = req.recv_pyobj()
-    except:
-        import sys
-        logger.critical(f"{sys.exc_info()=}")
+    req.send_pyobj(
+        dict(cmd="driver", params=params, sender=f"{__name__}.tomato_driver")
+    )
+    ret = req.recv_pyobj()
     if not ret.success:
         logger.error(f"could not push driver {args.driver!r} state to tomato-daemon")
         logger.debug(f"{ret=}")
