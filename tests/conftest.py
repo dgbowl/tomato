@@ -35,48 +35,35 @@ def start_tomato_daemon(tmpdir: str, port: int = 12345):
     # teardown_stuff
 
 
-@pytest.fixture(autouse=True, scope="session")
-def stop_tomato_daemon_session():
-    # setup_stuff
-    yield
-    # teardown_stuff
-    print("stop_tomato_daemon_session")
-    procs = []
-    for p in psutil.process_iter(["name"]):
-        if "tomato" in p.info["name"]:
-            procs.append(p)
-            try:
-                p.terminate()
-            except psutil.NoSuchProcess:
-                pass
-    gone, alive = psutil.wait_procs(procs, timeout=5)
-    print(f"{gone=}")
-    print(f"{alive=}")
-
-    if psutil.WINDOWS:
-        subprocess.run(["taskkill", "/F", "/IM", "tomato-job.exe", "/T"])
-        subprocess.run(["taskkill", "/F", "/IM", "tomato-daemon.exe", "/T"])
-        subprocess.run(["taskkill", "/F", "/IM", "tomato-driver.exe", "/T"])
-    else:
-        subprocess.run(["killall", "tomato-job"])
-        subprocess.run(["killall", "tomato-daemon"])
-        subprocess.run(["killall", "tomato-driver"])
-
-
 @pytest.fixture(scope="function")
 def stop_tomato_daemon(port: int = 12345):
     # setup_stuff
     yield
     # teardown_stuff
     print("stop_tomato_daemon")
+    subprocess.run(["tomato", "stop", "-P", f"12345"])
+    if psutil.WINDOWS:
+        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"])
+        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-job.exe"])
+        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"])
+
+    else:
+        subprocess.run(["killall", "tomato-daemon"])
+        subprocess.run(["killall", "tomato-job"])
+        subprocess.run(["killall", "tomato-driver"])
+
     procs = []
     for p in psutil.process_iter(["name"]):
-        if "tomato" in p.info["name"]:
-            procs.append(p)
-            try:
-                p.terminate()
-            except psutil.NoSuchProcess:
-                pass
+        for name in ["tomato-daemon", "tomato-job", "tomato-driver"]:
+            if name in p.info["name"]:
+                pc = p.children()
+                pc.append(p)
+                for proc in pc:
+                    procs.append(proc)
+                    try:
+                        proc.terminate()
+                    except psutil.NoSuchProcess:
+                        pass
     gone, alive = psutil.wait_procs(procs, timeout=5)
     print(f"{gone=}")
     print(f"{alive=}")

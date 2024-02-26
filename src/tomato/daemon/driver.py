@@ -39,7 +39,7 @@ def tomato_driver() -> None:
 
     # LOGFILE
     logfile = f"drivers_{args.port}.log"
-    logger = logging.getLogger(f"tomato.drivers.{args.driver}")
+    logger = logging.getLogger(f"{__name__}.tomato_drivers({args.driver!r})")
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
@@ -71,9 +71,8 @@ def tomato_driver() -> None:
         logger.critical(f"library of driver {args.driver!r} not found")
         return
 
-    driver = getattr(tomato.drivers, args.driver).Driver(
-        settings=daemon.drvs[args.driver].settings
-    )
+    kwargs = dict(settings=daemon.drvs[args.driver].settings)
+    driver = getattr(tomato.drivers, args.driver).Driver(**kwargs)
 
     logger.info(f"registering devices in driver {args.driver!r}")
     for dev in daemon.devs.values():
@@ -91,10 +90,14 @@ def tomato_driver() -> None:
         connected_at=str(datetime.now(timezone.utc)),
         settings=driver.settings,
     )
-    req.send_pyobj(
-        dict(cmd="driver", params=params, sender=f"{__name__}.tomato_driver")
-    )
-    ret = req.recv_pyobj()
+    try:
+        req.send_pyobj(
+            dict(cmd="driver", params=params, sender=f"{__name__}.tomato_driver")
+        )
+        ret = req.recv_pyobj()
+    except:
+        import sys
+        logger.critical(f"{sys.exc_info()=}")
     if not ret.success:
         logger.error(f"could not push driver {args.driver!r} state to tomato-daemon")
         logger.debug(f"{ret=}")

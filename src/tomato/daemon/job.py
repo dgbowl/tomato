@@ -72,13 +72,14 @@ def manage_running_pips(daemon: Daemon, req):
             kill_tomato_job(proc)
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
             reset = True
-            params = dict(status="cd", completed_at=str(datetime.now(timezone.utc)))
+            params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
             logging.warning(f"the pid {job.pid} of job {job.id} has not been found")
             reset = True
-            params = dict(status="ce", completed_at=str(datetime.now(timezone.utc)))
+            params = dict(status="ce")
         if reset:
+            params.update(dict(completed_at=str(datetime.now(timezone.utc)), pid=None))
             req.send_pyobj(dict(cmd="job", id=job.id, params=params))
             ret = req.recv_pyobj()
             if not ret.success:

@@ -138,6 +138,7 @@ def job_worker(
         processes[role] = Process(
             target=job_process,
             args=(tasks, component, device, driver, jobpath),
+            name="job-process",
         )
         processes[role].start()
 
