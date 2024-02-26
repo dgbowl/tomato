@@ -41,7 +41,7 @@ def stop_tomato_daemon(port: int = 12345):
     yield
     # teardown_stuff
     print("stop_tomato_daemon")
-    subprocess.run(["tomato", "stop", "-P", f"12345"])
+    subprocess.run(["tomato", "stop", "-P", f"{port}"])
     if psutil.WINDOWS:
         subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"])
         subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-job.exe"])
