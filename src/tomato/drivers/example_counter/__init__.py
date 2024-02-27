@@ -1,4 +1,3 @@
-import time
 import logging
 from multiprocessing import Process, Pipe
 from multiprocessing.connection import Connection
@@ -7,7 +6,7 @@ from functools import wraps
 
 from tomato.drivers.example_counter.counter import Counter
 from tomato.models import Reply
-from xarray import Dataset, DataArray
+from xarray import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -50,17 +49,15 @@ class Driver:
         self.devmap = {}
         self.settings = settings if settings is not None else {}
 
+    @staticmethod
     def in_devmap(func):
         @wraps(func)
         def wrapper(self, **kwargs):
             address = kwargs.get("address")
             channel = kwargs.get("channel")
             if (address, channel) not in self.devmap:
-                return Reply(
-                    success=False,
-                    msg=f"device with address {address!r} and channel {channel} is unknown",
-                    data=self.devmap.keys(),
-                )
+                msg = f"dev with address {address!r} and channel {channel} is unknown"
+                return Reply(success=False, msg=msg, data=self.devmap.keys())
             return func(self, **kwargs)
 
         return wrapper
@@ -141,7 +138,7 @@ class Driver:
         data = self.devmap[key].conn.recv()
 
         if len(data) == 0:
-            return Reply(success=False, msg=f"found no new datapoints")
+            return Reply(success=False, msg="found no new datapoints")
 
         data_vars = {}
         for ii, item in enumerate(data):

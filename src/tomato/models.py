@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union, Optional, Any, Mapping, Sequence, Literal
+from typing import Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
 
 
