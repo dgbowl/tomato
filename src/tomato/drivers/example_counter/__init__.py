@@ -11,6 +11,19 @@ from xarray import Dataset
 logger = logging.getLogger(__name__)
 
 
+def in_devmap(func):
+    @wraps(func)
+    def wrapper(self, **kwargs):
+        address = kwargs.get("address")
+        channel = kwargs.get("channel")
+        if (address, channel) not in self.devmap:
+            msg = f"dev with address {address!r} and channel {channel} is unknown"
+            return Reply(success=False, msg=msg, data=self.devmap.keys())
+        return func(self, **kwargs)
+
+    return wrapper
+
+
 class Driver:
     class Device:
         dev: Counter
@@ -48,19 +61,6 @@ class Driver:
     def __init__(self, settings=None):
         self.devmap = {}
         self.settings = settings if settings is not None else {}
-
-    @staticmethod
-    def in_devmap(func):
-        @wraps(func)
-        def wrapper(self, **kwargs):
-            address = kwargs.get("address")
-            channel = kwargs.get("channel")
-            if (address, channel) not in self.devmap:
-                msg = f"dev with address {address!r} and channel {channel} is unknown"
-                return Reply(success=False, msg=msg, data=self.devmap.keys())
-            return func(self, **kwargs)
-
-        return wrapper
 
     def dev_register(self, address: str, channel: int, **kwargs):
         key = (address, channel)
