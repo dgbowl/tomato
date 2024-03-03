@@ -1,3 +1,11 @@
+"""
+**tomato.daemon.driver**: the driver manager of tomato daemon
+-------------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+
+"""
+
 import os
 import subprocess
 import logging
@@ -17,6 +25,21 @@ logger = logging.getLogger(__name__)
 
 
 def tomato_driver() -> None:
+    """
+    The function called when `tomato-driver` is executed.
+
+    This function is responsible for managing all activities involving devices of a
+    single driver type.
+
+    First, the list of devices (and their channel/address) for the specified driver is
+    fetched from the `tomato-daemon`. Then, a new instance of the specified driver is
+    spawned, populating its device map using the above list. If successful, the current
+    process information is fed back to the `tomato-daemon`.
+
+    Afterwards, the main loop handles all requests related to each of the devices
+    managed by this driver process, including job commands. Finally, if the driver is
+    instructed to stop, it attempts to perform a teardown before exiting.
+    """
     # ARGUMENT PARSING
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -189,6 +212,13 @@ def stop_tomato_driver(port: int, context):
 
 
 def manager(port: int, timeout: int = 1000):
+    """
+    The driver manager thread of `tomato-daemon`.
+
+    This manager ensures individual driver processes are (re-)spawned and instructed to
+    quit as necessary.
+    """
+
     context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
     thread = currentThread()

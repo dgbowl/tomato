@@ -1,3 +1,17 @@
+"""
+**tomato.daemon.cmd**: command parsing for tomato daemon
+--------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+
+All functions in this module expect a :class:`dict` containing the command specification
+and a :class:`~tomato.models.Daemon` object as arguments. The :class:`Daemon` object is
+altered by the command.
+
+All functions in this module return a :class:`~tomato.models.Reply`.
+
+"""
+
 from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job
 from copy import deepcopy
 import logging
@@ -10,6 +24,10 @@ logger = logging.getLogger(__name__)
 def merge_pipelines(
     cur: dict[str, Pipeline], new: dict[str, Pipeline]
 ) -> dict[str, Pipeline]:
+    """
+    Helper function for merging a :class:`dict` of new :class:`Pipelines` into the
+    current :class:`dict`.
+    """
     ret = {}
     for pname, pip in cur.items():
         if pname not in new:

@@ -1,3 +1,16 @@
+"""
+**tomato.daemon.job**: the job manager of tomato daemon
+-------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+
+.. note::
+
+    Functions in this module that receive the :class:`~tomato.models.Daemon` state
+    object should be acting on a copy. All changes to the :class:`Daemon` state have to
+    be propagated via the :class:`tomato.daemon.cmd` set of functions.
+
+"""
 import os
 import subprocess
 import logging
@@ -36,6 +49,18 @@ def find_matching_pipelines(daemon: Daemon, method: list[dict]) -> list[str]:
 
 
 def kill_tomato_job(process: psutil.Process):
+    """
+    Wrapper around :func:`psutil.terminate`.
+
+    Here we kill the (grand)children of the process with the name of `tomato-job`,
+    i.e. the individual task functions. This allows the `tomato-job` process to exit
+    gracefully once the task functions join.
+
+    Note that on Windows, the `tomato-job.exe` process has two children: a `python.exe`
+    which is the actual process running the job, and `conhost.exe`, which we want to
+    avoid killing.
+
+    """
     logger = logging.getLogger(f"{__name__}.kill_tomato_job")
     if psutil.WINDOWS:
         pc = [p for p in process.children() if p.name() not in {"conhost.exe"}]
@@ -46,7 +71,6 @@ def kill_tomato_job(process: psutil.Process):
         to_kill = [p for p in process.children()]
     for proc in to_kill:
         logger.warning(f"killing process {proc.name()!r} with pid {proc.pid}")
-        # os.kill(proc.pid, sig)
         proc.terminate()
     gone, alive = psutil.wait_procs(to_kill, timeout=1)
     logger.debug(f"{gone=}")
@@ -54,6 +78,17 @@ def kill_tomato_job(process: psutil.Process):
 
 
 def manage_running_pips(daemon: Daemon, req):
+    """
+    Function that manages jobs and `tomato-daemon` pipelines.
+
+    The function only affects pipelines marked as running, i.e. with a set ``jobid``.
+    Jobs scheduled for killing (i.e. ``status == "rd"``) are terminated. Jobs that
+    are supposed to be running but have crashed are given appropriate status (``"ce"``).
+    Pipelines of both are reset.
+
+    Successful job completions are not processed here, but within the job process.
+
+    """
     logger = logging.getLogger(f"{__name__}.manage_running_pips")
     running = [pip for pip in daemon.pips.values() if pip.jobid is not None]
     logger.debug(f"{running=}")
@@ -94,7 +129,13 @@ def manage_running_pips(daemon: Daemon, req):
                 continue
 
 
-def check_queued_jobs(daemon: Daemon, req) -> dict[int, Pipeline]:
+def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
+    """
+    Function to check whether the queued jobs can be submitted onto any pipeline.
+
+    Returns a :class:`dict` containing the jobids as keys and lists of matched
+    :class:`Pipelines` as values.
+    """
     logger = logging.getLogger(f"{__name__}.check_queued_jobs")
     matched = {}
     queue = [job for job in daemon.jobs.values() if job.status in {"q", "qw"}]
@@ -115,6 +156,12 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, Pipeline]:
 
 
 def action_queued_jobs(daemon, matched, req):
+    """
+    Function that assigns jobs if a matched pipeline contains the requested sample.
+
+    The `tomato-job` process is launched from this function.
+
+    """
     logger = logging.getLogger(f"{__name__}.action_queued_jobs")
     for jobid in sorted(matched.keys()):
         job = daemon.jobs[jobid]
@@ -159,6 +206,13 @@ def action_queued_jobs(daemon, matched, req):
 
 
 def manager(port: int, timeout: int = 500):
+    """
+    The job manager thread of `tomato-daemon`.
+
+    This manager ensures the job queue is iterated over and pipelines are managed/reset.
+    Note that we poll the `tomato-daemon` for status only once per iteration of the main
+    loop.
+    """
     context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
     thread = currentThread()

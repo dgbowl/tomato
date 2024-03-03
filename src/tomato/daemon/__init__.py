@@ -3,6 +3,7 @@
 -------------------------------------------------------------------
 .. codeauthor::
     Peter Kraus
+
 """
 
 import logging
@@ -23,6 +24,10 @@ logger = logging.getLogger(__name__)
 
 
 def setup_logging(daemon: Daemon):
+    """
+    Helper function to set up logging (folder, filename, verbosity, format) based on
+    the passed daemon state.
+    """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(Path(daemon.logdir) / f"daemon_{daemon.port}.log")
@@ -35,7 +40,14 @@ def setup_logging(daemon: Daemon):
 
 
 def run_daemon():
-    """ """
+    """
+    The function called when `tomato-daemon` is executed.
+
+    Manages the state of the tomato daemon, including recovery of state via
+    :mod:`~tomato.daemon.io`, processing state updates via :mod:`~tomato.daemon.cmd`,
+    and the manager threads for both jobs (:mod:`~tomato.daemon.job`) and drivers
+    (:mod:`~tomato.daemon.driver`).
+    """
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--port", "-p", type=int, default=1234)
     parser.add_argument("--verbosity", "-V", type=int, default=logging.INFO)
@@ -75,20 +87,8 @@ def run_daemon():
             if "cmd" not in msg:
                 logger.error(f"received msg without cmd: {msg=}")
                 ret = Reply(success=False, msg="received msg without cmd", data=msg)
-            elif msg["cmd"] == "status":
-                ret = cmd.status(msg, daemon)
-            elif msg["cmd"] == "stop":
-                ret = cmd.stop(msg, daemon)
-            elif msg["cmd"] == "setup":
-                ret = cmd.setup(msg, daemon)
-            elif msg["cmd"] == "pipeline":
-                ret = cmd.pipeline(msg, daemon)
-            elif msg["cmd"] == "job":
-                ret = cmd.job(msg, daemon)
-            elif msg["cmd"] == "driver":
-                ret = cmd.driver(msg, daemon)
-            elif msg["cmd"] == "device":
-                ret = cmd.device(msg, daemon)
+            elif hasattr(cmd, msg["cmd"]):
+                ret = getattr(cmd, msg["cmd"])(msg, daemon)
             logger.debug(f"reply with {ret=}")
             rep.send_pyobj(ret)
         if daemon.status == "stop":
@@ -113,3 +113,4 @@ def run_daemon():
         if tN - t0 > 10:
             io.store(daemon)
             t0 = tN
+    logger.critical(f"tomato-daemon on port {daemon.port} exiting")
