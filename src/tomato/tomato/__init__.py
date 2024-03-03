@@ -122,6 +122,11 @@ def status(
     with_data: bool = False,
     **_: dict,
 ) -> Reply:
+    """
+    Get status of the tomato daemon.
+
+    If ``with_data`` is specified, the state of the daemon will be retrieved.
+    """
     logger.debug(f"checking status of tomato on port {port}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -155,6 +160,9 @@ def start(
     verbosity: int,
     **_: dict,
 ) -> Reply:
+    """
+    Start the tomato daemon.
+    """
     logger.debug(f"checking for availability of port {port}.")
     try:
         rep = context.socket(zmq.REP)
@@ -216,6 +224,11 @@ def stop(
     context: zmq.Context,
     **_: dict,
 ) -> Reply:
+    """
+    Stop a running tomato daemon.
+
+    Will not stop the daemon if any jobs are running. Will create a state snapshot.
+    """
     stat = status(port=port, timeout=timeout, context=context)
     if stat.success:
         req = context.socket(zmq.REQ)
@@ -249,6 +262,11 @@ def init(
     datadir: Path,
     **_: dict,
 ) -> Reply:
+    """
+    Create a default settings.toml file.
+
+    Will overwrite any existing settings.toml file.
+    """
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
@@ -284,6 +302,9 @@ def reload(
     appdir: Path,
     **_: dict,
 ) -> Reply:
+    """
+    Reload settings.toml and devices.yaml files and reconfigure tomato daemon.
+    """
     kwargs = dict(port=port, timeout=timeout, context=context)
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
@@ -421,7 +442,7 @@ def pipeline_load(
 
     .. code:: bash
 
-        tomato pipeline load <samplename> <pipeline>
+        tomato pipeline load <pipeline> <sampleid>
 
     """
     stat = status(port=port, timeout=timeout, context=context, with_data=True)

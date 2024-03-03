@@ -102,7 +102,7 @@ def run_tomato():
             default=3000,
         )
 
-    for p in [start, init]:
+    for p in [start, init, reload]:
         p.add_argument(
             "--appdir",
             "-A",
@@ -110,6 +110,7 @@ def run_tomato():
             help="Settings directory for tomato",
             default=Path(dirs.user_config_dir),
         )
+    for p in [init]:
         p.add_argument(
             "--datadir",
             "-D",
@@ -117,6 +118,7 @@ def run_tomato():
             help="Data directory for tomato",
             default=Path(dirs.user_data_dir),
         )
+    for p in [start]:
         p.add_argument(
             "--logdir",
             "-L",
@@ -253,7 +255,7 @@ def run_ketchup():
     args, extras = parser.parse_known_args()
     args, extras = verbose.parse_known_args(extras, args)
 
-    verbosity = args.verbose - args.quiet
+    verbosity = min(max((2 + args.quiet - args.verbose) * 10, 10), 50)
     set_loglevel(verbosity)
 
     if "func" in args:

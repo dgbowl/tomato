@@ -30,7 +30,9 @@ def setup_logging(daemon: Daemon):
     """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(Path(daemon.logdir) / f"daemon_{daemon.port}.log")
+    logdir = Path(daemon.logdir)
+    logdir.mkdir(parents=True, exist_ok=True)
+    fh = logging.FileHandler(logdir / f"daemon_{daemon.port}.log")
     fh.setLevel(daemon.verbosity)
     formatter = logging.Formatter(
         "%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s"

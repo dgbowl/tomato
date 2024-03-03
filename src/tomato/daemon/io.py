@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 def store(daemon: Daemon):
-    outfile = Path(daemon.settings["datadir"]) / f"tomato_state_{daemon.port}.pkl"
+    datadir = Path(daemon.settings["datadir"])
+    datadir.mkdir(parents=True, exist_ok=True)
+    outfile = datadir / f"tomato_state_{daemon.port}.pkl"
     logger.debug(f"storing daemon state to {outfile}")
     with outfile.open("wb") as out:
         pickle.dump(daemon, out, protocol=5)
