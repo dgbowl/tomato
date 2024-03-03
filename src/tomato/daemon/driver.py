@@ -66,7 +66,7 @@ def tomato_driver() -> None:
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
-        handlers=[logging.FileHandler(logfile, mode="a"), logging.StreamHandler()],
+        handlers=[logging.FileHandler(logfile, mode="a")],
     )
 
     # PORTS

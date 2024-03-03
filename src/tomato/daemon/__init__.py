@@ -29,7 +29,8 @@ def setup_logging(daemon: Daemon):
     the passed daemon state.
     """
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    for handler in logger.handlers:
+        logger.removeHandler(handler)
     logdir = Path(daemon.logdir)
     logdir.mkdir(parents=True, exist_ok=True)
     fh = logging.FileHandler(logdir / f"daemon_{daemon.port}.log")
