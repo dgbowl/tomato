@@ -28,18 +28,14 @@ def setup_logging(daemon: Daemon):
     Helper function to set up logging (folder, filename, verbosity, format) based on
     the passed daemon state.
     """
-    logger = logging.getLogger(__name__)
-    for handler in logger.handlers:
-        logger.removeHandler(handler)
     logdir = Path(daemon.logdir)
     logdir.mkdir(parents=True, exist_ok=True)
-    fh = logging.FileHandler(logdir / f"daemon_{daemon.port}.log")
-    fh.setLevel(daemon.verbosity)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s"
+    logfile = logdir / f"daemon_{daemon.port}.log"
+    logging.basicConfig(
+        level=daemon.verbosity,
+        format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
+        handlers=[logging.FileHandler(logfile, mode="a")],
     )
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
 
 
 def run_daemon():
