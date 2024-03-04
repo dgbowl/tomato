@@ -5,10 +5,12 @@
 ![Github link](https://badgen.net/github/tag/dgbowl/tomato/?icon=github)
 ![Github status](https://badgen.net/github/checks/dgbowl/tomato/?icon=github)
 
-`tomato` is the instrument automation package developed at Empa. Currently supported 
-hardware is:
+`tomato` is the instrument automation package developed at the [ConCat lab](https://tu.berlin/en/concat). Currently supported hardware is:
 
-- `dummy`: a Dummy device for testing purposes
+- `example_counter`: an example device for testing purposes.
+
+Partially supported hardware includes:
+
 - `biologic`: device for BioLogic potentiostats via the EC-Lib library, Windows only.
 
 See the [Documentation](https://dgbowl.github.io/tomato) for more detailed info.
