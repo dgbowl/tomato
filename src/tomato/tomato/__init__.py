@@ -35,11 +35,9 @@ import zmq
 import yaml
 import toml
 
-from tomato.models import Reply, Pipeline, Device
+from tomato.models import Reply, Pipeline, Device, Driver
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_TOMATO_PORT = 1234
 VERSION = metadata.version("tomato")
 
 
@@ -77,7 +75,14 @@ def get_pipelines(devs: dict[str, Device], pipelines: list) -> dict[str, Pipelin
                 dev = devs[comp["name"]]
                 for ch in dev.channels:
                     name = pip["name"].replace("*", f"{ch}")
-                    d = {dev.name: dict(role=comp["tag"], channel=ch)}
+                    d = {
+                        comp["tag"]: dict(
+                            name=dev.name,
+                            role=comp["tag"],
+                            channel=ch,
+                            address=dev.address,
+                        )
+                    }
                     p = dict(name=name, devs=d)
                     pips[name] = Pipeline(**p)
         else:
@@ -90,9 +95,23 @@ def get_pipelines(devs: dict[str, Device], pipelines: list) -> dict[str, Pipelin
                 if comp["channel"] not in dev.channels:
                     logger.error(f"channel {comp['channel']} not found among channels")
                     break
-                data["devs"][dev.name] = dict(role=comp["tag"], channel=comp["channel"])
-            pips[pip["name"]] = data
+                data["devs"][comp["tag"]] = dict(
+                    name=dev.name,
+                    role=comp["tag"],
+                    channel=comp["channel"],
+                    address=dev.address,
+                )
+            pips[pip["name"]] = Pipeline(**data)
     return pips
+
+
+def _updater(context, port, cmd, params):
+    dreq = context.socket(zmq.REQ)
+    dreq.connect(f"tcp://127.0.0.1:{port}")
+    dreq.send_pyobj(dict(cmd=cmd, params=params, sender=f"{__name__}._updater"))
+    ret = dreq.recv_pyobj()
+    dreq.close()
+    return ret
 
 
 def status(
@@ -103,6 +122,11 @@ def status(
     with_data: bool = False,
     **_: dict,
 ) -> Reply:
+    """
+    Get status of the tomato daemon.
+
+    If ``with_data`` is specified, the state of the daemon will be retrieved.
+    """
     logger.debug(f"checking status of tomato on port {port}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -136,11 +160,22 @@ def start(
     verbosity: int,
     **_: dict,
 ) -> Reply:
+    """
+    Start the tomato daemon.
+    """
     logger.debug(f"checking for availability of port {port}.")
     try:
         rep = context.socket(zmq.REP)
         rep.bind(f"tcp://127.0.0.1:{port}")
+        stat = status(port=port, timeout=1000, context=context)
         rep.unbind(f"tcp://127.0.0.1:{port}")
+        rep.setsockopt(zmq.LINGER, 0)
+        rep.close()
+        if stat.success:
+            return Reply(
+                success=False,
+                msg=f"tomato-daemon already running on port {port}",
+            )
     except zmq.error.ZMQError:
         return Reply(
             success=False,
@@ -168,10 +203,9 @@ def start(
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(cmd, creationflags=cfs)
-        time.sleep(2)
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
-    kwargs = dict(port=port, timeout=timeout, context=context)
+    kwargs = dict(port=port, timeout=max(timeout, 5000), context=context)
     stat = status(**kwargs)
     if stat.success:
         return reload(**kwargs, appdir=appdir)
@@ -183,7 +217,18 @@ def start(
         )
 
 
-def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict) -> Reply:
+def stop(
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    **_: dict,
+) -> Reply:
+    """
+    Stop a running tomato daemon.
+
+    Will not stop the daemon if any jobs are running. Will create a state snapshot.
+    """
     stat = status(port=port, timeout=timeout, context=context)
     if stat.success:
         req = context.socket(zmq.REQ)
@@ -193,7 +238,13 @@ def stop(*, port: int, timeout: int, context: zmq.Context, **_: dict) -> Reply:
         if rep.msg == "stop":
             return Reply(
                 success=True,
-                msg=f"tomato on port {port} was instructed to stop",
+                msg=f"tomato-daemon on port {port} was instructed to stop",
+            )
+        elif rep.msg == "running":
+            return Reply(
+                success=False,
+                msg=f"tomato-daemon on port {port} cannot stop as jobs are running",
+                data=rep.data,
             )
         else:
             return Reply(
@@ -211,6 +262,11 @@ def init(
     datadir: Path,
     **_: dict,
 ) -> Reply:
+    """
+    Create a default settings.toml file.
+
+    Will overwrite any existing settings.toml file.
+    """
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
@@ -224,10 +280,11 @@ def init(
         config = '{appdir.resolve() / 'devices.yml'}'
 
         [drivers]
+        example_counter.testpar = 1234
         """
     )
     if not appdir.exists():
-        logging.debug(f"creating directory '{appdir.resolve()}'")
+        logger.debug(f"creating directory '{appdir.resolve()}'")
         os.makedirs(appdir)
     with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
         of.write(defaults)
@@ -238,9 +295,18 @@ def init(
 
 
 def reload(
-    *, port: int, timeout: int, context: zmq.Context, appdir: Path, **_: dict
+    *,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    appdir: Path,
+    **_: dict,
 ) -> Reply:
-    logging.debug("Loading settings.toml file from %s.", appdir)
+    """
+    Reload settings.toml and devices.yaml files and reconfigure tomato daemon.
+    """
+    kwargs = dict(port=port, timeout=timeout, context=context)
+    logger.debug("Loading settings.toml file from %s.", appdir)
     try:
         settings = toml.load(appdir / "settings.toml")
     except FileNotFoundError:
@@ -251,19 +317,103 @@ def reload(
 
     devicefile = load_device_file(Path(settings["devices"]["config"]))
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
-    for dev in devs.values():
-        if dev.driver in settings["drivers"]:
-            dev.settings.update(settings["drivers"][dev.driver])
-
     pips = get_pipelines(devs, devicefile["pipelines"])
+    drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
+    for drv in drvs.values():
+        if drv.name in settings["drivers"]:
+            drv.settings.update(settings["drivers"][drv.name])
 
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(**kwargs, with_data=True)
     if not stat.success:
         return stat
+    daemon = stat.data
+    logger.critical(f"{daemon.status=}")
+    logger.critical(f"{daemon.pips=}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="setup", settings=settings, pips=pips, devs=devs))
-    rep = req.recv_pyobj()
+    if daemon.status == "bootstrap":
+        req.send_pyobj(
+            dict(
+                cmd="setup",
+                settings=settings,
+                pips=pips,
+                devs=devs,
+                drvs=drvs,
+                sender=f"{__name__}.reload",
+            )
+        )
+        rep = req.recv_pyobj()
+    elif daemon.status == "running":
+        retries = 0
+        while True:
+            if any([drv.port is None for drv in daemon.drvs.values()]):
+                retries += 1
+                logger.warning("not all tomato-drivers are online yet, waiting")
+                logger.debug(f"{retries=}")
+                time.sleep(timeout / 1000)
+                daemon = status(**kwargs, with_data=True).data
+            elif retries == 10:
+                return Reply(
+                    success=False, msg="tomato-drivers are not online", data=daemon
+                )
+            else:
+                break
+
+        # check changes in driver settings
+        for drv in drvs.values():
+            if drv.settings != daemon.drvs[drv.name].settings:
+                ret = _updater(
+                    context, daemon.drvs[drv.name].port, "settings", drv.settings
+                )
+                if ret.success is False:
+                    return ret
+                ret = _updater(
+                    context, port, "driver", dict(name=drv.name, settings=drv.settings)
+                )
+                logger.critical(f"{ret=}")
+
+        # check changes in devices
+        for dev in devs.values():
+            if (
+                dev.name not in daemon.devs
+                or dev.channels != daemon.devs[dev.name].channels
+            ):
+                logger.error(f"Here {dev.channels=} {dev.name=}")
+                for channel in dev.channels:
+                    params = dict(
+                        address=dev.address,
+                        channel=channel,
+                        capabilities=dev.capabilities,
+                    )
+                    ret = _updater(
+                        context, daemon.drvs[drv.name].port, "dev_register", params
+                    )
+                    if ret.success is False:
+                        return ret
+                params = dict(name=dev.name, channels=dev.channels)
+                ret = _updater(context, port, "device", params)
+                logger.critical(f"{ret=}")
+            elif dev != daemon.devs[dev.name]:
+                logger.error("updating devices not yet implemented")
+        for devname in daemon.devs:
+            if devname not in devs:
+                logger.error("removing devices not yet implemented")
+        # check changes in pipelines
+        for pip in pips.values():
+            if pip.name not in daemon.pips:
+                ret = _updater(context, port, "pipeline", pip.dict())
+                logger.critical(f"{ret=}")
+            else:
+                logger.error("updating pipelines not yet implemented")
+        for pip in daemon.pips.values():
+            if pip.name not in pips:
+                params = dict(name=pip.name, delete=True)
+                ret = _updater(context, port, "pipeline", params)
+                logger.critical(f"{ret=}")
+
+        req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.reload"))
+        rep = req.recv_pyobj()
+
     if rep.msg == "running":
         return Reply(
             success=True,
@@ -292,7 +442,7 @@ def pipeline_load(
 
     .. code:: bash
 
-        tomato pipeline load <samplename> <pipeline>
+        tomato pipeline load <pipeline> <sampleid>
 
     """
     stat = status(port=port, timeout=timeout, context=context, with_data=True)
@@ -300,21 +450,27 @@ def pipeline_load(
         return stat
 
     if pipeline not in stat.data.pips:
-        return Reply(success=False, msg=f"pipeline {pipeline} not found on tomato")
+        return Reply(success=False, msg=f"pipeline {pipeline!r} not found on tomato")
     pip = stat.data.pips[pipeline]
 
     if pip.sampleid is not None:
         return Reply(
-            success=False, msg=f"pipeline {pipeline} is not empty, aborting", data=pip
+            success=False, msg=f"pipeline {pipeline!r} is not empty, aborting", data=pip
         )
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_pyobj(
-        dict(cmd="pipeline", pipeline=pipeline, params=dict(sampleid=sampleid))
+        dict(
+            cmd="pipeline",
+            params=dict(sampleid=sampleid, name=pipeline),
+            sender=f"{__name__}.pipeline_load",
+        ),
     )
     msg = req.recv_pyobj()
-    return Reply(success=True, msg=f"loaded {sampleid} into {pipeline}", data=msg.data)
+    return Reply(
+        success=True, msg=f"loaded {sampleid!r} into {pipeline!r}", data=msg.data
+    )
 
 
 def pipeline_eject(
@@ -340,14 +496,14 @@ def pipeline_eject(
     if pipeline not in stat.data.pips:
         return Reply(
             success=False,
-            msg=f"pipeline {pipeline} not found on tomato",
+            msg=f"pipeline {pipeline!r} not found on tomato",
             data=stat.data.pips,
         )
     pip = stat.data.pips[pipeline]
 
     if pip.sampleid is None:
         return Reply(
-            success=True, msg=f"pipeline {pipeline} was already empty", data=pip
+            success=True, msg=f"pipeline {pipeline!r} was already empty", data=pip
         )
 
     if pip.jobid is not None:
@@ -358,11 +514,15 @@ def pipeline_eject(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_pyobj(
-        dict(cmd="pipeline", pipeline=pipeline, params=dict(sampleid=None, ready=False))
+        dict(
+            cmd="pipeline",
+            params=dict(sampleid=None, ready=False, name=pipeline),
+            sender=f"{__name__}.pipeline_eject",
+        )
     )
     rep = req.recv_pyobj()
     return Reply(
-        success=True, msg=f"pipeline {pipeline} ejected succesffully", data=rep.data
+        success=True, msg=f"pipeline {pipeline!r} ejected succesffully", data=rep.data
     )
 
 
@@ -389,14 +549,14 @@ def pipeline_ready(
     if pipeline not in stat.data.pips:
         return Reply(
             success=False,
-            msg=f"pipeline {pipeline} not found on tomato",
+            msg=f"pipeline {pipeline!r} not found on tomato",
             data=stat.data.pips,
         )
     pip = stat.data.pips[pipeline]
 
     if pip.ready:
         return Reply(
-            success=True, msg=f"pipeline {pipeline} was already ready", data=pip
+            success=True, msg=f"pipeline {pipeline!r} was already ready", data=pip
         )
 
     if pip.jobid is not None:
@@ -406,6 +566,12 @@ def pipeline_ready(
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="pipeline", pipeline=pipeline, params=dict(ready=True)))
+    req.send_pyobj(
+        dict(
+            cmd="pipeline",
+            params=dict(ready=True, name=pipeline),
+            sender=f"{__name__}.pipeline_ready",
+        )
+    )
     rep = req.recv_pyobj()
-    return Reply(success=True, msg=f"pipeline {pipeline} set as ready", data=rep.data)
+    return Reply(success=True, msg=f"pipeline {pipeline!r} set as ready", data=rep.data)

@@ -18,11 +18,12 @@ functions:
 import json
 import logging
 from pathlib import Path
+from datetime import datetime, timezone
 import yaml
 import zmq
 from dgbowl_schemas.tomato import to_payload
 
-from tomato.drivers import yadg_funcs
+from tomato.drivers.jobfuncs import merge_netcdfs
 from tomato.models import Reply, Daemon
 
 log = logging.getLogger(__name__)
@@ -38,40 +39,45 @@ def submit(
     **_: dict,
 ) -> Reply:
     """
-    Job submission function. Usage:
+    Job submission function.
 
-    .. code:: bash
-
-        ketchup [-t] [-v] [-q] submit <payload> [--jobname JOBNAME]
-
-    Attempts to open the ``yaml/json`` file specified in the ``<payload>`` argument,
+    Attempts to open the ``yaml/json`` file specified in the ``payload`` argument,
     and submit it to tomato's queue.
 
-    The supplied :class:`argparse.Namespace` has to contain the path to the ``payload``.
-    Optional arguments include an optional ``--jobname/-j`` parameter for supplying a
-    job name for the queue, the verbose/quiet switches (``-v/-q``) and the testing
-    switch (``-t``).
+    Reply contains information about the submitted job.
 
     Examples
     --------
 
     >>> # Submit a job:
-    >>> ketchup submit dummy_random_2_0.1.yml
-    jobid: 2
-    jobname: null
-
-    >>> # Increased verbosity:
-    >>> ketchup -v submit dummy_random_2_0.1.yml
-    INFO:tomato.ketchup.functions:Output path not set. Setting output path to '[...]'
-    INFO:tomato.ketchup.functions:queueing 'payload' into 'queue'
-    INFO:tomato.dbhandler.sqlite:inserting a new job into 'state'
-    jobid: 4
-    jobname: null
+    >>> ketchup submit counter_15_0.1.yml
+    data:
+      completed_at: null
+      executed_at: null
+      id: 1
+      jobname: null
+      payload:
+        [...]
+      pid: null
+      status: q
+      submitted_at: '2024-03-03 15:16:49.522866+00:00'
+    msg: job submitted successfully
+    success: true
 
     >>> # With a job name:
-    >>> ketchup submit dummy_random_2_0.1.yml -j dummy_random_2_0.1
-    jobid: 5
-    jobname: dummy_random_2_0.1
+    >>> ketchup submit counter_15_0.1.yml -j jobname_is_this
+    data:
+      completed_at: null
+      executed_at: null
+      id: 2
+      jobname: jobname_is_this
+      payload:
+        [...]
+      pid: null
+      status: q
+      submitted_at: '2024-03-03 15:19:09.856354+00:00'
+    msg: job submitted successfully
+    success: true
 
     """
     payload = Path(payload)
@@ -99,10 +105,11 @@ def submit(
             log.info(f"Snapshot path not set. Setting output path to {cwd}")
             payload.tomato.snapshot.path = cwd
 
-    log.info("queueing 'payload' into 'queue'")
+    log.debug("queueing 'payload' into 'queue'")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    params = dict(payload=payload, jobname=jobname)
+    dt = str(datetime.now(timezone.utc))
+    params = dict(payload=payload, jobname=jobname, submitted_at=dt)
     req.send_pyobj(dict(cmd="job", id=None, params=params))
     ret = req.recv_pyobj()
     if ret.success:
@@ -122,33 +129,66 @@ def status(
     **_: dict,
 ) -> Reply:
     """
-    Job or queue status query function. Usage:
+    Job status query function.
 
-    .. code:: bash
-
-        ketchup [-t] [-v] [-q] status
-        ketchup [-t] [-v] [-q] status <jobid>
-
-    The :class:`argparse.Namespace` has to contain the ``<jobid>`` the status of
-    which is supposed to be queried. If no ``<jobid>`` is provided, the status of the
-    whole ``queue`` of tomato is be queried.
-
-    Examples
-    --------
+    Reply contains information about all matched jobs.
 
     .. note::
 
         Calling ``ketchup status`` with a single ``jobid`` will return a ``yaml``
         :class:`list`, even though status of only one element was queried.
 
+    Examples
+    --------
+
     >>> # Get status of a given job
     >>> ketchup status 1
-    - jobid: 1
-      jobname: null
-      status:  c
-      submitted: 2022-06-02 06:49:00.578619+00:00
-      executed: 2022-06-02 06:49:02.966775+00:00
-      completed: 2022-06-02 06:49:08.229213+00:00
+    data:
+      1:
+        completed_at: null
+        executed_at: null
+        id: 1
+        jobname: null
+        payload:
+          [...]
+        pid: null
+        status: qw
+        submitted_at: '2024-03-03 15:16:49.522866+00:00'
+    msg: found 1 queued jobs
+    success: true
+
+    >>> # Get status of multiple jobs
+    >>> ketchup status 1 2
+    data:
+      1:
+        completed_at: null
+        executed_at: null
+        id: 1
+        jobname: counter
+        payload:
+          [...]
+        pid: null
+        status: qw
+        submitted_at: '2024-03-03 15:16:49.522866+00:00'
+    data:
+      1:
+        completed_at: '2024-03-03 15:27:44.660493+00:00'
+        executed_at: '2024-03-03 15:27:28.593896+00:00'
+        id: 1
+        jobname: null
+        payload:
+          [...]
+        pid: 514771
+        status: c
+        submitted_at: '2024-03-03 15:23:40.987074+00:00'
+    msg: found 2 queued jobs
+    success: true
+
+    >>> # Get status of non-existent job
+    >>> ketchup status 3
+    data: {}
+    msg: found 0 queued jobs
+    success: true
 
     """
     jobs = status.data.jobs
@@ -171,40 +211,48 @@ def cancel(
     **_: dict,
 ) -> Reply:
     """
-    Job cancellation function. Usage:
-
-    .. code:: bash
-
-        ketchup [-t] [-v] [-q] cancel <jobid>
-
-    The :class:`argparse.Namespace` has to contain the ``<jobid>`` of the job to be
-    cancelled. Optional arguments include the verbose/quiet switches (``-v/-q``) and
-    the testing switch (``-t``).
+    Job cancellation function.
 
     .. note::
 
         The :func:`~ketchup.functions.cancel` only sets the status of the running
         job to ``rd``; the actual job cancellation is performed in the
-        :func:`tomato.daemon.main.main_loop`.
+        :mod:`tomato.daemon.job` module.
 
     Examples
     --------
 
-    >>> # Cancel a job:
-    >>> ketchup cancel 1
-
-    .. warning::
-
-        Cancelling a running job will generate a warning. Output FAIR data should be
-        created as requested in the ``<payload>``.
+    >>> # Cancel a queued job:
+    >>> ketchup cancel 2
+    data:
+      2:
+        completed_at: null
+        executed_at: null
+        id: 2
+        jobname: null
+        payload:
+          [...]
+        pid: null
+        status: cd
+        submitted_at: '2024-03-03 15:23:50.702504+00:00'
+    msg: cancelled jobs successfully
+    success: true
 
     >>> # Cancel a running job:
-    >>> ketchup cancel 1
-    WARNING:tomato.ketchup.functions:cancelling a running job 1 with pid 17584
-
-    .. note::
-
-        Cancelling a completed job will do nothing.
+    >>> ketchup cancel 3
+    data:
+      3:
+        completed_at: null
+        executed_at: '2024-03-03 15:37:45.635442+00:00'
+        id: 3
+        jobname: null
+        payload:
+          [...]
+        pid: 515678
+        status: rd
+        submitted_at: '2024-03-03 15:37:44.858713+00:00'
+    msg: cancelled jobs successfully
+    success: true
 
     """
     jobs = status.data.jobs
@@ -220,7 +268,7 @@ def cancel(
             params = dict(status="cd")
         elif jobs[jobid].status in {"r"}:
             params = dict(status="rd")
-        elif jobs[jobid].status in {"cd", "ce"}:
+        elif jobs[jobid].status in {"cd", "ce", "c"}:
             continue
         req.send_pyobj(dict(cmd="job", id=jobid, params=params))
         ret = req.recv_pyobj()
@@ -238,11 +286,7 @@ def snapshot(
     **_: dict,
 ) -> Reply:
     """
-    Create a snapshot of job data. Usage:
-
-    .. code:: bash
-
-        ketchup [-t] [-v] [-q] snapshot <jobid>
+    Create a snapshot of job data.
 
     Requests an up-to-date snapshot of the data of the job identified by ``jobid``.
     Checks whether the job is running, raises a warning if job has been finished.
@@ -251,10 +295,11 @@ def snapshot(
     --------
 
     >>> # Create a snapshot in current working directory:
-    >>> ketchup snapshot 1
-    >>> ls
-    snapshot.1.json
-    snapshot.1.zip
+    >>> ketchup snapshot 3
+    data: null
+    msg: snapshot for job(s) [3] created successfully
+    success: true
+
 
     """
     jobs = status.data.jobs
@@ -266,19 +311,7 @@ def snapshot(
 
     jobdir = Path(status.data.settings["jobs"]["storage"])
     for jobid in jobids:
-        root = jobdir / str(jobid)
-        assert root.exists() and root.is_dir()
-        jobfile = root / "jobdata.json"
-        assert jobfile.exists() and jobfile.is_file()
-        with jobfile.open() as inf:
-            jobdata = json.load(inf)
-        log.debug("creating a preset file '%s'", f"preset.{jobid}.json")
-        preset = yadg_funcs.get_yadg_preset(
-            jobdata["payload"]["method"], jobdata["pipeline"], jobdata["devices"]
-        )
-        yadg_funcs.process_yadg_preset(
-            preset=preset, path=".", prefix=f"snapshot.{jobid}", jobdir=str(jobdir)
-        )
+        merge_netcdfs(jobdir / str(jobid), Path(f"snapshot.{jobid}.nc"))
     return Reply(success=True, msg=f"snapshot for job(s) {jobids} created successfully")
 
 
@@ -289,25 +322,32 @@ def search(
     **_: dict,
 ) -> Reply:
     """
-    Search the queue for a job that matches a given jobname. Usage:
+    Search the queue for a job that matches a given jobname.
 
-    .. code:: bash
-
-        ketchup [-t] [-v] [-q] [-c] search <jobname>
-
-    Searches the ``queue`` for a job that matches the ``jobname``, returns the
-    job status and ``jobid``. If the option ``-c/--complete`` is specified,
-    the completed jobs will also be searched.
+    Searches the queue for a job that matches the ``jobname``, returns the
+    job status and ``jobid``.
 
     Examples
     --------
 
     >>> # Create a snapshot in current working directory:
-    >>> ketchup submit dummy_random_2_0.1.yml -j dummy_random_2_0.1
-    >>> ketchup search dummy_random_2
-    - jobid: 1
-      jobname: dummy_random_2_0.1
-      status: r
+    >>> ketchup search counter
+    data:
+      1:
+        completed_at: null
+        executed_at: null
+        id: 1
+        jobname: counter
+        [...]
+        status: qw
+        submitted_at: '2024-03-03 15:40:21.205806+00:00'
+    msg: jobs matching 'counter' found
+    success: true
+
+    >>> ketchup search nothing
+    data: null
+    msg: no job matching 'nothing' found
+    success: false
 
     """
     jobs = status.data.jobs

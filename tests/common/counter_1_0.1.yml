@@ -1,0 +1,10 @@
+version: "0.2"
+sample:
+    name: counter_1_0.1
+method:
+  - device: "counter"
+    technique: "count"
+    time: 1.0
+    delay: 0.1
+tomato:
+    verbosity: "DEBUG"

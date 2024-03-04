@@ -1,10 +1,10 @@
 version: "0.1"
 sample:
-    name: dummy_sequential_1_0.05
+    name: counter_output_prefix
 method:
-  - device: "worker"
-    technique: "sequential"
-    time: 1
+  - device: "counter"
+    technique: "count"
+    time: 1.0
     delay: 0.05
 tomato:
     verbosity: "DEBUG"

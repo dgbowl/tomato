@@ -38,10 +38,12 @@ setuptools.setup(
         "toml~=0.10",
         "pyyaml~=6.0",
         "psutil~=5.9",
-        "yadg==4.2.4",
         "dgbowl_schemas>=108",
         "filelock~=3.12",
         "pyzmq~=25.1",
+        "h5netcdf~=1.3",
+        "xarray~=2024.2",
+        "pydantic~=1.0",
     ],
     extras_require={
         "testing": [
@@ -51,6 +53,7 @@ setuptools.setup(
             "sphinx~=7.2",
             "sphinx-rtd-theme~=1.3.0",
             "sphinx-autodoc-typehints < 1.20.0",
+            "sphinxcontrib-mermaid ~= 0.9.2",
             "autodoc-pydantic==1.9.0",
         ],
     },
@@ -59,6 +62,7 @@ setuptools.setup(
             "tomato=tomato:run_tomato",
             "ketchup=tomato:run_ketchup",
             "tomato-job=tomato.drivers:tomato_job",
+            "tomato-driver=tomato.daemon.driver:tomato_driver",
             "tomato-daemon=tomato.daemon:run_daemon",
         ]
     },

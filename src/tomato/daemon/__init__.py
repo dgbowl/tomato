@@ -3,38 +3,50 @@
 -------------------------------------------------------------------
 .. codeauthor::
     Peter Kraus
+
 """
 
 import logging
 import argparse
-from threading import Thread
 from pathlib import Path
+from threading import Thread
 import toml
 import time
 import zmq
 
 from tomato.models import Reply, Daemon
 import tomato.daemon.cmd as cmd
-import tomato.daemon.job as job
+import tomato.daemon.job
+import tomato.daemon.driver
 import tomato.daemon.io as io
 
 logger = logging.getLogger(__name__)
 
 
 def setup_logging(daemon: Daemon):
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(Path(daemon.logdir) / f"daemon_{daemon.port}.log")
-    fh.setLevel(daemon.verbosity)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s"
+    """
+    Helper function to set up logging (folder, filename, verbosity, format) based on
+    the passed daemon state.
+    """
+    logdir = Path(daemon.logdir)
+    logdir.mkdir(parents=True, exist_ok=True)
+    logfile = logdir / f"daemon_{daemon.port}.log"
+    logging.basicConfig(
+        level=daemon.verbosity,
+        format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
+        handlers=[logging.FileHandler(logfile, mode="a")],
     )
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
 
 
 def run_daemon():
-    """ """
+    """
+    The function called when `tomato-daemon` is executed.
+
+    Manages the state of the tomato daemon, including recovery of state via
+    :mod:`~tomato.daemon.io`, processing state updates via :mod:`~tomato.daemon.cmd`,
+    and the manager threads for both jobs (:mod:`~tomato.daemon.job`) and drivers
+    (:mod:`~tomato.daemon.driver`).
+    """
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--port", "-p", type=int, default=1234)
     parser.add_argument("--verbosity", "-V", type=int, default=logging.INFO)
@@ -59,7 +71,12 @@ def run_daemon():
     poller.register(rep, zmq.POLLIN)
 
     logger.debug("entering main loop")
-    jmgr = None
+    jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,))
+    jmgr.do_run = True
+    jmgr.start()
+    dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,))
+    dmgr.do_run = True
+    dmgr.start()
     t0 = time.process_time()
     while True:
         socks = dict(poller.poll(100))
@@ -69,32 +86,30 @@ def run_daemon():
             if "cmd" not in msg:
                 logger.error(f"received msg without cmd: {msg=}")
                 ret = Reply(success=False, msg="received msg without cmd", data=msg)
-            elif msg["cmd"] == "status":
-                ret = cmd.status(msg, daemon)
-            elif msg["cmd"] == "stop":
-                ret = cmd.stop(msg, daemon)
-                if jmgr is not None:
-                    jmgr.do_run = False
-                    jmgr.join()
-                    logger.info("job manager thread joined successfully")
-            elif msg["cmd"] == "setup":
-                settings = msg["settings"]
-                ret = cmd.setup(msg, daemon)
-                if jmgr is None:
-                    jmgr = Thread(target=job.manager, args=(daemon.port, context))
-                    jmgr.do_run = True
-                    jmgr.start()
-                    logger.info("job manager thread started")
-            elif msg["cmd"] == "pipeline":
-                ret = cmd.pipeline(msg, daemon)
-            elif msg["cmd"] == "job":
-                ret = cmd.job(msg, daemon)
+            elif hasattr(cmd, msg["cmd"]):
+                ret = getattr(cmd, msg["cmd"])(msg, daemon)
             logger.debug(f"reply with {ret=}")
             rep.send_pyobj(ret)
         if daemon.status == "stop":
-            io.store(daemon)
-            break
+            for mgr, label in [(jmgr, "job"), (dmgr, "driver")]:
+                if mgr is not None and mgr.do_run:
+                    logger.debug(f"stopping {label} manager thread")
+                    mgr.do_run = False
+            if jmgr is not None:
+                jmgr.join(1e-3)
+                if not jmgr.is_alive():
+                    jmgr = None
+                    logger.info("job manager thread joined")
+            if dmgr is not None:
+                dmgr.join(1e-3)
+                if not dmgr.is_alive():
+                    dmgr = None
+                    logger.info("driver manager thread joined")
+            if jmgr is None and dmgr is None:
+                io.store(daemon)
+                break
         tN = time.process_time()
         if tN - t0 > 10:
             io.store(daemon)
             t0 = tN
+    logger.critical(f"tomato-daemon on port {daemon.port} exiting")

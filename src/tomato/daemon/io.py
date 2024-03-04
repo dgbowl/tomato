@@ -1,3 +1,10 @@
+"""
+**tomato.daemon.io**: store and load state of tomato daemon
+-----------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+
+"""
 import pickle
 import logging
 from pathlib import Path
@@ -7,10 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 def store(daemon: Daemon):
-    outfile = Path(daemon.settings["datadir"]) / f"tomato_state_{daemon.port}.pkl"
+    datadir = Path(daemon.settings["datadir"])
+    datadir.mkdir(parents=True, exist_ok=True)
+    outfile = datadir / f"tomato_state_{daemon.port}.pkl"
     logger.debug(f"storing daemon state to {outfile}")
     with outfile.open("wb") as out:
-        pickle.dump(daemon, out)
+        pickle.dump(daemon, out, protocol=5)
 
 
 def load(daemon: Daemon):
@@ -23,4 +32,6 @@ def load(daemon: Daemon):
     daemon.jobs = loaded.jobs
     daemon.pips = loaded.pips
     daemon.devs = loaded.devs
+    daemon.drvs = loaded.drvs
     daemon.nextjob = loaded.nextjob
+    daemon.status = "running"
