@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>biologic: Driver for BioLogic potentiostats &mdash; tomato master documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/tomato_ico.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=30d551ce"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="tomato.drivers.biologic.kbio package" href="tomato.drivers.biologic.kbio.html" />
+    <link rel="prev" title="tomato.drivers package" href="tomato.drivers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tomato
+              <img src="../_static/tomato.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                master
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">tomato user manual</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../version.html">Version history</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tomato.html">tomato package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.set_loglevel"><code class="docutils literal notranslate"><span class="pre">set_loglevel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_tomato"><code class="docutils literal notranslate"><span class="pre">run_tomato()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_ketchup"><code class="docutils literal notranslate"><span class="pre">run_ketchup()</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="tomato.drivers.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#"><strong>biologic</strong>: Driver for BioLogic potentiostats</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#driver-configuration">Driver Configuration</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#supported-method-parameters">Supported <em>method</em> parameters:</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-tomato.drivers.biologic.kbio_wrapper">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.jobfuncs">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#module-tomato.models">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tomato</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tomato.html">tomato package</a></li>
+          <li class="breadcrumb-item"><a href="tomato.drivers.html">tomato.drivers package</a></li>
+      <li class="breadcrumb-item active"><strong>biologic</strong>: Driver for BioLogic potentiostats</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/apidoc/tomato.drivers.biologic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-tomato.drivers.biologic">
+<span id="biologic-driver-for-biologic-potentiostats"></span><h1><strong>biologic</strong>: Driver for BioLogic potentiostats<a class="headerlink" href="#module-tomato.drivers.biologic" title="Link to this heading"></a></h1>
+<p>This driver is a wrapper around BioLogic’s <a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio" title="tomato.drivers.biologic.kbio"><code class="xref py py-mod docutils literal notranslate"><span class="pre">kbio</span></code></a> package.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This driver is Windows-only.</p>
+</div>
+<section id="driver-configuration">
+<h2>Driver Configuration<a class="headerlink" href="#driver-configuration" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="#module-tomato.drivers.biologic" title="tomato.drivers.biologic"><code class="xref py py-mod docutils literal notranslate"><span class="pre">biologic</span></code></a> driver requires the following settings in the
+<a class="reference internal" href="../quickstart.html#setfile"><span class="std std-ref">Settings file</span></a>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[drivers.biologic.dllpath]</span></code> pointing to the folder of the EC-Lib Development library;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[drivers.biologic.lockfile]</span></code> pointing to a file to be used as a lock file for the DLL.</p></li>
+</ul>
+</section>
+<section id="supported-method-parameters">
+<h2>Supported <em>method</em> parameters:<a class="headerlink" href="#supported-method-parameters" title="Link to this heading"></a></h2>
+<section id="general-parameters">
+<h3>General parameters<a class="headerlink" href="#general-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">technique</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal[&quot;constant_current&quot;,</span> <span class="pre">&quot;constant_voltage&quot;,</span> <span class="pre">&quot;sweep_current&quot;,</span> <span class="pre">&quot;sweep_voltage&quot;,</span> <span class="pre">&quot;open_circuit_voltage&quot;,</span> <span class="pre">&quot;loop&quot;]</span></code></p></td>
+<td><p>see below</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float]</span></code></p></td>
+<td><p>total runtime of the <em>method</em>, in <code class="docutils literal notranslate"><span class="pre">s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">I_range</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal[&quot;100</span> <span class="pre">pA&quot;,</span> <span class="pre">&quot;1</span> <span class="pre">nA&quot;,</span> <span class="pre">&quot;10</span> <span class="pre">nA&quot;,</span> <span class="pre">&quot;100</span> <span class="pre">nA&quot;,</span> <span class="pre">&quot;1</span> <span class="pre">uA&quot;,</span> <span class="pre">&quot;10</span> <span class="pre">uA&quot;,</span> <span class="pre">&quot;100</span> <span class="pre">uA&quot;,</span> <span class="pre">&quot;1</span> <span class="pre">mA&quot;,</span> <span class="pre">&quot;10</span> <span class="pre">mA&quot;,</span> <span class="pre">&quot;100</span> <span class="pre">mA&quot;,</span> <span class="pre">&quot;1</span> <span class="pre">A&quot;]</span></code></p></td>
+<td><p>maximum current available to the <em>method</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">E_range</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal[&quot;+-2.5</span> <span class="pre">V&quot;,</span> <span class="pre">&quot;+-5.0</span> <span class="pre">V&quot;,</span> <span class="pre">&quot;+-10</span> <span class="pre">V&quot;]</span></code></p></td>
+<td><p>voltage range used by the <em>method</em></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">record_every_dt</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float]</span></code></p></td>
+<td><p>delay between datapoints, in <code class="docutils literal notranslate"><span class="pre">s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">is_delta</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></code></p></td>
+<td><p>is the setpoint a delta (<code class="docutils literal notranslate"><span class="pre">True</span></code>) or absolute (<code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="technique-limits">
+<span id="id1"></span><h3>Technique limits<a class="headerlink" href="#technique-limits" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">limit_current_max</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float,str]</span></code></p></td>
+<td><p>maximum allowed current, can be a C-rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">limit_current_min</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float,str]</span></code></p></td>
+<td><p>minimum allowed current, can be a C-rate</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">limit_voltage_max</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float]</span></code></p></td>
+<td><p>maximum allowed voltage</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">limit_voltage_min</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float]</span></code></p></td>
+<td><p>minimum allowed voltage</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">exit_on_limit</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></code></p></td>
+<td><p>abort when limit reached (<code class="docutils literal notranslate"><span class="pre">True</span></code>) or continue (<code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="controlled-current-and-voltage-techniques">
+<h3>Controlled current and voltage techniques<a class="headerlink" href="#controlled-current-and-voltage-techniques" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">current</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float,str]</span></code></p></td>
+<td><p>current setpoint, can be a C-rate, in <code class="docutils literal notranslate"><span class="pre">A</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">record_every_dE</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float]</span></code></p></td>
+<td><p>maximum spacing between datapoints, in <code class="docutils literal notranslate"><span class="pre">V</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">voltage</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float]</span></code></p></td>
+<td><p>voltage setpoint, in <code class="docutils literal notranslate"><span class="pre">V</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">record_every_dI</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Union[int,float]</span></code></p></td>
+<td><p>maximum spacing between datapoints, in <code class="docutils literal notranslate"><span class="pre">A</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scan_rate</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>sweep rate of setpoint, in <code class="docutils literal notranslate"><span class="pre">V/s</span></code> or <code class="docutils literal notranslate"><span class="pre">A/s</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="loop-parameters">
+<h3>Loop parameters<a class="headerlink" href="#loop-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_gotos</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></code></p></td>
+<td><p>number of jumps - <code class="docutils literal notranslate"><span class="pre">0</span></code> means no looping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">goto</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>zero-indexed index of the <em>method</em> to jump to</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="supported-techniques">
+<h3>Supported <code class="docutils literal notranslate"><span class="pre">techniques</span></code>:<a class="headerlink" href="#supported-techniques" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">open_circuit_voltage</span></code>: Measure the OCV of the cell. Supports the following parameters:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">record_every_dt</span></code> and <code class="docutils literal notranslate"><span class="pre">record_every_dE</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">I_range</span></code> and <code class="docutils literal notranslate"><span class="pre">E_range</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">constant_current</span></code>: Run a cell in CC mode - chronopotentiometry. Supports the following parameters:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">current</span></code> and <code class="docutils literal notranslate"><span class="pre">is_delta</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">record_every_dt</span></code> and <code class="docutils literal notranslate"><span class="pre">record_every_dE</span></code></p></li>
+<li><p>all of the <a class="reference internal" href="#technique-limits"><span class="std std-ref">Technique limits</span></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">constant_voltage</span></code>: Run a cell in CV mode - chronoamperometry. Supports the following parameters:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">voltage</span></code> and <code class="docutils literal notranslate"><span class="pre">is_delta</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">record_every_dt</span></code> and <code class="docutils literal notranslate"><span class="pre">record_every_dI</span></code></p></li>
+<li><p>all of the <a class="reference internal" href="#technique-limits"><span class="std std-ref">Technique limits</span></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">sweep_current</span></code>: Run a cell in LSC mode - linear sweep of current. Supports the following parameters:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">current</span></code>, <code class="docutils literal notranslate"><span class="pre">scan_rate</span></code> and <code class="docutils literal notranslate"><span class="pre">is_delta</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">record_every_dt</span></code> and <code class="docutils literal notranslate"><span class="pre">record_every_dE</span></code></p></li>
+<li><p>all of the <a class="reference internal" href="#technique-limits"><span class="std std-ref">Technique limits</span></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">sweep_voltage</span></code>: Run a cell in LSV mode - linear sweep of voltage. Supports the following parameters:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">voltage</span></code>, <code class="docutils literal notranslate"><span class="pre">scan_rate</span></code> and <code class="docutils literal notranslate"><span class="pre">is_delta</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">record_every_dt</span></code> and <code class="docutils literal notranslate"><span class="pre">record_every_dI</span></code></p></li>
+<li><p>all of the <a class="reference internal" href="#technique-limits"><span class="std std-ref">Technique limits</span></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">loop</span></code>: Arbitrary loop of techniques. Supports the following parameters:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_gotos</span></code> and <code class="docutils literal notranslate"><span class="pre">goto</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><em>Code author: Peter Kraus</em></p>
+</section>
+</section>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.biologic.kbio.html">tomato.drivers.biologic.kbio package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.c_utils">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.c_dump"><code class="docutils literal notranslate"><span class="pre">c_dump()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.c_buffer"><code class="docutils literal notranslate"><span class="pre">c_buffer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.c_buffer.parm"><code class="docutils literal notranslate"><span class="pre">c_buffer.parm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.c_buffer.value"><code class="docutils literal notranslate"><span class="pre">c_buffer.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.POD"><code class="docutils literal notranslate"><span class="pre">POD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.POD.keys"><code class="docutils literal notranslate"><span class="pre">POD.keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.POD.subset"><code class="docutils literal notranslate"><span class="pre">POD.subset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api"><code class="docutils literal notranslate"><span class="pre">KBIO_api</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetLibVersion"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetLibVersion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.Connect"><code class="docutils literal notranslate"><span class="pre">KBIO_api.Connect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.USB_DeviceInfo"><code class="docutils literal notranslate"><span class="pre">KBIO_api.USB_DeviceInfo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.TestConnection"><code class="docutils literal notranslate"><span class="pre">KBIO_api.TestConnection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.TestComSpeed"><code class="docutils literal notranslate"><span class="pre">KBIO_api.TestComSpeed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.Disconnect"><code class="docutils literal notranslate"><span class="pre">KBIO_api.Disconnect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.PluggedChannels"><code class="docutils literal notranslate"><span class="pre">KBIO_api.PluggedChannels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.channel_map"><code class="docutils literal notranslate"><span class="pre">KBIO_api.channel_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetChannelInfo"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetChannelInfo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.LoadFirmware"><code class="docutils literal notranslate"><span class="pre">KBIO_api.LoadFirmware()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetHardwareConf"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetHardwareConf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.SetHardwareConf"><code class="docutils literal notranslate"><span class="pre">KBIO_api.SetHardwareConf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.OptionError"><code class="docutils literal notranslate"><span class="pre">KBIO_api.OptionError()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetMessage"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetMessage()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetErrorMsg"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetErrorMsg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.DefineParameter"><code class="docutils literal notranslate"><span class="pre">KBIO_api.DefineParameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.DefineBoolParameter"><code class="docutils literal notranslate"><span class="pre">KBIO_api.DefineBoolParameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.DefineSglParameter"><code class="docutils literal notranslate"><span class="pre">KBIO_api.DefineSglParameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.DefineIntParameter"><code class="docutils literal notranslate"><span class="pre">KBIO_api.DefineIntParameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.UpdateParameters"><code class="docutils literal notranslate"><span class="pre">KBIO_api.UpdateParameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetTechniqueInfos"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetTechniqueInfos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetParamInfos"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetParamInfos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.LoadTechnique"><code class="docutils literal notranslate"><span class="pre">KBIO_api.LoadTechnique()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.StartChannel"><code class="docutils literal notranslate"><span class="pre">KBIO_api.StartChannel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.StopChannel"><code class="docutils literal notranslate"><span class="pre">KBIO_api.StopChannel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.StartChannels"><code class="docutils literal notranslate"><span class="pre">KBIO_api.StartChannels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.StopChannels"><code class="docutils literal notranslate"><span class="pre">KBIO_api.StopChannels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetCurrentValues"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetCurrentValues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetData"><code class="docutils literal notranslate"><span class="pre">KBIO_api.GetData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ConvertNumericIntoSingle"><code class="docutils literal notranslate"><span class="pre">KBIO_api.ConvertNumericIntoSingle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.FindEChemDev"><code class="docutils literal notranslate"><span class="pre">KBIO_api.FindEChemDev()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.FindEChemEthDev"><code class="docutils literal notranslate"><span class="pre">KBIO_api.FindEChemEthDev()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.FindEChemUsbDev"><code class="docutils literal notranslate"><span class="pre">KBIO_api.FindEChemUsbDev()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.SetEthernetConfig"><code class="docutils literal notranslate"><span class="pre">KBIO_api.SetEthernetConfig()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.DeviceInfo"><code class="docutils literal notranslate"><span class="pre">KBIO_api.DeviceInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ChannelInfo"><code class="docutils literal notranslate"><span class="pre">KBIO_api.ChannelInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.HardwareConf"><code class="docutils literal notranslate"><span class="pre">KBIO_api.HardwareConf</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.BL_Error"><code class="docutils literal notranslate"><span class="pre">KBIO_api.BL_Error</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.Error"><code class="docutils literal notranslate"><span class="pre">KBIO_api.Error</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.FindError"><code class="docutils literal notranslate"><span class="pre">KBIO_api.FindError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ecl_api"><code class="docutils literal notranslate"><span class="pre">KBIO_api.ecl_api</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.blfind_api"><code class="docutils literal notranslate"><span class="pre">KBIO_api.blfind_api</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.bind_function"><code class="docutils literal notranslate"><span class="pre">KBIO_api.bind_function()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_tech.ECC_parm"><code class="docutils literal notranslate"><span class="pre">ECC_parm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_tech.ECC_parm.label"><code class="docutils literal notranslate"><span class="pre">ECC_parm.label</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_tech.ECC_parm.type_"><code class="docutils literal notranslate"><span class="pre">ECC_parm.type_</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_tech.make_ecc_parm"><code class="docutils literal notranslate"><span class="pre">make_ecc_parm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_tech.make_ecc_parms"><code class="docutils literal notranslate"><span class="pre">make_ecc_parms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_tech.print_experiment_data"><code class="docutils literal notranslate"><span class="pre">print_experiment_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelsArray"><code class="docutils literal notranslate"><span class="pre">ChannelsArray</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ResultsArray"><code class="docutils literal notranslate"><span class="pre">ResultsArray</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataBuffer"><code class="docutils literal notranslate"><span class="pre">DataBuffer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device"><code class="docutils literal notranslate"><span class="pre">USB_device</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device.index"><code class="docutils literal notranslate"><span class="pre">USB_device.index</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device.instrument"><code class="docutils literal notranslate"><span class="pre">USB_device.instrument</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device.serial"><code class="docutils literal notranslate"><span class="pre">USB_device.serial</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device.address"><code class="docutils literal notranslate"><span class="pre">USB_device.address</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device"><code class="docutils literal notranslate"><span class="pre">Ethernet_device</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.config"><code class="docutils literal notranslate"><span class="pre">Ethernet_device.config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.instrument"><code class="docutils literal notranslate"><span class="pre">Ethernet_device.instrument</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.serial"><code class="docutils literal notranslate"><span class="pre">Ethernet_device.serial</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.identifier"><code class="docutils literal notranslate"><span class="pre">Ethernet_device.identifier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.name"><code class="docutils literal notranslate"><span class="pre">Ethernet_device.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE"><code class="docutils literal notranslate"><span class="pre">DEVICE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP"><code class="docutils literal notranslate"><span class="pre">DEVICE.VMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP2"><code class="docutils literal notranslate"><span class="pre">DEVICE.VMP2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MPG"><code class="docutils literal notranslate"><span class="pre">DEVICE.MPG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.BISTAT"><code class="docutils literal notranslate"><span class="pre">DEVICE.BISTAT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MCS_200"><code class="docutils literal notranslate"><span class="pre">DEVICE.MCS_200</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP3"><code class="docutils literal notranslate"><span class="pre">DEVICE.VMP3</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VSP"><code class="docutils literal notranslate"><span class="pre">DEVICE.VSP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.HCP803"><code class="docutils literal notranslate"><span class="pre">DEVICE.HCP803</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.EPP400"><code class="docutils literal notranslate"><span class="pre">DEVICE.EPP400</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.EPP4000"><code class="docutils literal notranslate"><span class="pre">DEVICE.EPP4000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.BISTAT2"><code class="docutils literal notranslate"><span class="pre">DEVICE.BISTAT2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.FCT150S"><code class="docutils literal notranslate"><span class="pre">DEVICE.FCT150S</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP300"><code class="docutils literal notranslate"><span class="pre">DEVICE.VMP300</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP50"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP50</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP150"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP150</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.FCT50S"><code class="docutils literal notranslate"><span class="pre">DEVICE.FCT50S</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP300"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP300</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.CLB500"><code class="docutils literal notranslate"><span class="pre">DEVICE.CLB500</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.HCP1005"><code class="docutils literal notranslate"><span class="pre">DEVICE.HCP1005</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.CLB2000"><code class="docutils literal notranslate"><span class="pre">DEVICE.CLB2000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VSP300"><code class="docutils literal notranslate"><span class="pre">DEVICE.VSP300</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP200"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP200</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MPG2"><code class="docutils literal notranslate"><span class="pre">DEVICE.MPG2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP100"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP100</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MOSLED"><code class="docutils literal notranslate"><span class="pre">DEVICE.MOSLED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.KINEXXX"><code class="docutils literal notranslate"><span class="pre">DEVICE.KINEXXX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.BCS815"><code class="docutils literal notranslate"><span class="pre">DEVICE.BCS815</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP240"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP240</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MPG205"><code class="docutils literal notranslate"><span class="pre">DEVICE.MPG205</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MPG210"><code class="docutils literal notranslate"><span class="pre">DEVICE.MPG210</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MPG220"><code class="docutils literal notranslate"><span class="pre">DEVICE.MPG220</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.MPG240"><code class="docutils literal notranslate"><span class="pre">DEVICE.MPG240</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.BP300"><code class="docutils literal notranslate"><span class="pre">DEVICE.BP300</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP3E"><code class="docutils literal notranslate"><span class="pre">DEVICE.VMP3E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VSP3E"><code class="docutils literal notranslate"><span class="pre">DEVICE.VSP3E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP50E"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP50E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP150E"><code class="docutils literal notranslate"><span class="pre">DEVICE.SP150E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.UNKNOWN"><code class="docutils literal notranslate"><span class="pre">DEVICE.UNKNOWN</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo"><code class="docutils literal notranslate"><span class="pre">DeviceInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.CPU"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.CPU</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.DeviceCode"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.DeviceCode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.FirmwareDate_dd"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.FirmwareDate_dd</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.FirmwareDate_mm"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.FirmwareDate_mm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.FirmwareDate_yyyy"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.FirmwareDate_yyyy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.FirmwareVersion"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.FirmwareVersion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.HTdisplayOn"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.HTdisplayOn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.NbOfConnectedPC"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.NbOfConnectedPC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.NumberOfChannels"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.NumberOfChannels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.NumberOfSlots"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.NumberOfSlots</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo.RAMSize"><code class="docutils literal notranslate"><span class="pre">DeviceInfo.RAMSize</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE_INFO"><code class="docutils literal notranslate"><span class="pre">DEVICE_INFO</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_IF0"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_IF0</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_IF2_Z"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_IF2_Z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_OTHERS"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_OTHERS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_IF2_NONZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_IF2_NONZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_IF3_Z"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_IF3_Z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_IF3_NONZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_IF3_NONZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_IF3_ZZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_IF3_ZZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_IF3_NZZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_IF3_NZZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_SP50"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_SP50</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_SP150Z"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_SP150Z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C340_SP150NZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C340_SP150NZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_Z"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_Z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_NZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_NZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_SP150Z"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_SP150Z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_SP150NZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_SP150NZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_MPG2"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_MPG2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_MPG2Z"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_MPG2Z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_MPGX"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_MPGX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_MPGXZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_MPGXZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_VMP3EZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_VMP3EZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD.C437_VMP3ENZ"><code class="docutils literal notranslate"><span class="pre">CHANNEL_BOARD.C437_VMP3ENZ</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo"><code class="docutils literal notranslate"><span class="pre">ChannelInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.AmpCode"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.AmpCode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.BoardSerialNumber"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.BoardSerialNumber</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.BoardVersion"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.BoardVersion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.Channel"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.Channel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.FirmwareCode"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.FirmwareCode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.FirmwareVersion"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.FirmwareVersion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.GPRAboard"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.GPRAboard</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.Lcboard"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.Lcboard</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MUXboard"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.MUXboard</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MaxBandwidth"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.MaxBandwidth</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MaxIRange"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.MaxIRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MemFilled"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.MemFilled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MemSize"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.MemSize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MinIRange"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.MinIRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.NbAmps"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.NbAmps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.NbOfTechniques"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.NbOfTechniques</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.State"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.State</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.XilinxVersion"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.XilinxVersion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.Zboard"><code class="docutils literal notranslate"><span class="pre">ChannelInfo.Zboard</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CH_INFO"><code class="docutils literal notranslate"><span class="pre">CH_INFO</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HardwareConf"><code class="docutils literal notranslate"><span class="pre">HardwareConf</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HardwareConf.Connection"><code class="docutils literal notranslate"><span class="pre">HardwareConf.Connection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HardwareConf.Mode"><code class="docutils literal notranslate"><span class="pre">HardwareConf.Mode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_CONF"><code class="docutils literal notranslate"><span class="pre">HW_CONF</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_CNX"><code class="docutils literal notranslate"><span class="pre">HW_CNX</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_CNX.STANDARD"><code class="docutils literal notranslate"><span class="pre">HW_CNX.STANDARD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_CNX.CE_TO_GND"><code class="docutils literal notranslate"><span class="pre">HW_CNX.CE_TO_GND</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_CNX.WE_TO_GND"><code class="docutils literal notranslate"><span class="pre">HW_CNX.WE_TO_GND</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_CNX.HIGH_VOLTAGE"><code class="docutils literal notranslate"><span class="pre">HW_CNX.HIGH_VOLTAGE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_MODE"><code class="docutils literal notranslate"><span class="pre">HW_MODE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_MODE.GROUNDED"><code class="docutils literal notranslate"><span class="pre">HW_MODE.GROUNDED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HW_MODE.FLOATING"><code class="docutils literal notranslate"><span class="pre">HW_MODE.FLOATING</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.NO_ERROR"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.NO_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_CHANGE"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_CHANGE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPEN_IN"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPEN_IN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.IRCMP_OVR"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.IRCMP_OVR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_4A"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_4A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_4A_OVRTEMP"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_4A_OVRTEMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_4A_BADPOW"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_4A_BADPOW</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_4A_POWFAIL"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_4A_POWFAIL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_48V"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_48V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_48V_OVRTEMP"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_48V_OVRTEMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_48V_BADPOW"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_48V_BADPOW</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_48V_POWFAIL"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_48V_POWFAIL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_10A5V_ERR"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_10A5V_ERR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_10A5V_OVRTEMP"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_10A5V_OVRTEMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_10A5V_BADPOW"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_10A5V_BADPOW</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.OPTION_ERROR.OPT_10A5V_POWFAIL"><code class="docutils literal notranslate"><span class="pre">OPTION_ERROR.OPT_10A5V_POWFAIL</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE"><code class="docutils literal notranslate"><span class="pre">FIRMWARE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE.NONE"><code class="docutils literal notranslate"><span class="pre">FIRMWARE.NONE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE.INTERPR"><code class="docutils literal notranslate"><span class="pre">FIRMWARE.INTERPR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE.UNKNOWN"><code class="docutils literal notranslate"><span class="pre">FIRMWARE.UNKNOWN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE.KERNEL"><code class="docutils literal notranslate"><span class="pre">FIRMWARE.KERNEL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE.INVALID"><code class="docutils literal notranslate"><span class="pre">FIRMWARE.INVALID</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE.ECAL"><code class="docutils literal notranslate"><span class="pre">FIRMWARE.ECAL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIRMWARE.ECAL4"><code class="docutils literal notranslate"><span class="pre">FIRMWARE.ECAL4</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues"><code class="docutils literal notranslate"><span class="pre">CurrentValues</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Ece"><code class="docutils literal notranslate"><span class="pre">CurrentValues.Ece</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.EceRangeMax"><code class="docutils literal notranslate"><span class="pre">CurrentValues.EceRangeMax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.EceRangeMin"><code class="docutils literal notranslate"><span class="pre">CurrentValues.EceRangeMin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.ElapsedTime"><code class="docutils literal notranslate"><span class="pre">CurrentValues.ElapsedTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Eoverflow"><code class="docutils literal notranslate"><span class="pre">CurrentValues.Eoverflow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Ewe"><code class="docutils literal notranslate"><span class="pre">CurrentValues.Ewe</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.EweRangeMax"><code class="docutils literal notranslate"><span class="pre">CurrentValues.EweRangeMax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.EweRangeMin"><code class="docutils literal notranslate"><span class="pre">CurrentValues.EweRangeMin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Freq"><code class="docutils literal notranslate"><span class="pre">CurrentValues.Freq</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.I"><code class="docutils literal notranslate"><span class="pre">CurrentValues.I</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.IRange"><code class="docutils literal notranslate"><span class="pre">CurrentValues.IRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Ioverflow"><code class="docutils literal notranslate"><span class="pre">CurrentValues.Ioverflow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.MemFilled"><code class="docutils literal notranslate"><span class="pre">CurrentValues.MemFilled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.OptErr"><code class="docutils literal notranslate"><span class="pre">CurrentValues.OptErr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.OptPos"><code class="docutils literal notranslate"><span class="pre">CurrentValues.OptPos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Rcomp"><code class="docutils literal notranslate"><span class="pre">CurrentValues.Rcomp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Saturation"><code class="docutils literal notranslate"><span class="pre">CurrentValues.Saturation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.State"><code class="docutils literal notranslate"><span class="pre">CurrentValues.State</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.TimeBase"><code class="docutils literal notranslate"><span class="pre">CurrentValues.TimeBase</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CURRENT_VALUES"><code class="docutils literal notranslate"><span class="pre">CURRENT_VALUES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo"><code class="docutils literal notranslate"><span class="pre">DataInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.IRQskipped"><code class="docutils literal notranslate"><span class="pre">DataInfo.IRQskipped</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.MuxPad"><code class="docutils literal notranslate"><span class="pre">DataInfo.MuxPad</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.NbCols"><code class="docutils literal notranslate"><span class="pre">DataInfo.NbCols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.NbRows"><code class="docutils literal notranslate"><span class="pre">DataInfo.NbRows</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.ProcessIndex"><code class="docutils literal notranslate"><span class="pre">DataInfo.ProcessIndex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.StartTime"><code class="docutils literal notranslate"><span class="pre">DataInfo.StartTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.TechniqueID"><code class="docutils literal notranslate"><span class="pre">DataInfo.TechniqueID</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.TechniqueIndex"><code class="docutils literal notranslate"><span class="pre">DataInfo.TechniqueIndex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.loop"><code class="docutils literal notranslate"><span class="pre">DataInfo.loop</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DATA_INFO"><code class="docutils literal notranslate"><span class="pre">DATA_INFO</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PARAM_TYPE"><code class="docutils literal notranslate"><span class="pre">PARAM_TYPE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PARAM_TYPE.PARAM_INT"><code class="docutils literal notranslate"><span class="pre">PARAM_TYPE.PARAM_INT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PARAM_TYPE.PARAM_BOOLEAN"><code class="docutils literal notranslate"><span class="pre">PARAM_TYPE.PARAM_BOOLEAN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PARAM_TYPE.PARAM_SINGLE"><code class="docutils literal notranslate"><span class="pre">PARAM_TYPE.PARAM_SINGLE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParam"><code class="docutils literal notranslate"><span class="pre">EccParam</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParam.ParamIndex"><code class="docutils literal notranslate"><span class="pre">EccParam.ParamIndex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParam.ParamStr"><code class="docutils literal notranslate"><span class="pre">EccParam.ParamStr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParam.ParamType"><code class="docutils literal notranslate"><span class="pre">EccParam.ParamType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParam.ParamVal"><code class="docutils literal notranslate"><span class="pre">EccParam.ParamVal</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ECC_PARM"><code class="docutils literal notranslate"><span class="pre">ECC_PARM</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParams"><code class="docutils literal notranslate"><span class="pre">EccParams</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParams.len"><code class="docutils literal notranslate"><span class="pre">EccParams.len</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParams.pParams"><code class="docutils literal notranslate"><span class="pre">EccParams.pParams</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ECC_PARMS"><code class="docutils literal notranslate"><span class="pre">ECC_PARMS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ECC_PARM_ARRAY"><code class="docutils literal notranslate"><span class="pre">ECC_PARM_ARRAY()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos"><code class="docutils literal notranslate"><span class="pre">TechniqueInfos</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.HardSettings"><code class="docutils literal notranslate"><span class="pre">TechniqueInfos.HardSettings</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.Id"><code class="docutils literal notranslate"><span class="pre">TechniqueInfos.Id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.Params"><code class="docutils literal notranslate"><span class="pre">TechniqueInfos.Params</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.indx"><code class="docutils literal notranslate"><span class="pre">TechniqueInfos.indx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.nbParams"><code class="docutils literal notranslate"><span class="pre">TechniqueInfos.nbParams</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.nbSettings"><code class="docutils literal notranslate"><span class="pre">TechniqueInfos.nbSettings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TECHNIQUE_INFOS"><code class="docutils literal notranslate"><span class="pre">TECHNIQUE_INFOS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PROG_STATE"><code class="docutils literal notranslate"><span class="pre">PROG_STATE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PROG_STATE.STOP"><code class="docutils literal notranslate"><span class="pre">PROG_STATE.STOP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PROG_STATE.RUN"><code class="docutils literal notranslate"><span class="pre">PROG_STATE.RUN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PROG_STATE.PAUSE"><code class="docutils literal notranslate"><span class="pre">PROG_STATE.PAUSE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PROG_STATE.SYNC"><code class="docutils literal notranslate"><span class="pre">PROG_STATE.SYNC</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE"><code class="docutils literal notranslate"><span class="pre">I_RANGE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_KEEP"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_KEEP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_100pA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_100pA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_1nA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_1nA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_10nA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_10nA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_100nA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_100nA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_1uA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_1uA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_10uA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_10uA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_100uA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_100uA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_1mA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_1mA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_10mA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_10mA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_100mA"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_100mA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_1A"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_1A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_BOOSTER"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_BOOSTER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.I_RANGE.I_RANGE_AUTO"><code class="docutils literal notranslate"><span class="pre">I_RANGE.I_RANGE_AUTO</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.E_RANGE"><code class="docutils literal notranslate"><span class="pre">E_RANGE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.E_RANGE.E_RANGE_2_5V"><code class="docutils literal notranslate"><span class="pre">E_RANGE.E_RANGE_2_5V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.E_RANGE.E_RANGE_5V"><code class="docutils literal notranslate"><span class="pre">E_RANGE.E_RANGE_5V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.E_RANGE.E_RANGE_10V"><code class="docutils literal notranslate"><span class="pre">E_RANGE.E_RANGE_10V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.E_RANGE.E_RANGE_AUTO"><code class="docutils literal notranslate"><span class="pre">E_RANGE.E_RANGE_AUTO</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_1"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_2"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_3"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_3</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_4"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_4</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_5"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_5</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_6"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_6</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_7"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_7</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_8"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_8</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.BANDWIDTH.BW_9"><code class="docutils literal notranslate"><span class="pre">BANDWIDTH.BW_9</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.GAIN"><code class="docutils literal notranslate"><span class="pre">GAIN</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.GAIN.GAIN_1"><code class="docutils literal notranslate"><span class="pre">GAIN.GAIN_1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.GAIN.GAIN_10"><code class="docutils literal notranslate"><span class="pre">GAIN.GAIN_10</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.GAIN.GAIN_100"><code class="docutils literal notranslate"><span class="pre">GAIN.GAIN_100</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.GAIN.GAIN_1000"><code class="docutils literal notranslate"><span class="pre">GAIN.GAIN_1000</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FILTER"><code class="docutils literal notranslate"><span class="pre">FILTER</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FILTER.FILTER_NONE"><code class="docutils literal notranslate"><span class="pre">FILTER.FILTER_NONE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FILTER.FILTER_50KHZ"><code class="docutils literal notranslate"><span class="pre">FILTER.FILTER_50KHZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FILTER.FILTER_1KHZ"><code class="docutils literal notranslate"><span class="pre">FILTER.FILTER_1KHZ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FILTER.FILTER_5HZ"><code class="docutils literal notranslate"><span class="pre">FILTER.FILTER_5HZ</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_NONE"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_NONE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_2A"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_2A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_1A"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_1A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_5A"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_5A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_10A"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_10A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_20A"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_20A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_HEUS"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_HEUS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_LC"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_LC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_80A"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_80A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_4AI"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_4AI</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_PAC"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_PAC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_4AI_VSP"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_4AI_VSP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_LC_VSP"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_LC_VSP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_UNDEF"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_UNDEF</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_MUIC"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_MUIC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_ERROR"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_8AI"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_8AI</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_LB500"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_LB500</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_100A5V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_100A5V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_LB2000"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_LB2000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_1A48V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_1A48V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_4A14V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_4A14V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_5A_MPG2B"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_5A_MPG2B</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_10A_MPG2B"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_10A_MPG2B</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_20A_MPG2B"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_20A_MPG2B</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_40A_MPG2B"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_40A_MPG2B</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL_COIN_CELL_HOLDER"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL_COIN_CELL_HOLDER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL4_10A5V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL4_10A5V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL4_2A30V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL4_2A30V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL4_30A50V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL4_30A50V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL3_50A60V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL3_50A60V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL3_200A12V"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL3_200A12V</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL3_50A60VII"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL3_50A60VII</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL4_1A48VPII"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL4_1A48VPII</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.AMPLIFIER.AMPL4_1A48VPIII"><code class="docutils literal notranslate"><span class="pre">AMPLIFIER.AMPL4_1A48VPIII</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR"><code class="docutils literal notranslate"><span class="pre">ERROR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.NOERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.NOERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_NOTCONNECTED"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_NOTCONNECTED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_CONNECTIONINPROGRESS"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_CONNECTIONINPROGRESS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_CHANNELNOTPLUGGED"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_CHANNELNOTPLUGGED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_INVALIDPARAMETERS"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_INVALIDPARAMETERS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_FILENOTEXISTS"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_FILENOTEXISTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_FUNCTIONFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_FUNCTIONFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_NOCHANNELSELECTED"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_NOCHANNELSELECTED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_INVALIDCONF"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_INVALIDCONF</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_ECLAB_LOADED"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_ECLAB_LOADED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_LIBNOTCORRECTLYLOADED"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_LIBNOTCORRECTLYLOADED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_USBLIBRARYERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_USBLIBRARYERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_FUNCTIONINPROGRESS"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_FUNCTIONINPROGRESS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_CHANNEL_RUNNING"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_CHANNEL_RUNNING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_DEVICE_NOTALLOWED"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_DEVICE_NOTALLOWED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_UPDATEPARAMETERS"><code class="docutils literal notranslate"><span class="pre">ERROR.GEN_UPDATEPARAMETERS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.INSTR_VMEERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.INSTR_VMEERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.INSTR_TOOMANYDATA"><code class="docutils literal notranslate"><span class="pre">ERROR.INSTR_TOOMANYDATA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.INSTR_RESPNOTPOSSIBLE"><code class="docutils literal notranslate"><span class="pre">ERROR.INSTR_RESPNOTPOSSIBLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.INSTR_RESPERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.INSTR_RESPERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.INSTR_MSGSIZEERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.INSTR_MSGSIZEERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_COMMFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_COMMFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_CONNECTIONFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_CONNECTIONFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_WAITINGACK"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_WAITINGACK</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_INVALIDIPADDRESS"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_INVALIDIPADDRESS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_ALLOCMEMFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_ALLOCMEMFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_LOADFIRMWAREFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_LOADFIRMWAREFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_INCOMPATIBLESERVER"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_INCOMPATIBLESERVER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.COMM_MAXCONNREACHED"><code class="docutils literal notranslate"><span class="pre">ERROR.COMM_MAXCONNREACHED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_FIRMFILENOTEXISTS"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_FIRMFILENOTEXISTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_FIRMFILEACCESSFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_FIRMFILEACCESSFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_FIRMINVALIDFILE"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_FIRMINVALIDFILE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_FIRMLOADINGFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_FIRMLOADINGFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_XILFILENOTEXISTS"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_XILFILENOTEXISTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_XILFILEACCESSFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_XILFILEACCESSFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_XILINVALIDFILE"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_XILINVALIDFILE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_XILLOADINGFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_XILLOADINGFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_FIRMWARENOTLOADED"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_FIRMWARENOTLOADED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.FIRM_FIRMWAREINCOMPATIBLE"><code class="docutils literal notranslate"><span class="pre">ERROR.FIRM_FIRMWAREINCOMPATIBLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_ECCFILENOTEXISTS"><code class="docutils literal notranslate"><span class="pre">ERROR.TECH_ECCFILENOTEXISTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_INCOMPATIBLEECC"><code class="docutils literal notranslate"><span class="pre">ERROR.TECH_INCOMPATIBLEECC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_ECCFILECORRUPTED"><code class="docutils literal notranslate"><span class="pre">ERROR.TECH_ECCFILECORRUPTED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_LOADTECHNIQUEFAILED"><code class="docutils literal notranslate"><span class="pre">ERROR.TECH_LOADTECHNIQUEFAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_DATACORRUPTED"><code class="docutils literal notranslate"><span class="pre">ERROR.TECH_DATACORRUPTED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_MEMFULL"><code class="docutils literal notranslate"><span class="pre">ERROR.TECH_MEMFULL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_CHANGE"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_CHANGE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_OPEN_IN"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_OPEN_IN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_4A_ERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_4A_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_4A_OVERTEMP"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_4A_OVERTEMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_4A_BADPOWER"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_4A_BADPOWER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_4A_POWERFAIL"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_4A_POWERFAIL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_48V_ERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_48V_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_48V_OVERTEMP"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_48V_OVERTEMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_48V_BADPOWER"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_48V_BADPOWER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_48V_POWERFAIL"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_48V_POWERFAIL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_10A5V_ERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_10A5V_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_10A5V_OVERTEMP"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_10A5V_OVERTEMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_10A5V_BADPOWER"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_10A5V_BADPOWER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_10A5V_POWERFAIL"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_10A5V_POWERFAIL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_1A48VP_ERROR"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_1A48VP_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_1A48VP_OVERTEMP"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_1A48VP_OVERTEMP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_1A48VP_BADPOWER"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_1A48VP_BADPOWER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.OPT_1A48VP_POWERFAIL"><code class="docutils literal notranslate"><span class="pre">ERROR.OPT_1A48VP_POWERFAIL</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.NO_ERROR"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.NO_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.UNKNOWN_ERROR"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.UNKNOWN_ERROR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.INVALID_PARAMETER"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.INVALID_PARAMETER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.ACK_TIMEOUT"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.ACK_TIMEOUT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.EXP_RUNNING"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.EXP_RUNNING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.CMD_FAILED"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.CMD_FAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.FIND_FAILED"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.FIND_FAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.SOCKET_WRITE"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.SOCKET_WRITE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.SOCKET_READ"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.SOCKET_READ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.CFG_MODIFY_FAILED"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.CFG_MODIFY_FAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.READ_PARAM_FAILED"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.READ_PARAM_FAILED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.EMPTY_PARAM"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.EMPTY_PARAM</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.IP_FORMAT"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.IP_FORMAT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.NM_FORMAT"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.NM_FORMAT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.GW_FORMAT"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.GW_FORMAT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.IP_NOT_FOUND"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.IP_NOT_FOUND</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.IP_ALREADYEXIST"><code class="docutils literal notranslate"><span class="pre">FIND_ERROR.IP_ALREADYEXIST</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID"><code class="docutils literal notranslate"><span class="pre">TECH_ID</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.NONE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.NONE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.OCV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.OCV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CA"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.PEIS"><code class="docutils literal notranslate"><span class="pre">TECH_ID.PEIS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.POTPULSE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.POTPULSE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.GALPULSE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.GALPULSE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.GEIS"><code class="docutils literal notranslate"><span class="pre">TECH_ID.GEIS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKPEIS_SLAVE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKPEIS_SLAVE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKPEIS"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKPEIS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CPOWER"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CPOWER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CLOAD"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CLOAD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.FCT"><code class="docutils literal notranslate"><span class="pre">TECH_ID.FCT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.SPEIS"><code class="docutils literal notranslate"><span class="pre">TECH_ID.SPEIS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.SGEIS"><code class="docutils literal notranslate"><span class="pre">TECH_ID.SGEIS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKPDYN"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKPDYN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKPDYN_SLAVE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKPDYN_SLAVE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKGDYN"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKGDYN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKGEIS_SLAVE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKGEIS_SLAVE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKGEIS"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKGEIS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.STACKGDYN_SLAVE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.STACKGDYN_SLAVE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CPO"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CPO</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CGA"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CGA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.COKINE"><code class="docutils literal notranslate"><span class="pre">TECH_ID.COKINE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.PDYN"><code class="docutils literal notranslate"><span class="pre">TECH_ID.PDYN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.GDYN"><code class="docutils literal notranslate"><span class="pre">TECH_ID.GDYN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CVA"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CVA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.DPV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.DPV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.SWV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.SWV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.NPV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.NPV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.RNPV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.RNPV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.DNPV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.DNPV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.DPA"><code class="docutils literal notranslate"><span class="pre">TECH_ID.DPA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.EVT"><code class="docutils literal notranslate"><span class="pre">TECH_ID.EVT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.LP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.LP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.GC"><code class="docutils literal notranslate"><span class="pre">TECH_ID.GC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CPP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CPP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.PDP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.PDP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.PSP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.PSP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.ZRA"><code class="docutils literal notranslate"><span class="pre">TECH_ID.ZRA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.MIR"><code class="docutils literal notranslate"><span class="pre">TECH_ID.MIR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.PZIR"><code class="docutils literal notranslate"><span class="pre">TECH_ID.PZIR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.GZIR"><code class="docutils literal notranslate"><span class="pre">TECH_ID.GZIR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.LOOP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.LOOP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.TO"><code class="docutils literal notranslate"><span class="pre">TECH_ID.TO</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.TI"><code class="docutils literal notranslate"><span class="pre">TECH_ID.TI</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.TOS"><code class="docutils literal notranslate"><span class="pre">TECH_ID.TOS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CPLIMIT"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CPLIMIT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.GDYNLIMIT"><code class="docutils literal notranslate"><span class="pre">TECH_ID.GDYNLIMIT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CALIMIT"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CALIMIT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.PDYNLIMIT"><code class="docutils literal notranslate"><span class="pre">TECH_ID.PDYNLIMIT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.LASV"><code class="docutils literal notranslate"><span class="pre">TECH_ID.LASV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.MP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.MP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CASG"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CASG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CASP"><code class="docutils literal notranslate"><span class="pre">TECH_ID.CASP</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.class_name"><code class="docutils literal notranslate"><span class="pre">class_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.exception_brief"><code class="docutils literal notranslate"><span class="pre">exception_brief()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.warn_diff"><code class="docutils literal notranslate"><span class="pre">warn_diff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.error_diff"><code class="docutils literal notranslate"><span class="pre">error_diff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.prepend_path"><code class="docutils literal notranslate"><span class="pre">prepend_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.file_complete"><code class="docutils literal notranslate"><span class="pre">file_complete()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.pp_plural"><code class="docutils literal notranslate"><span class="pre">pp_plural()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-tomato.drivers.biologic.kbio_wrapper">
+<span id="submodules"></span><h2>Submodules<a class="headerlink" href="#module-tomato.drivers.biologic.kbio_wrapper" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_test_magic">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_test_magic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'or'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_test_magic" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_num_steps">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_num_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tech</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_num_steps" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.pad_steps">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">pad_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ns</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.pad_steps" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.current">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.current" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.vlimit">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">vlimit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.vlimit" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.translate">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">technique</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.translate" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">dsl_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.EccParams" title="tomato.drivers.biologic.kbio.kbio_types.EccParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">EccParams</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.payload_to_ecc">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">payload_to_ecc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.payload_to_ecc" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.parse_raw_data">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">parse_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.parse_raw_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_api">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_api" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.kbio_wrapper.</span></span><span class="sig-name descname"><span class="pre">get_kbio_techpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dllpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">techname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function" id="module-tomato.drivers.biologic.main">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.get_status">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.get_status" title="Link to this definition"></a></dt>
+<dd><p>Get the current status of the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>timestamp, ready, metadata</strong> – Returns a tuple containing the timestamp, readiness status, and
+associated metadata.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, bool, dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.get_data">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.get_data" title="Link to this definition"></a></dt>
+<dd><p>Get cached data from the device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>timestamp, nrows, data</strong> – Returns a tuple containing the timestamp and associated metadata.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, int, dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.start_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">start_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.start_job" title="Link to this definition"></a></dt>
+<dd><p>Start a job on the device.</p>
+<p>The function first translates the <code class="docutils literal notranslate"><span class="pre">payload</span></code> into an instrument-specific
+language, using the <code class="docutils literal notranslate"><span class="pre">capacity</span></code> provided if necessary. The converted
+<code class="docutils literal notranslate"><span class="pre">payload</span></code> is then submitted to the device, overwriting any current job
+information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+<li><p><strong>payload</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – A protocol describing the techniques to be executed and their order.</p></li>
+<li><p><strong>capacity</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The capacity information for the studied battery cell. Only required for
+battery-testing applications or for payloads where currents are specified
+using C or D rates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A timestamp corresponding to the start of the job execution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>timestamp</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.drivers.biologic.main.stop_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.biologic.main.</span></span><span class="sig-name descname"><span class="pre">stop_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobqueue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dllpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.drivers.biologic.main.stop_job" title="Link to this definition"></a></dt>
+<dd><p>Stop a job running on the device.</p>
+<p>This function stops any currently running technique on the specified channel
+of the device. No data is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – IP address of the potentiostat.</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numeric, 1-indexed ID of the channel.</p></li>
+<li><p><strong>dllpath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Path to the BioLogic DLL file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A timestamp corresponding to the start of the job execution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>timestamp</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-tomato.drivers.biologic.tech_params"></span></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tomato.drivers.html" class="btn btn-neutral float-left" title="tomato.drivers package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tomato.drivers.biologic.kbio.html" class="btn btn-neutral float-right" title="tomato.drivers.biologic.kbio package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 - 2023, dgbowl authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Other Versions</span>
+      v: master
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"> 
+      <script src="../versions.js"></script>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
