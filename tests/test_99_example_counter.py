@@ -5,11 +5,10 @@ import time
 import json
 import yaml
 import xarray as xr
-from pathlib import Path
-import zmq
 
-from tomato import tomato
 from . import utils
+
+PORT = 12345
 
 
 @pytest.mark.parametrize(
@@ -104,12 +103,12 @@ def test_counter_multidev(
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    utils.wait_until_tomato_running(port=12345, timeout=3000)
-    ret = tomato.reload(port=12345, context=zmq.Context(), timeout=3000, appdir=Path())
-    print(f"{ret=}")
+    utils.wait_until_tomato_running(port=PORT, timeout=3000)
+    subprocess.run(["tomato", "reload", "-p", f"{PORT}", "-A", "."])
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    utils.wait_until_ketchup_status(jobid=1, status="c", port=12345, timeout=10000)
+    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=10000)
+    utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=10000)
 
     ret = utils.job_status(1)
     print(f"{ret=}")
