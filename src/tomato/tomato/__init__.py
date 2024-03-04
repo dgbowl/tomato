@@ -370,7 +370,8 @@ def reload(
                 ret = _updater(
                     context, port, "driver", dict(name=drv.name, settings=drv.settings)
                 )
-                logger.critical(f"{ret=}")
+                if ret.success is False:
+                    return ret
 
         # check changes in devices
         for dev in devs.values():
@@ -378,7 +379,6 @@ def reload(
                 dev.name not in daemon.devs
                 or dev.channels != daemon.devs[dev.name].channels
             ):
-                logger.error(f"Here {dev.channels=} {dev.name=}")
                 for channel in dev.channels:
                     params = dict(
                         address=dev.address,
@@ -392,7 +392,8 @@ def reload(
                         return ret
                 params = dev.dict()
                 ret = _updater(context, port, "device", params)
-                logger.critical(f"{ret=}")
+                if ret.success is False:
+                    return ret
             elif dev != daemon.devs[dev.name]:
                 logger.error("updating devices not yet implemented")
         for devname in daemon.devs:
@@ -402,14 +403,16 @@ def reload(
         for pip in pips.values():
             if pip.name not in daemon.pips:
                 ret = _updater(context, port, "pipeline", pip.dict())
-                logger.critical(f"{ret=}")
+                if ret.success is False:
+                    return ret
             else:
                 logger.error("updating pipelines not yet implemented")
         for pip in daemon.pips.values():
             if pip.name not in pips:
                 params = dict(name=pip.name, delete=True)
                 ret = _updater(context, port, "pipeline", params)
-                logger.critical(f"{ret=}")
+                if ret.success is False:
+                    return ret
 
         req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.reload"))
         rep = req.recv_pyobj()
