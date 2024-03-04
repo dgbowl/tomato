@@ -1,7 +1,0 @@
-tomato.ketchup package
-======================
-
-.. automodule:: tomato.ketchup
-   :members:
-   :undoc-members:
-   :show-inheritance:
