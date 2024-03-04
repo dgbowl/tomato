@@ -16,6 +16,12 @@ Submodules
    :show-inheritance:
 
 
+.. automodule:: tomato.daemon.driver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 .. automodule:: tomato.daemon.io
    :members:
    :undoc-members:

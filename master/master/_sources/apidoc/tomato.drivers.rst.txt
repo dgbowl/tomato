@@ -14,24 +14,13 @@ Subpackages
 
    tomato.drivers.biologic
    tomato.drivers.dummy
+   tomato.drivers.example_counter
 
 Submodules
 ----------
 
 
-.. automodule:: tomato.drivers.driver_funcs
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-.. automodule:: tomato.drivers.logger_funcs
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-.. automodule:: tomato.drivers.yadg_funcs
+.. automodule:: tomato.drivers.jobfuncs
    :members:
    :undoc-members:
    :show-inheritance:

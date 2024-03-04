@@ -18,6 +18,8 @@
         <script src="_static/documentation_options.js?v=30d551ce"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -55,8 +57,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
 <ul>
@@ -126,6 +127,8 @@
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device.address">address (tomato.drivers.biologic.kbio.kbio_types.USB_device property)</a>
 
       <ul>
+        <li><a href="apidoc/tomato.html#tomato.models.Component.address">(tomato.models.Component attribute)</a>
+</li>
         <li><a href="apidoc/tomato.html#tomato.models.Device.address">(tomato.models.Device attribute)</a>
 </li>
       </ul></li>
@@ -208,6 +211,8 @@
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ChannelInfo.amplifier">amplifier (tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ChannelInfo property)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.appdir">appdir (tomato.models.Daemon attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.attrs">attrs (tomato.drivers.example_counter.Driver attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -329,16 +334,16 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.Channel">Channel (tomato.drivers.biologic.kbio.kbio_types.ChannelInfo attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.html#tomato.models.Pipeline.Component.channel">channel (tomato.models.Pipeline.Component attribute)</a>
+      <li><a href="apidoc/tomato.html#tomato.models.Component.channel">channel (tomato.models.Component attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CHANNEL_BOARD">CHANNEL_BOARD (class in tomato.drivers.biologic.kbio.kbio_types)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.channel_map">channel_map() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api static method)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo">ChannelInfo (class in tomato.drivers.biologic.kbio.kbio_types)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.html#tomato.models.Device.channels">channels (tomato.models.Device attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelsArray">ChannelsArray (in module tomato.drivers.biologic.kbio.kbio_types)</a>
@@ -379,13 +384,19 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.config">config (tomato.drivers.biologic.kbio.kbio_types.Ethernet_device attribute)</a>
 </li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device.conn">conn (tomato.drivers.example_counter.Driver.Device attribute)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.Connect">Connect() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
+</li>
+      <li><a href="apidoc/tomato.html#tomato.models.Driver.connected_at">connected_at (tomato.models.Driver attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.HardwareConf.connection">connection (tomato.drivers.biologic.kbio.kbio_api.KBIO_api.HardwareConf property)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.HardwareConf.Connection">Connection (tomato.drivers.biologic.kbio.kbio_types.HardwareConf attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ConvertNumericIntoSingle">ConvertNumericIntoSingle() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter">Counter (class in tomato.drivers.example_counter.counter)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.CP">CP (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
@@ -419,9 +430,7 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DATA_INFO">DATA_INFO (in module tomato.drivers.biologic.kbio.kbio_types)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_funcs.data_poller">data_poller() (in module tomato.drivers.driver_funcs)</a>
-</li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_funcs.data_snapshot">data_snapshot() (in module tomato.drivers.driver_funcs)</a>
+      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.jobfuncs.data_to_pickle">data_to_pickle() (in module tomato.drivers.jobfuncs)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataBuffer">DataBuffer (in module tomato.drivers.biologic.kbio.kbio_types)</a>
 </li>
@@ -435,7 +444,23 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.DefineSglParameter">DefineSglParameter() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
 </li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.delay">delay (tomato.drivers.example_counter.counter.Counter attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device.dev">dev (tomato.drivers.example_counter.Driver.Device attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_attr_get">dev_attr_get() (tomato.drivers.example_counter.Driver method)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_attr_set">dev_attr_set() (tomato.drivers.example_counter.Driver method)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_register">dev_register() (tomato.drivers.example_counter.Driver method)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_status">dev_status() (tomato.drivers.example_counter.Driver method)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE">DEVICE (class in tomato.drivers.biologic.kbio.kbio_types)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.device">device() (in module tomato.daemon.cmd)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE_INFO">DEVICE_INFO (in module tomato.drivers.biologic.kbio.kbio_types)</a>
 </li>
@@ -443,8 +468,8 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DeviceInfo">DeviceInfo (class in tomato.drivers.biologic.kbio.kbio_types)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.devmap">devmap (tomato.drivers.example_counter.Driver attribute)</a>
+</li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.devs">devs (tomato.models.Daemon attribute)</a>
 
       <ul>
@@ -459,26 +484,16 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.DPV">DPV (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver">Driver (class in tomato.drivers.example_counter)</a>
+</li>
       <li><a href="apidoc/tomato.html#tomato.models.Device.driver">driver (tomato.models.Device attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_api">driver_api() (in module tomato.drivers)</a>
-
-      <ul>
-        <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_funcs.driver_api">(in module tomato.drivers.driver_funcs)</a>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.driver">driver() (in module tomato.daemon.cmd)</a>
 </li>
-      </ul></li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_reset">driver_reset() (in module tomato.drivers)</a>
-
-      <ul>
-        <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_funcs.driver_reset">(in module tomato.drivers.driver_funcs)</a>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device">Driver.Device (class in tomato.drivers.example_counter)</a>
 </li>
-      </ul></li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_worker">driver_worker() (in module tomato.drivers)</a>
-
-      <ul>
-        <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_funcs.driver_worker">(in module tomato.drivers.driver_funcs)</a>
+      <li><a href="apidoc/tomato.html#tomato.models.Daemon.drvs">drvs (tomato.models.Daemon attribute)</a>
 </li>
-      </ul></li>
       <li><a href="apidoc/tomato.drivers.biologic.html#tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc">dsl_to_ecc() (in module tomato.drivers.biologic.kbio_wrapper)</a>
 </li>
   </ul></td>
@@ -526,6 +541,8 @@
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.ElapsedTime">ElapsedTime (tomato.drivers.biologic.kbio.kbio_types.CurrentValues attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.EMPTY_PARAM">EMPTY_PARAM (tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.end">end (tomato.drivers.example_counter.counter.Counter attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.Eoverflow">Eoverflow (tomato.drivers.biologic.kbio.kbio_types.CurrentValues attribute)</a>
 </li>
@@ -691,10 +708,10 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_UPDATEPARAMETERS">GEN_UPDATEPARAMETERS (tomato.drivers.biologic.kbio.kbio_types.ERROR attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_USBLIBRARYERROR">GEN_USBLIBRARYERROR (tomato.drivers.biologic.kbio.kbio_types.ERROR attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.GEN_USBLIBRARYERROR">GEN_USBLIBRARYERROR (tomato.drivers.biologic.kbio.kbio_types.ERROR attribute)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.html#tomato.drivers.biologic.main.get_data">get_data() (in module tomato.drivers.biologic.main)</a>
 
       <ul>
@@ -720,8 +737,6 @@
 </li>
       </ul></li>
       <li><a href="apidoc/tomato.drivers.biologic.html#tomato.drivers.biologic.kbio_wrapper.get_test_magic">get_test_magic() (in module tomato.drivers.biologic.kbio_wrapper)</a>
-</li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.yadg_funcs.get_yadg_preset">get_yadg_preset() (in module tomato.drivers.yadg_funcs)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.GetChannelInfo">GetChannelInfo() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
 </li>
@@ -821,12 +836,14 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.identifier">identifier (tomato.drivers.biologic.kbio.kbio_types.Ethernet_device attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device.index">index (tomato.drivers.biologic.kbio.kbio_types.USB_device attribute)</a>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.in_devmap">in_devmap() (in module tomato.drivers.example_counter)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.indx">indx (tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos attribute)</a>
+      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.USB_device.index">index (tomato.drivers.biologic.kbio.kbio_types.USB_device attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.indx">indx (tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos attribute)</a>
+</li>
       <li><a href="apidoc/tomato.tomato.html#tomato.tomato.init">init() (in module tomato.tomato)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.INSTR_MSGSIZEERROR">INSTR_MSGSIZEERROR (tomato.drivers.biologic.kbio.kbio_types.ERROR attribute)</a>
@@ -881,10 +898,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.job">job() (in module tomato.daemon.cmd)</a>
 </li>
-      <li><a href="apidoc/tomato.html#tomato.models.Pipeline.jobid">jobid (tomato.models.Pipeline attribute)</a>
+      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.jobfuncs.job_process">job_process() (in module tomato.drivers.jobfuncs)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.jobfuncs.job_worker">job_worker() (in module tomato.drivers.jobfuncs)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.html#tomato.models.Pipeline.jobid">jobid (tomato.models.Pipeline attribute)</a>
+</li>
       <li><a href="apidoc/tomato.html#tomato.models.Job.jobname">jobname (tomato.models.Job attribute)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.jobs">jobs (tomato.models.Daemon attribute)</a>
@@ -941,19 +962,13 @@
       </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.io.load">load() (in module tomato.daemon.io)</a>
 </li>
-      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.load_device_file">load_device_file() (in module tomato.tomato)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.load_device_file">load_device_file() (in module tomato.tomato)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.LoadFirmware">LoadFirmware() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.LoadTechnique">LoadTechnique() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
-</li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.logger_funcs.log_listener">log_listener() (in module tomato.drivers.logger_funcs)</a>
-</li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.logger_funcs.log_listener_config">log_listener_config() (in module tomato.drivers.logger_funcs)</a>
-</li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.logger_funcs.log_worker_config">log_worker_config() (in module tomato.drivers.logger_funcs)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.logdir">logdir (tomato.models.Daemon attribute)</a>
 </li>
@@ -975,8 +990,12 @@
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.job.manage_running_pips">manage_running_pips() (in module tomato.daemon.job)</a>
 </li>
-      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.job.manager">manager() (in module tomato.daemon.job)</a>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.manager">manager() (in module tomato.daemon.driver)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.daemon.html#tomato.daemon.job.manager">(in module tomato.daemon.job)</a>
 </li>
+      </ul></li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ChannelInfo.max_IRange">max_IRange (tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ChannelInfo property)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MaxBandwidth">MaxBandwidth (tomato.drivers.biologic.kbio.kbio_types.ChannelInfo attribute)</a>
@@ -992,6 +1011,8 @@
 </li>
       </ul></li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ChannelInfo.MemSize">MemSize (tomato.drivers.biologic.kbio.kbio_types.ChannelInfo attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.jobfuncs.merge_netcdfs">merge_netcdfs() (in module tomato.drivers.jobfuncs)</a>
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.merge_pipelines">merge_pipelines() (in module tomato.daemon.cmd)</a>
 </li>
@@ -1018,6 +1039,8 @@
         <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon">tomato.daemon</a>
 </li>
         <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.cmd">tomato.daemon.cmd</a>
+</li>
+        <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.driver">tomato.daemon.driver</a>
 </li>
         <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.io">tomato.daemon.io</a>
 </li>
@@ -1047,15 +1070,15 @@
 </li>
         <li><a href="apidoc/tomato.drivers.biologic.html#module-tomato.drivers.biologic.tech_params">tomato.drivers.biologic.tech_params</a>
 </li>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.driver_funcs">tomato.drivers.driver_funcs</a>
-</li>
         <li><a href="apidoc/tomato.drivers.dummy.html#module-tomato.drivers.dummy">tomato.drivers.dummy</a>
 </li>
         <li><a href="apidoc/tomato.drivers.dummy.html#module-tomato.drivers.dummy.main">tomato.drivers.dummy.main</a>
 </li>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.logger_funcs">tomato.drivers.logger_funcs</a>
+        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter">tomato.drivers.example_counter</a>
 </li>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.yadg_funcs">tomato.drivers.yadg_funcs</a>
+        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter.counter">tomato.drivers.example_counter.counter</a>
+</li>
+        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.jobfuncs">tomato.drivers.jobfuncs</a>
 </li>
         <li><a href="apidoc/tomato.ketchup.html#module-tomato.ketchup">tomato.ketchup</a>
 </li>
@@ -1097,7 +1120,11 @@
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.Ethernet_device.name">name (tomato.drivers.biologic.kbio.kbio_types.Ethernet_device attribute)</a>
 
       <ul>
+        <li><a href="apidoc/tomato.html#tomato.models.Component.name">(tomato.models.Component attribute)</a>
+</li>
         <li><a href="apidoc/tomato.html#tomato.models.Device.name">(tomato.models.Device attribute)</a>
+</li>
+        <li><a href="apidoc/tomato.html#tomato.models.Driver.name">(tomato.models.Driver attribute)</a>
 </li>
         <li><a href="apidoc/tomato.html#tomato.models.Pipeline.name">(tomato.models.Pipeline attribute)</a>
 </li>
@@ -1114,10 +1141,10 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.NbRows">NbRows (tomato.drivers.biologic.kbio.kbio_types.DataInfo attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.nbSettings">nbSettings (tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos.nbSettings">nbSettings (tomato.drivers.biologic.kbio.kbio_types.TechniqueInfos attribute)</a>
+</li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.nextjob">nextjob (tomato.models.Daemon attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR.NM_FORMAT">NM_FORMAT (tomato.drivers.biologic.kbio.kbio_types.FIND_ERROR attribute)</a>
@@ -1270,10 +1297,14 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.PEIS">PEIS (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
+      <li><a href="apidoc/tomato.html#tomato.models.Driver.pid">pid (tomato.models.Driver attribute)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.html#tomato.models.Job.pid">(tomato.models.Job attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.html#tomato.models.Job.pid">pid (tomato.models.Job attribute)</a>
-</li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.pipeline">pipeline() (in module tomato.daemon.cmd)</a>
 </li>
       <li><a href="apidoc/tomato.tomato.html#tomato.tomato.pipeline_eject">pipeline_eject() (in module tomato.tomato)</a>
@@ -1291,7 +1322,11 @@
       <li><a href="apidoc/tomato.html#tomato.models.Device.pollrate">pollrate (tomato.models.Device attribute)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.port">port (tomato.models.Daemon attribute)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.html#tomato.models.Driver.port">(tomato.models.Driver attribute)</a>
 </li>
+      </ul></li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.POTPULSE">POTPULSE (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.utils.pp_plural">pp_plural() (in module tomato.drivers.biologic.kbio.utils)</a>
@@ -1302,7 +1337,7 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_tech.print_experiment_data">print_experiment_data() (in module tomato.drivers.biologic.kbio.kbio_tech)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.yadg_funcs.process_yadg_preset">process_yadg_preset() (in module tomato.drivers.yadg_funcs)</a>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device.proc">proc (tomato.drivers.example_counter.Driver.Device attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.ProcessIndex">ProcessIndex (tomato.drivers.biologic.kbio.kbio_types.DataInfo attribute)</a>
 </li>
@@ -1334,9 +1369,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.RNPV">RNPV (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.html#tomato.models.Pipeline.Component.role">role (tomato.models.Pipeline.Component attribute)</a>
+      <li><a href="apidoc/tomato.html#tomato.models.Component.role">role (tomato.models.Component attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PROG_STATE.RUN">RUN (tomato.drivers.biologic.kbio.kbio_types.PROG_STATE attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.run_counter">run_counter() (tomato.drivers.example_counter.counter.Counter method)</a>
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.run_daemon">run_daemon() (in module tomato.daemon)</a>
 </li>
@@ -1374,10 +1411,12 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.SetHardwareConf">SetHardwareConf() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
 </li>
-      <li><a href="apidoc/tomato.html#tomato.models.Daemon.settings">settings (tomato.models.Daemon attribute)</a>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.settings">settings (tomato.drivers.example_counter.Driver attribute)</a>
 
       <ul>
-        <li><a href="apidoc/tomato.html#tomato.models.Device.settings">(tomato.models.Device attribute)</a>
+        <li><a href="apidoc/tomato.html#tomato.models.Daemon.settings">(tomato.models.Daemon attribute)</a>
+</li>
+        <li><a href="apidoc/tomato.html#tomato.models.Driver.settings">(tomato.models.Driver attribute)</a>
 </li>
       </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.setup">setup() (in module tomato.daemon.cmd)</a>
@@ -1407,6 +1446,10 @@
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP50">SP50 (tomato.drivers.biologic.kbio.kbio_types.DEVICE attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.SP50E">SP50E (tomato.drivers.biologic.kbio.kbio_types.DEVICE attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.spawn_tomato_driver">spawn_tomato_driver() (in module tomato.daemon.driver)</a>
+</li>
+      <li><a href="apidoc/tomato.html#tomato.models.Driver.spawned_at">spawned_at (tomato.models.Driver attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.SPEIS">SPEIS (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
@@ -1444,6 +1487,10 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.StartChannels">StartChannels() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
 </li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.started">started (tomato.drivers.example_counter.counter.Counter attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.started_at">started_at (tomato.drivers.example_counter.counter.Counter attribute)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DataInfo.StartTime">StartTime (tomato.drivers.biologic.kbio.kbio_types.DataInfo attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ChannelInfo.state">state (tomato.drivers.biologic.kbio.kbio_api.KBIO_api.ChannelInfo property)</a>
@@ -1467,6 +1514,8 @@
 </li>
         <li><a href="apidoc/tomato.tomato.html#tomato.tomato.status">(in module tomato.tomato)</a>
 </li>
+        <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.status">(tomato.drivers.example_counter.Driver method)</a>
+</li>
       </ul></li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.PROG_STATE.STOP">STOP (tomato.drivers.biologic.kbio.kbio_types.PROG_STATE attribute)</a>
 </li>
@@ -1484,6 +1533,8 @@
         <li><a href="apidoc/tomato.drivers.dummy.html#tomato.drivers.dummy.main.stop_job">(in module tomato.drivers.dummy.main)</a>
 </li>
       </ul></li>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.stop_tomato_driver">stop_tomato_driver() (in module tomato.daemon.driver)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.StopChannel">StopChannel() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.StopChannels">StopChannels() (tomato.drivers.biologic.kbio.kbio_api.KBIO_api method)</a>
@@ -1508,6 +1559,16 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.task_data">task_data() (tomato.drivers.example_counter.Driver method)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.task_start">task_start() (tomato.drivers.example_counter.Driver method)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.task_status">task_status() (tomato.drivers.example_counter.Driver method)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.tasks">tasks (tomato.drivers.example_counter.Driver attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.teardown">teardown() (tomato.drivers.example_counter.Driver method)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_DATACORRUPTED">TECH_DATACORRUPTED (tomato.drivers.biologic.kbio.kbio_types.ERROR attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.ERROR.TECH_ECCFILECORRUPTED">TECH_ECCFILECORRUPTED (tomato.drivers.biologic.kbio.kbio_types.ERROR attribute)</a>
@@ -1536,6 +1597,8 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.TI">TI (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.time">time (tomato.drivers.example_counter.counter.Counter attribute)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.CurrentValues.TimeBase">TimeBase (tomato.drivers.biologic.kbio.kbio_types.CurrentValues attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.TO">TO (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
@@ -1561,6 +1624,13 @@
 
       <ul>
         <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.cmd">module</a>
+</li>
+      </ul></li>
+      <li>
+    tomato.daemon.driver
+
+      <ul>
+        <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.driver">module</a>
 </li>
       </ul></li>
       <li>
@@ -1598,6 +1668,8 @@
         <li><a href="apidoc/tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     tomato.drivers.biologic.kbio.c_utils
 
@@ -1612,8 +1684,6 @@
         <li><a href="apidoc/tomato.drivers.biologic.kbio.html#module-tomato.drivers.biologic.kbio.kbio_api">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     tomato.drivers.biologic.kbio.kbio_tech
 
@@ -1664,13 +1734,6 @@
 </li>
       </ul></li>
       <li>
-    tomato.drivers.driver_funcs
-
-      <ul>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.driver_funcs">module</a>
-</li>
-      </ul></li>
-      <li>
     tomato.drivers.dummy
 
       <ul>
@@ -1685,17 +1748,24 @@
 </li>
       </ul></li>
       <li>
-    tomato.drivers.logger_funcs
+    tomato.drivers.example_counter
 
       <ul>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.logger_funcs">module</a>
+        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter">module</a>
 </li>
       </ul></li>
       <li>
-    tomato.drivers.yadg_funcs
+    tomato.drivers.example_counter.counter
 
       <ul>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.yadg_funcs">module</a>
+        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter.counter">module</a>
+</li>
+      </ul></li>
+      <li>
+    tomato.drivers.jobfuncs
+
+      <ul>
+        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers.jobfuncs">module</a>
 </li>
       </ul></li>
       <li>
@@ -1719,12 +1789,10 @@
         <li><a href="apidoc/tomato.tomato.html#module-tomato.tomato">module</a>
 </li>
       </ul></li>
-      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.tomato_job">tomato_job() (in module tomato.drivers)</a>
-
-      <ul>
-        <li><a href="apidoc/tomato.drivers.html#tomato.drivers.driver_funcs.tomato_job">(in module tomato.drivers.driver_funcs)</a>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.tomato_driver">tomato_driver() (in module tomato.daemon.driver)</a>
 </li>
-      </ul></li>
+      <li><a href="apidoc/tomato.drivers.html#tomato.drivers.tomato_job">tomato_job() (in module tomato.drivers)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.tech_types.TECH_ID.TOS">TOS (tomato.drivers.biologic.kbio.tech_types.TECH_ID attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_api.KBIO_api.Error.translate">translate (tomato.drivers.biologic.kbio.kbio_api.KBIO_api.Error property)</a>
@@ -1761,6 +1829,8 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.val">val (tomato.drivers.example_counter.counter.Counter attribute)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.c_utils.c_buffer.value">value (tomato.drivers.biologic.kbio.c_utils.c_buffer property)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.verbosity">verbosity (tomato.models.Daemon attribute)</a>
@@ -1771,10 +1841,10 @@
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP">VMP (tomato.drivers.biologic.kbio.kbio_types.DEVICE attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP2">VMP2 (tomato.drivers.biologic.kbio.kbio_types.DEVICE attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP2">VMP2 (tomato.drivers.biologic.kbio.kbio_types.DEVICE attribute)</a>
+</li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP3">VMP3 (tomato.drivers.biologic.kbio.kbio_types.DEVICE attribute)</a>
 </li>
       <li><a href="apidoc/tomato.drivers.biologic.kbio.html#tomato.drivers.biologic.kbio.kbio_types.DEVICE.VMP300">VMP300 (tomato.drivers.biologic.kbio.kbio_types.DEVICE attribute)</a>

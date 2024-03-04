@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="tomato.drivers.biologic.kbio package" href="tomato.drivers.biologic.kbio.html" />
-    <link rel="prev" title="dummy: A dummy driver module" href="tomato.drivers.dummy.html" /> 
+    <link rel="prev" title="tomato.drivers package" href="tomato.drivers.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,46 +57,41 @@
 <li class="toctree-l1"><a class="reference internal" href="../version.html">Version history</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>biologic</strong>: Driver for BioLogic potentiostats</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#driver-configuration">Driver Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#supported-method-parameters">Supported <em>method</em> parameters:</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#general-parameters">General parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#technique-limits">Technique limits</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#controlled-current-and-voltage-techniques">Controlled current and voltage techniques</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#loop-parameters">Loop parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#supported-techniques">Supported <code class="docutils literal notranslate"><span class="pre">techniques</span></code>:</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.kbio.html">tomato.drivers.biologic.kbio package</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-tomato.drivers.biologic.kbio_wrapper">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.get_test_magic"><code class="docutils literal notranslate"><span class="pre">get_test_magic()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.get_num_steps"><code class="docutils literal notranslate"><span class="pre">get_num_steps()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.pad_steps"><code class="docutils literal notranslate"><span class="pre">pad_steps()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.current"><code class="docutils literal notranslate"><span class="pre">current()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.vlimit"><code class="docutils literal notranslate"><span class="pre">vlimit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.translate"><code class="docutils literal notranslate"><span class="pre">translate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.dsl_to_ecc"><code class="docutils literal notranslate"><span class="pre">dsl_to_ecc()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.payload_to_ecc"><code class="docutils literal notranslate"><span class="pre">payload_to_ecc()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.parse_raw_data"><code class="docutils literal notranslate"><span class="pre">parse_raw_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_api"><code class="docutils literal notranslate"><span class="pre">get_kbio_api()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.kbio_wrapper.get_kbio_techpath"><code class="docutils literal notranslate"><span class="pre">get_kbio_techpath()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.main.get_status"><code class="docutils literal notranslate"><span class="pre">get_status()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.main.get_data"><code class="docutils literal notranslate"><span class="pre">get_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.main.start_job"><code class="docutils literal notranslate"><span class="pre">start_job()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tomato.drivers.biologic.main.stop_job"><code class="docutils literal notranslate"><span class="pre">stop_job()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="tomato.html">tomato package</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tomato.html">tomato package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.set_loglevel"><code class="docutils literal notranslate"><span class="pre">set_loglevel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_tomato"><code class="docutils literal notranslate"><span class="pre">run_tomato()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_ketchup"><code class="docutils literal notranslate"><span class="pre">run_ketchup()</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="tomato.drivers.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#"><strong>biologic</strong>: Driver for BioLogic potentiostats</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#driver-configuration">Driver Configuration</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#supported-method-parameters">Supported <em>method</em> parameters:</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#module-tomato.drivers.biologic.kbio_wrapper">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.jobfuncs">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.html#module-tomato.models">Submodules</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -113,6 +108,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tomato.html">tomato package</a></li>
+          <li class="breadcrumb-item"><a href="tomato.drivers.html">tomato.drivers package</a></li>
       <li class="breadcrumb-item active"><strong>biologic</strong>: Driver for BioLogic potentiostats</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/apidoc/tomato.drivers.biologic.rst.txt" rel="nofollow"> View page source</a>
@@ -1092,7 +1089,7 @@ of the device. No data is returned.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tomato.drivers.dummy.html" class="btn btn-neutral float-left" title="dummy: A dummy driver module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tomato.drivers.html" class="btn btn-neutral float-left" title="tomato.drivers package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="tomato.drivers.biologic.kbio.html" class="btn btn-neutral float-right" title="tomato.drivers.biologic.kbio package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

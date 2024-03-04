@@ -19,6 +19,8 @@
         <script src="_static/documentation_options.js?v=30d551ce"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -54,6 +56,8 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quick start guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#first-time-set-up">First time set-up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-program-flowchart"><strong>tomato</strong> program flowchart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-concepts-flowchart"><strong>tomato</strong> concepts flowchart</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#settings-file">Settings file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#devices-file">Devices file</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#devices-section"><strong>devices</strong> section</a></li>
@@ -79,8 +83,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
 <ul>
@@ -136,103 +139,263 @@ default, the <em>appdir</em> path is:</p>
 <p>Where <em>appdir</em> is <code class="docutils literal notranslate"><span class="pre">/home/kraus/.config/tomato/1.0a1/</span></code>. The <em>appdir</em> can be specified
 using the <code class="docutils literal notranslate"><span class="pre">--appdir</span></code> argument to <strong>tomato</strong>.</p>
 </section>
+<section id="tomato-program-flowchart">
+<h2><strong>tomato</strong> program flowchart<a class="headerlink" href="#tomato-program-flowchart" title="Link to this heading"></a></h2>
+<p><strong>tomato</strong> currently contains two command line user-facing utilities/executables:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>, responsible for management of the state daemon process, and</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>, responsible for job submission and management.</p></li>
+</ul>
+<p>These two executables then internally spawn other processes, including the state daemon
+<code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process for every running job, and a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code>
+process for managing all devices of a certain driver type.</p>
+<div class="mermaid">
+            flowchart TB
+    subgraph daemon[tomato-daemon]
+        cmd{{port:cmd}} ==&gt; st[(state)]
+        st --&gt; jm([job manager])
+        st --&gt; dm([driver manager])
+        st &lt;--&gt; io[state io]
+    end
+
+    subgraph driver[tomato-driver]
+        dcmd{{port:cmd}} ==&gt;  dst[(state)]
+    end
+
+    dst o-.-o h1[hardware]
+
+    subgraph job[tomato-job]
+        mp([main loop]) --&gt; tp&gt;task process]
+    end
+
+    t&gt;tomato] -.-&gt; cmd
+    k&gt;ketchup] -.-&gt; cmd
+
+    jm -.-&gt; job
+    dst -.-&gt; driver
+    dm -..-&gt; driver
+    tp -.-&gt; dcmd
+        </div></section>
+<section id="tomato-concepts-flowchart">
+<span id="concepts"></span><h2><strong>tomato</strong> concepts flowchart<a class="headerlink" href="#tomato-concepts-flowchart" title="Link to this heading"></a></h2>
+<p>The following concepts are used in <strong>tomato</strong>:</p>
+<ul class="simple">
+<li><p><em>devices</em>, which represent individually-addressable and optionally multichannel
+instruments in the lab,</p></li>
+<li><p><em>pipelines</em>, which represent the real world organisation of <em>devices</em> into independent
+experimental set-ups, optionally containing one or more <em>device</em> (or their channels),</p></li>
+<li><p><em>jobs</em>, which are processes that carry out a <em>payload</em> (i.e. a set of experimental
+instructions) on a <em>pipeline</em>, and</p></li>
+<li><p><em>drivers</em>, which are processes managing all devices of a certain driver type:</p></li>
+</ul>
+<div class="mermaid">
+            flowchart LR
+
+    c1 --- drv1[driver 123]
+    c2 --- drv1
+    c3 --- drv1
+
+    a100 --- drv2[driver abc]
+    b100 --- drv2
+
+    subgraph d1[device 1]
+        ip1[address: 192.168.1.1]
+        c1[channel 1]
+        c2[channel 2]
+        c3[channel 3]
+    end
+
+    subgraph a[device a]
+        com1[address: COM1]
+        a100[channel 100]
+    end
+
+    subgraph b[device b]
+        com2[address: COM2]
+        b100[channel 100]
+    end
+
+    subgraph pipelines
+        pip1
+        pip2
+        pip3
+    end
+
+    subgraph drivers
+        drv1
+        drv2
+    end
+
+    subgraph devices
+        d1
+        a
+        b
+    end
+
+    subgraph jobs
+        j1
+        j2
+    end
+
+    j1[complex] --- |two part payload| pip1
+    j2[simple] --- |simple payload| pip3
+
+    pip1[pipeline a1] -.-&gt; c1
+    pip1[pipeline a1] -.-&gt; a100
+
+    pip2[pipeline b2] -.-&gt; c2
+    pip2[pipeline b2] -.-&gt; b100
+
+    pip3[pipeline 3] -.-&gt; c3
+        </div></section>
 <section id="settings-file">
 <span id="setfile"></span><h2>Settings file<a class="headerlink" href="#settings-file" title="Link to this heading"></a></h2>
-<p>The <em>settings file</em> <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> has to be located in the <em>appdir</em>. The default
-file generated by <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> above looks similar to the below file:</p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="k">[queue]</span>
-<span class="linenos">2</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sqlite3&#39;</span>
-<span class="linenos">3</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.local/share/tomato/1.0a1/database.db&#39;</span>
-<span class="linenos">4</span><span class="w"> </span><span class="n">storage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.local/share/tomato/1.0a1/Jobs&#39;</span>
-<span class="linenos">5</span>
-<span class="linenos">6</span><span class="w"> </span><span class="k">[devices]</span>
-<span class="linenos">7</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.config/tomato/1.0a1/devices.yml&#39;</span>
-<span class="linenos">8</span>
-<span class="linenos">9</span><span class="w"> </span><span class="k">[drivers]</span>
+<p>The <em>settings file</em> contains the basic information required to start the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>.
+This is a <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> file, which has to be located in the <em>appdir</em>. The default
+file generated by <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> looks similar to the below example:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="n">datadir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.local/share/tomato/1.0a1&#39;</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="w"> </span><span class="k">[jobs]</span>
+<span class="linenos"> 4</span><span class="w"> </span><span class="n">storage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.local/share/tomato/1.0a1/Jobs&#39;</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="w"> </span><span class="k">[devices]</span>
+<span class="linenos"> 7</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.config/tomato/1.0a1/devices.yml&#39;</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="w"> </span><span class="k">[drivers]</span>
+<span class="linenos">10</span><span class="w"> </span><span class="n">example_counter</span><span class="p">.</span><span class="n">testpar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1234</span>
 </pre></div>
 </div>
-<p>In addition to the <em>appdir</em>, a second path, <em>datadir</em> is used to specify the location of
+<p>In addition to the <em>appdir</em>, a second path, <em>datadir</em>, is used to specify the location of
 the data created by <strong>tomato</strong>. The default <em>datadir</em> is:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">$env:localappdata\dgbowl\tomato\&lt;version&gt;</span></code> on Windows,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">$HOME/.local/share/tomato/&lt;version&gt;</span></code> on Linux.</p></li>
 </ul>
-<p>In the default <em>settings file</em> shown above, the <code class="docutils literal notranslate"><span class="pre">[queue]</span></code> section contains <code class="docutils literal notranslate"><span class="pre">path</span></code>,
-specifying the location of the <code class="docutils literal notranslate"><span class="pre">database.db</span></code> file containing the <em>queue</em> table, as
-well as the database <code class="docutils literal notranslate"><span class="pre">type</span></code> (only <code class="docutils literal notranslate"><span class="pre">sqlite3</span></code> is supported). The <code class="docutils literal notranslate"><span class="pre">storage</span></code> entry
-points to the path where the raw data generated by the submitted <em>jobs</em> will be stored.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">[devices]</span></code> section within the <em>settings file</em> file points to a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted
-<a class="reference internal" href="#devfile"><span class="std std-ref">Devices file</span></a>, defining the hardware configuration of the devices managed by <strong>tomato</strong>.</p>
-<p>Additional, <em>driver</em>-specific settings (such as the <code class="docutils literal notranslate"><span class="pre">dllpath</span></code> required by the
-<a class="reference internal" href="apidoc/tomato.drivers.biologic.html#module-tomato.drivers.biologic" title="tomato.drivers.biologic"><code class="xref py py-mod docutils literal notranslate"><span class="pre">biologic</span></code></a> driver) may be provided in the <code class="docutils literal notranslate"><span class="pre">[drivers]</span></code> section.</p>
+<p>In the default <em>settings file</em> shown above, the following entries are specified:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">jobs.storage</span></code> which is the directory where the data and logs of <strong>tomato</strong> jobs
+will be stored,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">devices.config</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted <a class="reference internal" href="#devfile"><span class="std std-ref">devices file</span></a>,
+defining the hardware configuration of the devices managed by <strong>tomato</strong>.</p></li>
+</ul>
+<p>Additional, <em>driver</em>-specific settings may be provided in the <code class="docutils literal notranslate"><span class="pre">[drivers]</span></code> section,
+following the example of the <code class="docutils literal notranslate"><span class="pre">drivers.example_counter.testpar</span></code> entry.</p>
 </section>
 <section id="devices-file">
 <span id="devfile"></span><h2>Devices file<a class="headerlink" href="#devices-file" title="Link to this heading"></a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted file contains information about each <em>device</em>, corresponding to
 an individual piece of hardware managed by <strong>tomato</strong>, as well as information about the
-organisation of such <em>devices</em> into addressable chunks, called <em>pipelines</em>. The
-<em>pipelines</em> can be thought of as digital twins of experimental set-ups, and should
-contain all <em>devices</em> required to carry out a <em>payload</em> (see <a class="reference internal" href="#payfile"><span class="std std-ref">Payload file</span></a>).</p>
+organisation of such <em>devices</em> into <em>pipelines</em>.</p>
+<p>When the devices file is not present, the default file shipped with <strong>tomato</strong> will be
+used instead:</p>
 <section id="devices-section">
 <h3><strong>devices</strong> section<a class="headerlink" href="#devices-section" title="Link to this heading"></a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
-<span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-8</span>
-<span class="linenos"> 3</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.109.209.8&quot;</span>
-<span class="linenos"> 4</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">6</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">7</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">8</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">9</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">11</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">12</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">13</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">14</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">16</span><span class="p p-Indicator">]</span>
-<span class="linenos"> 5</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;biologic&quot;</span>
-<span class="linenos"> 6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
-<span class="linenos"> 7</span><span class="w">     </span><span class="nt">capabilities</span><span class="p">:</span>
-<span class="linenos"> 8</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">open_circuit_voltage</span>
-<span class="linenos"> 9</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant_current</span>
-<span class="linenos">10</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant_voltage</span>
-<span class="linenos">11</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sweep_current</span>
-<span class="linenos">12</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sweep_voltage</span>
-<span class="linenos">13</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">loop</span>
+<p>The <code class="docutils literal notranslate"><span class="pre">devices</span></code> section of the default <em>devices file</em> is shown below:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
+<span class="linenos">3</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example_counter&quot;</span>
+<span class="linenos">4</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example-addr&quot;</span>
+<span class="linenos">5</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">]</span>
+<span class="linenos">6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos">7</span><span class="w">     </span><span class="nt">capabilities</span><span class="p">:</span>
+<span class="linenos">8</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">count</span>
 </pre></div>
 </div>
-<p>In the example <code class="docutils literal notranslate"><span class="pre">devices</span></code> section above, we define a single BioLogic MPG2 potentiostat.
-Each entry in this section has to define the <code class="docutils literal notranslate"><span class="pre">name</span></code> of the instrument, the <code class="docutils literal notranslate"><span class="pre">address</span></code>
-and <code class="docutils literal notranslate"><span class="pre">channels</span></code> available and used for connecting to the instrument, the <code class="docutils literal notranslate"><span class="pre">driver</span></code> with
-which <strong>tomato</strong> will manage this <em>device</em>, the <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> specifying the polling frequency
-with which the <strong>tomato</strong> daemon queries the worker job for data, and finally a list of the
-<code class="docutils literal notranslate"><span class="pre">capabilities</span></code> this <em>device</em> supports.</p>
+<p>Here, we define a single device using the <a class="reference internal" href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter" title="tomato.drivers.example_counter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">example_counter</span></code></a> driver.
+The definition includes the <code class="docutils literal notranslate"><span class="pre">address</span></code> of the device (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> type) as well as an
+enumeration of individually-addressable channels the device has (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">capabilities</span></code> list enumerates all “techniques” or “methods” the device can
+perform (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>).</p>
+<p>For example, the devices shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a> above would
+be defined as:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;driver</span><span class="nv"> </span><span class="s">123&quot;</span>
+<span class="linenos"> 4</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.1.1&quot;</span>
+<span class="linenos"> 5</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 7</span><span class="w">     </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 8</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
+<span class="linenos"> 9</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;driver</span><span class="nv"> </span><span class="s">abc&quot;</span>
+<span class="linenos">10</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;COM1&quot;</span>
+<span class="linenos">11</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">100</span><span class="p p-Indicator">]</span>
+<span class="linenos">12</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="linenos">13</span><span class="w">     </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<span class="linenos">14</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
+<span class="linenos">15</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;driver</span><span class="nv"> </span><span class="s">abc&quot;</span>
+<span class="linenos">16</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;COM2&quot;</span>
+<span class="linenos">17</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">100</span><span class="p p-Indicator">]</span>
+<span class="linenos">18</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="linenos">19</span><span class="w">     </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> here is an internal setting for <strong>tomato</strong> and defaults to 10 s. It
-is the frequency with which the <em>job</em> daemon supervising the <em>device</em> asks the <em>driver</em>
-for new data, <strong>not</strong> the frequency with which the <em>driver</em> asks the hardware for data!</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> here is an internal setting for <strong>tomato</strong>. It is the frequency
+with which the job interacting with the device driver asks the driver for data,
+<strong>not</strong> the frequency with which the driver asks the hardware for data!</p>
 </div>
 </section>
 <section id="pipelines-section">
 <h3><strong>pipelines</strong> section<a class="headerlink" href="#pipelines-section" title="Link to this heading"></a></h3>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
-<span class="hll"><span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-7-10</span>
-</span><span class="hll"><span class="linenos"> 3</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span>
-</span><span class="hll"><span class="linenos"> 4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2</span>
-</span><span class="hll"><span class="linenos"> 5</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-7</span>
-</span><span class="hll"><span class="linenos"> 6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-</span><span class="linenos"> 7</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-8-*</span>
-<span class="linenos"> 8</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2</span>
-<span class="linenos">10</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPG2-8</span>
-<span class="linenos">11</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">each</span>
+<p>The default <code class="docutils literal notranslate"><span class="pre">pipelines</span></code> section looks as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
+<span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-counter</span>
+<span class="linenos">3</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos">4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">counter</span>
+<span class="hll"><span class="linenos">5</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
+</span><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
-<p>In the example <code class="docutils literal notranslate"><span class="pre">pipelines</span></code> section above, we show two ways of defining <em>pipelines</em> in
-<strong>tomato</strong>. In the first entry on <code class="docutils literal notranslate"><span class="pre">lines</span> <span class="pre">2-6</span></code>, we define a <em>pipeline</em> by its <code class="docutils literal notranslate"><span class="pre">name</span></code>,
-and assign a list of <em>devices</em> into it, identified within the <em>pipeline</em> by their
-<code class="docutils literal notranslate"><span class="pre">tag</span></code>, and matched against the <code class="docutils literal notranslate"><span class="pre">devices</span></code> section using the <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">channel</span></code>.</p>
-<p>Alternatively, for multi-channel <em>devices</em>, such as the <code class="docutils literal notranslate"><span class="pre">MPG2-8</span></code> defined in the example
-above, a shorthand for defining a <em>pipeline</em> for each <code class="docutils literal notranslate"><span class="pre">channel</span></code> is shown in the second
-entry. The pipeline <code class="docutils literal notranslate"><span class="pre">name</span></code> will be generated by replacing the <code class="docutils literal notranslate"><span class="pre">*</span></code> with each <code class="docutils literal notranslate"><span class="pre">channel</span></code>.</p>
-<p>Multiple <em>devices</em> can be combined into a single <em>pipeline</em> using the above syntax.</p>
+<p>Here, a single <em>pipeline</em> called <code class="docutils literal notranslate"><span class="pre">pip-counter</span></code> is defined to contain the one available
+channel of the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> device (defined on line 5) shown further above. For multi
+channel devices, it is also possible to define a <em>pipeline</em> for each channel automatically.
+For example, with the following definition:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
+<span class="hll"><span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-counter-*</span>
+</span><span class="linenos">3</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos">4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">counter</span>
+<span class="linenos">5</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
+<span class="hll"><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">each</span>
+</span></pre></div>
+</div>
+<p>a set of pipelines would be created using each of the available channels in
+<code class="docutils literal notranslate"><span class="pre">dev-counter</span></code>, replacing the <code class="docutils literal notranslate"><span class="pre">*</span></code> in line 2 using the channel. Therefore, one
+<em>pipeline</em>  with name <code class="docutils literal notranslate"><span class="pre">pip-counter-1</span></code> would be created. However, if the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code>
+contained more than one channel, a <em>pipeline</em> would be generated for each channel.</p>
+<p>Finally, a definition for the pipelines shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a>
+above can be defined as:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline a1</span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos"> 4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
+<span class="linenos"> 5</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos"> 6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 7</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
+<span class="linenos"> 8</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
+<span class="linenos"> 9</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">10</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline b2</span>
+<span class="linenos">11</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos">12</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
+<span class="linenos">13</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos">14</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos">15</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
+<span class="linenos">16</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
+<span class="linenos">17</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">18</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline 3</span>
+<span class="linenos">19</span><span class="w">     </span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos">20</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
+<span class="linenos">21</span><span class="w">         </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos">22</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="payload-file">
 <span id="payfile"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Link to this heading"></a></h2>
-<p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the <em>queue</em>.
-The overall schema of the <em>payload</em> is defined in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas vmaster)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a>
-module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas vmaster)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
+<p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and
+allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined
+in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas vmaster)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas vmaster)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_0_2.Payload">
 <em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload_0_2.</span></span><span class="sig-name descname"><span class="pre">Payload</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload_0_2.Payload" title="Link to this definition"></a></dt>

@@ -57,8 +57,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
 <ul class="current">
@@ -165,7 +164,9 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.status">
 <span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.status" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Get status of the tomato daemon.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">with_data</span></code> is specified, the state of the daemon will be retrieved.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
 </dd>
@@ -175,7 +176,8 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.start">
 <span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.start" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Start the tomato daemon.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
 </dd>
@@ -185,7 +187,9 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.stop">
 <span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.stop" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Stop a running tomato daemon.</p>
+<p>Will not stop the daemon if any jobs are running. Will create a state snapshot.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
 </dd>
@@ -195,7 +199,9 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.init">
 <span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datadir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.init" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Create a default settings.toml file.</p>
+<p>Will overwrite any existing settings.toml file.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
 </dd>
@@ -205,7 +211,8 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.reload">
 <span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">reload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.reload" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Reload settings.toml and devices.yaml files and reconfigure tomato daemon.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reply</span></code></a></p>
 </dd>
@@ -216,7 +223,7 @@
 <dt class="sig sig-object py" id="tomato.tomato.pipeline_load">
 <span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleid</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.pipeline_load" title="Link to this definition"></a></dt>
 <dd><p>Load a sample into a pipeline. Usage:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>pipeline<span class="w"> </span>load<span class="w"> </span>&lt;samplename&gt;<span class="w"> </span>&lt;pipeline&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>pipeline<span class="w"> </span>load<span class="w"> </span>&lt;pipeline&gt;<span class="w"> </span>&lt;sampleid&gt;
 </pre></div>
 </div>
 <dl class="field-list simple">

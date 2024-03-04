@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="tomato.daemon package" href="tomato.daemon.html" />
-    <link rel="prev" title="tomato.drivers.biologic.kbio package" href="tomato.drivers.biologic.kbio.html" /> 
+    <link rel="prev" title="tomato.drivers.example_counter package" href="tomato.drivers.example_counter.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,8 +58,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
 <ul class="current">
@@ -75,6 +74,15 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tomato.models">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tomato.models.Driver"><code class="docutils literal notranslate"><span class="pre">Driver</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.name"><code class="docutils literal notranslate"><span class="pre">Driver.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.port"><code class="docutils literal notranslate"><span class="pre">Driver.port</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.pid"><code class="docutils literal notranslate"><span class="pre">Driver.pid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.spawned_at"><code class="docutils literal notranslate"><span class="pre">Driver.spawned_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.connected_at"><code class="docutils literal notranslate"><span class="pre">Driver.connected_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.settings"><code class="docutils literal notranslate"><span class="pre">Driver.settings</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#tomato.models.Device"><code class="docutils literal notranslate"><span class="pre">Device</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Device.name"><code class="docutils literal notranslate"><span class="pre">Device.name</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Device.driver"><code class="docutils literal notranslate"><span class="pre">Device.driver</span></code></a></li>
@@ -82,15 +90,16 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Device.channels"><code class="docutils literal notranslate"><span class="pre">Device.channels</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Device.capabilities"><code class="docutils literal notranslate"><span class="pre">Device.capabilities</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Device.pollrate"><code class="docutils literal notranslate"><span class="pre">Device.pollrate</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Device.settings"><code class="docutils literal notranslate"><span class="pre">Device.settings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tomato.models.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.name"><code class="docutils literal notranslate"><span class="pre">Component.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.address"><code class="docutils literal notranslate"><span class="pre">Component.address</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.channel"><code class="docutils literal notranslate"><span class="pre">Component.channel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.role"><code class="docutils literal notranslate"><span class="pre">Component.role</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tomato.models.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Pipeline.Component"><code class="docutils literal notranslate"><span class="pre">Pipeline.Component</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.models.Pipeline.Component.channel"><code class="docutils literal notranslate"><span class="pre">Pipeline.Component.channel</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.models.Pipeline.Component.role"><code class="docutils literal notranslate"><span class="pre">Pipeline.Component.role</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Pipeline.name"><code class="docutils literal notranslate"><span class="pre">Pipeline.name</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Pipeline.ready"><code class="docutils literal notranslate"><span class="pre">Pipeline.ready</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Pipeline.jobid"><code class="docutils literal notranslate"><span class="pre">Pipeline.jobid</span></code></a></li>
@@ -118,6 +127,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.settings"><code class="docutils literal notranslate"><span class="pre">Daemon.settings</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.pips"><code class="docutils literal notranslate"><span class="pre">Daemon.pips</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.devs"><code class="docutils literal notranslate"><span class="pre">Daemon.devs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.drvs"><code class="docutils literal notranslate"><span class="pre">Daemon.drvs</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.jobs"><code class="docutils literal notranslate"><span class="pre">Daemon.jobs</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.nextjob"><code class="docutils literal notranslate"><span class="pre">Daemon.nextjob</span></code></a></li>
 </ul>
@@ -184,14 +194,24 @@
 <li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.setup_logging"><code class="docutils literal notranslate"><span class="pre">setup_logging()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.run_daemon"><code class="docutils literal notranslate"><span class="pre">run_daemon()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#module-tomato.daemon.cmd">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-cmd-command-parsing-for-tomato-daemon"><strong>tomato.daemon.cmd</strong>: command parsing for tomato daemon</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.merge_pipelines"><code class="docutils literal notranslate"><span class="pre">merge_pipelines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.stop"><code class="docutils literal notranslate"><span class="pre">stop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.setup"><code class="docutils literal notranslate"><span class="pre">setup()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.pipeline"><code class="docutils literal notranslate"><span class="pre">pipeline()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.job"><code class="docutils literal notranslate"><span class="pre">job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.driver"><code class="docutils literal notranslate"><span class="pre">driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.device"><code class="docutils literal notranslate"><span class="pre">device()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-driver-the-driver-manager-of-tomato-daemon"><strong>tomato.daemon.driver</strong>: the driver manager of tomato daemon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.tomato_driver"><code class="docutils literal notranslate"><span class="pre">tomato_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.spawn_tomato_driver"><code class="docutils literal notranslate"><span class="pre">spawn_tomato_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.stop_tomato_driver"><code class="docutils literal notranslate"><span class="pre">stop_tomato_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-io-store-and-load-state-of-tomato-daemon"><strong>tomato.daemon.io</strong>: store and load state of tomato daemon</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.store"><code class="docutils literal notranslate"><span class="pre">store()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-job-the-job-manager-of-tomato-daemon"><strong>tomato.daemon.job</strong>: the job manager of tomato daemon</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.find_matching_pipelines"><code class="docutils literal notranslate"><span class="pre">find_matching_pipelines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.kill_tomato_job"><code class="docutils literal notranslate"><span class="pre">kill_tomato_job()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.manage_running_pips"><code class="docutils literal notranslate"><span class="pre">manage_running_pips()</span></code></a></li>
@@ -203,9 +223,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_api"><code class="docutils literal notranslate"><span class="pre">driver_api()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_worker"><code class="docutils literal notranslate"><span class="pre">driver_worker()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_reset"><code class="docutils literal notranslate"><span class="pre">driver_reset()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a><ul>
@@ -224,20 +241,19 @@
 <li class="toctree-l4"><a class="reference internal" href="tomato.drivers.dummy.html#module-tomato.drivers.dummy.main">Submodules</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.example_counter.html#tomato.drivers.example_counter.in_devmap"><code class="docutils literal notranslate"><span class="pre">in_devmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver"><code class="docutils literal notranslate"><span class="pre">Driver</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.example_counter.html#module-tomato.drivers.example_counter.counter">Submodules</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.driver_funcs">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_funcs.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_funcs.driver_api"><code class="docutils literal notranslate"><span class="pre">driver_api()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_funcs.data_poller"><code class="docutils literal notranslate"><span class="pre">data_poller()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_funcs.data_snapshot"><code class="docutils literal notranslate"><span class="pre">data_snapshot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_funcs.driver_worker"><code class="docutils literal notranslate"><span class="pre">driver_worker()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.driver_funcs.driver_reset"><code class="docutils literal notranslate"><span class="pre">driver_reset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.logger_funcs.log_listener_config"><code class="docutils literal notranslate"><span class="pre">log_listener_config()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.logger_funcs.log_listener"><code class="docutils literal notranslate"><span class="pre">log_listener()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.logger_funcs.log_worker_config"><code class="docutils literal notranslate"><span class="pre">log_worker_config()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.yadg_funcs.get_yadg_preset"><code class="docutils literal notranslate"><span class="pre">get_yadg_preset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.yadg_funcs.process_yadg_preset"><code class="docutils literal notranslate"><span class="pre">process_yadg_preset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.jobfuncs">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.merge_netcdfs"><code class="docutils literal notranslate"><span class="pre">merge_netcdfs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.data_to_pickle"><code class="docutils literal notranslate"><span class="pre">data_to_pickle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.job_process"><code class="docutils literal notranslate"><span class="pre">job_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.job_worker"><code class="docutils literal notranslate"><span class="pre">job_worker()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -271,6 +287,78 @@
 </section>
 <section id="module-tomato.models">
 <span id="submodules"></span><h2>Submodules<a class="headerlink" href="#module-tomato.models" title="Link to this heading"></a></h2>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="tomato.models.Driver">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tomato.models.</span></span><span class="sig-name descname"><span class="pre">Driver</span></span><a class="headerlink" href="#tomato.models.Driver" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Driver&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Port&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pid&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;spawned_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spawned At&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;connected_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Connected At&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Settings&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details></p><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Driver.name">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Driver.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Driver.port">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Driver.port" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Driver.pid">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Driver.pid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Driver.spawned_at">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spawned_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Driver.spawned_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Driver.connected_at">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connected_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Driver.connected_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Driver.settings">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#tomato.models.Driver.settings" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="tomato.models.Device">
 <em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tomato.models.</span></span><span class="sig-name descname"><span class="pre">Device</span></span><a class="headerlink" href="#tomato.models.Device" title="Link to this definition"></a></dt>
@@ -310,15 +398,13 @@
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pollrate&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Settings&quot;</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">},</span>
 <span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;driver&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;address&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;channels&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;capabilities&quot;</span>
 <span class="w">   </span><span class="p">]</span>
 <span class="p">}</span>
@@ -336,12 +422,12 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Device.address">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Device.address" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Device.address" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Device.channels">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Device.channels" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Device.channels" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -354,9 +440,61 @@
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pollrate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#tomato.models.Device.pollrate" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="tomato.models.Component">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tomato.models.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><a class="headerlink" href="#tomato.models.Component" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Component&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Address&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Channel&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Role&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;address&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;channel&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;role&quot;</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details></p><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Component.name">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Component.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="tomato.models.Device.settings">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#tomato.models.Device.settings" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.models.Component.address">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Component.address" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Component.channel">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Component.channel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Component.role">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Component.role" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -403,6 +541,14 @@
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Component&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Address&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Channel&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
@@ -413,6 +559,8 @@
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">},</span>
 <span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;address&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;channel&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;role&quot;</span>
 <span class="w">         </span><span class="p">]</span>
@@ -421,44 +569,7 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-</details></p><dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="tomato.models.Pipeline.Component">
-<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Component</span></span><a class="headerlink" href="#tomato.models.Pipeline.Component" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p><details  class="autodoc_pydantic_collapsable_json">
-<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Component&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Channel&quot;</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Role&quot;</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">   </span><span class="p">},</span>
-<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;channel&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;role&quot;</span>
-<span class="w">   </span><span class="p">]</span>
-<span class="p">}</span>
-</pre></div>
-</div>
 </details></p><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="tomato.models.Pipeline.Component.channel">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Pipeline.Component.channel" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="tomato.models.Pipeline.Component.role">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Pipeline.Component.role" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Pipeline.name">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Pipeline.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -480,7 +591,7 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Pipeline.devs">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">devs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tomato.models.Pipeline.Component" title="tomato.models.Pipeline.Component"><span class="pre">Component</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#tomato.models.Pipeline.devs" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">devs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tomato.models.Component" title="tomato.models.Component"><span class="pre">Component</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#tomato.models.Pipeline.devs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -535,16 +646,13 @@
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Completed At&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">   </span><span class="p">},</span>
-<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;id&quot;</span>
-<span class="w">   </span><span class="p">]</span>
+<span class="w">   </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </details></p><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Job.id">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Job.id" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -638,6 +746,13 @@
 <span class="w">            </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/definitions/Device&quot;</span>
 <span class="w">         </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;drvs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Drvs&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/definitions/Driver&quot;</span>
+<span class="w">         </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;jobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jobs&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
@@ -664,6 +779,14 @@
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Component&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Address&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Channel&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
@@ -674,6 +797,8 @@
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">},</span>
 <span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;address&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;channel&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;role&quot;</span>
 <span class="w">         </span><span class="p">]</span>
@@ -745,6 +870,39 @@
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pollrate&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;driver&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;address&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;channels&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;capabilities&quot;</span>
+<span class="w">         </span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;Driver&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Driver&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Port&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pid&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;spawned_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spawned At&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;connected_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Connected At&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Settings&quot;</span><span class="p">,</span>
@@ -752,9 +910,7 @@
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">},</span>
 <span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;driver&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;capabilities&quot;</span>
+<span class="w">            </span><span class="s2">&quot;name&quot;</span>
 <span class="w">         </span><span class="p">]</span>
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;Job&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -802,10 +958,7 @@
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Completed At&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">            </span><span class="p">}</span>
-<span class="w">         </span><span class="p">},</span>
-<span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;id&quot;</span>
-<span class="w">         </span><span class="p">]</span>
+<span class="w">         </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">}</span>
 <span class="p">}</span>
@@ -849,6 +1002,11 @@
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Daemon.devs">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">devs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tomato.models.Device" title="tomato.models.Device"><span class="pre">Device</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#tomato.models.Daemon.devs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Daemon.drvs">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">drvs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tomato.models.Driver" title="tomato.models.Driver"><span class="pre">Driver</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#tomato.models.Daemon.drvs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -915,7 +1073,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tomato.drivers.biologic.kbio.html" class="btn btn-neutral float-left" title="tomato.drivers.biologic.kbio package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tomato.drivers.example_counter.html" class="btn btn-neutral float-left" title="tomato.drivers.example_counter package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="tomato.daemon.html" class="btn btn-neutral float-right" title="tomato.daemon package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

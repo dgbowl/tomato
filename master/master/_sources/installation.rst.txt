@@ -14,13 +14,13 @@ environment.
 
 .. note::
 
-    The optional targets ``[docs]`` and ``[testing]`` will install packages required 
+    The optional targets ``[docs]`` and ``[testing]`` will install packages required
     for building this documentation and running the test-suite, respectively.
 
 Testing the installation
 ````````````````````````
 To run the test-suite, you need to first install **tomato** using the above command,
-and then you need to clone the git repository, and launch ``pytest`` from within the 
+and then you need to clone the git repository, and launch ``pytest`` from within the
 created ``tomato`` folder:
 
 .. code::
@@ -29,9 +29,4 @@ created ``tomato`` folder:
     cd tomato
     pytest -vv
 
-The test-suite currently contains the following unit tests:
-
-- :mod:`tomato.tomato` unit tests,
-- unit tests for the :mod:`tomato.drivers.dummy` driver,
-
-Therefore, the tests should work on all platforms.
+As the test suite only uses the :mod:`tomato.drivers.example_counter` driver, the tests should work on all platforms.

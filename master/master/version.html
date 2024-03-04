@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="dummy: A dummy driver module" href="apidoc/tomato.drivers.dummy.html" />
+    <link rel="next" title="tomato.drivers.example_counter package" href="apidoc/tomato.drivers.example_counter.html" />
     <link rel="prev" title="Usage" href="usage.html" /> 
 </head>
 
@@ -55,14 +55,14 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Version history</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-v1-0"><strong>tomato</strong>-v1.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tomato-v0-2"><strong>tomato</strong>-v0.2</a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
 <ul>
@@ -95,6 +95,17 @@
              
   <section id="version-history">
 <h1>Version history<a class="headerlink" href="#version-history" title="Link to this heading"></a></h1>
+<section id="tomato-v1-0">
+<h2><strong>tomato</strong>-v1.0<a class="headerlink" href="#tomato-v1-0" title="Link to this heading"></a></h2>
+<a class="reference external image-reference" href="https://github.com/dgbowl/tomato/tree/1.0"><img alt="https://img.shields.io/static/v1?label=tomato&amp;message=v1.0&amp;color=blue&amp;logo=github" src="https://img.shields.io/static/v1?label=tomato&amp;message=v1.0&amp;color=blue&amp;logo=github" /></a>
+<a class="reference external image-reference" href="https://pypi.org/project/tomato/1.0/"><img alt="https://img.shields.io/static/v1?label=tomato&amp;message=v1.0&amp;color=blue&amp;logo=pypi" src="https://img.shields.io/static/v1?label=tomato&amp;message=v1.0&amp;color=blue&amp;logo=pypi" /></a>
+<img alt="https://img.shields.io/static/v1?label=release%20date&amp;message=2024-04-01&amp;color=red&amp;logo=pypi" src="https://img.shields.io/static/v1?label=release%20date&amp;message=2024-04-01&amp;color=red&amp;logo=pypi" />
+<p><em>Section author: Peter Kraus</em></p>
+<p>Developed at the ConCat lab at TU Berlin.</p>
+<p>The code has been restructured and the interprocess communication is now using <code class="xref py py-mod docutils literal notranslate"><span class="pre">zmq</span></code>
+instead of <code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite</span></code>. The dependency on <code class="xref py py-mod docutils literal notranslate"><span class="pre">yadg</span></code> has also been removed.</p>
+<p><em>Code author: Peter Kraus</em></p>
+</section>
 <section id="tomato-v0-2">
 <h2><strong>tomato</strong>-v0.2<a class="headerlink" href="#tomato-v0-2" title="Link to this heading"></a></h2>
 <a class="reference external image-reference" href="https://github.com/dgbowl/tomato/tree/0.2"><img alt="https://img.shields.io/static/v1?label=tomato&amp;message=v0.2&amp;color=blue&amp;logo=github" src="https://img.shields.io/static/v1?label=tomato&amp;message=v0.2&amp;color=blue&amp;logo=github" /></a>
@@ -125,7 +136,7 @@ Loris Ercole.</em></p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="apidoc/tomato.drivers.dummy.html" class="btn btn-neutral float-right" title="dummy: A dummy driver module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="apidoc/tomato.drivers.example_counter.html" class="btn btn-neutral float-right" title="tomato.drivers.example_counter package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
