@@ -14,6 +14,7 @@ from . import utils
         ("counter_5_0.2", 25, "results.1"),
         ("counter_output_prefix", 20, "data"),
         ("counter_output_path", 20, os.path.join("newfolder", "results.1")),
+        ("counter_multistep", 15, "results.1")
     ],
 )
 def test_counter_npoints(
