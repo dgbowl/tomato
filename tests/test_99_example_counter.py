@@ -109,8 +109,10 @@ def test_counter_multidev(
     print(f"{ret=}")
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    utils.wait_until_ketchup_status(1, "c", port=12345, timeout=10000)
+    utils.wait_until_ketchup_status(jobid=1, status="c", port=12345, timeout=10000)
 
+    ret = utils.job_status(1)
+    print(f"{ret=}")
     status = utils.job_status(1)["data"][1]["status"]
     assert status == "c"
     files = os.listdir(os.path.join(".", "Jobs", "1"))
