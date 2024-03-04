@@ -390,7 +390,7 @@ def reload(
                     )
                     if ret.success is False:
                         return ret
-                params = dict(name=dev.name, channels=dev.channels)
+                params = dev.dict()
                 ret = _updater(context, port, "device", params)
                 logger.critical(f"{ret=}")
             elif dev != daemon.devs[dev.name]:

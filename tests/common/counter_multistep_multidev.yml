@@ -1,0 +1,18 @@
+version: "0.2"
+sample:
+    name: counter_multistep_multidev
+method:
+  - device: "counter-1"
+    technique: "count"
+    time: 1.0
+    delay: 0.2
+  - device: "counter-1"
+    technique: "count"
+    time: 1.0
+    delay: 0.2
+  - device: "counter-2"
+    technique: "count"
+    time: 2.0
+    delay: 0.1
+tomato:
+    verbosity: "DEBUG"
