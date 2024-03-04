@@ -188,7 +188,7 @@ Each *job* stores its data and logs in its own *job* folder, which is a subfolde
 
     While "live" *job* data is available in the *job* folder in pickled form, accessing
     those files directly is not supported and may lead to race conditions and crashes.
-    If you need an up-to-date data archive, request a :ref:`snapshot <data snapshotting>`.
+    If you need an up-to-date data archive, request a :ref:`snapshot <snapshotting>`.
     If you need the current status of a *device*, probe the responsible driver process.
 
 
@@ -203,6 +203,8 @@ and includes instrumental uncertainties.
 Unless specified within the *payload*, the default location where these output files
 will be placed is the ``cwd()`` where the ``ketchup submit`` command was executed;
 the default filenames of the returned files are ``results.<jobid>.[zip,json]``.
+
+.. _snapshotting:
 
 Data snapshotting
 *****************
