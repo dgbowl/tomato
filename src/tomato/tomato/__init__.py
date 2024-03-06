@@ -413,8 +413,9 @@ def reload(
                 ret = _updater(context, port, "pipeline", params)
                 if ret.success is False:
                     return ret
-
-        req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.reload"))
+        req.send_pyobj(
+            dict(cmd="setup", settings=settings, sender=f"{__name__}.reload")
+        )
         rep = req.recv_pyobj()
 
     if rep.msg == "running":
