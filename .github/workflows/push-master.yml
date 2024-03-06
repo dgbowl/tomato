@@ -2,6 +2,8 @@ name: push-master
 on:
     push:
         branches: ['master']
+    pull_request:
+        branches: ['master']
 jobs:
     call-build:
         uses: ./.github/workflows/workflow-build.yml
