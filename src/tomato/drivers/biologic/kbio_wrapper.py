@@ -3,15 +3,20 @@ from typing import Union
 
 import logging
 
-from .kbio.kbio_api import KBIO_api
-from .kbio.kbio_types import PROG_STATE, VMP3_FAMILY, EccParams
-from .kbio.tech_types import TECH_ID
-from .kbio.kbio_tech import make_ecc_parm, make_ecc_parms, ECC_parm
-from .kbio.c_utils import c_is_64b
-
 from .tech_params import named_params, techfiles, datatypes, I_ranges, E_ranges
+try:
+    import biologic_kbio
+    from biologic_kbio.kbio_api import KBIO_api
+    from biologic_kbio.kbio_types import PROG_STATE, VMP3_FAMILY, EccParams
+    from biologic_kbio.tech_types import TECH_ID
+    from biologic_kbio.kbio_tech import make_ecc_parm, make_ecc_parms, ECC_parm
+    from biologic_kbio.c_utils import c_is_64b
+except ImportError:
+    biologic_kbio = None
 
 log = logging.getLogger(__name__)
+if biologic_kbio is None:
+    log.error("biologic_kbio could not be imported. The biologic driver will not work.")
 
 
 def get_test_magic(
