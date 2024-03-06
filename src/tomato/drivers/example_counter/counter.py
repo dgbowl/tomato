@@ -37,7 +37,7 @@ class Counter:
                     self.started_at = None
 
             cmd = None
-            if conn.poll(1e-6):
+            if conn.poll(1e-3):
                 cmd, attr, val = conn.recv()
 
             if cmd == "set":
@@ -58,3 +58,5 @@ class Counter:
             elif cmd == "data":
                 conn.send(data)
                 data = []
+            else:
+                time.sleep(1e-3)
