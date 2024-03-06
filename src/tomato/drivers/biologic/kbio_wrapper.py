@@ -206,7 +206,7 @@ def translate(technique: dict, capacity: float) -> dict:
     return tech
 
 
-def dsl_to_ecc(api, dsl: dict) -> EccParams:
+def dsl_to_ecc(api, dsl: dict):
     eccs = []
     for k, val in dsl.items():
         if k == "technique":
