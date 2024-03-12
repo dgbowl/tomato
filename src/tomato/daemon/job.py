@@ -165,7 +165,6 @@ def action_queued_jobs(daemon, matched, req):
     Function that assigns jobs if a matched pipeline contains the requested sample.
 
     The `tomato-job` process is launched from this function.
-
     """
     logger = logging.getLogger(f"{__name__}.action_queued_jobs")
     for jobid in sorted(matched.keys()):
@@ -246,6 +245,14 @@ def manager(port: int, timeout: int = 500):
 
 
 def tomato_job() -> None:
+    """
+    The function called when `tomato-job` is executed.
+
+    This function is resposible for managing all activities of a single job, including
+    contacting the daemon about job pid, spawning of sub-processes to run tasks on each
+    Component of the Pipeline, merging data at the end of the job, and reporting back
+    to the daemon once the job is successfully finished.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version",
@@ -323,9 +330,9 @@ def tomato_job() -> None:
         logger.debug("path does not exist, creating")
         os.makedirs(outpath)
 
-    logger.info("handing off to 'job_worker'")
+    logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
-    ret = job_worker(context, args.port, payload, pip, jobpath, snappath)
+    ret = job_main_loop(context, args.port, payload, pip, jobpath, snappath)
     logger.info("==============================")
 
     merge_netcdfs(jobpath, outpath / f"{prefix}.nc")
@@ -378,6 +385,14 @@ def job_process(
     driver: Driver,
     jobpath: Path,
 ):
+    """
+    Child process of `tomato-job`, responsible for tasks on one Component of a Pipeline.
+
+    For each task in tasks, starts the task, then monitors the Component status and polls
+    for data, and moves on to the next task as instructed in the payload.
+
+    Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
+    """
     sender = f"{__name__}.job_process"
     logger = logging.getLogger(sender)
     logger.debug(f"in job process of {component.role!r}")
@@ -411,7 +426,7 @@ def job_process(
                 req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
                 ret = req.recv_pyobj()
                 if ret.success:
-                    data_to_pickle(ret.data, datapath)
+                    data_to_pickle(ret.data, datapath, role=component.role)
                 t0 += device.pollrate
             req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
             ret = req.recv_pyobj()
@@ -422,10 +437,10 @@ def job_process(
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
         if ret.success:
-            data_to_pickle(ret.data, datapath)
+            data_to_pickle(ret.data, datapath, role=component.role)
 
 
-def job_worker(
+def job_main_loop(
     context: zmq.Context,
     port: int,
     payload: dict,
@@ -433,6 +448,9 @@ def job_worker(
     jobpath: Path,
     snappath: Path,
 ) -> None:
+    """
+    The main loop function of `tomato-job`, split for better readability.
+    """
     sender = f"{__name__}.job_worker"
     logger = logging.getLogger(sender)
 
