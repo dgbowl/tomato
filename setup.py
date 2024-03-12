@@ -56,9 +56,6 @@ setuptools.setup(
             "sphinxcontrib-mermaid ~= 0.9.2",
             "autodoc-pydantic==1.9.0",
         ],
-        "biologic": [
-            "biologic-kbio",
-        ],
     },
     entry_points={
         "console_scripts": [
