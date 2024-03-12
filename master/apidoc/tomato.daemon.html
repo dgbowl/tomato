@@ -70,7 +70,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.daemon package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tomato-daemon-module-of-functions-comprising-the-tomato-daemon"><strong>tomato.daemon</strong>: module of functions comprising the tomato daemon</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.daemon.setup_logging"><code class="docutils literal notranslate"><span class="pre">setup_logging()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#tomato.daemon.run_daemon"><code class="docutils literal notranslate"><span class="pre">run_daemon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.daemon.tomato_daemon"><code class="docutils literal notranslate"><span class="pre">tomato_daemon()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-tomato.daemon.cmd">Submodules</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#tomato-daemon-cmd-command-parsing-for-tomato-daemon"><strong>tomato.daemon.cmd</strong>: command parsing for tomato daemon</a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.merge_pipelines"><code class="docutils literal notranslate"><span class="pre">merge_pipelines()</span></code></a></li>
@@ -89,6 +89,8 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato-daemon-io-store-and-load-state-of-tomato-daemon"><strong>tomato.daemon.io</strong>: store and load state of tomato daemon</a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.io.store"><code class="docutils literal notranslate"><span class="pre">store()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.io.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.io.merge_netcdfs"><code class="docutils literal notranslate"><span class="pre">merge_netcdfs()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.io.data_to_pickle"><code class="docutils literal notranslate"><span class="pre">data_to_pickle()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato-daemon-job-the-job-manager-of-tomato-daemon"><strong>tomato.daemon.job</strong>: the job manager of tomato daemon</a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.find_matching_pipelines"><code class="docutils literal notranslate"><span class="pre">find_matching_pipelines()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.kill_tomato_job"><code class="docutils literal notranslate"><span class="pre">kill_tomato_job()</span></code></a></li>
@@ -96,6 +98,9 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.check_queued_jobs"><code class="docutils literal notranslate"><span class="pre">check_queued_jobs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.action_queued_jobs"><code class="docutils literal notranslate"><span class="pre">action_queued_jobs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_process"><code class="docutils literal notranslate"><span class="pre">job_process()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_worker"><code class="docutils literal notranslate"><span class="pre">job_worker()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -149,8 +154,8 @@ the passed daemon state.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.run_daemon">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.</span></span><span class="sig-name descname"><span class="pre">run_daemon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.run_daemon" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.daemon.tomato_daemon">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.</span></span><span class="sig-name descname"><span class="pre">tomato_daemon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.tomato_daemon" title="Link to this definition"></a></dt>
 <dd><p>The function called when <cite>tomato-daemon</cite> is executed.</p>
 <p>Manages the state of the tomato daemon, including recovery of state via
 <a class="reference internal" href="#module-tomato.daemon.io" title="tomato.daemon.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a>, processing state updates via <a class="reference internal" href="#module-tomato.daemon.cmd" title="tomato.daemon.cmd"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cmd</span></code></a>,
@@ -306,6 +311,16 @@ quit as necessary.</p>
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.load" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.io.merge_netcdfs">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">merge_netcdfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.merge_netcdfs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.io.data_to_pickle">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">data_to_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.data_to_pickle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <section id="tomato-daemon-job-the-job-manager-of-tomato-daemon">
 <span id="module-tomato.daemon.job"></span><h3><strong>tomato.daemon.job</strong>: the job manager of tomato daemon<a class="headerlink" href="#tomato-daemon-job-the-job-manager-of-tomato-daemon" title="Link to this heading"></a></h3>
 <p><em>Code author: Peter Kraus</em></p>
@@ -376,6 +391,31 @@ Pipelines of both are reset.</p>
 <p>This manager ensures the job queue is iterated over and pipelines are managed/reset.
 Note that we poll the <cite>tomato-daemon</cite> for status only once per iteration of the main
 loop.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.tomato_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">tomato_job</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.tomato_job" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.job_process">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">driver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_process" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.job_worker">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snappath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_worker" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

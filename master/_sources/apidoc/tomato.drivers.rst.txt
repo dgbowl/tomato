@@ -12,15 +12,4 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   tomato.drivers.biologic
-   tomato.drivers.dummy
    tomato.drivers.example_counter
-
-Submodules
-----------
-
-
-.. automodule:: tomato.drivers.jobfuncs
-   :members:
-   :undoc-members:
-   :show-inheritance:

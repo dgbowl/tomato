@@ -192,7 +192,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-module-of-functions-comprising-the-tomato-daemon"><strong>tomato.daemon</strong>: module of functions comprising the tomato daemon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.setup_logging"><code class="docutils literal notranslate"><span class="pre">setup_logging()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.run_daemon"><code class="docutils literal notranslate"><span class="pre">run_daemon()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.tomato_daemon"><code class="docutils literal notranslate"><span class="pre">tomato_daemon()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.daemon.html#module-tomato.daemon.cmd">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-cmd-command-parsing-for-tomato-daemon"><strong>tomato.daemon.cmd</strong>: command parsing for tomato daemon</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.merge_pipelines"><code class="docutils literal notranslate"><span class="pre">merge_pipelines()</span></code></a></li>
@@ -211,6 +211,8 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-io-store-and-load-state-of-tomato-daemon"><strong>tomato.daemon.io</strong>: store and load state of tomato daemon</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.store"><code class="docutils literal notranslate"><span class="pre">store()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.merge_netcdfs"><code class="docutils literal notranslate"><span class="pre">merge_netcdfs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.data_to_pickle"><code class="docutils literal notranslate"><span class="pre">data_to_pickle()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-job-the-job-manager-of-tomato-daemon"><strong>tomato.daemon.job</strong>: the job manager of tomato daemon</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.find_matching_pipelines"><code class="docutils literal notranslate"><span class="pre">find_matching_pipelines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.kill_tomato_job"><code class="docutils literal notranslate"><span class="pre">kill_tomato_job()</span></code></a></li>
@@ -218,42 +220,21 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.check_queued_jobs"><code class="docutils literal notranslate"><span class="pre">check_queued_jobs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.action_queued_jobs"><code class="docutils literal notranslate"><span class="pre">action_queued_jobs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.job_process"><code class="docutils literal notranslate"><span class="pre">job_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.job_worker"><code class="docutils literal notranslate"><span class="pre">job_worker()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tomato.drivers.html">tomato.drivers package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.biologic.html"><strong>biologic</strong>: Driver for BioLogic potentiostats</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.html#driver-configuration">Driver Configuration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.html#supported-method-parameters">Supported <em>method</em> parameters:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.biologic.html#module-tomato.drivers.biologic.kbio_wrapper">Submodules</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.dummy.html"><strong>dummy</strong>: A dummy driver module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.dummy.html#supported-method-parameters">Supported <em>method</em> parameters:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.dummy.html#tomato.drivers.dummy.get_status"><code class="docutils literal notranslate"><span class="pre">get_status()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.dummy.html#tomato.drivers.dummy.get_data"><code class="docutils literal notranslate"><span class="pre">get_data()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.dummy.html#tomato.drivers.dummy.start_job"><code class="docutils literal notranslate"><span class="pre">start_job()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.dummy.html#tomato.drivers.dummy.stop_job"><code class="docutils literal notranslate"><span class="pre">stop_job()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="tomato.drivers.dummy.html#module-tomato.drivers.dummy.main">Submodules</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tomato.drivers.example_counter.html#tomato.drivers.example_counter.in_devmap"><code class="docutils literal notranslate"><span class="pre">in_devmap()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver"><code class="docutils literal notranslate"><span class="pre">Driver</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="tomato.drivers.example_counter.html#module-tomato.drivers.example_counter.counter">Submodules</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.drivers.html#module-tomato.drivers.jobfuncs">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.merge_netcdfs"><code class="docutils literal notranslate"><span class="pre">merge_netcdfs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.data_to_pickle"><code class="docutils literal notranslate"><span class="pre">data_to_pickle()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.job_process"><code class="docutils literal notranslate"><span class="pre">job_process()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.drivers.html#tomato.drivers.jobfuncs.job_worker"><code class="docutils literal notranslate"><span class="pre">job_worker()</span></code></a></li>
 </ul>
 </li>
 </ul>
