@@ -5,8 +5,10 @@
     Peter Kraus
 
 """
+
 import pickle
 import logging
+import xarray as xr
 from pathlib import Path
 from tomato.models import Daemon
 
@@ -35,3 +37,27 @@ def load(daemon: Daemon):
     daemon.drvs = loaded.drvs
     daemon.nextjob = loaded.nextjob
     daemon.status = "running"
+
+
+def merge_netcdfs(jobpath: Path, outpath: Path):
+    logger = logging.getLogger(f"{__name__}.merge_netcdf")
+    logger.debug("opening datasets")
+    datasets = []
+    for fn in jobpath.glob("*.pkl"):
+        with pickle.load(fn.open("rb")) as ds:
+            datasets.append(ds)
+    logger.debug(f"merging {datasets=}")
+    if len(datasets) > 0:
+        ds = xr.concat(datasets, dim="uts")
+        ds.to_netcdf(outpath, engine="h5netcdf")
+
+
+def data_to_pickle(ds: xr.Dataset, path: Path):
+    logger = logging.getLogger(f"{__name__}.data_to_pickle")
+    logger.debug("checking existing")
+    if path.exists():
+        with pickle.load(path.open("rb")) as oldds:
+            ds = xr.concat([oldds, ds], dim="uts")
+    logger.debug("dumping pickle")
+    with path.open("wb") as out:
+        pickle.dump(ds, out, protocol=5)

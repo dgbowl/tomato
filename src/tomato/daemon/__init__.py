@@ -38,7 +38,7 @@ def setup_logging(daemon: Daemon):
     )
 
 
-def run_daemon():
+def tomato_daemon():
     """
     The function called when `tomato-daemon` is executed.
 

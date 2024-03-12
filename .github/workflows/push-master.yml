@@ -7,19 +7,19 @@ jobs:
         uses: ./.github/workflows/workflow-build.yml
         with:
             pyver: '3.9'
-            os: 'windows-latest'
+            os: 'ubuntu-latest'
     call-test:
         needs: [call-build]
         uses: ./.github/workflows/workflow-test.yml
         with:
             pyver: '3.9'
-            os: 'windows-latest'
+            os: 'ubuntu-latest'
     call-pages:
         needs: [call-build]
         uses: ./.github/workflows/workflow-pages.yml
         with:
             pyver: '3.9'
-            os: windows-latest
+            os: ubuntu-latest
     deploy:
         needs: [call-pages]
         runs-on: ubuntu-latest
@@ -30,7 +30,7 @@ jobs:
                 python-version: '3.9'
           - uses: actions/download-artifact@v4
             with:
-                name: public-windows-latest-3.9
+                name: public-ubuntu-latest-3.9
                 path: public/master
           - uses: peaceiris/actions-gh-pages@v3
             with:
