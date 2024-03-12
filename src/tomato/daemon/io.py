@@ -40,20 +40,31 @@ def load(daemon: Daemon):
 
 
 def merge_netcdfs(jobpath: Path, outpath: Path):
+    """
+    Merges the individual pickled :class:`xr.Datasets` of each Component found in
+    `jobpath` into a single NetCDF file, with each individual :class:`xr.Dataset` stored
+    in a separate NetCDF group named using the Component `role`.
+    """
     logger = logging.getLogger(f"{__name__}.merge_netcdf")
     logger.debug("opening datasets")
     datasets = []
     for fn in jobpath.glob("*.pkl"):
         with pickle.load(fn.open("rb")) as ds:
             datasets.append(ds)
-    logger.debug(f"merging {datasets=}")
-    if len(datasets) > 0:
-        ds = xr.concat(datasets, dim="uts")
-        ds.to_netcdf(outpath, engine="h5netcdf")
+    logger.debug(f"saving {len(datasets)} as groups")
+    for di, ds in enumerate(datasets):
+        mode = "w" if di == 0 else "a"
+        ds.to_netcdf(outpath, mode=mode, engine="h5netcdf", group=ds.attrs["role"])
 
 
-def data_to_pickle(ds: xr.Dataset, path: Path):
+def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
+    """
+    Dump the returned data into a pickle.
+
+    Concatenates with existing data from the same Component.
+    """
     logger = logging.getLogger(f"{__name__}.data_to_pickle")
+    ds.attrs["role"] = role
     logger.debug("checking existing")
     if path.exists():
         with pickle.load(path.open("rb")) as oldds:

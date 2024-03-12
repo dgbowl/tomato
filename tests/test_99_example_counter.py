@@ -36,7 +36,7 @@ def test_counter_npoints(
     assert "job-1.log" in files
     if prefix is not None:
         assert os.path.exists(f"{prefix}.nc")
-        ds = xr.load_dataset(f"{prefix}.nc")
+        ds = xr.load_dataset(f"{prefix}.nc", group="counter")
         print(f"{ds=}")
         assert ds["uts"].size == npoints
 
@@ -91,8 +91,8 @@ def test_counter_snapshot(
 @pytest.mark.parametrize(
     "casename, npoints",
     [
-        ("counter_multidev", 15),
-        ("counter_multistep_multidev", 30),
+        ("counter_multidev", {"counter-1": 10, "counter-2": 5}),
+        ("counter_multistep_multidev", {"counter-1": 10, "counter-2": 20}),
     ],
 )
 def test_counter_multidev(
@@ -118,6 +118,7 @@ def test_counter_multidev(
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
-    ds = xr.load_dataset("results.1.nc")
-    print(f"{ds=}")
-    assert ds["uts"].size == npoints
+    for group, points in npoints.items():
+        ds = xr.load_dataset("results.1.nc", group=group)
+        print(f"{ds=}")
+        assert ds["uts"].size == points
