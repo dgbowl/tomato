@@ -100,7 +100,7 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_process"><code class="docutils literal notranslate"><span class="pre">job_process()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_worker"><code class="docutils literal notranslate"><span class="pre">job_worker()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_main_loop"><code class="docutils literal notranslate"><span class="pre">job_main_loop()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -314,12 +314,17 @@ quit as necessary.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.io.merge_netcdfs">
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">merge_netcdfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.merge_netcdfs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Merges the individual pickled <code class="xref py py-class docutils literal notranslate"><span class="pre">xr.Datasets</span></code> of each Component found in
+<cite>jobpath</cite> into a single NetCDF file, with each individual <code class="xref py py-class docutils literal notranslate"><span class="pre">xr.Dataset</span></code> stored
+in a separate NetCDF group named using the Component <cite>role</cite>.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.io.data_to_pickle">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">data_to_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.data_to_pickle" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">data_to_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.data_to_pickle" title="Link to this definition"></a></dt>
+<dd><p>Dump the returned data into a pickle.</p>
+<p>Concatenates with existing data from the same Component.</p>
+</dd></dl>
 
 <section id="tomato-daemon-job-the-job-manager-of-tomato-daemon">
 <span id="module-tomato.daemon.job"></span><h3><strong>tomato.daemon.job</strong>: the job manager of tomato daemon<a class="headerlink" href="#tomato-daemon-job-the-job-manager-of-tomato-daemon" title="Link to this heading"></a></h3>
@@ -396,7 +401,12 @@ loop.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.tomato_job">
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">tomato_job</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.tomato_job" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>The function called when <cite>tomato-job</cite> is executed.</p>
+<p>This function is resposible for managing all activities of a single job, including
+contacting the daemon about job pid, spawning of sub-processes to run tasks on each
+Component of the Pipeline, merging data at the end of the job, and reporting back
+to the daemon once the job is successfully finished.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
@@ -406,12 +416,17 @@ loop.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.job_process">
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">driver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_process" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Child process of <cite>tomato-job</cite>, responsible for tasks on one Component of a Pipeline.</p>
+<p>For each task in tasks, starts the task, then monitors the Component status and polls
+for data, and moves on to the next task as instructed in the payload.</p>
+<p>Stores the data for that Component as a <cite>pickle</cite> of a <code class="xref py py-class docutils literal notranslate"><span class="pre">xr.Dataset</span></code>.</p>
+</dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.job.job_worker">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snappath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_worker" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dt class="sig sig-object py" id="tomato.daemon.job.job_main_loop">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_main_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snappath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_main_loop" title="Link to this definition"></a></dt>
+<dd><p>The main loop function of <cite>tomato-job</cite>, split for better readability.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
