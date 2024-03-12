@@ -23,7 +23,7 @@ import yaml
 import zmq
 from dgbowl_schemas.tomato import to_payload
 
-from tomato.drivers.jobfuncs import merge_netcdfs
+from tomato.daemon.io import merge_netcdfs
 from tomato.models import Reply, Daemon
 
 log = logging.getLogger(__name__)
