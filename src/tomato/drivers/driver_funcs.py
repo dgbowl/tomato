@@ -281,7 +281,7 @@ def driver_worker(
         if p.exitcode == 0:
             log.info(f"'data_poller' with pid {p.pid} closed successfully")
         else:
-            log.critical(f"'data_poller' with pid {p.pid} was terminated")
+            log.critical(f"'data_poller' with pid {p.pid} was terminated with exit code {p.exitcode}")
             ret = 1
 
     log.info("-----------------------")
