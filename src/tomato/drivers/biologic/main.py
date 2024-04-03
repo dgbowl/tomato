@@ -233,7 +233,6 @@ def stop_job(
             id_, device_info = api.Connect(address)
             logger.info(f"stopping run on '{address}:{channel}'")
             api.StopChannel(id_, channel)
-            logger.info(f"run stopped at '{dt}'")
             api.Disconnect(id_)
         except Exception as e:
             logger.critical(f"{e=}")
@@ -242,4 +241,5 @@ def stop_job(
     else:
         pass
     dt = datetime.now(timezone.utc)
+    logger.info(f"run stopped at '{dt}'")
     return dt.timestamp()
