@@ -274,6 +274,37 @@ def cancel(args: Namespace) -> None:
                 log.info(f"setting job {jobid} to status 'rd'")
                 dbhandler.job_set_status(queue["path"], "rd", jobid, type=queue["type"])
 
+def cancel_all(args: Namespace) -> None:
+    """
+    Cancel all running jobs. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] cancel_all
+
+    Cancels all running jobs. Optional arguments include the verbose/quiet switches
+    (``-v/-q``) and the testing switch (``-t``).
+
+    Examples
+    --------
+
+    >>> # Cancel all running jobs:
+    >>> ketchup cancel_all
+
+    """
+    dirs = setlib.get_dirs(args.test)
+    settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
+    queue = settings["queue"]
+    jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
+    cancelled_something=False
+    for jobid, _, _, status in jobs:
+        if status in {"r","qw","q"}:
+            cancelled_something=True
+            print(f"Cancelling job {jobid} with status '{status}'")
+            args.jobid = jobid
+            cancel(args)
+    if not cancelled_something:
+        print("Did not find any jobs to cancel")
 
 def load(args: Namespace) -> None:
     """
