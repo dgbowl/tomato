@@ -139,34 +139,44 @@ def data_poller(
 ) -> None:
     log_worker_config(lq, loglevel)
     log = logging.getLogger()
-    pollrate = kwargs.pop("pollrate", 10)
+    pollrate = kwargs.get("pollrate", 10)
     log.debug(f"in 'data_poller', {pollrate=}")
-    cont = True
+    _, _, metadata = driver_api(driver, "get_status", jq, log, address, channel, **kwargs)
+    mem_size = metadata["mem_size"]
+    done = False
     previous = None
-    while cont:
-        ts, done, _ = driver_api(
-            driver, "get_status", jq, log, address, channel, **kwargs
-        )
-        ts, nrows, data = driver_api(
-            driver, "get_data", jq, log, address, channel, **kwargs
-        )
-        data["previous"] = previous
-        previous = data["current"]
-        while nrows > 0:
-            isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
-            isots = isots.replace(":", "")
-            fn = os.path.join(root, f"{device}_{isots}_data.json")
-            log.debug(f"found {nrows} data rows, writing into '{fn}'")
-            with open(fn, "w") as of:
-                json.dump(data, of)
+    while not done:
+        while True:
             ts, nrows, data = driver_api(
                 driver, "get_data", jq, log, address, channel, **kwargs
             )
             data["previous"] = previous
             previous = data["current"]
-        if done:
-            cont = False
-        else:
+            mem_filled=data['current']['mem_filled']
+            f_mem_filled=mem_filled/mem_size
+            if f_mem_filled > 0.995:
+                log.critical(f"{device} {address}:{channel} memory is full, data is being lost")
+            elif f_mem_filled > 0.8:
+                log.warning(f"{device} {address}:{channel} memory is {f_mem_filled*100:.1f}% full")
+            
+            if nrows > 0:
+                isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+                isots = isots.replace(":", "")
+                fn = os.path.join(root, f"{device}_{isots}_data.json")
+                log.debug(f"found {nrows} data rows, writing into '{fn}'")
+                with open(fn, "w") as of:
+                    json.dump(data, of)
+            else:
+                status = data['current']['status']
+                if status in ['RUN', 'STOP', 'PAUSE']:
+                    done = "STOP" == status
+                    if done:
+                        log.info(f"{device} {address}:{channel} status is 'STOP', stopping data polling")
+                else:
+                    log.critical(f"get_data status not understood: '{status}', stopping data polling")
+                    done = True
+                break
+        if not done:
             time.sleep(pollrate)
     log.info(f"rejoining main thread")
     return

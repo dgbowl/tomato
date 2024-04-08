@@ -50,25 +50,29 @@ def get_status(
     for attempt in range(N_ATTEMPTS):
         try:
             time0 = time.time()
-            logger.info(f"connecting to '{address}:{channel}'")
+            logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath,address) as api:
                 metadata["dll_version"] = api.GetLibVersion()
                 id_, device_info = api.id_, api.device_info
                 logger.info(f"getting status of '{address}:{channel}'")
                 channel_info = api.GetChannelInfo(id_, channel)
-            logger.info(f"disconnected from '{address}:{channel}'")
+            logger.debug(f"disconnected from '{address}:{channel}'")
             elapsed_time = time.time() - time0
             if elapsed_time > 0.5:
-                logger.warning(f"status retrieved in {elapsed_time:.3f} s")
-            break
+                logger.debug(f"status retrieved in {elapsed_time:.3f} s")
+            if getattr(channel_info, "FirmwareVersion")==0:
+                logger.debug(f"Attempt {attempt+1} failed: Firmware version read as 0")
+            else:
+                break
         except Exception as e:
-            logger.warning(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug(f"Attempt {attempt+1} failed: {e=}")
             if attempt == N_ATTEMPTS-1:
-                logger.critical(f"Failed to get status after {N_ATTEMPTS} attempts")
+                logger.critical(f"Failed to get status after {N_ATTEMPTS} attempts, last error: {e}")
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
     metadata["channel_board"] = channel_info.board
+    metadata["mem_size"] = getattr(channel_info, "MemSize")
     metadata["channel_amp"] = channel_info.amplifier if channel_info.NbAmps else None
     metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_IRange]
     logger.debug("Logging all channel info:")
@@ -119,22 +123,22 @@ def get_data(
     logger.debug(f"starting get_data for '{address}:{channel}'")
     for attempt in range(N_ATTEMPTS):
         try:
-            logger.info(f"connecting to '{address}:{channel}'")
+            logger.debug(f"connecting to '{address}:{channel}'")
             time0 = time.time()
             with KBIO_api_wrapped(dllpath,address) as api:
                 id_, device_info = api.id_, api.device_info
                 logger.info(f"getting data from '{address}:{channel}'")
                 data = api.GetData(id_, channel)
                 data = parse_raw_data(api, data, device_info.model)
-            logger.info(f"disconnected from '{address}:{channel}'")
+            logger.debug(f"disconnected from '{address}:{channel}'")
             elapsed_time = time.time() - time0
             if elapsed_time > 0.5:
-                logger.warning(f"data retrieved in {elapsed_time:.3f} s")
+                logger.debug(f"data retrieved in {elapsed_time:.3f} s")
             break
         except Exception as e:
-            logger.warning(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug(f"Attempt {attempt+1} failed: {e=}")
             if attempt == N_ATTEMPTS-1:
-                logger.critical(f"Failed to get data after {N_ATTEMPTS} attempts")
+                logger.critical(f"Failed to get data after {N_ATTEMPTS} attempts, last error: {e}")
     dt = datetime.now(timezone.utc)
     return dt.timestamp(), data["technique"]["data_rows"], data
 
@@ -187,7 +191,7 @@ def start_job(
     for attempt in range(N_ATTEMPTS):
         try:
             time0 = time.time()
-            logger.info(f"connecting to '{address}:{channel}'")
+            logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath,address) as api:
                 id_, device_info = api.id_, api.device_info
                 logger.debug("translating payload to ECC")
@@ -210,13 +214,13 @@ def start_job(
                 api.StartChannel(id_, channel)
                 elapsed_time = time.time() - time0
                 if elapsed_time > 0.5:
-                    logger.warning(f"run started in {elapsed_time:.3f} s")
-            logger.info(f"disconnected from '{address}:{channel}'")
+                    logger.debug(f"run started in {elapsed_time:.3f} s")
+            logger.debug(f"disconnected from '{address}:{channel}'")
             break
         except Exception as e:
-            logger.warning(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug(f"Attempt {attempt+1} failed: {e=}")
             if attempt == N_ATTEMPTS-1:
-                logger.critical(f"Failed to start job after {N_ATTEMPTS} attempts")
+                logger.critical(f"Failed to start job after {N_ATTEMPTS} attempts, last error: {e}")
     dt = datetime.now(timezone.utc)
     logger.info(f"run started at '{dt}'")
     return dt.timestamp()
@@ -257,21 +261,21 @@ def stop_job(
     logger.debug(f"starting stop_job for '{address}:{channel}'")
     for attempt in range(N_ATTEMPTS):
         try:
-            logger.info(f"connecting to '{address}:{channel}'")
+            logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath,address) as api:
                 time0 = time.time()
                 id_, device_info = api.id_, api.device_info
                 logger.info(f"stopping run on '{address}:{channel}'")
                 api.StopChannel(id_, channel)
-            logger.info(f"disconnected from '{address}:{channel}'")
+            logger.debug(f"disconnected from '{address}:{channel}'")
             elapsed_time = time.time() - time0
             if elapsed_time > 0.5:
-                logger.warning(f"run stopped in {elapsed_time:.3f} s")
+                logger.debug(f"run stopped in {elapsed_time:.3f} s")
             break
         except Exception as e:
-            logger.warning(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug(f"Attempt {attempt+1} failed: {e=}")
             if attempt == N_ATTEMPTS-1:
-                logger.critical(f"Failed to stop job after {N_ATTEMPTS} attempts")
+                logger.critical(f"Failed to stop job after {N_ATTEMPTS} attempts, last error: {e}")
 
     if jobqueue:
         jobqueue.close()

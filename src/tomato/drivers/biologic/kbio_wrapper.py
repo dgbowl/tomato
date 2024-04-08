@@ -265,6 +265,7 @@ def parse_raw_data(api, data, devname):
         },
         "current": {
             "status": status,
+            "mem_filled": current_values.MemFilled,
             "elapsed_time": current_values.ElapsedTime,
             "I_range": {v: k for k, v in I_ranges.items()}[current_values.IRange],
             "E_range": {
