@@ -121,26 +121,26 @@ def get_data(
 
     """
     logger.debug(f"starting get_data for '{address}:{channel}'")
+    time0 = time.time()
     for attempt in range(N_ATTEMPTS):
         try:
             logger.debug(f"connecting to '{address}:{channel}'")
-            time0 = time.time()
             with KBIO_api_wrapped(dllpath,address) as api:
                 id_, device_info = api.id_, api.device_info
-                logger.info(f"getting data from '{address}:{channel}'")
+                logger.debug(f"getting data from '{address}:{channel}'")
                 data = api.GetData(id_, channel)
                 data = parse_raw_data(api, data, device_info.model)
             logger.debug(f"disconnected from '{address}:{channel}'")
-            elapsed_time = time.time() - time0
-            if elapsed_time > 0.5:
-                logger.debug(f"data retrieved in {elapsed_time:.3f} s")
             break
         except Exception as e:
             logger.debug(f"Attempt {attempt+1} failed: {e=}")
             if attempt == N_ATTEMPTS-1:
                 logger.critical(f"Failed to get data after {N_ATTEMPTS} attempts, last error: {e}")
     dt = datetime.now(timezone.utc)
-    return dt.timestamp(), data["technique"]["data_rows"], data
+    nrows = data["technique"]["data_rows"]
+    elapsed_time = time.time() - time0
+    logger.info(f"read {nrows} rows from '{address}:{channel} in {attempt+1} attempts in {elapsed_time:.3f} s")
+    return dt.timestamp(), nrows, data
 
 
 def start_job(
