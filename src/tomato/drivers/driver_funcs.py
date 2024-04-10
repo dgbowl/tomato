@@ -139,6 +139,8 @@ def data_poller(
 ) -> None:
     log_worker_config(lq, loglevel)
     log = logging.getLogger()
+    N_STOP_CONFIRM = 100
+    stops_confirmed = 0
     pollrate = kwargs.get("pollrate", 10)
     log.debug(f"in 'data_poller', {pollrate=}")
     _, _, metadata = driver_api(driver, "get_status", jq, log, address, channel, **kwargs)
@@ -168,15 +170,19 @@ def data_poller(
                     json.dump(data, of)
             else:
                 status = data['current']['status']
-                if status in ['RUN', 'STOP', 'PAUSE']:
-                    done = "STOP" == status
-                    if done:
-                        log.info(f"{device} {address}:{channel} status is 'STOP', stopping data polling")
+                if status == "STOP":
+                    stops_confirmed += 1
+                    log.debug(f"{address}:{channel} has given {stops_confirmed} 'STOP' statuses in a row")
+                elif status in ['RUN', 'PAUSE']:
+                    stops_confirmed = 0
                 else:
-                    log.critical(f"get_data status not understood: '{status}', stopping data polling")
-                    done = True
+                    stops_confirmed += 1
+                    log.critical(f"get_data status not understood: '{status}', counting as 'STOP' status {stops_confirmed}")
                 break
-        if not done:
+        if stops_confirmed >= N_STOP_CONFIRM:
+            done = True
+            log.info(f"device '{device}' has stopped polling after {N_STOP_CONFIRM} consecutive 'STOP' statuses")
+        else:
             time.sleep(pollrate)
     log.info(f"rejoining main thread")
     return
