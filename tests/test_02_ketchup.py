@@ -1,6 +1,7 @@
 import os
 import pytest
 import zmq
+import time
 
 from tomato import ketchup, tomato
 from .utils import wait_until_tomato_running, wait_until_ketchup_status
@@ -127,7 +128,7 @@ def test_ketchup_status_complete(pl, datadir, start_tomato_daemon, stop_tomato_d
 @pytest.mark.parametrize(
     "pl",
     [
-        "counter_15_0.1",
+        "counter_60_0.1",
     ],
 )
 def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -136,6 +137,7 @@ def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid=pl)
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
+    time.sleep(5)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
@@ -153,7 +155,7 @@ def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
 @pytest.mark.parametrize(
     "pl",
     [
-        "counter_15_0.1",
+        "counter_60_0.1",
     ],
 )
 def test_ketchup_snapshot(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -162,6 +164,7 @@ def test_ketchup_snapshot(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid=pl)
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
+    time.sleep(5)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.snapshot(jobids=[1], status=status)
     print(f"{ret=}")

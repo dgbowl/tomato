@@ -22,7 +22,7 @@ from importlib import metadata
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import currentThread
-from multiprocessing import Process, Event
+from multiprocessing import Process
 
 import zmq
 import psutil
@@ -286,11 +286,11 @@ def tomato_job() -> None:
     jobid = jsdata["job"]["id"]
     jobpath = Path(jsdata["job"]["path"]).resolve()
 
-    logfile = jobpath / f"job-{jobid}.log"
+    logpath = jobpath / f"job-{jobid}.log"
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
-        handlers=[logging.FileHandler(logfile, mode="a")],
+        handlers=[logging.FileHandler(logpath, mode="a")],
     )
     logger = logging.getLogger(__name__)
 
@@ -332,7 +332,7 @@ def tomato_job() -> None:
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
-    ret = job_main_loop(context, args.port, payload, pip, jobpath, snappath)
+    ret = job_main_loop(context, args.port, payload, pip, jobpath, snappath, logpath)
     logger.info("==============================")
 
     merge_netcdfs(jobpath, outpath / f"{prefix}.nc")
@@ -384,6 +384,7 @@ def job_process(
     device: Device,
     driver: Driver,
     jobpath: Path,
+    logpath: Path,
 ):
     """
     Child process of `tomato-job`, responsible for tasks on one Component of a Pipeline.
@@ -394,6 +395,11 @@ def job_process(
     Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
     """
     sender = f"{__name__}.job_process"
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
+        handlers=[logging.FileHandler(logpath, mode="a")],
+    )
     logger = logging.getLogger(sender)
     logger.debug(f"in job process of {component.role!r}")
 
@@ -433,7 +439,8 @@ def job_process(
             logger.debug(f"{ret=}")
             if ret.success and ret.msg == "ready":
                 break
-            time.sleep(device.pollrate / 5)
+            time.sleep(device.pollrate - (tN - t0))
+            logger.debug("tock")
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
         if ret.success:
@@ -447,12 +454,14 @@ def job_main_loop(
     pipname: str,
     jobpath: Path,
     snappath: Path,
+    logpath: Path,
 ) -> None:
     """
     The main loop function of `tomato-job`, split for better readability.
     """
-    sender = f"{__name__}.job_worker"
+    sender = f"{__name__}.job_main_loop"
     logger = logging.getLogger(sender)
+    logger.debug("process started")
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -491,7 +500,7 @@ def job_main_loop(
         logger.debug(f"{driver=}")
         processes[role] = Process(
             target=job_process,
-            args=(tasks, component, device, driver, jobpath),
+            args=(tasks, component, device, driver, jobpath, logpath),
             name="job-process",
         )
         processes[role].start()
@@ -500,6 +509,7 @@ def job_main_loop(
     snapshot = payload["tomato"].get("snapshot", None)
     t0 = time.perf_counter()
     while True:
+        logger.debug("tick")
         tN = time.perf_counter()
         if snapshot is not None and tN - t0 > snapshot["frequency"]:
             logger.debug("creating snapshot")
