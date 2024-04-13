@@ -124,7 +124,6 @@ def test_ketchup_status_complete(pl, datadir, start_tomato_daemon, stop_tomato_d
     assert os.path.exists("results.1.nc")
 
 
-@pytest.mark.xfail(strict=False)
 @pytest.mark.parametrize(
     "pl",
     [
