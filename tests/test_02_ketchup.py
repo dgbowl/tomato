@@ -141,6 +141,7 @@ def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     assert wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
 
+    assert wait_until_pickle(jobid=1, timeout=2000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
