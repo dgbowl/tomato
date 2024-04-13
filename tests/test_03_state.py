@@ -79,7 +79,7 @@ def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert ret.data.nextjob == 2
     assert ret.data.jobs[1].status == "r"
 
-    wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=15000)
+    assert wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=25000)
     ret = tomato.status(**kwargs, with_data=True)
     print(f"{ret=}")
     assert ret.success
