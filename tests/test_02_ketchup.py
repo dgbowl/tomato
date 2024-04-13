@@ -3,7 +3,11 @@ import pytest
 import zmq
 
 from tomato import ketchup, tomato
-from .utils import wait_until_tomato_running, wait_until_ketchup_status
+from .utils import (
+    wait_until_tomato_running,
+    wait_until_ketchup_status,
+    wait_until_pickle,
+)
 
 PORT = 12345
 CTXT = zmq.Context()
@@ -164,6 +168,7 @@ def test_ketchup_snapshot(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     assert wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
 
+    assert wait_until_pickle(jobid=1, timeout=2000)
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.snapshot(jobids=[1], status=status)
     print(f"{ret=}")

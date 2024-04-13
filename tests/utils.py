@@ -2,6 +2,7 @@ import subprocess
 import time
 import yaml
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -70,5 +71,16 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
         data = yaml.safe_load(ret.stdout)["data"]
         if data[jobid]["status"] == status:
             return True
+        time.sleep(0.5)
+    return False
+
+
+def wait_until_pickle(jobid: int, timeout: int):
+    t0 = time.perf_counter()
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        files = os.listdir(os.path.join(os.getcwd(), "Jobs", f"{jobid}"))
+        for file in files:
+            if file.endswith(".pkl"):
+                return True
         time.sleep(0.5)
     return False
