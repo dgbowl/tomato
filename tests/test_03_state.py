@@ -3,7 +3,6 @@ from pathlib import Path
 import zmq
 import time
 import psutil
-import pytest
 
 from tomato import ketchup, tomato
 from .utils import (
@@ -51,7 +50,6 @@ def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon
     assert "jobs are running" in ret.msg
 
 
-@pytest.mark.xfail()
 def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     os.chdir(datadir)
@@ -90,7 +88,6 @@ def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert ret.data.jobs[1].status == "c"
 
 
-@pytest.mark.xfail()
 def test_recover_waiting_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     os.chdir(datadir)
@@ -123,7 +120,6 @@ def test_recover_waiting_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert ret.data.pips["pip-counter"].sampleid == "counter_5_0.2"
 
 
-@pytest.mark.xfail()
 def test_recover_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     os.chdir(datadir)
