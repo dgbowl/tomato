@@ -152,6 +152,9 @@ def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     status = tomato.status(**kwargs, with_data=True)
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
+    print(f"{os.listdir()=}")
+    print(f"{os.listdir('Jobs')=}")
+    print(f"{os.listdir(os.path.join('Jobs', '1'))=}")
     assert ret.data[1].status == "cd"
     assert os.path.exists("results.1.nc")
 
