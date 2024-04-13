@@ -22,7 +22,7 @@ from importlib import metadata
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import currentThread
-from multiprocessing import Process
+from multiprocessing import Process, Event
 
 import zmq
 import psutil
@@ -433,7 +433,7 @@ def job_process(
             logger.debug(f"{ret=}")
             if ret.success and ret.msg == "ready":
                 break
-            time.sleep(device.pollrate / 10)
+            time.sleep(device.pollrate / 5)
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
         if ret.success:
@@ -509,7 +509,8 @@ def job_main_loop(
         if all(joined):
             break
         else:
-            time.sleep(1)
+            # We'd like to execute this loop exactly once every second
+            time.sleep(1.0 - tN % 1)
     logger.debug(f"{[proc.exitcode for proc in processes.values()]}")
     for proc in processes.values():
         if proc.exitcode != 0:
