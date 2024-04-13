@@ -265,7 +265,6 @@ def manager(port: int, timeout: int = 1000):
         logger.debug("tick")
         time.sleep(1 if action_counter > 0 else 0.1)
 
-
     logger.info("instructed to quit")
     req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
     daemon = req.recv_pyobj().data
