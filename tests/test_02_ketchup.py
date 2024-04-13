@@ -151,7 +151,6 @@ def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     assert os.path.exists("results.1.nc")
 
 
-@pytest.mark.xfail(strict=False)
 @pytest.mark.parametrize(
     "pl",
     [
