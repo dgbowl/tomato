@@ -528,7 +528,3 @@ def job_main_loop(
         else:
             # We'd like to execute this loop exactly once every second
             time.sleep(1.0 - tN % 1)
-    logger.debug(f"{[proc.exitcode for proc in threads.values()]}")
-    for proc in threads.values():
-        if proc.exitcode != 0:
-            return proc.exitcode
