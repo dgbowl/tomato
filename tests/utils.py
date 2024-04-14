@@ -3,6 +3,7 @@ import time
 import yaml
 import logging
 import os
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -84,3 +85,17 @@ def wait_until_pickle(jobid: int, timeout: int):
                 return True
         time.sleep(0.5)
     return False
+
+
+def kill_tomato_daemon(port: int = 12345):
+    procs = []
+    for p in psutil.process_iter(["name", "cmdline"]):
+        if "tomato-daemon" in p.info["name"] and f"{port}" in p.info["cmdline"]:
+            for pc in p.children():
+                pc.terminate()
+                procs.append(p)
+            p.terminate()
+            procs.append(p)
+    gone, alive = psutil.wait_procs(procs, timeout=3)
+    print(f"{gone=}")
+    print(f"{alive=}")

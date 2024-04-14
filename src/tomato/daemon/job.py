@@ -22,7 +22,7 @@ from importlib import metadata
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import currentThread, Thread
-
+from typing import Any
 import zmq
 import psutil
 
@@ -243,6 +243,33 @@ def manager(port: int, timeout: int = 500):
     logger.info("instructed to quit")
 
 
+def lazy_pirate(
+    pyobj: Any, retries: int, timeout: int, address: str, context: zmq.Context
+) -> Any:
+    logger.debug("Here")
+    req = context.socket(zmq.REQ)
+    req.connect(address)
+    poller = zmq.Poller()
+    poller.register(req, zmq.POLLIN)
+    for _ in range(retries):
+        req.send_pyobj(pyobj)
+        events = dict(poller.poll(timeout))
+        if req not in events:
+            logger.warning(f"could not contact tomato-daemon in {timeout/1000} s")
+            req.setsockopt(zmq.LINGER, 0)
+            req.close()
+            poller.unregister(req)
+            req = context.socket(zmq.REQ)
+            req.connect(address)
+            poller.register(req, zmq.POLLIN)
+        else:
+            break
+    else:
+        logger.error(f"number of connection retries exceeded: {retries}")
+        raise RuntimeError(f"Number of connection retries exceeded: {retries}")
+    return req.recv_pyobj()
+
+
 def tomato_job() -> None:
     """
     The function called when `tomato-job` is executed.
@@ -268,6 +295,12 @@ def tomato_job() -> None:
         "--timeout",
         help="Timeout [ms] for driver actions.",
         default=1000,
+        type=int,
+    )
+    parser.add_argument(
+        "--retries",
+        help="Number of retries for driver actions.",
+        default=10,
         type=int,
     )
     parser.add_argument(
@@ -308,15 +341,15 @@ def tomato_job() -> None:
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{args.port}")
-    poller = zmq.Poller()
-    poller.register(req, zmq.POLLIN)
+
+    pkwargs = dict(
+        address=f"tcp://127.0.0.1:{args.port}",
+        retries=args.retries,
+        timeout=args.timeout,
+        context=context,
+    )
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
-    req.send_pyobj(dict(cmd="job", id=jobid, params=params))
-    events = dict(poller.poll(args.timeout))
-    if req in events:
-        req.recv_pyobj()
-    else:
-        logger.warning(f"could not contact tomato-daemon in {args.timeout/1000} s")
+    lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
 
     output = tomato["output"]
     outpath = Path(output["path"])
@@ -330,12 +363,7 @@ def tomato_job() -> None:
     respath = outpath / f"{prefix}.nc"
     snappath = outpath / f"snapshot.{jobid}.nc"
     params = dict(respath=str(respath), snappath=str(snappath), jobpath=str(jobpath))
-    req.send_pyobj(dict(cmd="job", id=jobid, params=params))
-    events = dict(poller.poll(args.timeout))
-    if req in events:
-        req.recv_pyobj()
-    else:
-        logger.warning(f"could not contact tomato-daemon in {args.timeout/1000} s")
+    lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
@@ -346,33 +374,18 @@ def tomato_job() -> None:
 
     logger.info("job finished successfully, attempting to set status to 'c'")
     params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
-    req.send_pyobj(dict(cmd="job", id=jobid, params=params))
-    events = dict(poller.poll(args.timeout))
-    if req not in events:
-        logger.warning(f"could not contact tomato-daemon in {args.timeout/1000} s")
-        req.setsockopt(zmq.LINGER, 0)
-        req.close()
-        poller.unregister(req)
-        req = context.socket(zmq.REQ)
-        req.connect(f"tcp://127.0.0.1:{args.port}")
-    else:
-        ret = req.recv_pyobj()
-        logger.debug(f"{ret=}")
-        if ret.success is False:
-            logger.error("could not set job status for unknown reason")
-            return 1
+    ret = lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
+    logger.debug(f"{ret=}")
+    if ret.success is False:
+        logger.error("could not set job status for unknown reason")
+        return 1
+
     logger.info(f"resetting pipeline {pip!r}")
     params = dict(jobid=None, ready=ready, name=pip)
-    req.send_pyobj(dict(cmd="pipeline", params=params))
-    events = dict(poller.poll(args.timeout))
-    if req in events:
-        ret = req.recv_pyobj()
-        logger.debug(f"{ret=}")
-        if not ret.success:
-            logger.error(f"could not reset pipeline {pip!r}")
-            return 1
-    else:
-        logger.error(f"could not contact tomato-daemon in {args.timeout/1000} s")
+    ret = lazy_pirate(pyobj=dict(cmd="pipeline", params=params), **pkwargs)
+    logger.debug(f"{ret=}")
+    if not ret.success:
+        logger.error(f"could not reset pipeline {pip!r}")
         return 1
     logger.info("exiting tomato-job")
 
