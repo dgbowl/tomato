@@ -79,7 +79,7 @@ def tomato_daemon():
     dmgr.start()
     t0 = time.process_time()
     while True:
-        socks = dict(poller.poll(100))
+        socks = dict(poller.poll(1000))
         if rep in socks:
             msg = rep.recv_pyobj()
             logger.debug(f"received {msg=}")

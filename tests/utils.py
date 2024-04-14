@@ -2,6 +2,8 @@ import subprocess
 import time
 import yaml
 import logging
+import os
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,7 @@ def wait_until_tomato_running(port: int, timeout: int):
         data = yaml.safe_load(ret.stdout)
         if data["success"]:
             return True
-        time.sleep(timeout / 5000)
+        time.sleep(0.5)
     return False
 
 
@@ -55,7 +57,7 @@ def wait_until_tomato_stopped(port: int, timeout: int):
         data = yaml.safe_load(ret.stdout)
         if not data["success"]:
             return True
-        time.sleep(timeout / 5000)
+        time.sleep(0.5)
     return False
 
 
@@ -70,5 +72,31 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
         data = yaml.safe_load(ret.stdout)["data"]
         if data[jobid]["status"] == status:
             return True
-        time.sleep(timeout / 5000)
+        time.sleep(0.5)
     return False
+
+
+def wait_until_pickle(jobid: int, timeout: int):
+    t0 = time.perf_counter()
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        files = os.listdir(os.path.join(os.getcwd(), "Jobs", f"{jobid}"))
+        for file in files:
+            if file.endswith(".pkl"):
+                return True
+        time.sleep(0.5)
+    return False
+
+
+def kill_tomato_daemon(port: int = 12345):
+    procs = []
+    for p in psutil.process_iter(["name", "cmdline"]):
+        if "tomato-daemon" in p.info["name"] and f"{port}" in p.info["cmdline"]:
+            for pc in p.children():
+                if psutil.WINDOWS:
+                    pc.terminate()
+                    procs.append(p)
+            p.terminate()
+            procs.append(p)
+    gone, alive = psutil.wait_procs(procs, timeout=3)
+    print(f"{gone=}")
+    print(f"{alive=}")

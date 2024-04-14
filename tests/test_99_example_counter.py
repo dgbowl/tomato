@@ -44,7 +44,7 @@ def test_counter_npoints(
 @pytest.mark.parametrize(
     "casename",
     [
-        "counter_15_0.1",
+        "counter_60_0.1",
     ],
 )
 def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -67,7 +67,7 @@ def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daem
 @pytest.mark.parametrize(
     "casename,  external",
     [
-        ("counter_15_0.1", True),
+        ("counter_60_0.1", True),
         ("counter_snapshot", False),
     ],
 )

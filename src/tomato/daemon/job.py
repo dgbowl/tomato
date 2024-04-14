@@ -21,9 +21,8 @@ import argparse
 from importlib import metadata
 from datetime import datetime, timezone
 from pathlib import Path
-from threading import currentThread
-from multiprocessing import Process
-
+from threading import currentThread, Thread
+from typing import Any
 import zmq
 import psutil
 
@@ -99,7 +98,6 @@ def manage_running_pips(daemon: Daemon, req):
     logger.debug(f"{running=}")
     for pip in running:
         job = daemon.jobs[pip.jobid]
-        logger.debug(f"{job=}")
         if job.pid is None:
             continue
         pidexists = psutil.pid_exists(job.pid)
@@ -111,6 +109,7 @@ def manage_running_pips(daemon: Daemon, req):
             proc = psutil.Process(pid=job.pid)
             kill_tomato_job(proc)
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
+            merge_netcdfs(Path(job.jobpath), Path(job.respath))
             reset = True
             params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
@@ -244,6 +243,33 @@ def manager(port: int, timeout: int = 500):
     logger.info("instructed to quit")
 
 
+def lazy_pirate(
+    pyobj: Any, retries: int, timeout: int, address: str, context: zmq.Context
+) -> Any:
+    logger.debug("Here")
+    req = context.socket(zmq.REQ)
+    req.connect(address)
+    poller = zmq.Poller()
+    poller.register(req, zmq.POLLIN)
+    for _ in range(retries):
+        req.send_pyobj(pyobj)
+        events = dict(poller.poll(timeout))
+        if req not in events:
+            logger.warning(f"could not contact tomato-daemon in {timeout/1000} s")
+            req.setsockopt(zmq.LINGER, 0)
+            req.close()
+            poller.unregister(req)
+            req = context.socket(zmq.REQ)
+            req.connect(address)
+            poller.register(req, zmq.POLLIN)
+        else:
+            break
+    else:
+        logger.error(f"number of connection retries exceeded: {retries}")
+        raise RuntimeError(f"Number of connection retries exceeded: {retries}")
+    return req.recv_pyobj()
+
+
 def tomato_job() -> None:
     """
     The function called when `tomato-job` is executed.
@@ -272,6 +298,12 @@ def tomato_job() -> None:
         type=int,
     )
     parser.add_argument(
+        "--retries",
+        help="Number of retries for driver actions.",
+        default=10,
+        type=int,
+    )
+    parser.add_argument(
         "jobfile",
         type=Path,
         help="Path to a ketchup-processed payload json file.",
@@ -286,11 +318,11 @@ def tomato_job() -> None:
     jobid = jsdata["job"]["id"]
     jobpath = Path(jsdata["job"]["path"]).resolve()
 
-    logfile = jobpath / f"job-{jobid}.log"
+    logpath = jobpath / f"job-{jobid}.log"
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
-        handlers=[logging.FileHandler(logfile, mode="a")],
+        handlers=[logging.FileHandler(logpath, mode="a")],
     )
     logger = logging.getLogger(__name__)
 
@@ -309,98 +341,84 @@ def tomato_job() -> None:
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{args.port}")
-    poller = zmq.Poller()
-    poller.register(req, zmq.POLLIN)
+
+    pkwargs = dict(
+        address=f"tcp://127.0.0.1:{args.port}",
+        retries=args.retries,
+        timeout=args.timeout,
+        context=context,
+    )
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
-    req.send_pyobj(dict(cmd="job", id=jobid, params=params))
-    events = dict(poller.poll(args.timeout))
-    if req in events:
-        req.recv_pyobj()
-    else:
-        logger.warning(f"could not contact tomato-daemon in {args.timeout/1000} s")
+    lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
 
     output = tomato["output"]
-    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
     outpath = Path(output["path"])
-    snappath = outpath / f"snapshot.{jobid}.nc"
     logger.debug(f"output folder is {outpath}")
     if outpath.exists():
         assert outpath.is_dir()
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(outpath)
+    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
+    respath = outpath / f"{prefix}.nc"
+    snappath = outpath / f"snapshot.{jobid}.nc"
+    params = dict(respath=str(respath), snappath=str(snappath), jobpath=str(jobpath))
+    lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
-    ret = job_main_loop(context, args.port, payload, pip, jobpath, snappath)
+    job_main_loop(context, args.port, payload, pip, jobpath, snappath, logpath)
     logger.info("==============================")
 
-    merge_netcdfs(jobpath, outpath / f"{prefix}.nc")
+    merge_netcdfs(jobpath, respath)
 
-    if ret is None:
-        logger.info("job finished successfully, attempting to set status to 'c'")
-        params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
-        req.send_pyobj(dict(cmd="job", id=jobid, params=params))
-        events = dict(poller.poll(args.timeout))
-        if req not in events:
-            logger.warning(f"could not contact tomato-daemon in {args.timeout/1000} s")
-            req.setsockopt(zmq.LINGER, 0)
-            req.close()
-            poller.unregister(req)
-            req = context.socket(zmq.REQ)
-            req.connect(f"tcp://127.0.0.1:{args.port}")
-        else:
-            ret = req.recv_pyobj()
-            logger.debug(f"{ret=}")
-            if ret.success is False:
-                logger.error("could not set job status for unknown reason")
-                return 1
-    else:
-        logger.info("job was terminated, status should be 'cd'")
-        logger.info("handing off to 'driver_reset'")
-        logger.info("==============================")
-        # driver_reset(pip)
-        logger.info("==============================")
-        ready = False
+    logger.info("job finished successfully, attempting to set status to 'c'")
+    params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
+    ret = lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
+    logger.debug(f"{ret=}")
+    if ret.success is False:
+        logger.error("could not set job status for unknown reason")
+        return 1
+
     logger.info(f"resetting pipeline {pip!r}")
     params = dict(jobid=None, ready=ready, name=pip)
-    req.send_pyobj(dict(cmd="pipeline", params=params))
-    events = dict(poller.poll(args.timeout))
-    if req in events:
-        ret = req.recv_pyobj()
-        logger.debug(f"{ret=}")
-        if not ret.success:
-            logger.error(f"could not reset pipeline {pip!r}")
-            return 1
-    else:
-        logger.error(f"could not contact tomato-daemon in {args.timeout/1000} s")
+    ret = lazy_pirate(pyobj=dict(cmd="pipeline", params=params), **pkwargs)
+    logger.debug(f"{ret=}")
+    if not ret.success:
+        logger.error(f"could not reset pipeline {pip!r}")
         return 1
     logger.info("exiting tomato-job")
 
 
-def job_process(
+def job_thread(
     tasks: list,
     component: Component,
     device: Device,
     driver: Driver,
     jobpath: Path,
+    logpath: Path,
 ):
     """
-    Child process of `tomato-job`, responsible for tasks on one Component of a Pipeline.
+    A subthread of `tomato-job`, responsible for tasks on one Component of a Pipeline.
 
     For each task in tasks, starts the task, then monitors the Component status and polls
     for data, and moves on to the next task as instructed in the payload.
 
     Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
     """
-    sender = f"{__name__}.job_process"
+    sender = f"{__name__}.job_thread"
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
+        handlers=[logging.FileHandler(logpath, mode="a")],
+    )
     logger = logging.getLogger(sender)
-    logger.debug(f"in job process of {component.role!r}")
+    logger.debug(f"in job thread of {component.role!r}")
 
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
-    logger.debug(f"job process of {component.role!r} connected to tomato-daemon")
+    logger.debug(f"job thread of {component.role!r} connected to tomato-daemon")
 
     kwargs = dict(address=component.address, channel=component.channel)
 
@@ -433,7 +451,8 @@ def job_process(
             logger.debug(f"{ret=}")
             if ret.success and ret.msg == "ready":
                 break
-            time.sleep(device.pollrate / 10)
+            time.sleep(device.pollrate - (tN - t0))
+            logger.debug("tock")
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
         if ret.success:
@@ -447,12 +466,14 @@ def job_main_loop(
     pipname: str,
     jobpath: Path,
     snappath: Path,
+    logpath: Path,
 ) -> None:
     """
     The main loop function of `tomato-job`, split for better readability.
     """
-    sender = f"{__name__}.job_worker"
+    sender = f"{__name__}.job_main_loop"
     logger = logging.getLogger(sender)
+    logger.debug("process started")
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -481,7 +502,7 @@ def job_main_loop(
     logger.debug(f"{plan=}")
 
     # distribute plan into threads
-    processes = {}
+    threads = {}
     for role, tasks in plan.items():
         component = pipeline.devs[role]
         logger.debug(f"{component=}")
@@ -489,28 +510,26 @@ def job_main_loop(
         logger.debug(f"{device=}")
         driver = daemon.drvs[device.driver]
         logger.debug(f"{driver=}")
-        processes[role] = Process(
-            target=job_process,
-            args=(tasks, component, device, driver, jobpath),
-            name="job-process",
+        threads[role] = Thread(
+            target=job_thread,
+            args=(tasks, component, device, driver, jobpath, logpath),
+            name="job-thread",
         )
-        processes[role].start()
+        threads[role].start()
 
     # wait until threads join or we're killed
     snapshot = payload["tomato"].get("snapshot", None)
     t0 = time.perf_counter()
     while True:
+        logger.debug("tick")
         tN = time.perf_counter()
         if snapshot is not None and tN - t0 > snapshot["frequency"]:
             logger.debug("creating snapshot")
             merge_netcdfs(jobpath, snappath)
             t0 += snapshot["frequency"]
-        joined = [proc.is_alive() is False for proc in processes.values()]
+        joined = [proc.is_alive() is False for proc in threads.values()]
         if all(joined):
             break
         else:
-            time.sleep(1)
-    logger.debug(f"{[proc.exitcode for proc in processes.values()]}")
-    for proc in processes.values():
-        if proc.exitcode != 0:
-            return proc.exitcode
+            # We'd like to execute this loop exactly once every second
+            time.sleep(1.0 - tN % 1)

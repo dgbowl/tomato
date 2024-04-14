@@ -13,7 +13,6 @@ All functions in this module return a :class:`~tomato.models.Reply`.
 """
 
 from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job
-from copy import deepcopy
 import logging
 
 import tomato.daemon.io as io
@@ -46,7 +45,7 @@ def merge_pipelines(
 
 def status(msg: dict, daemon: Daemon) -> Reply:
     if msg.get("with_data", False):
-        return Reply(success=True, msg=daemon.status, data=deepcopy(daemon))
+        return Reply(success=True, msg=daemon.status, data=daemon)
     else:
         return Reply(success=True, msg=daemon.status)
 

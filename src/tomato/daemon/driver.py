@@ -240,24 +240,30 @@ def manager(port: int, timeout: int = 1000):
             to = timeout
         daemon = req.recv_pyobj().data
         drivers_needed = {v.driver for v in daemon.devs.values()}
+        action_counter = 0
         for driver in drivers_needed:
             if driver not in daemon.drvs:
                 logger.debug(f"spawning driver {driver!r}")
                 spawn_tomato_driver(daemon.port, driver, req)
+                action_counter += 1
             else:
                 drv = daemon.drvs[driver]
                 if drv.pid is not None and not psutil.pid_exists(drv.pid):
                     logger.warning(f"respawning crashed driver {driver!r}")
                     spawn_tomato_driver(daemon.port, driver, req)
+                    action_counter += 1
                 elif drv.pid is None and drv.spawned_at is None:
                     logger.debug(f"spawning driver {driver!r}")
                     spawn_tomato_driver(daemon.port, driver, req)
+                    action_counter += 1
                 elif drv.pid is None:
                     tspawn = datetime.fromisoformat(drv.spawned_at)
                     if (datetime.now(timezone.utc) - tspawn).seconds > 10:
                         logger.warning(f"respawning late driver {driver!r}")
                         spawn_tomato_driver(daemon.port, driver, req)
-        time.sleep(timeout / 1e3)
+                        action_counter += 1
+        logger.debug("tick")
+        time.sleep(1 if action_counter > 0 else 0.1)
 
     logger.info("instructed to quit")
     req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
