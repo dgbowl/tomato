@@ -92,8 +92,9 @@ def kill_tomato_daemon(port: int = 12345):
     for p in psutil.process_iter(["name", "cmdline"]):
         if "tomato-daemon" in p.info["name"] and f"{port}" in p.info["cmdline"]:
             for pc in p.children():
-                pc.terminate()
-                procs.append(p)
+                if psutil.WINDOWS:
+                    pc.terminate()
+                    procs.append(p)
             p.terminate()
             procs.append(p)
     gone, alive = psutil.wait_procs(procs, timeout=3)
