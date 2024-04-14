@@ -197,7 +197,14 @@ def action_queued_jobs(daemon, matched, req):
             with jpath.open("w", encoding="UTF-8") as of:
                 json.dump(jobargs, of, indent=1)
 
-            cmd = ["tomato-job", "--port", str(daemon.port), str(jpath)]
+            cmd = [
+                "tomato-job",
+                "--port",
+                str(daemon.port),
+                "--verbosity",
+                str(daemon.verbosity),
+                str(jpath),
+            ]
             if psutil.WINDOWS:
                 cfs = subprocess.CREATE_NO_WINDOW
                 cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
@@ -304,6 +311,12 @@ def tomato_job() -> None:
         type=int,
     )
     parser.add_argument(
+        "--verbosity",
+        help="Verbosity of the tomato-job.",
+        default=logging.INFO,
+        type=int,
+    )
+    parser.add_argument(
         "jobfile",
         type=Path,
         help="Path to a ketchup-processed payload json file.",
@@ -320,7 +333,7 @@ def tomato_job() -> None:
 
     logpath = jobpath / f"job-{jobid}.log"
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=args.verbosity,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
         handlers=[logging.FileHandler(logpath, mode="a")],
     )
@@ -407,11 +420,11 @@ def job_thread(
     Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
     """
     sender = f"{__name__}.job_thread"
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
-        handlers=[logging.FileHandler(logpath, mode="a")],
-    )
+    # logging.basicConfig(
+    #    level=logging.DEBUG,
+    #    format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
+    #    handlers=[logging.FileHandler(logpath, mode="a")],
+    # )
     logger = logging.getLogger(sender)
     logger.debug(f"in job thread of {component.role!r}")
 

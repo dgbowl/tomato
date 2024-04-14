@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import yaml
 import zmq
+import subprocess
 
 from tomato import tomato
 from .utils import wait_until_tomato_running, wait_until_tomato_stopped
@@ -155,7 +156,16 @@ def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
     assert Path("daemon_12345.log").stat().st_size > 0
 
 
-def test_tomato_log_verbosity_default(start_tomato_daemon, stop_tomato_daemon):
+def test_tomato_log_verbosity_testing(datadir, start_tomato_daemon, stop_tomato_daemon):
+    assert wait_until_tomato_running(port=PORT, timeout=5000)
+    assert Path("daemon_12345.log").exists()
+    assert Path("daemon_12345.log").stat().st_size > 0
+
+
+def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
+    os.chdir(datadir)
+    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", "."])
+    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-L", "."])
     assert wait_until_tomato_running(port=PORT, timeout=5000)
     assert Path("daemon_12345.log").exists()
     assert Path("daemon_12345.log").stat().st_size > 0

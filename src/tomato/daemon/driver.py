@@ -54,6 +54,12 @@ def tomato_driver() -> None:
         type=int,
     )
     parser.add_argument(
+        "--verbosity",
+        help="Verbosity of the tomato-driver.",
+        default=logging.INFO,
+        type=int,
+    )
+    parser.add_argument(
         "driver",
         type=str,
         help="Name of the driver module.",
@@ -64,7 +70,7 @@ def tomato_driver() -> None:
     logfile = f"drivers_{args.port}.log"
     logger = logging.getLogger(f"{__name__}.tomato_drivers({args.driver!r})")
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=args.verbosity,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
         handlers=[logging.FileHandler(logfile, mode="a")],
     )
@@ -181,8 +187,8 @@ def tomato_driver() -> None:
     logger.critical(f"driver {args.driver!r} is quitting")
 
 
-def spawn_tomato_driver(port: int, driver: str, req):
-    cmd = ["tomato-driver", "--port", str(port), driver]
+def spawn_tomato_driver(port: int, driver: str, req: zmq.Socket, verbosity: int):
+    cmd = ["tomato-driver", "--port", str(port), "--verbosity", str(verbosity), driver]
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NO_WINDOW
         cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
@@ -244,23 +250,23 @@ def manager(port: int, timeout: int = 1000):
         for driver in drivers_needed:
             if driver not in daemon.drvs:
                 logger.debug(f"spawning driver {driver!r}")
-                spawn_tomato_driver(daemon.port, driver, req)
+                spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
                 action_counter += 1
             else:
                 drv = daemon.drvs[driver]
                 if drv.pid is not None and not psutil.pid_exists(drv.pid):
                     logger.warning(f"respawning crashed driver {driver!r}")
-                    spawn_tomato_driver(daemon.port, driver, req)
+                    spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
                     action_counter += 1
                 elif drv.pid is None and drv.spawned_at is None:
                     logger.debug(f"spawning driver {driver!r}")
-                    spawn_tomato_driver(daemon.port, driver, req)
+                    spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
                     action_counter += 1
                 elif drv.pid is None:
                     tspawn = datetime.fromisoformat(drv.spawned_at)
                     if (datetime.now(timezone.utc) - tspawn).seconds > 10:
                         logger.warning(f"respawning late driver {driver!r}")
-                        spawn_tomato_driver(daemon.port, driver, req)
+                        spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
                         action_counter += 1
         logger.debug("tick")
         time.sleep(1 if action_counter > 0 else 0.1)
