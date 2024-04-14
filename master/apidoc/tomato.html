@@ -116,6 +116,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.submitted_at"><code class="docutils literal notranslate"><span class="pre">Job.submitted_at</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.executed_at"><code class="docutils literal notranslate"><span class="pre">Job.executed_at</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.completed_at"><code class="docutils literal notranslate"><span class="pre">Job.completed_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.jobpath"><code class="docutils literal notranslate"><span class="pre">Job.jobpath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.respath"><code class="docutils literal notranslate"><span class="pre">Job.respath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.snappath"><code class="docutils literal notranslate"><span class="pre">Job.snappath</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tomato.models.Daemon"><code class="docutils literal notranslate"><span class="pre">Daemon</span></code></a><ul>
@@ -220,8 +223,9 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.check_queued_jobs"><code class="docutils literal notranslate"><span class="pre">check_queued_jobs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.action_queued_jobs"><code class="docutils literal notranslate"><span class="pre">action_queued_jobs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.lazy_pirate"><code class="docutils literal notranslate"><span class="pre">lazy_pirate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.job_process"><code class="docutils literal notranslate"><span class="pre">job_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.job_thread"><code class="docutils literal notranslate"><span class="pre">job_thread()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.job_main_loop"><code class="docutils literal notranslate"><span class="pre">job_main_loop()</span></code></a></li>
 </ul>
 </li>
@@ -626,6 +630,18 @@
 <span class="w">      </span><span class="nt">&quot;completed_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Completed At&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;jobpath&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jobpath&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;respath&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Respath&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;snappath&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Snappath&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">}</span>
 <span class="p">}</span>
@@ -669,6 +685,21 @@
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Job.completed_at">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">completed_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.completed_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Job.jobpath">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">jobpath</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.jobpath" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Job.respath">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">respath</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.respath" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Job.snappath">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">snappath</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.snappath" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -937,6 +968,18 @@
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;completed_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Completed At&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;jobpath&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jobpath&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;respath&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Respath&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;snappath&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Snappath&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">}</span>

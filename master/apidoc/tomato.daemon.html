@@ -98,8 +98,9 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.check_queued_jobs"><code class="docutils literal notranslate"><span class="pre">check_queued_jobs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.action_queued_jobs"><code class="docutils literal notranslate"><span class="pre">action_queued_jobs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.lazy_pirate"><code class="docutils literal notranslate"><span class="pre">lazy_pirate()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_process"><code class="docutils literal notranslate"><span class="pre">job_process()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_thread"><code class="docutils literal notranslate"><span class="pre">job_thread()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_main_loop"><code class="docutils literal notranslate"><span class="pre">job_main_loop()</span></code></a></li>
 </ul>
 </li>
@@ -399,6 +400,16 @@ loop.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.job.lazy_pirate">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">lazy_pirate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pyobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.lazy_pirate" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.tomato_job">
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">tomato_job</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.tomato_job" title="Link to this definition"></a></dt>
 <dd><p>The function called when <cite>tomato-job</cite> is executed.</p>
@@ -414,9 +425,9 @@ to the daemon once the job is successfully finished.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.job.job_process">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">driver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_process" title="Link to this definition"></a></dt>
-<dd><p>Child process of <cite>tomato-job</cite>, responsible for tasks on one Component of a Pipeline.</p>
+<dt class="sig sig-object py" id="tomato.daemon.job.job_thread">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_thread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">driver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_thread" title="Link to this definition"></a></dt>
+<dd><p>A subthread of <cite>tomato-job</cite>, responsible for tasks on one Component of a Pipeline.</p>
 <p>For each task in tasks, starts the task, then monitors the Component status and polls
 for data, and moves on to the next task as instructed in the payload.</p>
 <p>Stores the data for that Component as a <cite>pickle</cite> of a <code class="xref py py-class docutils literal notranslate"><span class="pre">xr.Dataset</span></code>.</p>
@@ -424,7 +435,7 @@ for data, and moves on to the next task as instructed in the payload.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.job_main_loop">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_main_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snappath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_main_loop" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_main_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snappath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.job_main_loop" title="Link to this definition"></a></dt>
 <dd><p>The main loop function of <cite>tomato-job</cite>, split for better readability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
