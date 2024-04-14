@@ -21,8 +21,7 @@ import argparse
 from importlib import metadata
 from datetime import datetime, timezone
 from pathlib import Path
-from threading import currentThread
-from multiprocessing import Process
+from threading import currentThread, Thread
 
 import zmq
 import psutil
@@ -99,7 +98,6 @@ def manage_running_pips(daemon: Daemon, req):
     logger.debug(f"{running=}")
     for pip in running:
         job = daemon.jobs[pip.jobid]
-        logger.debug(f"{job=}")
         if job.pid is None:
             continue
         pidexists = psutil.pid_exists(job.pid)
@@ -111,6 +109,7 @@ def manage_running_pips(daemon: Daemon, req):
             proc = psutil.Process(pid=job.pid)
             kill_tomato_job(proc)
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
+            merge_netcdfs(Path(job.jobpath), Path(job.respath))
             reset = True
             params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
@@ -320,22 +319,30 @@ def tomato_job() -> None:
         logger.warning(f"could not contact tomato-daemon in {args.timeout/1000} s")
 
     output = tomato["output"]
-    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
     outpath = Path(output["path"])
-    snappath = outpath / f"snapshot.{jobid}.nc"
     logger.debug(f"output folder is {outpath}")
     if outpath.exists():
         assert outpath.is_dir()
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(outpath)
+    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
+    respath = outpath / f"{prefix}.nc"
+    snappath = outpath / f"snapshot.{jobid}.nc"
+    params = dict(respath=str(respath), snappath=str(snappath), jobpath=str(jobpath))
+    req.send_pyobj(dict(cmd="job", id=jobid, params=params))
+    events = dict(poller.poll(args.timeout))
+    if req in events:
+        req.recv_pyobj()
+    else:
+        logger.warning(f"could not contact tomato-daemon in {args.timeout/1000} s")
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
     ret = job_main_loop(context, args.port, payload, pip, jobpath, snappath, logpath)
     logger.info("==============================")
 
-    merge_netcdfs(jobpath, outpath / f"{prefix}.nc")
+    merge_netcdfs(jobpath, respath)
 
     if ret is None:
         logger.info("job finished successfully, attempting to set status to 'c'")
@@ -378,7 +385,7 @@ def tomato_job() -> None:
     logger.info("exiting tomato-job")
 
 
-def job_process(
+def job_thread(
     tasks: list,
     component: Component,
     device: Device,
@@ -387,26 +394,26 @@ def job_process(
     logpath: Path,
 ):
     """
-    Child process of `tomato-job`, responsible for tasks on one Component of a Pipeline.
+    A subthread of `tomato-job`, responsible for tasks on one Component of a Pipeline.
 
     For each task in tasks, starts the task, then monitors the Component status and polls
     for data, and moves on to the next task as instructed in the payload.
 
     Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
     """
-    sender = f"{__name__}.job_process"
+    sender = f"{__name__}.job_thread"
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
         handlers=[logging.FileHandler(logpath, mode="a")],
     )
     logger = logging.getLogger(sender)
-    logger.debug(f"in job process of {component.role!r}")
+    logger.debug(f"in job thread of {component.role!r}")
 
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
-    logger.debug(f"job process of {component.role!r} connected to tomato-daemon")
+    logger.debug(f"job thread of {component.role!r} connected to tomato-daemon")
 
     kwargs = dict(address=component.address, channel=component.channel)
 
@@ -490,7 +497,7 @@ def job_main_loop(
     logger.debug(f"{plan=}")
 
     # distribute plan into threads
-    processes = {}
+    threads = {}
     for role, tasks in plan.items():
         component = pipeline.devs[role]
         logger.debug(f"{component=}")
@@ -498,12 +505,12 @@ def job_main_loop(
         logger.debug(f"{device=}")
         driver = daemon.drvs[device.driver]
         logger.debug(f"{driver=}")
-        processes[role] = Process(
-            target=job_process,
+        threads[role] = Thread(
+            target=job_thread,
             args=(tasks, component, device, driver, jobpath, logpath),
-            name="job-process",
+            name="job-thread",
         )
-        processes[role].start()
+        threads[role].start()
 
     # wait until threads join or we're killed
     snapshot = payload["tomato"].get("snapshot", None)
@@ -515,13 +522,13 @@ def job_main_loop(
             logger.debug("creating snapshot")
             merge_netcdfs(jobpath, snappath)
             t0 += snapshot["frequency"]
-        joined = [proc.is_alive() is False for proc in processes.values()]
+        joined = [proc.is_alive() is False for proc in threads.values()]
         if all(joined):
             break
         else:
             # We'd like to execute this loop exactly once every second
             time.sleep(1.0 - tN % 1)
-    logger.debug(f"{[proc.exitcode for proc in processes.values()]}")
-    for proc in processes.values():
+    logger.debug(f"{[proc.exitcode for proc in threads.values()]}")
+    for proc in threads.values():
         if proc.exitcode != 0:
             return proc.exitcode

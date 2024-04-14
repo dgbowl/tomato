@@ -45,6 +45,9 @@ class Job(BaseModel):
     submitted_at: Optional[str] = None
     executed_at: Optional[str] = None
     completed_at: Optional[str] = None
+    jobpath: Optional[str] = None
+    respath: Optional[str] = None
+    snappath: Optional[str] = None
 
 
 class Daemon(BaseModel, arbitrary_types_allowed=True):
