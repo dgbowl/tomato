@@ -309,9 +309,8 @@ def snapshot(
         if jobs[jobid].status in {"q", "qw"}:
             return Reply(success=False, msg=f"job {jobid} is still queued")
 
-    jobdir = Path(status.data.settings["jobs"]["storage"])
     for jobid in jobids:
-        merge_netcdfs(jobdir / str(jobid), Path(f"snapshot.{jobid}.nc"))
+        merge_netcdfs(Path(jobs[jobid].jobpath), Path(f"snapshot.{jobid}.nc"))
     return Reply(success=True, msg=f"snapshot for job(s) {jobids} created successfully")
 
 
