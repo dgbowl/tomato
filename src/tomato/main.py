@@ -142,8 +142,8 @@ def run_ketchup():
     )
     cancel.set_defaults(func=ketchup.cancel)
 
-    cancel = subparsers.add_parser("cancel_all")
-    cancel.set_defaults(func=ketchup.cancel_all)
+    cancel_all = subparsers.add_parser("cancel_all")
+    cancel_all.set_defaults(func=ketchup.cancel_all)
 
     load = subparsers.add_parser("load")
     load.add_argument("sample", help="Name of the sample to be loaded.", default=None)
