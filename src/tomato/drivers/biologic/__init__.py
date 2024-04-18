@@ -96,6 +96,7 @@ Supported ``techniques``:
 
 .. codeauthor::
     Peter Kraus
+    Graham Kimbell
 
 .. |biologic.techs| replace:: :class:`Literal["constant_current", "constant_voltage", "sweep_current", "sweep_voltage", "open_circuit_voltage", "loop"]`
 
