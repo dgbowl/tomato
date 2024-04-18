@@ -22,7 +22,6 @@ def get_status(
     jobqueue: multiprocessing.Queue,
     logger: logging.Logger,
     dllpath: str = None,
-    lockpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -100,7 +99,6 @@ def get_data(
     jobqueue: multiprocessing.Queue,
     logger: logging.Logger,
     dllpath: str = None,
-    lockpath: str = None,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -157,7 +155,6 @@ def start_job(
     logger: logging.Logger,
     payload: list[dict],
     dllpath: str = None,
-    lockpath: str = None,
     capacity: float = 0.0,
     **kwargs: dict,
 ) -> float:
@@ -247,7 +244,6 @@ def stop_job(
     jobqueue: multiprocessing.Queue,
     logger: multiprocessing.Queue,
     dllpath: str = None,
-    lockpath: str = None,
     **kwargs: dict,
 ) -> float:
     """

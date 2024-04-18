@@ -37,7 +37,6 @@ setuptools.setup(
         "psutil",
         "yadg == 4.2.5",
         "dgbowl_schemas>=108",
-        "filelock",
     ],
     extras_require={
         "testing": [

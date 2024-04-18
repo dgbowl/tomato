@@ -11,7 +11,6 @@ The :mod:`~tomato.drivers.biologic` driver requires the following settings in th
 :ref:`setfile`:
 
 - ``[drivers.biologic.dllpath]`` pointing to the folder of the EC-Lib Development library;
-- ``[drivers.biologic.lockfile]`` pointing to a file to be used as a lock file for the DLL.
 
 Supported *method* parameters:
 ---------------------------------
