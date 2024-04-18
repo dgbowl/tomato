@@ -49,7 +49,7 @@ def get_status(
     metadata = {}
     for attempt in range(N_ATTEMPTS):
         try:
-            time0 = time.time()
+            time0 = time.perf_counter()
             logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath, address) as api:
                 metadata["dll_version"] = api.GetLibVersion()
@@ -57,7 +57,7 @@ def get_status(
                 logger.info(f"getting status of '{address}:{channel}'")
                 channel_info = api.GetChannelInfo(id_, channel)
             logger.debug(f"disconnected from '{address}:{channel}'")
-            elapsed_time = time.time() - time0
+            elapsed_time = time.perf_counter() - time0
             if elapsed_time > 0.5:
                 logger.debug(f"status retrieved in {elapsed_time:.3f} s")
             if getattr(channel_info, "FirmwareVersion") == 0:
@@ -122,7 +122,7 @@ def get_data(
 
     """
     logger.debug(f"starting get_data for '{address}:{channel}'")
-    time0 = time.time()
+    time0 = time.perf_counter()
     for attempt in range(N_ATTEMPTS):
         try:
             logger.debug(f"connecting to '{address}:{channel}'")
@@ -141,7 +141,7 @@ def get_data(
                 )
     dt = datetime.now(timezone.utc)
     nrows = data["technique"]["data_rows"]
-    elapsed_time = time.time() - time0
+    elapsed_time = time.perf_counter() - time0
     logger.info(
         f"read {nrows} rows from '{address}:{channel} in {attempt+1} attempts in {elapsed_time:.3f} s"
     )
@@ -194,7 +194,7 @@ def start_job(
     logger.debug(f"starting start_job for '{address}:{channel}'")
     for attempt in range(N_ATTEMPTS):
         try:
-            time0 = time.time()
+            time0 = time.perf_counter()
             logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath, address) as api:
                 id_, device_info = api.id_, api.device_info
@@ -222,7 +222,7 @@ def start_job(
                     first = False
                 logger.info(f"starting run on '{address}:{channel}'")
                 api.StartChannel(id_, channel)
-                elapsed_time = time.time() - time0
+                elapsed_time = time.perf_counter() - time0
                 if elapsed_time > 0.5:
                     logger.debug(f"run started in {elapsed_time:.3f} s")
             logger.debug(f"disconnected from '{address}:{channel}'")
@@ -274,12 +274,12 @@ def stop_job(
         try:
             logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath, address) as api:
-                time0 = time.time()
+                time0 = time.perf_counter()
                 id_, device_info = api.id_, api.device_info
                 logger.info(f"stopping run on '{address}:{channel}'")
                 api.StopChannel(id_, channel)
             logger.debug(f"disconnected from '{address}:{channel}'")
-            elapsed_time = time.time() - time0
+            elapsed_time = time.perf_counter() - time0
             if elapsed_time > 0.5:
                 logger.debug(f"run stopped in {elapsed_time:.3f} s")
             break
