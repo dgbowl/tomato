@@ -16,6 +16,8 @@ from .logger_funcs import log_listener_config, log_listener, log_worker_config
 from . import yadg_funcs
 from .. import dbhandler
 
+N_STOP_CONFIRM = 3
+
 
 def tomato_job() -> None:
     parser = argparse.ArgumentParser()
@@ -139,7 +141,6 @@ def data_poller(
 ) -> None:
     log_worker_config(lq, loglevel)
     log = logging.getLogger()
-    N_STOP_CONFIRM = 3
     stops_confirmed = 0
     pollrate = kwargs.get("pollrate", 10)
     log.debug(f"in 'data_poller', {pollrate=}")
