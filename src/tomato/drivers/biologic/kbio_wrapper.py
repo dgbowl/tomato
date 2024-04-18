@@ -13,8 +13,9 @@ from .kbio.c_utils import c_is_64b
 
 from .tech_params import named_params, techfiles, datatypes, I_ranges, E_ranges
 
+
 class KBIO_api_wrapped(KBIO_api):
-    def __init__(self,dllpath,address):
+    def __init__(self, dllpath, address):
         if c_is_64b:
             dllfile = "EClib64.dll"
         else:
@@ -30,11 +31,12 @@ class KBIO_api_wrapped(KBIO_api):
         super().__init__(apipath)
 
     def __enter__(self):
-        self.id_, self.device_info = self.Connect(self.address,self.connect_timeout)
+        self.id_, self.device_info = self.Connect(self.address, self.connect_timeout)
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.Disconnect(self.id_)
+
 
 def get_test_magic(
     variable: str, sign: str, logic: str = "or", active: bool = True

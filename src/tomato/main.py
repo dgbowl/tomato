@@ -2,6 +2,7 @@
 Main module - executables for tomato.
 
 """
+
 import argparse
 import logging
 import psutil
@@ -83,7 +84,7 @@ def run_tomato():
     elif psutil.POSIX:
         pid = os.getpid()
 
-    procs = psutil.process_iter(['pid', 'name'])
+    procs = psutil.process_iter(["pid", "name"])
     toms = [p.pid for p in procs if p.name() in {"tomato", "tomato.exe"}]
     toms.pop(toms.index(pid))
     if len(toms) > 0 and not args.test:
