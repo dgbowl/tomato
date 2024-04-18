@@ -45,31 +45,31 @@ def get_status(
         associated metadata.
 
     """
-    logger.debug(f"starting get_status for '{address}:{channel}'")
+    logger.debug("starting get_status for '%s:%s'", address, channel)
     metadata = {}
     for attempt in range(N_ATTEMPTS):
         try:
             time0 = time.perf_counter()
-            logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath, address) as api:
                 metadata["dll_version"] = api.GetLibVersion()
                 id_, device_info = api.id_, api.device_info
-                logger.info(f"getting status of '{address}:{channel}'")
+                logger.info("getting status of '%s:%s'", address, channel)
                 channel_info = api.GetChannelInfo(id_, channel)
-            logger.debug(f"disconnected from '{address}:{channel}'")
             elapsed_time = time.perf_counter() - time0
             if elapsed_time > 0.5:
-                logger.debug(f"status retrieved in {elapsed_time:.3f} s")
+                logger.debug("status retrieved in %.3f s", elapsed_time)
             if getattr(channel_info, "FirmwareVersion") == 0:
-                logger.debug(f"Attempt {attempt+1} failed: Firmware version read as 0")
+                logger.debug("Attempt %d failed: Firmware version read as 0", attempt+1)
             else:
                 break
         except Exception as e:
-            logger.debug(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug("Attempt %d failed: %s", attempt+1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
-                    f"Failed to get status after {N_ATTEMPTS} attempts, last error: {e}"
+                    "Failed to start job after %d attempts, last error: %s",
+                    N_ATTEMPTS, e
                 )
+            raise e
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
@@ -79,7 +79,7 @@ def get_status(
     metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_IRange]
     logger.debug("Logging all channel info:")
     for field, _ in channel_info._fields_:
-        logger.debug(f"{field}={getattr(channel_info,field)}")
+        logger.debug("%s=%s", field, getattr(channel_info, field))
     if metadata["channel_state"] in {"STOP"}:
         logger.debug("Channel state is 'STOP'")
         ready = True
@@ -121,29 +121,30 @@ def get_data(
         Returns a tuple containing the timestamp and associated metadata.
 
     """
-    logger.debug(f"starting get_data for '{address}:{channel}'")
+    logger.debug("starting get_data for '%s:%s'", address, channel)
     time0 = time.perf_counter()
     for attempt in range(N_ATTEMPTS):
         try:
-            logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath, address) as api:
                 id_, device_info = api.id_, api.device_info
-                logger.debug(f"getting data from '{address}:{channel}'")
+                logger.debug("getting data from '%s:%s'", address, channel)
                 data = api.GetData(id_, channel)
                 data = parse_raw_data(api, data, device_info.model)
-            logger.debug(f"disconnected from '{address}:{channel}'")
             break
         except Exception as e:
-            logger.debug(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug("Attempt %d failed: %s", attempt+1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
-                    f"Failed to get data after {N_ATTEMPTS} attempts, last error: {e}"
+                    "Failed to start job after %d attempts, last error: %s",
+                    N_ATTEMPTS, e
                 )
+            raise e
     dt = datetime.now(timezone.utc)
     nrows = data["technique"]["data_rows"]
     elapsed_time = time.perf_counter() - time0
     logger.info(
-        f"read {nrows} rows from '{address}:{channel} in {attempt+1} attempts in {elapsed_time:.3f} s"
+        "read %d rows from '%s:%s' in %d attempts in %.3f s",
+        nrows, address, channel, attempt+1, elapsed_time
     )
     return dt.timestamp(), nrows, data
 
@@ -191,11 +192,10 @@ def start_job(
         A timestamp corresponding to the start of the job execution.
 
     """
-    logger.debug(f"starting start_job for '{address}:{channel}'")
+    logger.debug("starting start_job for '%s:%s'", address, channel)
     for attempt in range(N_ATTEMPTS):
         try:
             time0 = time.perf_counter()
-            logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath, address) as api:
                 id_, device_info = api.id_, api.device_info
                 logger.debug("translating payload to ECC")
@@ -208,7 +208,7 @@ def start_job(
                     if ti == ntechs:
                         last = True
                     techfile = get_kbio_techpath(dllpath, techname, device_info.model)
-                    logger.info(f"loading technique {ti}: '{techname}'")
+                    logger.info("loading technique %d: '%s'", ti, techname)
                     api.LoadTechnique(
                         id_,
                         channel,
@@ -220,21 +220,22 @@ def start_job(
                     )
                     ti += 1
                     first = False
-                logger.info(f"starting run on '{address}:{channel}'")
+                logger.info("starting run on '%s:%s'", address, channel)
                 api.StartChannel(id_, channel)
                 elapsed_time = time.perf_counter() - time0
                 if elapsed_time > 0.5:
-                    logger.debug(f"run started in {elapsed_time:.3f} s")
-            logger.debug(f"disconnected from '{address}:{channel}'")
+                    logger.debug("run started in %.3f s", elapsed_time)
             break
         except Exception as e:
-            logger.debug(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug("Attempt %d failed: %s", attempt+1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
-                    f"Failed to start job after {N_ATTEMPTS} attempts, last error: {e}"
+                    "Failed to start job after %d attempts, last error: %s",
+                    N_ATTEMPTS, e
                 )
+            raise e
     dt = datetime.now(timezone.utc)
-    logger.info(f"run started at '{dt}'")
+    logger.info("run started at '%s'", dt)
     return dt.timestamp()
 
 
@@ -269,31 +270,31 @@ def stop_job(
         A timestamp corresponding to the start of the job execution.
 
     """
-    logger.debug(f"starting stop_job for '{address}:{channel}'")
+    logger.debug("starting stop_job for '%s:%s'", address, channel)
     for attempt in range(N_ATTEMPTS):
         try:
-            logger.debug(f"connecting to '{address}:{channel}'")
             with KBIO_api_wrapped(dllpath, address) as api:
                 time0 = time.perf_counter()
                 id_, device_info = api.id_, api.device_info
-                logger.info(f"stopping run on '{address}:{channel}'")
+                logger.info("stopping run on '%s:%s'", address, channel)
                 api.StopChannel(id_, channel)
-            logger.debug(f"disconnected from '{address}:{channel}'")
             elapsed_time = time.perf_counter() - time0
             if elapsed_time > 0.5:
-                logger.debug(f"run stopped in {elapsed_time:.3f} s")
+                logger.debug("run stopped in %.3f s", elapsed_time)
             break
         except Exception as e:
-            logger.debug(f"Attempt {attempt+1} failed: {e=}")
+            logger.debug("Attempt %d failed: %s", attempt+1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
-                    f"Failed to stop job after {N_ATTEMPTS} attempts, last error: {e}"
+                    "Failed to start job after %d attempts, last error: %s",
+                    N_ATTEMPTS, e
                 )
+            raise e
 
     if jobqueue:
         jobqueue.close()
     else:
         pass
     dt = datetime.now(timezone.utc)
-    logger.info(f"run stopped at '{dt}'")
+    logger.info("run stopped at '%s'", dt)
     return dt.timestamp()

@@ -21,7 +21,7 @@ class KBIO_api_wrapped(KBIO_api):
         else:
             dllfile = "EClib.dll"
         apipath = os.path.join(dllpath, dllfile)
-        log.debug(f"biologic library path is '{apipath}'")
+        log.debug("biologic library path is '%s'", apipath)
 
         self.connect_timeout = 1
         self.address = address
@@ -31,11 +31,13 @@ class KBIO_api_wrapped(KBIO_api):
         super().__init__(apipath)
 
     def __enter__(self):
+        log.debug("connecting to '%s'", self.address)
         self.id_, self.device_info = self.Connect(self.address, self.connect_timeout)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.Disconnect(self.id_)
+        log.debug("disconnected from '%s'", self.address)
 
 
 def get_test_magic(
@@ -213,7 +215,7 @@ def translate(technique: dict, capacity: float) -> dict:
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
     else:
         if technique["technique"] != "open_circuit_voltage":
-            log.error(f"technique name '{technique['technique']}' not understood.")
+            log.error("technique name '%s' not understood.", technique['technique'])
         tech = {
             "technique": "open_circuit_voltage",
             "Rest_time_T": technique.get("time", 0.0),
@@ -312,7 +314,7 @@ def get_kbio_api(dllpath):
     else:
         dllfile = "EClib.dll"
     apipath = os.path.join(dllpath, dllfile)
-    log.debug(f"biologic library path is '{apipath}'")
+    log.debug("biologic library path is '%s'", apipath)
     api = KBIO_api(apipath)
     return api
 
