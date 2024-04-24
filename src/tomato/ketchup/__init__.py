@@ -21,4 +21,15 @@ Also includes *sample*/*pipeline* management functions:
 
 
 """
-from .functions import submit, status, cancel, load, eject, ready, snapshot, search, cancel_all
+
+from .functions import (
+    submit,
+    status,
+    cancel,
+    load,
+    eject,
+    ready,
+    snapshot,
+    search,
+    cancel_all,
+)

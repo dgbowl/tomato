@@ -23,9 +23,7 @@ def _kill_tomato_job(proc):
                 try:
                     proc.terminate()
                 except psutil.NoSuchProcess:
-                    log.warning(
-                        "dead proc: name='%s', pid=%d", proc.name(), proc.pid
-                    )
+                    log.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
                     continue
             gone, alive = psutil.wait_procs(ppc, timeout=10)
     elif psutil.POSIX:
@@ -33,9 +31,7 @@ def _kill_tomato_job(proc):
             try:
                 proc.terminate()
             except psutil.NoSuchProcess:
-                log.warning(
-                    "dead proc: name='%s', pid=%d", proc.name(), proc.pid
-                )
+                log.warning("dead proc: name='%s', pid=%d", proc.name(), proc.pid)
                 continue
         gone, alive = psutil.wait_procs(pc, timeout=10)
     log.debug(f"{gone=}")

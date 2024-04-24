@@ -144,7 +144,9 @@ def data_poller(
     stops_confirmed = 0
     pollrate = kwargs.get("pollrate", 10)
     log.debug(f"in 'data_poller', {pollrate=}")
-    _, _, metadata = driver_api(driver, "get_status", jq, log, address, channel, **kwargs)
+    _, _, metadata = driver_api(
+        driver, "get_status", jq, log, address, channel, **kwargs
+    )
     mem_size = metadata["mem_size"]
     done = False
     previous = None
@@ -155,13 +157,17 @@ def data_poller(
             )
             data["previous"] = previous
             previous = data["current"]
-            mem_filled=data['current']['mem_filled']
-            f_mem_filled=mem_filled/mem_size
+            mem_filled = data["current"]["mem_filled"]
+            f_mem_filled = mem_filled / mem_size
             if f_mem_filled > 0.995:
-                log.critical(f"{device} {address}:{channel} memory is full, data is being lost")
+                log.critical(
+                    f"{device} {address}:{channel} memory is full, data is being lost"
+                )
             elif f_mem_filled > 0.8:
-                log.warning(f"{device} {address}:{channel} memory is {f_mem_filled*100:.1f}% full")
-            
+                log.warning(
+                    f"{device} {address}:{channel} memory is {f_mem_filled*100:.1f}% full"
+                )
+
             if nrows > 0:
                 isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
                 isots = isots.replace(":", "")
@@ -170,19 +176,25 @@ def data_poller(
                 with open(fn, "w") as of:
                     json.dump(data, of)
             else:
-                status = data['current']['status']
+                status = data["current"]["status"]
                 if status == "STOP":
                     stops_confirmed += 1
-                    log.debug(f"{address}:{channel} has given {stops_confirmed} 'STOP' statuses in a row")
-                elif status in ['RUN', 'PAUSE']:
+                    log.debug(
+                        f"{address}:{channel} has given {stops_confirmed} 'STOP' statuses in a row"
+                    )
+                elif status in ["RUN", "PAUSE"]:
                     stops_confirmed = 0
                 else:
                     stops_confirmed += 1
-                    log.critical(f"get_data status not understood: '{status}', counting as 'STOP' status {stops_confirmed}")
+                    log.critical(
+                        f"get_data status not understood: '{status}', counting as 'STOP' status {stops_confirmed}"
+                    )
                 break
         if stops_confirmed >= N_STOP_CONFIRM:
             done = True
-            log.info(f"device '{device}' has stopped polling after {N_STOP_CONFIRM} consecutive 'STOP' statuses")
+            log.info(
+                f"device '{device}' has stopped polling after {N_STOP_CONFIRM} consecutive 'STOP' statuses"
+            )
         else:
             time.sleep(pollrate)
     log.info(f"rejoining main thread")
@@ -298,7 +310,9 @@ def driver_worker(
         if p.exitcode == 0:
             log.info(f"'data_poller' with pid {p.pid} closed successfully")
         else:
-            log.critical(f"'data_poller' with pid {p.pid} was terminated with exit code {p.exitcode}")
+            log.critical(
+                f"'data_poller' with pid {p.pid} was terminated with exit code {p.exitcode}"
+            )
             ret = 1
 
     log.info("-----------------------")

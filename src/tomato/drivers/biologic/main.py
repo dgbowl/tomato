@@ -59,15 +59,18 @@ def get_status(
             if elapsed_time > 0.5:
                 logger.debug("status retrieved in %.3f s", elapsed_time)
             if getattr(channel_info, "FirmwareVersion") == 0:
-                logger.debug("Attempt %d failed: Firmware version read as 0", attempt+1)
+                logger.debug(
+                    "Attempt %d failed: Firmware version read as 0", attempt + 1
+                )
             else:
                 break
         except Exception as e:
-            logger.debug("Attempt %d failed: %s", attempt+1, e)
+            logger.debug("Attempt %d failed: %s", attempt + 1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS, e
+                    N_ATTEMPTS,
+                    e,
                 )
             raise e
     metadata["device_model"] = device_info.model
@@ -132,11 +135,12 @@ def get_data(
                 data = parse_raw_data(api, data, device_info.model)
             break
         except Exception as e:
-            logger.debug("Attempt %d failed: %s", attempt+1, e)
+            logger.debug("Attempt %d failed: %s", attempt + 1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS, e
+                    N_ATTEMPTS,
+                    e,
                 )
             raise e
     dt = datetime.now(timezone.utc)
@@ -144,7 +148,11 @@ def get_data(
     elapsed_time = time.perf_counter() - time0
     logger.info(
         "read %d rows from '%s:%s' in %d attempts in %.3f s",
-        nrows, address, channel, attempt+1, elapsed_time
+        nrows,
+        address,
+        channel,
+        attempt + 1,
+        elapsed_time,
     )
     return dt.timestamp(), nrows, data
 
@@ -227,11 +235,12 @@ def start_job(
                     logger.debug("run started in %.3f s", elapsed_time)
             break
         except Exception as e:
-            logger.debug("Attempt %d failed: %s", attempt+1, e)
+            logger.debug("Attempt %d failed: %s", attempt + 1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS, e
+                    N_ATTEMPTS,
+                    e,
                 )
             raise e
     dt = datetime.now(timezone.utc)
@@ -283,11 +292,12 @@ def stop_job(
                 logger.debug("run stopped in %.3f s", elapsed_time)
             break
         except Exception as e:
-            logger.debug("Attempt %d failed: %s", attempt+1, e)
+            logger.debug("Attempt %d failed: %s", attempt + 1, e)
             if attempt == N_ATTEMPTS - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS, e
+                    N_ATTEMPTS,
+                    e,
                 )
             raise e
 

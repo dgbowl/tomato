@@ -215,7 +215,7 @@ def translate(technique: dict, capacity: float) -> dict:
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
     else:
         if technique["technique"] != "open_circuit_voltage":
-            log.error("technique name '%s' not understood.", technique['technique'])
+            log.error("technique name '%s' not understood.", technique["technique"])
         tech = {
             "technique": "open_circuit_voltage",
             "Rest_time_T": technique.get("time", 0.0),
