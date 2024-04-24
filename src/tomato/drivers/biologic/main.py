@@ -12,9 +12,6 @@ from .kbio_wrapper import (
     parse_raw_data,
 )
 
-# number of attempts to perform a given operation before giving up
-N_ATTEMPTS = 120
-
 
 def get_status(
     address: str,
@@ -22,6 +19,7 @@ def get_status(
     jobqueue: multiprocessing.Queue,
     logger: logging.Logger,
     dllpath: str = None,
+    max_connect_attempts: int = 120,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -47,7 +45,7 @@ def get_status(
     """
     logger.debug("starting get_status for '%s:%s'", address, channel)
     metadata = {}
-    for attempt in range(N_ATTEMPTS):
+    for attempt in range(max_connect_attempts):
         try:
             time0 = time.perf_counter()
             with KBIO_api_wrapped(dllpath, address) as api:
@@ -66,10 +64,10 @@ def get_status(
                 break
         except Exception as e:
             logger.debug("Attempt %d failed: %s", attempt + 1, e)
-            if attempt == N_ATTEMPTS - 1:
+            if attempt == max_connect_attempts - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS,
+                    max_connect_attempts,
                     e,
                 )
             raise e
@@ -102,6 +100,7 @@ def get_data(
     jobqueue: multiprocessing.Queue,
     logger: logging.Logger,
     dllpath: str = None,
+    max_connect_attempts: int = 120,
     **kwargs: dict,
 ) -> tuple[float, dict]:
     """
@@ -126,7 +125,7 @@ def get_data(
     """
     logger.debug("starting get_data for '%s:%s'", address, channel)
     time0 = time.perf_counter()
-    for attempt in range(N_ATTEMPTS):
+    for attempt in range(max_connect_attempts):
         try:
             with KBIO_api_wrapped(dllpath, address) as api:
                 id_, device_info = api.id_, api.device_info
@@ -136,10 +135,10 @@ def get_data(
             break
         except Exception as e:
             logger.debug("Attempt %d failed: %s", attempt + 1, e)
-            if attempt == N_ATTEMPTS - 1:
+            if attempt == max_connect_attempts - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS,
+                    max_connect_attempts,
                     e,
                 )
             raise e
@@ -164,6 +163,7 @@ def start_job(
     logger: logging.Logger,
     payload: list[dict],
     dllpath: str = None,
+    max_connect_attempts: int = 120,
     capacity: float = 0.0,
     **kwargs: dict,
 ) -> float:
@@ -201,7 +201,7 @@ def start_job(
 
     """
     logger.debug("starting start_job for '%s:%s'", address, channel)
-    for attempt in range(N_ATTEMPTS):
+    for attempt in range(max_connect_attempts):
         try:
             time0 = time.perf_counter()
             with KBIO_api_wrapped(dllpath, address) as api:
@@ -236,10 +236,10 @@ def start_job(
             break
         except Exception as e:
             logger.debug("Attempt %d failed: %s", attempt + 1, e)
-            if attempt == N_ATTEMPTS - 1:
+            if attempt == max_connect_attempts - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS,
+                    max_connect_attempts,
                     e,
                 )
             raise e
@@ -254,6 +254,7 @@ def stop_job(
     jobqueue: multiprocessing.Queue,
     logger: multiprocessing.Queue,
     dllpath: str = None,
+    max_connect_attempts: int = 120,
     **kwargs: dict,
 ) -> float:
     """
@@ -280,7 +281,7 @@ def stop_job(
 
     """
     logger.debug("starting stop_job for '%s:%s'", address, channel)
-    for attempt in range(N_ATTEMPTS):
+    for attempt in range(max_connect_attempts):
         try:
             with KBIO_api_wrapped(dllpath, address) as api:
                 time0 = time.perf_counter()
@@ -293,10 +294,10 @@ def stop_job(
             break
         except Exception as e:
             logger.debug("Attempt %d failed: %s", attempt + 1, e)
-            if attempt == N_ATTEMPTS - 1:
+            if attempt == max_connect_attempts - 1:
                 logger.critical(
                     "Failed to start job after %d attempts, last error: %s",
-                    N_ATTEMPTS,
+                    max_connect_attempts,
                     e,
                 )
             raise e
