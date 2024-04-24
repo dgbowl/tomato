@@ -26,7 +26,7 @@ class KBIO_api_wrapped(KBIO_api):
         self.connect_timeout = 1
         self.address = address
         self.id_ = None
-        self.device_info = ""
+        self.device_info = None
 
         super().__init__(apipath)
 
