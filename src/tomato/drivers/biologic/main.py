@@ -70,7 +70,7 @@ def get_status(
                     max_connect_attempts,
                     e,
                 )
-            raise e
+                raise e
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
