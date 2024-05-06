@@ -70,7 +70,7 @@ def get_status(
                     max_connect_attempts,
                     e,
                 )
-            raise e
+                raise e
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
@@ -141,7 +141,7 @@ def get_data(
                     max_connect_attempts,
                     e,
                 )
-            raise e
+                raise e
     dt = datetime.now(timezone.utc)
     nrows = data["technique"]["data_rows"]
     elapsed_time = time.perf_counter() - time0
@@ -242,7 +242,7 @@ def start_job(
                     max_connect_attempts,
                     e,
                 )
-            raise e
+                raise e
     dt = datetime.now(timezone.utc)
     logger.info("run started at '%s'", dt)
     return dt.timestamp()
@@ -300,7 +300,7 @@ def stop_job(
                     max_connect_attempts,
                     e,
                 )
-            raise e
+                raise e
 
     if jobqueue:
         jobqueue.close()
