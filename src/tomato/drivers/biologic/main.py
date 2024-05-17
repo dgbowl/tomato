@@ -57,11 +57,7 @@ def get_status(
             if elapsed_time > 0.5:
                 logger.debug("status retrieved in %.3f s", elapsed_time)
             if getattr(channel_info, "FirmwareVersion") == 0:
-                logger.debug(
-                    "Attempt %d failed: Firmware version read as 0", attempt + 1
-                )
-            else:
-                break
+                raise ValueError("Firmware version read as 0")
         except Exception as e:
             logger.debug("Attempt %d failed: %s", attempt + 1, e)
             if attempt == max_connect_attempts - 1:
@@ -71,11 +67,13 @@ def get_status(
                     e,
                 )
                 raise e
+        else:
+            break
     metadata["device_model"] = device_info.model
     metadata["device_channels"] = device_info.NumberOfChannels
     metadata["channel_state"] = channel_info.state
     metadata["channel_board"] = channel_info.board
-    metadata["mem_size"] = getattr(channel_info, "MemSize")
+    metadata["mem_size"] = channel_info.MemSize
     metadata["channel_amp"] = channel_info.amplifier if channel_info.NbAmps else None
     metadata["channel_I_ranges"] = [channel_info.min_IRange, channel_info.max_IRange]
     logger.debug("Logging all channel info:")
@@ -130,8 +128,7 @@ def get_data(
             with KBIO_api_wrapped(dllpath, address) as api:
                 id_, device_info = api.id_, api.device_info
                 logger.debug("getting data from '%s:%s'", address, channel)
-                data = api.GetData(id_, channel)
-                data = parse_raw_data(api, data, device_info.model)
+                data = parse_raw_data(api, api.GetData(id_, channel), device_info.model)
             break
         except Exception as e:
             logger.debug("Attempt %d failed: %s", attempt + 1, e)
