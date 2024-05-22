@@ -37,6 +37,13 @@ def _default_parsers() -> tuple[argparse.ArgumentParser, argparse.ArgumentParser
         default=False,
         help="Launch tomato in test mode.",
     )
+    parser.add_argument(
+        "-J",
+        "--json",
+        action="store_true",
+        default=False,
+        help="Return a json string from ketchup commands.",
+    )
 
     verbose = argparse.ArgumentParser(add_help=False)
     for p in [parser, verbose]:
