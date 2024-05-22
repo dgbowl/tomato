@@ -210,8 +210,8 @@ def status(args: Namespace) -> None:
                 "pid",
             ]
             running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
-            pips, pjobids, pids = zip(*running)
-            print(f"{pjobids=}")
+            if running:
+                pips, pjobids, pids = zip(*running)
             rows = []
             for i, jobid in enumerate(args.jobid):
                 ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
@@ -226,8 +226,7 @@ def status(args: Namespace) -> None:
                     None,
                     None,
                 ]
-                if status.startswith("r") or status.startswith("c"):
-                    print(f"{jobid=}")
+                if running and (status.startswith("r") or status.startswith("c")):
                     try:
                         i = pjobids.index(int(jobid))
                         row[6:7] = [pips[i], pids[i]]
