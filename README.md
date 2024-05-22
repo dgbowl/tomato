@@ -16,6 +16,7 @@ See the [Documentation](https://dgbowl.github.io/tomato) for more detailed info.
 ## Contributors:
 - [Peter Kraus](http://github.com/PeterKraus)
 - [Loris Ercole](http://github.com/lorisercole)
+- [Graham Kimbell](http://github.com/g-kimbell)
 
 ## Acknowledgements
 

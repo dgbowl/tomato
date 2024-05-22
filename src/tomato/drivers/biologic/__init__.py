@@ -11,7 +11,6 @@ The :mod:`~tomato.drivers.biologic` driver requires the following settings in th
 :ref:`setfile`:
 
 - ``[drivers.biologic.dllpath]`` pointing to the folder of the EC-Lib Development library;
-- ``[drivers.biologic.lockfile]`` pointing to a file to be used as a lock file for the DLL.
 
 Supported *method* parameters:
 ---------------------------------
@@ -96,6 +95,7 @@ Supported ``techniques``:
 
 .. codeauthor::
     Peter Kraus
+    Graham Kimbell
 
 .. |biologic.techs| replace:: :class:`Literal["constant_current", "constant_voltage", "sweep_current", "sweep_voltage", "open_circuit_voltage", "loop"]`
 
@@ -104,4 +104,5 @@ Supported ``techniques``:
 .. |biologic.Eranges| replace:: :class:`Literal["+-2.5 V", "+-5.0 V", "+-10 V"]`
 
 """
+
 from .main import get_status, get_data, start_job, stop_job

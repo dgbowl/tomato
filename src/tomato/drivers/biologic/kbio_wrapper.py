@@ -14,6 +14,32 @@ from .kbio.c_utils import c_is_64b
 from .tech_params import named_params, techfiles, datatypes, I_ranges, E_ranges
 
 
+class KBIO_api_wrapped(KBIO_api):
+    def __init__(self, dllpath, address):
+        if c_is_64b:
+            dllfile = "EClib64.dll"
+        else:
+            dllfile = "EClib.dll"
+        apipath = os.path.join(dllpath, dllfile)
+        log.debug("biologic library path is '%s'", apipath)
+
+        self.connect_timeout = 1
+        self.address = address
+        self.id_ = None
+        self.device_info = None
+
+        super().__init__(apipath)
+
+    def __enter__(self):
+        log.debug("connecting to '%s'", self.address)
+        self.id_, self.device_info = self.Connect(self.address, self.connect_timeout)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.Disconnect(self.id_)
+        log.debug("disconnected from '%s'", self.address)
+
+
 def get_test_magic(
     variable: str, sign: str, logic: str = "or", active: bool = True
 ) -> int:
@@ -189,7 +215,7 @@ def translate(technique: dict, capacity: float) -> dict:
             tech["Record_every_dE"] = technique.get("record_every_dE", 0.005)
     else:
         if technique["technique"] != "open_circuit_voltage":
-            log.error(f"technique name '{technique['technique']}' not understood.")
+            log.error("technique name '%s' not understood.", technique["technique"])
         tech = {
             "technique": "open_circuit_voltage",
             "Rest_time_T": technique.get("time", 0.0),
@@ -243,6 +269,7 @@ def parse_raw_data(api, data, devname):
         },
         "current": {
             "status": status,
+            "mem_filled": current_values.MemFilled,
             "elapsed_time": current_values.ElapsedTime,
             "I_range": {v: k for k, v in I_ranges.items()}[current_values.IRange],
             "E_range": {
@@ -287,7 +314,7 @@ def get_kbio_api(dllpath):
     else:
         dllfile = "EClib.dll"
     apipath = os.path.join(dllpath, dllfile)
-    log.debug(f"biologic library path is '{apipath}'")
+    log.debug("biologic library path is '%s'", apipath)
     api = KBIO_api(apipath)
     return api
 

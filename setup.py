@@ -1,7 +1,8 @@
 import setuptools
 import versioneer
-version=versioneer.get_version()
-cmdclass=versioneer.get_cmdclass()
+
+version = versioneer.get_version()
+cmdclass = versioneer.get_cmdclass()
 
 with open("README.md", "r", encoding="utf-8") as infile:
     readme = infile.read()
@@ -37,7 +38,6 @@ setuptools.setup(
         "psutil",
         "yadg == 4.2.5",
         "dgbowl_schemas>=108",
-        "filelock",
     ],
     extras_require={
         "testing": [
@@ -47,14 +47,14 @@ setuptools.setup(
             "sphinx==4.5.0",
             "sphinx-rtd-theme",
             "sphinx-autodoc-typehints",
-            "autodoc-pydantic"
-        ]
+            "autodoc-pydantic",
+        ],
     },
     entry_points={
         "console_scripts": [
             "tomato=tomato:run_tomato",
             "ketchup=tomato:run_ketchup",
-            "tomato_job=tomato.drivers:tomato_job"
+            "tomato_job=tomato.drivers:tomato_job",
         ]
     },
 )

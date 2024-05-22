@@ -2,6 +2,7 @@
 Main module - executables for tomato.
 
 """
+
 import argparse
 import logging
 import psutil
@@ -83,7 +84,7 @@ def run_tomato():
     elif psutil.POSIX:
         pid = os.getpid()
 
-    procs = psutil.process_iter(['pid', 'name'])
+    procs = psutil.process_iter(["pid", "name"])
     toms = [p.pid for p in procs if p.name() in {"tomato", "tomato.exe"}]
     toms.pop(toms.index(pid))
     if len(toms) > 0 and not args.test:
@@ -141,6 +142,9 @@ def run_ketchup():
         "jobid", help="The jobid of the job to be cancelled.", default=None
     )
     cancel.set_defaults(func=ketchup.cancel)
+
+    cancel_all = subparsers.add_parser("cancel_all")
+    cancel_all.set_defaults(func=ketchup.cancel_all)
 
     load = subparsers.add_parser("load")
     load.add_argument("sample", help="Name of the sample to be loaded.", default=None)
