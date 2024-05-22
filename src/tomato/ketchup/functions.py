@@ -59,13 +59,13 @@ def submit(args: Namespace) -> None:
     dirs = setlib.get_dirs(args.test)
     settings = setlib.get_settings(dirs.user_config_dir, dirs.user_data_dir)
     queue = settings["queue"]
-    if args.json: # read directly from json string encoded in base64
+    if args.json:  # read directly from json string encoded in base64
         log.debug("attempting to open payload delivered by base64 encoded json string")
         encoded_json_string = args.payload
         json_string = base64.b64decode(encoded_json_string).decode()
         pldict = json.loads(json_string)
         payload = to_payload(**pldict)
-    else: # load a local file
+    else:  # load a local file
         if os.path.exists(args.payload) and os.path.isfile(args.payload):
             log.debug(f"attempting to open Payload at '{args.payload}'")
         else:
@@ -144,9 +144,9 @@ def status(args: Namespace) -> None:
 
     >>> # Get pipeline status of tomato as a json string:
     >>> ketchup -J status
-    {"pipeline": ["dummy-10", "dummy-5"], "ready": [false, false], "jobid": [3, null], 
+    {"pipeline": ["dummy-10", "dummy-5"], "ready": [false, false], "jobid": [3, null],
     "PID": [1035, null], "sampleid": ["dummy_sequential_1_0.05", null]}
-    
+
     .. note::
 
         Calling ``ketchup status`` with a single ``jobid`` will return a ``yaml``
@@ -173,17 +173,17 @@ def status(args: Namespace) -> None:
             rows = [
                 (pip,) + dbhandler.pipeline_get_info(state["path"], pip, state["type"])
                 for pip in pips
-                ]
+            ]
             columns = list(map(list, zip(*rows)))
-            column_names = ['pipeline','sampleid','ready','jobid','pid']
-            data = {name: column for name,column in zip(column_names,columns)}
+            column_names = ["pipeline", "sampleid", "ready", "jobid", "pid"]
+            data = {name: column for name, column in zip(column_names, columns)}
             print(json.dumps(data))
         elif "queue" in args.jobid:
             jobs = dbhandler.job_get_all(queue["path"], type=queue["type"])
             running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
             rows = []
             jobids = []
-            column_names = ['jobid','jobname','status','pipeline','pid']
+            column_names = ["jobid", "jobname", "status", "pipeline", "pid"]
             for jobid, jobname, payload, status in jobs:
                 if not status.startswith("c") or args.verbose - args.quiet > 0:
                     row = [jobid, jobname, status, None, None]
@@ -192,32 +192,50 @@ def status(args: Namespace) -> None:
             for pip, pjobid, pid in running:
                 try:
                     idx = jobids.index(pjobid)
-                    rows[idx][3:4]=[pip,pid]
+                    rows[idx][3:4] = [pip, pid]
                 except ValueError:
-                    pass # not in running
+                    pass  # not in running
             columns = list(map(list, zip(*rows)))
-            data = {name: column for name,column in zip(column_names,columns)}
+            data = {name: column for name, column in zip(column_names, columns)}
             print(json.dumps(data))
         else:
-            column_names = ["jobid","jobname","status","submitted_at","executed at","completed_at","pipeline","pid"]
+            column_names = [
+                "jobid",
+                "jobname",
+                "status",
+                "submitted_at",
+                "executed at",
+                "completed_at",
+                "pipeline",
+                "pid",
+            ]
             running = dbhandler.pipeline_get_running(state["path"], type=state["type"])
-            pips,pjobids,pids = zip(*running)
+            pips, pjobids, pids = zip(*running)
             print(f"{pjobids=}")
-            rows=[]
-            for i,jobid in enumerate(args.jobid):
+            rows = []
+            for i, jobid in enumerate(args.jobid):
                 ji = dbhandler.job_get_info(queue["path"], jobid, type=queue["type"])
                 jobname, payload, status, submitted_at, executed_at, completed_at = ji
-                row = [int(jobid),jobname,status,submitted_at,executed_at,completed_at,None,None]
+                row = [
+                    int(jobid),
+                    jobname,
+                    status,
+                    submitted_at,
+                    executed_at,
+                    completed_at,
+                    None,
+                    None,
+                ]
                 if status.startswith("r") or status.startswith("c"):
                     print(f"{jobid=}")
                     try:
                         i = pjobids.index(int(jobid))
-                        row[6:7] = [pips[i],pids[i]]
+                        row[6:7] = [pips[i], pids[i]]
                     except ValueError:
-                        pass # not in running
+                        pass  # not in running
                 rows += [row]
             columns = list(map(list, zip(*rows)))
-            data = {name: column for name,column in zip(column_names,columns)}
+            data = {name: column for name, column in zip(column_names, columns)}
             print(json.dumps(data))
 
     else:
