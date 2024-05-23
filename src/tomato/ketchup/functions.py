@@ -464,7 +464,7 @@ def eject(args: Namespace) -> None:
         log.info(f"pipeline '{args.pipeline}' is already empty")
 
 
-def ready(args, unready=False):
+def ready(args, mark_ready=True):
     """
     Mark pipeline as ready. Usage:
 
@@ -489,17 +489,11 @@ def ready(args, unready=False):
         state["path"], args.pipeline, state["type"]
     )
 
-    if jobid is None and pid is None and ready:
-        if unready:
-            log.info(f"marking pipeline '{args.pipeline}' as not ready.")
-            dbhandler.pipeline_reset_job(
-                state["path"], args.pipeline, False, state["type"]
-            )
-        else:
-            log.info(f"marking pipeline '{args.pipeline}' as ready.")
-            dbhandler.pipeline_reset_job(
-                state["path"], args.pipeline, True, state["type"]
-            )
+    if jobid is None and pid is None:
+        log.info(f"marking pipeline '{args.pipeline}' as {'ready' if mark_ready else 'not ready'}.")
+        dbhandler.pipeline_reset_job(
+            state["path"], args.pipeline, mark_ready, state["type"]
+        )
     else:
         log.warning(f"cannot change pipeline ready status: job '{jobid}' is running.")
 
@@ -516,7 +510,7 @@ def unready(args):
     whether it is currently running.
 
     """
-    ready(args, unready=True)
+    ready(args, mark_ready=False)
 
 
 def snapshot(args: Namespace) -> None:
