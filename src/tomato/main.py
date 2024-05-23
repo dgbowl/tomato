@@ -176,7 +176,7 @@ def run_ketchup():
     unready.add_argument(
         "pipeline", help="Name of the pipeline to mark as not ready.", default=None
     )
-    ready.set_defaults(func=ketchup.unready)
+    unready.set_defaults(func=ketchup.unready)
 
     snapshot = subparsers.add_parser("snapshot")
     snapshot.add_argument(
