@@ -172,6 +172,12 @@ def run_ketchup():
     )
     ready.set_defaults(func=ketchup.ready)
 
+    unready = subparsers.add_parser("unready")
+    unready.add_argument(
+        "pipeline", help="Name of the pipeline to mark as not ready.", default=None
+    )
+    ready.set_defaults(func=ketchup.unready)
+
     snapshot = subparsers.add_parser("snapshot")
     snapshot.add_argument(
         "jobid", help="The jobid of the job to be snapshotted.", default=None
