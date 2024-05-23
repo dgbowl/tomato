@@ -464,7 +464,7 @@ def eject(args: Namespace) -> None:
         log.info(f"pipeline '{args.pipeline}' is already empty")
 
 
-def ready(args):
+def ready(args, unready=False):
     """
     Mark pipeline as ready. Usage:
 
@@ -489,11 +489,34 @@ def ready(args):
         state["path"], args.pipeline, state["type"]
     )
 
-    if jobid is None and pid is None:
-        log.info(f"marking pipeline '{args.pipeline}' as ready.")
-        dbhandler.pipeline_reset_job(state["path"], args.pipeline, True, state["type"])
+    if jobid is None and pid is None and ready:
+        if unready:
+            log.info(f"marking pipeline '{args.pipeline}' as not ready.")
+            dbhandler.pipeline_reset_job(
+                state["path"], args.pipeline, False, state["type"]
+            )
+        else:
+            log.info(f"marking pipeline '{args.pipeline}' as ready.")
+            dbhandler.pipeline_reset_job(
+                state["path"], args.pipeline, True, state["type"]
+            )
     else:
-        log.warning(f"cannot mark pipeline as ready: job '{jobid}' is running.")
+        log.warning(f"cannot change pipeline ready status: job '{jobid}' is running.")
+
+
+def unready(args):
+    """
+    Mark pipeline as unready. Usage:
+
+    .. code:: bash
+
+        ketchup [-t] [-v] [-q] unready <pipeline>
+
+    Marks the ``pipeline`` as unready. Checks whether the pipeline exists, and
+    whether it is currently running.
+
+    """
+    ready(args, unready=True)
 
 
 def snapshot(args: Namespace) -> None:

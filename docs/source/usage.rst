@@ -137,6 +137,15 @@ To manage *samples* in the *pipelines*, use the following :mod:`~tomato.ketchup`
        has been implemented to allow the user to investigate the *sample* and/or *pipeline*
        for any faults.
 
+    #. **To mark** a *pipeline* as **not ready**, run:
+
+         .. code-block:: bash
+    
+              >>> ketchup unready <pipeline>
+    
+         This command will mark the *pipeline* as not ready, any *jobs* that are submitted
+         will not be run automatically.
+
 .. note::
 
     Further information about :mod:`~tomato.ketchup` is available in the documentation
