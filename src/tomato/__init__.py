@@ -1,17 +1,18 @@
 import sys
 from pathlib import Path
 
+from importlib import metadata
 import argparse
 import logging
 import zmq
 import appdirs
 import yaml
 
-from tomato import tomato, ketchup, _version
+from tomato import tomato, ketchup
 
 sys.path += sys.modules["tomato"].__path__
 
-__version__ = _version.get_versions()["version"]
+__version__ = metadata.version("tomato")
 VERSION = __version__
 DEFAULT_TOMATO_PORT = 1234
 logger = logging.getLogger(__name__)
