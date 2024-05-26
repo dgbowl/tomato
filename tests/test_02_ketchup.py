@@ -134,7 +134,7 @@ def test_ketchup_status_complete(pl, datadir, start_tomato_daemon, stop_tomato_d
         "counter_60_0.1",
     ],
 )
-def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
+def test_ketchup_cancel_running(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     args = [datadir, start_tomato_daemon, stop_tomato_daemon]
     test_ketchup_submit_one(f"{pl}.yml", None, *args)
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid=pl)
@@ -157,6 +157,25 @@ def test_ketchup_cancel(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
     print(f"{os.listdir(os.path.join('Jobs', '1'))=}")
     assert ret.data[1].status == "cd"
     assert os.path.exists("results.1.nc")
+
+
+@pytest.mark.parametrize(
+    "pl",
+    [
+        "counter_60_0.1",
+    ],
+)
+def test_ketchup_cancel_queued(pl, datadir, start_tomato_daemon, stop_tomato_daemon):
+    args = [datadir, start_tomato_daemon, stop_tomato_daemon]
+    test_ketchup_submit_one(f"{pl}.yml", None, *args)
+    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid=pl)
+    assert wait_until_ketchup_status(jobid=1, status="qw", port=PORT, timeout=5000)
+
+    status = tomato.status(**kwargs, with_data=True)
+    ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1])
+    print(f"{ret=}")
+    assert ret.success
+    assert ret.data[1].status == "cd"
 
 
 @pytest.mark.parametrize(
