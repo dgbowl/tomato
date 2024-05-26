@@ -35,7 +35,7 @@ jobs:
         strategy:
             matrix:
                 pyver: ['3.9']
-                os: ['windows-latest']
+                os: ['ubuntu-latest']
         uses: ./.github/workflows/workflow-pages.yml
         with:
             pyver: ${{ matrix.pyver }}

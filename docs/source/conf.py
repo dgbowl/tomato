@@ -36,7 +36,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     # "sphinx.ext.autosummary",
-    "sphinx_autodoc_typehints",
+    # "sphinx_autodoc_typehints",
     "sphinx_rtd_theme",
     "sphinxcontrib.autodoc_pydantic",
     "sphinxcontrib.mermaid",

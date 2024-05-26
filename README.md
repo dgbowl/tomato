@@ -9,15 +9,12 @@
 
 - `example_counter`: an example device for testing purposes.
 
-Partially supported hardware includes:
-
-- `biologic`: device for BioLogic potentiostats via the EC-Lib library, Windows only.
-
 See the [Documentation](https://dgbowl.github.io/tomato) for more detailed info.
 
 ## Contributors:
 - [Peter Kraus](http://github.com/PeterKraus)
 - [Loris Ercole](http://github.com/lorisercole)
+- [Graham Kimbell](http://github.com/g-kimbell)
 
 ## Acknowledgements
 
