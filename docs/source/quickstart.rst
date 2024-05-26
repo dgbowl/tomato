@@ -323,6 +323,4 @@ Payload file
 ````````````
 The *payload* file contains all information required to enter a *job* into the queue and
 allow its assignment onto a *pipeline*. The overall schema of the *payload* is defined
-in the :mod:`dgbowl_schemas.tomato` module, and is parsed using :func:`dgbowl_schemas.tomato.to_payload`:
-
-.. autopydantic_model:: dgbowl_schemas.tomato.payload_0_2.Payload
+in the :mod:`dgbowl_schemas.tomato` module, and is parsed using :func:`dgbowl_schemas.tomato.to_payload`.
