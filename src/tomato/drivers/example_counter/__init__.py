@@ -40,10 +40,10 @@ class DriverInterface(DriverInterface):
 
     def attrs(self, **kwargs) -> dict:
         return dict(
-            delay=dict(type=float, rw=True),
-            time=dict(type=float, rw=True),
-            started=dict(type=bool, rw=True),
-            val=dict(type=int, rw=False),
+            delay=dict(type=float, rw=True, status=False, data=True),
+            time=dict(type=float, rw=True, status=False, data=True),
+            started=dict(type=bool, rw=True, status=True, data=False),
+            val=dict(type=int, rw=False, status=True, data=True),
         )
 
     def tasks(self, **kwargs) -> dict:
@@ -129,6 +129,16 @@ class DriverInterface(DriverInterface):
             return Reply(success=True, msg="ready")
         else:
             return Reply(success=True, msg="running")
+
+    @in_devmap
+    def task_stop(self, address: str, channel: int):
+        self.dev_set_attr(attr="started", val=False, address=address, channel=channel)
+
+        ret = self.task_data(self, address, channel)
+        if ret.success:
+            return Reply(success=True, msg=f"task stopped, {ret.msg}", data=ret.data)
+        else:
+            return Reply(success=True, msg=f"task stopped, {ret.msg}")
 
     @in_devmap
     def task_data(self, address: str, channel: int, **kwargs):
