@@ -18,7 +18,7 @@ from threading import currentThread
 import zmq
 import psutil
 
-import tomato.drivers
+from tomato.drivers import driver_to_interface
 from tomato.models import Reply
 
 logger = logging.getLogger(__name__)
@@ -96,12 +96,11 @@ def tomato_driver() -> None:
     logger.debug(f"{daemon=}")
 
     logger.info(f"attempting to spawn driver {args.driver!r}")
-    if not hasattr(tomato.drivers, args.driver):
+    Interface = driver_to_interface(args.driver)
+    if Interface is None:
         logger.critical(f"library of driver {args.driver!r} not found")
         return
-
-    kwargs = dict(settings=daemon.drvs[args.driver].settings)
-    interface = getattr(tomato.drivers, args.driver).DriverInterface(**kwargs)
+    interface = Interface(settings=daemon.drvs[args.driver].settings)
 
     logger.info(f"registering devices in driver {args.driver!r}")
     for dev in daemon.devs.values():
