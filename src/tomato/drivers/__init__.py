@@ -1,6 +1,7 @@
 """
 Driver documentation goes here.
 """
+
 import importlib
 import logging
 
@@ -8,6 +9,7 @@ from typing import Union
 from tomato.models import ModelInterface
 
 logger = logging.getLogger(__name__)
+
 
 def driver_to_interface(drivername: str) -> Union[None, ModelInterface]:
     modname = f"tomato_{drivername.replace('-', '_')}"

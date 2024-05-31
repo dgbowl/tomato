@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Any, Mapping, Sequence, Literal
+from typing import Optional, Any, Mapping, Sequence, Literal, TypeVar
 from pathlib import Path
 from abc import ABCMeta, abstractmethod
 import xarray as xr
@@ -76,7 +76,7 @@ class ModelInterface(metaclass=ABCMeta):
     class Attr(BaseModel):
         """Class used to describe device attributes."""
 
-        type: type
+        type: TypeVar("T")
         rw: bool = False
         status: bool = False
 
