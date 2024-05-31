@@ -5,7 +5,7 @@ from typing import Any
 from functools import wraps
 
 from tomato.drivers.example_counter.counter import Counter
-from tomato.models import Reply, DriverInterface
+from tomato.models import Reply, ModelInterface
 from xarray import Dataset
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ def in_devmap(func):
     return wrapper
 
 
-class DriverInterface(DriverInterface):
+class DriverInterface(ModelInterface):
     class DeviceInterface:
         dev: Counter
         conn: Connection
@@ -40,10 +40,10 @@ class DriverInterface(DriverInterface):
 
     def attrs(self, **kwargs) -> dict:
         return dict(
-            delay=dict(type=float, rw=True, status=False, data=True),
-            time=dict(type=float, rw=True, status=False, data=True),
-            started=dict(type=bool, rw=True, status=True, data=False),
-            val=dict(type=int, rw=False, status=True, data=True),
+            delay=self.Attr(type=float, rw=True),
+            time=self.Attr(type=float, rw=True),
+            started=self.Attr(type=bool, rw=True, status=True),
+            val=self.Attr(type=int, status=True),
         )
 
     def tasks(self, **kwargs) -> dict:
@@ -70,7 +70,7 @@ class DriverInterface(DriverInterface):
         key = (address, channel)
         if attr in self.attrs():
             params = self.attrs()[attr]
-            if params["rw"] and isinstance(val, params["type"]):
+            if params.rw and isinstance(val, params.type):
                 self.devmap[key].conn.send(("set", attr, val))
 
     @in_devmap
@@ -183,4 +183,5 @@ class DriverInterface(DriverInterface):
 
 
 if __name__ == "__main__":
-    test = DriverInterface()
+    interface = DriverInterface()
+    print(f"{interface=}")

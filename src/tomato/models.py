@@ -72,7 +72,14 @@ class Reply(BaseModel):
     data: Optional[Any] = None
 
 
-class DriverInterface(metaclass=ABCMeta):
+class ModelInterface(metaclass=ABCMeta):
+    class Attr(BaseModel):
+        """Class used to describe device attributes."""
+
+        type: type
+        rw: bool = False
+        status: bool = False
+
     class DeviceInterface(metaclass=ABCMeta):
         """Class used to implement management of each individual device."""
 
@@ -106,11 +113,11 @@ class DriverInterface(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def attrs(self, address: str, channel: int, **kwargs) -> dict:
+    def attrs(self, address: str, channel: int, **kwargs) -> dict[str, Attr]:
         """
         Function that returns all gettable and settable attributes, their rw status,
-        and whether they are to be printed in :func:`self.dev_get_data` and
-        :func:`self.dev_status`.
+        and whether they are to be returned in :func:`self.dev_status`. All attrs are
+        returned by :func:`self.dev_get_data`.
 
         This is the "low level" control interface, intended for the device dashboard.
 
@@ -118,10 +125,10 @@ class DriverInterface(metaclass=ABCMeta):
             ::
 
                 return dict(
-                    delay = dict(type=float, rw=True, status=False, data=True),
-                    time = dict(type=float, rw=True, status=False, data=True),
-                    started = dict(type=bool, rw=True, status=True, data=False),
-                    val = dict(type=int, rw=False, status=True, data=True),
+                    delay = self.Attr(type=float, rw=True, status=False),
+                    time = self.Attr(type=float, rw=True, status=False),
+                    started = self.Attr(type=bool, rw=True, status=True),
+                    val = self.Attr(type=int, rw=False, status=True),
                 )
 
         """
@@ -149,11 +156,10 @@ class DriverInterface(metaclass=ABCMeta):
 
     def dev_get_data(self, address: str, channel: int, **kwargs):
         ret = {}
-        for k, v in self.attrs(address=address, channel=channel, **kwargs).items():
-            if v.data:
-                ret[k] = self.dev_get_attr(
-                    attr=k, address=address, channel=channel, **kwargs
-                )
+        for k in self.attrs(address=address, channel=channel, **kwargs).keys():
+            ret[k] = self.dev_get_attr(
+                attr=k, address=address, channel=channel, **kwargs
+            )
         return ret
 
     @abstractmethod
