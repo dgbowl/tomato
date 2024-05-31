@@ -109,18 +109,21 @@ class DriverInterface(metaclass=ABCMeta):
     def attrs(self, address: str, channel: int, **kwargs) -> dict:
         """
         Function that returns all gettable and settable attributes, their rw status,
-        and whether they are to be printed in `dev_status`.
+        and whether they are to be printed in :func:`self.dev_get_data` and
+        :func:`self.dev_status`.
 
         This is the "low level" control interface, intended for the device dashboard.
 
         Example:
-        --------
-        return dict(
-            delay = dict(type=float, rw=True, status=False),
-            time = dict(type=float, rw=True, status=False),
-            started = dict(type=bool, rw=True, status=True),
-            val = dict(type=int, rw=False, status=True),
-        )
+            ::
+
+                return dict(
+                    delay = dict(type=float, rw=True, status=False, data=True),
+                    time = dict(type=float, rw=True, status=False, data=True),
+                    started = dict(type=bool, rw=True, status=True, data=False),
+                    val = dict(type=int, rw=False, status=True, data=True),
+                )
+
         """
         pass
 
@@ -144,10 +147,14 @@ class DriverInterface(metaclass=ABCMeta):
                 )
         return ret
 
-    # @abstractmethod
-    # def dev_get_data(self, address: str, channel: int, **kwargs):
-    #    """Get a data report from a Component"""
-    #    pass
+    def dev_get_data(self, address: str, channel: int, **kwargs):
+        ret = {}
+        for k, v in self.attrs(address=address, channel=channel, **kwargs).items():
+            if v.data:
+                ret[k] = self.dev_get_attr(
+                    attr=k, address=address, channel=channel, **kwargs
+                )
+        return ret
 
     @abstractmethod
     def tasks(self, address: str, channel: int, **kwargs) -> dict:
@@ -157,9 +164,12 @@ class DriverInterface(metaclass=ABCMeta):
         elements present in :func:`self.attrs`.
 
         Example:
-        return dict(
-            count = dict(time = dict(type=float), delay = dict(type=float),
-        )
+            ::
+
+                return dict(
+                    count = dict(time = dict(type=float), delay = dict(type=float),
+                )
+
         """
         pass
 
@@ -178,10 +188,10 @@ class DriverInterface(metaclass=ABCMeta):
         """get any cached data for the current task on the component"""
         pass
 
-    # @abstractmethod
-    # def task_stop(self, address: str, channel: int) -> xr.Dataset:
-    #    """stops the current task, making the component ready and returning any data"""
-    #    pass
+    @abstractmethod
+    def task_stop(self, address: str, channel: int) -> xr.Dataset:
+        """stops the current task, making the component ready and returning any data"""
+        pass
 
     @abstractmethod
     def status(self) -> dict:
