@@ -5,7 +5,7 @@ from typing import Any
 from functools import wraps
 
 from tomato.drivers.example_counter.counter import Counter
-from tomato.models import Reply
+from tomato.models import Reply, DriverInterface
 from xarray import Dataset
 
 logger = logging.getLogger(__name__)
@@ -24,8 +24,8 @@ def in_devmap(func):
     return wrapper
 
 
-class Driver:
-    class Device:
+class DriverInterface(DriverInterface):
+    class DeviceInterface:
         dev: Counter
         conn: Connection
         proc: Process
@@ -35,49 +35,48 @@ class Driver:
             self.conn, conn = Pipe()
             self.proc = Process(target=self.dev.run_counter, args=(conn,))
 
-    devmap: dict[tuple, Device]
+    devmap: dict[tuple, DeviceInterface]
     settings: dict
 
-    attrs: dict = dict(
-        delay=dict(type=float, rw=True),
-        time=dict(type=float, rw=True),
-        started=dict(type=bool, rw=True),
-        val=dict(type=int, rw=False),
-    )
+    def attrs(self, **kwargs) -> dict:
+        return dict(
+            delay=dict(type=float, rw=True),
+            time=dict(type=float, rw=True),
+            started=dict(type=bool, rw=True),
+            val=dict(type=int, rw=False),
+        )
 
-    tasks: dict = dict(
-        count=dict(
-            time=dict(type=float),
-            delay=dict(type=float),
-        ),
-        random=dict(
-            time=dict(type=float),
-            delay=dict(type=float),
-            min=dict(type=float),
-            max=dict(type=float),
-        ),
-    )
-
-    def __init__(self, settings=None):
-        self.devmap = {}
-        self.settings = settings if settings is not None else {}
+    def tasks(self, **kwargs) -> dict:
+        return dict(
+            count=dict(
+                time=dict(type=float),
+                delay=dict(type=float),
+            ),
+            random=dict(
+                time=dict(type=float),
+                delay=dict(type=float),
+                min=dict(type=float),
+                max=dict(type=float),
+            ),
+        )
 
     def dev_register(self, address: str, channel: int, **kwargs):
         key = (address, channel)
-        self.devmap[key] = self.Device()
+        self.devmap[key] = self.DeviceInterface()
         self.devmap[key].proc.start()
 
     @in_devmap
-    def dev_attr_set(self, attr: str, val: Any, address: str, channel: int, **kwargs):
+    def dev_set_attr(self, attr: str, val: Any, address: str, channel: int, **kwargs):
         key = (address, channel)
-        if attr in self.attrs:
-            if self.attrs[attr]["rw"] and isinstance(val, self.attrs[attr]["type"]):
+        if attr in self.attrs():
+            params = self.attrs()[attr]
+            if params["rw"] and isinstance(val, params["type"]):
                 self.devmap[key].conn.send(("set", attr, val))
 
     @in_devmap
-    def dev_attr_get(self, attr: str, address: str, channel: int, **kwargs):
+    def dev_get_attr(self, attr: str, address: str, channel: int, **kwargs):
         key = (address, channel)
-        if attr in self.attrs:
+        if attr in self.attrs():
             self.devmap[key].conn.send(("get", attr, None))
             return self.devmap[key].conn.recv()
 
@@ -88,23 +87,15 @@ class Driver:
         return self.devmap[key].conn.recv()
 
     @in_devmap
-    def task_status(self, address: str, channel: int):
-        started = self.dev_attr_get(attr="started", address=address, channel=channel)
-        if not started:
-            return Reply(success=True, msg="ready")
-        else:
-            return Reply(success=True, msg="running")
-
-    @in_devmap
     def task_start(self, address: str, channel: int, task: str, **kwargs):
-        if task not in self.tasks:
+        if task not in self.tasks():
             return Reply(
                 success=False,
                 msg=f"unknown task {task!r} requested",
-                data=self.tasks,
+                data=self.tasks(),
             )
 
-        reqs = self.tasks[task]
+        reqs = self.tasks()[task]
         for k, v in reqs.items():
             if k not in kwargs and "default" not in v:
                 logger.critical("Somehow we're here")
@@ -123,13 +114,21 @@ class Driver:
                     msg=f"parameter {k!r} is wrong type",
                     data=reqs,
                 )
-            self.dev_attr_set(attr=k, val=val, address=address, channel=channel)
-        self.dev_attr_set(attr="started", val=True, address=address, channel=channel)
+            self.dev_set_attr(attr=k, val=val, address=address, channel=channel)
+        self.dev_set_attr(attr="started", val=True, address=address, channel=channel)
         return Reply(
             success=True,
             msg=f"task {task!r} started successfully",
             data=kwargs,
         )
+
+    @in_devmap
+    def task_status(self, address: str, channel: int):
+        started = self.dev_get_attr(attr="started", address=address, channel=channel)
+        if not started:
+            return Reply(success=True, msg="ready")
+        else:
+            return Reply(success=True, msg="running")
 
     @in_devmap
     def task_data(self, address: str, channel: int, **kwargs):
@@ -171,3 +170,7 @@ class Driver:
                 logger.error(f"device {key!r} is still alive")
             else:
                 logger.debug(f"device {key!r} successfully closed")
+
+
+if __name__ == "__main__":
+    test = DriverInterface()
