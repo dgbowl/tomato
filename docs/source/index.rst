@@ -42,7 +42,6 @@ sustainable batteries of the future.
    :maxdepth: 1
    :caption: tomato driver library
 
-   apidoc/tomato.drivers.example_counter
 
 .. toctree::
    :maxdepth: 1
