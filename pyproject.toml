@@ -33,6 +33,7 @@ dependencies = [
     "h5netcdf >= 1.3",
     "xarray >= 2024.2",
     "pydantic ~= 1.0",
+    "tomato-example-counter @ git+https://github.com/dgbowl/tomato-example-counter.git",
 ]
 
 [project.optional-dependencies]
