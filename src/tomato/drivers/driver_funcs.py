@@ -163,7 +163,7 @@ def data_poller(
                 with open(fn, "w") as of:
                     json.dump(data, of)
             else:
-                status = data["current"].get("status")
+                status = data.get("current", {}).get("status")
                 if status is not None:
                     if status in ["RUN", "PAUSE"]:
                         stop = False
