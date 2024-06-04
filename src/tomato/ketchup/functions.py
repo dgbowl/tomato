@@ -250,9 +250,8 @@ def status(args: Namespace) -> None:
                     " ".join([f"{str(r):<{w}.{w}}" for r, w in zip(row, column_widths)])
                 )
         else:
-            for i, jobid in enumerate(args.jobid):
-                for c, r in zip(column_names, rows[i]):
-                    print(f"{c}: {r}")
+            data = [dict(zip(column_names, row)) for row in rows]
+            print(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
 
 def cancel(args: Namespace) -> None:
