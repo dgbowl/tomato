@@ -146,7 +146,6 @@ def data_poller(
     _, _, metadata = driver_api(
         driver, "get_status", jq, log, address, channel, **kwargs
     )
-    mem_size = metadata["mem_size"]
     done = False
     previous = None
     while not done:
@@ -156,17 +155,6 @@ def data_poller(
             )
             data["previous"] = previous
             previous = data["current"]
-            mem_filled = data["current"]["mem_filled"]
-            f_mem_filled = mem_filled / mem_size
-            if f_mem_filled > 0.995:
-                log.critical(
-                    f"{device} {address}:{channel} memory is full, data is being lost"
-                )
-            elif f_mem_filled > 0.8:
-                log.warning(
-                    f"{device} {address}:{channel} memory is {f_mem_filled*100:.1f}% full"
-                )
-
             if nrows > 0:
                 isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
                 isots = isots.replace(":", "")
