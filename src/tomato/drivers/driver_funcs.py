@@ -163,16 +163,16 @@ def data_poller(
                 with open(fn, "w") as of:
                     json.dump(data, of)
             else:
-                status = data.get("current", {}).get("status")
-                if status is not None:
+                if data and data.get("current", {}).get("status"):
+                    status = data["current"]["status"]
                     if status in ["RUN", "PAUSE"]:
                         stop = False
                     else:
+                        stop = True
                         if status != "STOP":
                             log.info(
                                 f"device '{device}' status '{status}' not understood, expected 'RUN' 'PAUSE' or 'STOP'"
                             )
-                        stop = True
                 else:
                     ts, stop, _ = driver_api(
                         driver, "get_status", jq, log, address, channel, **kwargs
