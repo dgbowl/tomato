@@ -163,24 +163,27 @@ def data_poller(
                 with open(fn, "w") as of:
                     json.dump(data, of)
             else:
-                status = data["current"]["status"]
-                if status == "STOP":
-                    stops_received += 1
-                    log.debug(
-                        f"{address}:{channel} has given {stops_received} 'STOP' statuses in a row"
-                    )
-                elif status in ["RUN", "PAUSE"]:
-                    stops_received = 0
+                status = data["current"].get("status")
+                if status is not None:
+                    if status in ["RUN", "PAUSE"]:
+                        stop = False
+                    else:
+                        if status != "STOP":
+                            log.info(
+                                f"device '{device}' status '{status}' not understood, expected 'RUN' 'PAUSE' or 'STOP'"
+                            )
+                        stop = True
                 else:
-                    stops_received += 1
-                    log.critical(
-                        f"get_data status not understood: '{status}', counting as 'STOP' status {stops_received}"
+                    ts, stop, _ = driver_api(
+                        driver, "get_status", jq, log, address, channel, **kwargs
                     )
+                if stop:
+                    stops_received += 1
                 break
         if stops_received >= stops_required:
             done = True
             log.info(
-                f"device '{device}' has stopped polling after {stops_required} consecutive 'STOP' statuses"
+                f"device '{device}' has stopped polling after {stops_required} consecutive stop statuses"
             )
         else:
             time.sleep(pollrate)
