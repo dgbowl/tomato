@@ -44,10 +44,9 @@ setuptools.setup(
             "pytest",
         ],
         "docs": [
-            "sphinx==4.5.0",
+            "sphinx > 5.0",
             "sphinx-rtd-theme",
             "sphinx-autodoc-typehints",
-            "autodoc-pydantic",
         ],
     },
     entry_points={
