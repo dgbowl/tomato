@@ -143,30 +143,30 @@ def data_poller(
     stops_required = kwargs.get("stops_required", 2)
     stops_received = 0
     log.debug(f"in 'data_poller', {pollrate=}")
-    _, _, metadata = driver_api(
-        driver, "get_status", jq, log, address, channel, **kwargs
-    )
-    mem_size = metadata["mem_size"]
-    done = False
+    finished_polling = False
     previous = None
-    while not done:
-        while True:
+    data = {}
+    while not finished_polling:
+        try: # try to get status from last get_data, otherwise use get_status
+            status = data["current"]["status"]
+            if status in ["RUN", "PAUSE"]:
+                stop = False
+            else:
+                stop = True
+                if status != "STOP":
+                    log.info(
+                        f"device '{device}' status '{status}' not understood, expected 'RUN' 'PAUSE' or 'STOP'"
+                    )
+        except (TypeError, KeyError): # data["current"]["status"] doesn't exist
+            ts, stop, _ = driver_api(
+                driver, "get_status", jq, log, address, channel, **kwargs
+            )
+        while True: # get data until no more data is available
             ts, nrows, data = driver_api(
                 driver, "get_data", jq, log, address, channel, **kwargs
             )
             data["previous"] = previous
             previous = data["current"]
-            mem_filled = data["current"]["mem_filled"]
-            f_mem_filled = mem_filled / mem_size
-            if f_mem_filled > 0.995:
-                log.critical(
-                    f"{device} {address}:{channel} memory is full, data is being lost"
-                )
-            elif f_mem_filled > 0.8:
-                log.warning(
-                    f"{device} {address}:{channel} memory is {f_mem_filled*100:.1f}% full"
-                )
-
             if nrows > 0:
                 isots = datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
                 isots = isots.replace(":", "")
@@ -175,26 +175,13 @@ def data_poller(
                 with open(fn, "w") as of:
                     json.dump(data, of)
             else:
-                status = data["current"]["status"]
-                if status == "STOP":
-                    stops_received += 1
-                    log.debug(
-                        f"{address}:{channel} has given {stops_received} 'STOP' statuses in a row"
-                    )
-                elif status in ["RUN", "PAUSE"]:
-                    stops_received = 0
-                else:
-                    stops_received += 1
-                    log.critical(
-                        f"get_data status not understood: '{status}', counting as 'STOP' status {stops_received}"
-                    )
                 break
-        if stops_received >= stops_required:
-            done = True
-            log.info(
-                f"device '{device}' has stopped polling after {stops_required} consecutive 'STOP' statuses"
-            )
+        if stop:
+            stops_received += 1
+            if stops_received >= stops_required:
+                finished_polling = True
         else:
+            stops_received = 0
             time.sleep(pollrate)
     log.info(f"rejoining main thread")
     return

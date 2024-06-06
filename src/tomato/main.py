@@ -122,6 +122,13 @@ def run_ketchup():
         help="Set the job name of the submitted job to?",
         default=None,
     )
+    submit.add_argument(
+        "-J",
+        "--json",
+        action="store_true",
+        default=False,
+        help="Return a json string from ketchup commands.",
+    )
     submit.set_defaults(func=ketchup.submit)
 
     status = subparsers.add_parser("status")
@@ -134,6 +141,13 @@ def run_ketchup():
             "or 'state' for the status of pipelines."
         ),
         default=["state"],
+    )
+    status.add_argument(
+        "-J",
+        "--json",
+        action="store_true",
+        default=False,
+        help="Return a json string from ketchup commands.",
     )
     status.set_defaults(func=ketchup.status)
 
@@ -164,6 +178,12 @@ def run_ketchup():
         "pipeline", help="Name of the pipeline to mark as ready.", default=None
     )
     ready.set_defaults(func=ketchup.ready)
+
+    unready = subparsers.add_parser("unready")
+    unready.add_argument(
+        "pipeline", help="Name of the pipeline to mark as not ready.", default=None
+    )
+    unready.set_defaults(func=ketchup.unready)
 
     snapshot = subparsers.add_parser("snapshot")
     snapshot.add_argument(

@@ -18,6 +18,7 @@ Also includes *sample*/*pipeline* management functions:
 - :func:`.load` to load a *sample* into a *pipeline*
 - :func:`.eject` to remove any *sample* present in a *pipeline*
 - :func:`.ready` to mark a *pipeline* as ready
+- :func:`.unready` to mark a *pipeline* as not ready
 
 
 """
@@ -29,6 +30,7 @@ from .functions import (
     load,
     eject,
     ready,
+    unready,
     snapshot,
     search,
     cancel_all,

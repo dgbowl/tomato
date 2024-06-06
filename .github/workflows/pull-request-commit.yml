@@ -2,7 +2,7 @@ name: pull-request-commit
 on:
   pull_request:
     branches:
-      - master
+      - 0.2.x
 jobs:
   build:
     strategy:
@@ -20,7 +20,7 @@ jobs:
       - uses: ./.github/workflows/before-job
       - uses: ./.github/workflows/build-job
       - uses: actions/upload-artifact@v2
-        with: 
+        with:
           name: dist-${{ matrix.os }}-${{ matrix.pyver }}
           path: dist
   test:
@@ -72,6 +72,6 @@ jobs:
             subprocess.run(["pip", "install", f"{fn}[docs]"])
       - uses: ./.github/workflows/docs-job
       - uses: actions/upload-artifact@v2
-        with: 
+        with:
           name: public-${{ matrix.os }}-${{ matrix.pyver }}
           path: public
