@@ -143,13 +143,25 @@ def data_poller(
     stops_required = kwargs.get("stops_required", 2)
     stops_received = 0
     log.debug(f"in 'data_poller', {pollrate=}")
-    _, _, metadata = driver_api(
-        driver, "get_status", jq, log, address, channel, **kwargs
-    )
-    done = False
+    finished_polling = False
     previous = None
-    while not done:
-        while True:
+    data = {}
+    while not finished_polling:
+        try: # try to get status from last get_data, otherwise use get_status
+            status = data["current"]["status"]
+            if status in ["RUN", "PAUSE"]:
+                stop = False
+            else:
+                stop = True
+                if status != "STOP":
+                    log.info(
+                        f"device '{device}' status '{status}' not understood, expected 'RUN' 'PAUSE' or 'STOP'"
+                    )
+        except (TypeError, KeyError): # data["current"]["status"] doesn't exist
+            ts, stop, _ = driver_api(
+                driver, "get_status", jq, log, address, channel, **kwargs
+            )
+        while True: # get data until no more data is available
             ts, nrows, data = driver_api(
                 driver, "get_data", jq, log, address, channel, **kwargs
             )
@@ -163,29 +175,13 @@ def data_poller(
                 with open(fn, "w") as of:
                     json.dump(data, of)
             else:
-                try:
-                    status = data["current"]["status"]
-                    if status in ["RUN", "PAUSE"]:
-                        stop = False
-                    else:
-                        stop = True
-                        if status != "STOP":
-                            log.info(
-                                f"device '{device}' status '{status}' not understood, expected 'RUN' 'PAUSE' or 'STOP'"
-                            )
-                except (TypeError, KeyError): # data["current"]["status"] doesn't exist
-                    ts, stop, _ = driver_api(
-                        driver, "get_status", jq, log, address, channel, **kwargs
-                    )
-                if stop:
-                    stops_received += 1
                 break
-        if stops_received >= stops_required:
-            done = True
-            log.info(
-                f"device '{device}' has stopped polling after {stops_required} consecutive stop statuses"
-            )
+        if stop:
+            stops_received += 1
+            if stops_received >= stops_required:
+                finished_polling = True
         else:
+            stops_received = 0
             time.sleep(pollrate)
     log.info(f"rejoining main thread")
     return
