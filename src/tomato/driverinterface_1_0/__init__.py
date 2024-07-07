@@ -1,7 +1,29 @@
 from abc import ABCMeta, abstractmethod
-import xarray as xr
 from typing import TypeVar, Any, Literal
 from pydantic import BaseModel
+from threading import Thread, currentThread
+from queue import Queue
+from tomato.models import Reply
+from dgbowl_schemas.tomato.payload import Task
+import logging
+from functools import wraps
+from xarray import Dataset
+
+
+logger = logging.getLogger(__name__)
+
+
+def in_devmap(func):
+    @wraps(func)
+    def wrapper(self, **kwargs):
+        address = kwargs.get("address")
+        channel = kwargs.get("channel")
+        if (address, channel) not in self.devmap:
+            msg = f"dev with address {address!r} and channel {channel} is unknown"
+            return Reply(success=False, msg=msg, data=self.devmap.keys())
+        return func(self, **kwargs)
+
+    return wrapper
 
 
 class ModelInterface(metaclass=ABCMeta):
@@ -15,9 +37,45 @@ class ModelInterface(metaclass=ABCMeta):
         status: bool = False
 
     class DeviceInterface(metaclass=ABCMeta):
-        """Class used to implement management of each individual device."""
+        driver: object
+        data: list
+        status: dict
+        key: tuple
+        thread: Thread
+        task_list: Queue
+        running: bool
 
-        pass
+        def __init__(self, driver, key, **kwargs):
+            self.driver = driver
+            self.key = key
+            self.task_list = Queue()
+            self.thread = Thread(target=self._worker_wrapper, daemon=True)
+            self.data = []
+            self.status = {}
+            self.running = False
+
+        def run(self):
+            self.thread.do_run = True
+            self.thread.start()
+            self.running = True
+
+        def _worker_wrapper(self):
+            thread = currentThread()
+            task = self.task_list.get()
+
+            self.task_runner(task, thread)
+
+            self.task_list.task_done()
+            self.running = False
+            self.thread = Thread(target=self._worker_wrapper, daemon=True)
+
+        @abstractmethod
+        def task_runner(task: Task, thread: Thread):
+            pass
+
+    def CreateDeviceInterface(self, key, **kwargs):
+        """Factory function which passes DriverInterface to the DeviceInterface"""
+        return self.DeviceInterface(self, key, **kwargs)
 
     devmap: dict[tuple, DeviceInterface]
     """Map of registered devices, the tuple keys are components = (address, channel)"""
@@ -35,7 +93,8 @@ class ModelInterface(metaclass=ABCMeta):
         :obj:`self.DeviceInterface` object in the :obj:`self.devmap` if necessary, or
         updating existing channels in :obj:`self.devmap`.
         """
-        self.devmap[(address, channel)] = self.DeviceInterface(**kwargs)
+        key = (address, channel)
+        self.devmap[(address, channel)] = self.CreateDeviceInterface(key, **kwargs)
 
     def dev_teardown(self, address: str, channel: int, **kwargs: dict) -> None:
         """
@@ -68,25 +127,107 @@ class ModelInterface(metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
+    @in_devmap
     def dev_set_attr(self, attr: str, val: Any, address: str, channel: int, **kwargs):
-        """Set the value of a read-write attr on a Component"""
-        pass
+        key = (address, channel)
+        if attr in self.attrs():
+            params = self.attrs()[attr]
+            if params.rw and isinstance(val, params.type):
+                self.devmap[key].status[attr] = val
 
-    @abstractmethod
+    @in_devmap
     def dev_get_attr(self, attr: str, address: str, channel: int, **kwargs):
-        """Get the value of any attr from a Component"""
-        pass
+        key = (address, channel)
+        if attr in self.attrs(address=address, channel=channel):
+            return self.devmap[key].status[attr]
 
-    def dev_status(self, address: str, channel: int, **kwargs) -> dict[str, Any]:
-        """Get a status report from a Component"""
-        ret = {}
-        for k, v in self.attrs(address=address, channel=channel, **kwargs).items():
-            if v.status:
-                ret[k] = self.dev_get_attr(
-                    attr=k, address=address, channel=channel, **kwargs
-                )
-        return ret
+    @in_devmap
+    def dev_status(self, address: str, channel: int, **kwargs):
+        key = (address, channel)
+        running = self.devmap[key].running
+        return Reply(
+            success=True,
+            msg=f"component {key} is{' ' if running else ' not ' }running",
+            data=running,
+        )
+
+    @in_devmap
+    def task_start(self, address: str, channel: int, task: Task, **kwargs):
+        if task.technique_name not in self.tasks(address=address, channel=channel):
+            return Reply(
+                success=False,
+                msg=f"unknown task {task.technique_name!r} requested",
+                data=self.tasks(),
+            )
+
+        key = (address, channel)
+        self.devmap[key].task_list.put(task)
+        self.devmap[key].run()
+        return Reply(
+            success=True,
+            msg=f"task {task!r} started successfully",
+            data=task,
+        )
+
+    @in_devmap
+    def task_status(self, address: str, channel: int):
+        key = (address, channel)
+        started = self.devmap[key].running
+        if not started:
+            return Reply(success=True, msg="ready")
+        else:
+            return Reply(success=True, msg="running")
+
+    @in_devmap
+    def task_stop(self, address: str, channel: int):
+        self.dev_set_attr(attr="started", val=False, address=address, channel=channel)
+
+        ret = self.task_data(self, address, channel)
+        if ret.success:
+            return Reply(success=True, msg=f"task stopped, {ret.msg}", data=ret.data)
+        else:
+            return Reply(success=True, msg=f"task stopped, {ret.msg}")
+
+    @in_devmap
+    def task_data(self, address: str, channel: int, **kwargs):
+        key = (address, channel)
+        data = self.devmap[key].data
+        self.devmap[key].data = []
+
+        if len(data) == 0:
+            return Reply(success=False, msg="found no new datapoints")
+
+        data_vars = {}
+        for ii, item in enumerate(data):
+            for k, v in item.items():
+                if k not in data_vars:
+                    data_vars[k] = [None] * ii
+                data_vars[k].append(v)
+            for k in data_vars:
+                if k not in item:
+                    data_vars[k].append(None)
+
+        uts = {"uts": data_vars.pop("uts")}
+        data_vars = {k: ("uts", v) for k, v in data_vars.items()}
+        ds = Dataset(data_vars=data_vars, coords=uts)
+        return Reply(success=True, msg=f"found {len(data)} new datapoints", data=ds)
+
+    def status(self):
+        devkeys = self.devmap.keys()
+        return Reply(
+            success=True,
+            msg=f"driver running with {len(devkeys)} devices",
+            data=dict(devkeys=devkeys),
+        )
+
+    def teardown(self):
+        for key, dev in self.devmap.items():
+            dev.thread.do_run = False
+            dev.thread.join(1)
+            if dev.thread.is_alive():
+                logger.error(f"device {key!r} is still alive")
+            else:
+                logger.debug(f"device {key!r} successfully closed")
 
     def dev_get_data(self, address: str, channel: int, **kwargs):
         ret = {}
@@ -110,39 +251,5 @@ class ModelInterface(metaclass=ABCMeta):
                     count = dict(time = dict(type=float), delay = dict(type=float),
                 )
 
-        """
-        pass
-
-    @abstractmethod
-    def task_start(self, address: str, channel: int, task: str, **kwargs) -> None:
-        """start a task on a (ready) component"""
-        pass
-
-    @abstractmethod
-    def task_status(self, address: str, channel: int) -> Literal["running", "ready"]:
-        """check task status of the component"""
-        pass
-
-    @abstractmethod
-    def task_data(self, address: str, channel: int, **kwargs) -> xr.Dataset:
-        """get any cached data for the current task on the component"""
-        pass
-
-    @abstractmethod
-    def task_stop(self, address: str, channel: int) -> xr.Dataset:
-        """stops the current task, making the component ready and returning any data"""
-        pass
-
-    @abstractmethod
-    def status(self) -> dict:
-        """return status info of the driver"""
-        pass
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Stop all tasks, tear down all devices, close all processes.
-
-        Users can assume the devices are put in a safe state (valves closed, power off).
         """
         pass

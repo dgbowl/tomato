@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
-from tomato.driverinterface_1_0 import ModelInterface as ModelInterface
 
 
 class Driver(BaseModel):

@@ -28,18 +28,20 @@ import psutil
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.models import Pipeline, Daemon, Component, Device, Driver
+from dgbowl_schemas.tomato import to_payload
+from dgbowl_schemas.tomato.payload import Payload
 
 logger = logging.getLogger(__name__)
 
 
 def find_matching_pipelines(daemon: Daemon, method: list[dict]) -> list[str]:
-    req_names = set([item.device for item in method])
-    req_capabs = set([item.technique for item in method])
+    req_tags = set([item.component_tag for item in method])
+    req_capabs = set([item.technique_name for item in method])
 
     candidates = []
     for pip in daemon.pips.values():
         dnames = set([comp.role for comp in pip.devs.values()])
-        if req_names.intersection(dnames) == req_names:
+        if req_tags.intersection(dnames) == req_tags:
             candidates.append(pip)
 
     matched = []
@@ -189,7 +191,7 @@ def action_queued_jobs(daemon, matched, req):
             jpath = root / "jobdata.json"
             jobargs = {
                 "pipeline": pip.dict(),
-                "payload": job.payload.dict(),
+                "payload": job.payload.model_dump(),
                 "devices": {dname: dev.dict() for dname, dev in daemon.devs.items()},
                 "job": dict(id=job.id, path=str(root)),
             }
@@ -325,8 +327,8 @@ def tomato_job() -> None:
 
     with args.jobfile.open() as infile:
         jsdata = json.load(infile)
-    payload = jsdata["payload"]
-    ready = payload["tomato"].get("unlock_when_done", False)
+    payload = to_payload(**jsdata["payload"])
+
     pip = jsdata["pipeline"]["name"]
     jobid = jsdata["job"]["id"]
     jobpath = Path(jsdata["job"]["path"]).resolve()
@@ -339,8 +341,10 @@ def tomato_job() -> None:
     )
     logger = logging.getLogger(__name__)
 
-    tomato = payload.get("tomato", {})
-    verbosity = tomato.get("verbosity", "INFO")
+    logger.debug(f"{payload=}")
+
+    ready = payload.settings.unlock_when_done
+    verbosity = payload.settings.verbosity
     loglevel = logging._checkLevel(verbosity)
     logger.debug("setting logger verbosity to '%s'", verbosity)
     logger.setLevel(loglevel)
@@ -364,15 +368,15 @@ def tomato_job() -> None:
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
     lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
 
-    output = tomato["output"]
-    outpath = Path(output["path"])
+    output = payload.settings.output
+    outpath = Path(output.path)
     logger.debug(f"output folder is {outpath}")
     if outpath.exists():
         assert outpath.is_dir()
     else:
         logger.debug("path does not exist, creating")
         os.makedirs(outpath)
-    prefix = f"results.{jobid}" if output["prefix"] is None else output["prefix"]
+    prefix = f"results.{jobid}" if output.prefix is None else output.prefix
     respath = outpath / f"{prefix}.nc"
     snappath = outpath / f"snapshot.{jobid}.nc"
     params = dict(respath=str(respath), snappath=str(snappath), jobpath=str(jobpath))
@@ -446,7 +450,7 @@ def job_thread(
             if ret.success and ret.msg == "ready":
                 break
 
-        req.send_pyobj(dict(cmd="task_start", params={**task, **kwargs}))
+        req.send_pyobj(dict(cmd="task_start", params={"task": task, **kwargs}))
         ret = req.recv_pyobj()
         logger.debug(f"{ret=}")
 
@@ -475,7 +479,7 @@ def job_thread(
 def job_main_loop(
     context: zmq.Context,
     port: int,
-    payload: dict,
+    payload: Payload,
     pipname: str,
     jobpath: Path,
     snappath: Path,
@@ -505,13 +509,10 @@ def job_main_loop(
 
     # collate steps by role
     plan = {}
-    for step in payload["method"]:
-        if step["device"] not in plan:
-            plan[step["device"]] = []
-        task = {k: v for k, v in step.items()}
-        del task["device"]
-        task["task"] = task.pop("technique")
-        plan[step["device"]].append(task)
+    for step in payload.method:
+        if step.component_tag not in plan:
+            plan[step.component_tag] = []
+        plan[step.component_tag].append(step)
     logger.debug(f"{plan=}")
 
     # distribute plan into threads
@@ -531,15 +532,15 @@ def job_main_loop(
         threads[role].start()
 
     # wait until threads join or we're killed
-    snapshot = payload["tomato"].get("snapshot", None)
+    snapshot = payload.settings.snapshot
     t0 = time.perf_counter()
     while True:
         logger.debug("tick")
         tN = time.perf_counter()
-        if snapshot is not None and tN - t0 > snapshot["frequency"]:
+        if snapshot is not None and tN - t0 > snapshot.frequency:
             logger.debug("creating snapshot")
             merge_netcdfs(jobpath, snappath)
-            t0 += snapshot["frequency"]
+            t0 += snapshot.frequency
         joined = [proc.is_alive() is False for proc in threads.values()]
         if all(joined):
             break

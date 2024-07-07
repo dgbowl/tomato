@@ -56,7 +56,7 @@ def tomato_driver() -> None:
     parser.add_argument(
         "--verbosity",
         help="Verbosity of the tomato-driver.",
-        default=logging.INFO,
+        default=logging.DEBUG,
         type=int,
     )
     parser.add_argument(
@@ -174,7 +174,6 @@ def tomato_driver() -> None:
                 ret = interface.task_start(**msg["params"])
             elif msg["cmd"] == "task_data":
                 ret = interface.task_data(**msg["params"])
-            logger.debug(f"{ret=}")
             rep.send_pyobj(ret)
         if status == "stop":
             break
@@ -187,7 +186,8 @@ def tomato_driver() -> None:
 
 
 def spawn_tomato_driver(port: int, driver: str, req: zmq.Socket, verbosity: int):
-    cmd = ["tomato-driver", "--port", str(port), "--verbosity", str(verbosity), driver]
+    # cmd = ["tomato-driver", "--port", str(port), "--verbosity", str(verbosity), driver]
+    cmd = ["tomato-driver", "--port", str(port), driver]
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NO_WINDOW
         cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
@@ -276,7 +276,6 @@ def manager(port: int, timeout: int = 1000):
     for driver in daemon.drvs.values():
         logger.debug(f"stopping driver {driver.name!r} on port {driver.port}")
         ret = stop_tomato_driver(driver.port, context)
-        logger.debug(f"{ret=}")
         if ret.success:
             logger.info(f"stopped driver {driver.name!r}")
         else:

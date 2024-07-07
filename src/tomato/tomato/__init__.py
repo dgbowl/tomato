@@ -327,8 +327,8 @@ def reload(
     if not stat.success:
         return stat
     daemon = stat.data
-    logger.critical(f"{daemon.status=}")
-    logger.critical(f"{daemon.pips=}")
+    logger.debug(f"{daemon.status=}")
+    logger.debug(f"{daemon.pips=}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     if daemon.status == "bootstrap":
@@ -343,6 +343,7 @@ def reload(
             )
         )
         rep = req.recv_pyobj()
+        logger.debug(rep)
     elif daemon.status == "running":
         retries = 0
         while True:
@@ -361,6 +362,7 @@ def reload(
 
         # check changes in driver settings
         for drv in drvs.values():
+            logger.debug(f"{drv=}")
             if drv.settings != daemon.drvs[drv.name].settings:
                 ret = _updater(
                     context, daemon.drvs[drv.name].port, "settings", drv.settings
@@ -375,6 +377,7 @@ def reload(
 
         # check changes in devices
         for dev in devs.values():
+            logger.debug(f"{dev=}")
             if (
                 dev.name not in daemon.devs
                 or dev.channels != daemon.devs[dev.name].channels
@@ -385,9 +388,11 @@ def reload(
                         channel=channel,
                         capabilities=dev.capabilities,
                     )
+                    logger.debug(f"{params=}")
                     ret = _updater(
                         context, daemon.drvs[drv.name].port, "dev_register", params
                     )
+                    logger.debug(f"{ret=}")
                     if ret.success is False:
                         return ret
                 params = dev.dict()
@@ -401,6 +406,7 @@ def reload(
                 logger.error("removing devices not yet implemented")
         # check changes in pipelines
         for pip in pips.values():
+            logger.debug(f"{pip=}")
             if pip.name not in daemon.pips:
                 ret = _updater(context, port, "pipeline", pip.dict())
                 if ret.success is False:

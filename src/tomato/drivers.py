@@ -6,7 +6,7 @@ import importlib
 import logging
 
 from typing import Union
-from tomato.models import ModelInterface
+from tomato.driverinterface_1_0 import ModelInterface
 
 logger = logging.getLogger(__name__)
 
