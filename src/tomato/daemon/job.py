@@ -190,9 +190,9 @@ def action_queued_jobs(daemon, matched, req):
 
             jpath = root / "jobdata.json"
             jobargs = {
-                "pipeline": pip.dict(),
+                "pipeline": pip.model_dump(),
                 "payload": job.payload.model_dump(),
-                "devices": {dname: dev.dict() for dname, dev in daemon.devs.items()},
+                "devices": {dn: dev.model_dump() for dn, dev in daemon.devs.items()},
                 "job": dict(id=job.id, path=str(root)),
             }
 

@@ -395,7 +395,7 @@ def reload(
                     logger.debug(f"{ret=}")
                     if ret.success is False:
                         return ret
-                params = dev.dict()
+                params = dev.model_dump()
                 ret = _updater(context, port, "device", params)
                 if ret.success is False:
                     return ret
@@ -408,7 +408,7 @@ def reload(
         for pip in pips.values():
             logger.debug(f"{pip=}")
             if pip.name not in daemon.pips:
-                ret = _updater(context, port, "pipeline", pip.dict())
+                ret = _updater(context, port, "pipeline", pip.model_dump())
                 if ret.success is False:
                     return ret
             else:

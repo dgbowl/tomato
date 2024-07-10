@@ -6,12 +6,12 @@ import importlib
 import logging
 
 from typing import Union
-from tomato.driverinterface_1_0 import ModelInterface
+from tomato.driverinterface_1_0 import DriverInterface
 
 logger = logging.getLogger(__name__)
 
 
-def driver_to_interface(drivername: str) -> Union[None, ModelInterface]:
+def driver_to_interface(drivername: str) -> Union[None, DriverInterface]:
     modname = f"tomato_{drivername.replace('-', '_')}"
 
     try:
