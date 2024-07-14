@@ -1,8 +1,8 @@
-from setuptools import distutils
 import os
 import pytest
 import subprocess
 import psutil
+import shutil
 
 
 @pytest.fixture
@@ -16,11 +16,11 @@ def datadir(tmpdir, request):
     filename = request.module.__file__
     test_dir, _ = os.path.splitext(filename)
     if os.path.isdir(test_dir):
-        distutils.dir_util.copy_tree(test_dir, str(tmpdir))
+        shutil.copytree(test_dir, str(tmpdir), dirs_exist_ok=True)
     base_dir, _ = os.path.split(test_dir)
     common_dir = os.path.join(base_dir, "common")
     if os.path.isdir(common_dir):
-        distutils.dir_util.copy_tree(common_dir, str(tmpdir))
+        shutil.copytree(common_dir, str(tmpdir), dirs_exist_ok=True)
     print(f"{tmpdir=}")
     return tmpdir
 
