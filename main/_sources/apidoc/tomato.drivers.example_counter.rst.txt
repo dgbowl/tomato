@@ -1,0 +1,16 @@
+tomato.drivers.example\_counter package
+=======================================
+
+.. automodule:: tomato.drivers.example_counter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+
+.. automodule:: tomato.drivers.example_counter.counter
+   :members:
+   :undoc-members:
+   :show-inheritance:
