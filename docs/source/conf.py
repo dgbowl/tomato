@@ -12,15 +12,16 @@
 #
 import os
 import sys
+from importlib.metadata import version as get_version
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
-version = "master"
+version = get_version("tomato")
 
 # -- Project information -----------------------------------------------------
 
 project = "tomato"
-copyright = "2021 - 2023, dgbowl authors"
+copyright = "2021 - 2024, dgbowl authors"
 author = "Peter Kraus"
 release = version
 

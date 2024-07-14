@@ -1,14 +1,14 @@
 name: pull-request-commit
 on:
     pull_request:
-        branches: ['master']
+        branches: ['main']
 jobs:
     call-lint:
         uses: ./.github/workflows/workflow-lint.yml
     call-build:
         strategy:
             matrix:
-                pyver: ['3.9', '3.10', '3.11']
+                pyver: ['3.9', '3.10', '3.11', '3.12']
                 os: ['ubuntu-latest']
                 include:
                   - pyver: '3.9'
@@ -21,7 +21,7 @@ jobs:
         needs: [call-build]
         strategy:
             matrix:
-                pyver: ['3.9', '3.10', '3.11']
+                pyver: ['3.9', '3.10', '3.11', '3.12']
                 os: ['ubuntu-latest']
                 include:
                   - pyver: '3.9'

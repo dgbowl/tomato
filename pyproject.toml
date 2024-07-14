@@ -45,7 +45,7 @@ docs = [
 ]
 
 [project.urls]
-Documentation = "https://dgbowl.github.io/tomato/master"
+Documentation = "https://dgbowl.github.io/tomato/main"
 Issues = "https://github.com/dgbowl/tomato/issues"
 Repository = "https://github.com/dgbowl/tomato/"
 
