@@ -1,5 +1,9 @@
 """
-Driver documentation goes here.
+**tomato.drivers**: Shim interfacing with tomato driver packages
+----------------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+
 """
 
 import importlib
