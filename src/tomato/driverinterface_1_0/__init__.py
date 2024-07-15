@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Any
+from typing import TypeVar, Any, Union
 from pydantic import BaseModel
 from threading import Thread, currentThread
 from queue import Queue
@@ -154,7 +154,7 @@ class DriverInterface(metaclass=ABCMeta):
         pass
 
     @in_devmap
-    def attrs(self, address: str, channel: int, **kwargs) -> Reply | None:
+    def attrs(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
         key = (address, channel)
         ret = self.devmap[key].attrs(**kwargs)
         return Reply(
@@ -166,7 +166,7 @@ class DriverInterface(metaclass=ABCMeta):
     @in_devmap
     def dev_set_attr(
         self, attr: str, val: Any, address: str, channel: int, **kwargs
-    ) -> Reply | None:
+    ) -> Union[Reply, None]:
         key = (address, channel)
         self.devmap[key].set_attr(attr=attr, val=val, **kwargs)
         return Reply(
@@ -178,7 +178,7 @@ class DriverInterface(metaclass=ABCMeta):
     @in_devmap
     def dev_get_attr(
         self, attr: str, address: str, channel: int, **kwargs
-    ) -> Reply | None:
+    ) -> Union[Reply, None]:
         key = (address, channel)
         ret = self.devmap[key].get_attr(attr=attr, **kwargs)
         return Reply(
@@ -188,7 +188,7 @@ class DriverInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_status(self, address: str, channel: int, **kwargs) -> Reply | None:
+    def dev_status(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
         key = (address, channel)
         running = self.devmap[key].running
         return Reply(
@@ -200,7 +200,7 @@ class DriverInterface(metaclass=ABCMeta):
     @in_devmap
     def task_start(
         self, address: str, channel: int, task: Task, **kwargs
-    ) -> Reply | None:
+    ) -> Union[Reply, None]:
         key = (address, channel)
         if task.technique_name not in self.devmap[key].tasks(**kwargs):
             return Reply(
@@ -228,7 +228,7 @@ class DriverInterface(metaclass=ABCMeta):
             return Reply(success=True, msg="running")
 
     @in_devmap
-    def task_stop(self, address: str, channel: int, **kwargs) -> Reply | None:
+    def task_stop(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
         key = (address, channel)
         ret = self.devmap[key].stop_task(**kwargs)
         if ret is not None:
@@ -241,7 +241,7 @@ class DriverInterface(metaclass=ABCMeta):
             return Reply(success=True, msg=f"task stopped, {ret.msg}")
 
     @in_devmap
-    def task_data(self, address: str, channel: int, **kwargs) -> Reply | None:
+    def task_data(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
         key = (address, channel)
         data = self.devmap[key].get_data(**kwargs)
 
