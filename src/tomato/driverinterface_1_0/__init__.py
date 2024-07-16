@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar, Any, Union
 from pydantic import BaseModel
-from threading import Thread, currentThread, RLock
+from threading import Thread, current_thread, RLock
 from queue import Queue
 from tomato.models import Reply
 from dgbowl_schemas.tomato.payload import Task
@@ -17,12 +17,16 @@ logger = logging.getLogger(__name__)
 def in_devmap(func):
     @wraps(func)
     def wrapper(self, **kwargs):
-        address = kwargs.get("address")
-        channel = kwargs.get("channel")
-        if (address, channel) not in self.devmap:
+        if "key" in kwargs:
+            key = kwargs.pop("key")
+        else:
+            address = kwargs.get("address")
+            channel = kwargs.get("channel")
+            key = (address, channel)
+        if key not in self.devmap:
             msg = f"dev with address {address!r} and channel {channel} is unknown"
             return Reply(success=False, msg=msg, data=self.devmap.keys())
-        return func(self, **kwargs)
+        return func(self, **kwargs, key=key)
 
     return wrapper
 
@@ -31,7 +35,7 @@ T = TypeVar("T")
 
 
 class Attr(BaseModel):
-    """Class used to describe device attributes."""
+    """A Pydantic :class:`BaseModel` used to describe device attributes."""
 
     type: T
     rw: bool = False
@@ -40,15 +44,39 @@ class Attr(BaseModel):
 
 
 class ModelInterface(metaclass=ABCMeta):
+    """
+    An abstract base class specifying the a driver interface.
+
+    Individual driver modules should expose a :class:`DriverInterface` which inherits
+    from this abstract class. Only the methods of this class should be used to interact
+    with drivers and their devices.
+    """
+
     version: str = "1.0"
 
     class DeviceManager(metaclass=ABCMeta):
-        driver: object
+        """
+        An abstract base class specifying a manager for an individual component.
+        """
+
+        driver: super
+        """The parent :class:`DriverInterface` instance."""
+
         data: dict[str, list]
+        """Container for cached data on this component."""
+
         datalock: RLock
+        """Lock object for thread-safe data manipulation."""
+
         key: tuple
+        """The key in :obj:`driver.devmap` referring to this object."""
+
         thread: Thread
+        """The worker :class:`Thread`."""
+
         task_list: Queue
+        """A :class:`Queue` used to pass :class:`Tasks` to the worker :class:`Thread`."""
+
         running: bool
 
         def __init__(self, driver, key, **kwargs):
@@ -61,52 +89,80 @@ class ModelInterface(metaclass=ABCMeta):
             self.datalock = RLock()
 
         def run(self):
+            """Helper function for starting the :obj:`self.thread`."""
             self.thread.do_run = True
             self.thread.start()
             self.running = True
 
         def task_runner(self):
-            thread = currentThread()
+            """
+            Target function for the :obj:`self.thread`.
+
+            This function waits for a :class:`Task` passed using :obj:`self.task_list`,
+            then handles setting all :class:`Attrs` using the :func:`prepare_task`
+            function, and finally handles the main loop of the task, periodically running
+            the :func:`do_task` function (using `task.sampling_interval`) until the
+            maximum task duration (i.e. `task.max_duration`) is exceeded.
+
+            The :obj:`self.thread` is re-primed for future :class:`Tasks` at the end
+            of this function.
+            """
+            thread = current_thread()
             task: Task = self.task_list.get()
             self.prepare_task(task)
-            t0 = time.perf_counter()
-            tD = t0
+            t_start = time.perf_counter()
+            t_prev = t_start
             self.data = defaultdict(list)
             while getattr(thread, "do_run"):
-                tN = time.perf_counter()
-                if tN - tD > task.sampling_interval:
+                t_now = time.perf_counter()
+                if t_now - t_prev > task.sampling_interval:
                     with self.datalock:
-                        self.do_task(task, t0=t0, tN=tN, tD=tD)
-                    tD += task.sampling_interval
-                if tN - t0 > task.max_duration:
+                        self.do_task(task, t_start=t_start, t_now=t_now, t_prev=t_prev)
+                    t_prev += task.sampling_interval
+                if t_now - t_start > task.max_duration:
                     break
-                time.sleep(max(1e-2, task.sampling_interval / 10))
+                time.sleep(max(1e-2, task.sampling_interval / 20))
 
             self.task_list.task_done()
             self.running = False
             self.thread = Thread(target=self.task_runner, daemon=True)
 
         def prepare_task(self, task: Task, **kwargs: dict):
+            """
+            Given a :class:`Task`, prepare this component for execution by settin all
+            :class:`Attrs` as specified in the `task.technique_params` dictionary.
+            """
             if task.technique_params is not None:
                 for k, v in task.technique_params.items():
                     self.set_attr(attr=k, val=v)
 
         @abstractmethod
         def do_task(self, task: Task, **kwargs: dict):
+            """
+            Periodically called task execution function.
+
+            This function is responsible for updating :obj:`self.data` with new data, i.e.
+            performing the measurement. It should also update the values of all
+            :class:`Attrs`, so that the component status is consistent with the cached data.
+            """
             pass
 
         def stop_task(self, **kwargs: dict):
+            """Stops the currently running task."""
             setattr(self.thread, "do_run", False)
 
         @abstractmethod
         def set_attr(self, attr: str, val: Any, **kwargs: dict):
+            """Sets the specified :class:`Attr` to `val`."""
             pass
 
         @abstractmethod
         def get_attr(self, attr: str, **kwargs: dict) -> Any:
+            """Reads the value of the specified :class:`Attr`."""
             pass
 
         def get_data(self, **kwargs: dict) -> dict[str, list]:
+            """Returns the cached :obj:`self.data` before clearing the cache."""
             with self.datalock:
                 ret = self.data
                 self.data = defaultdict(list)
@@ -114,13 +170,16 @@ class ModelInterface(metaclass=ABCMeta):
 
         @abstractmethod
         def attrs(**kwargs) -> dict[str, Attr]:
+            """Returns a :class:`dict` of all available :class:`Attrs`."""
             pass
 
         @abstractmethod
         def capabilities(**kwargs) -> set:
+            """Returns a :class:`set` of all supported techniques."""
             pass
 
         def status(self, **kwargs) -> dict:
+            """Compiles a status report from :class:`Attrs` marked as `status=True`."""
             status = {}
             for attr, props in self.attrs().items():
                 if props.status:
@@ -128,11 +187,14 @@ class ModelInterface(metaclass=ABCMeta):
             return status
 
     def CreateDeviceManager(self, key, **kwargs):
-        """Factory function which passes DriverInterface to the DeviceInterface"""
+        """
+        A factory function which is used to pass this :class:`ModelInterface` to the new
+        :class:`DeviceManager` instance.
+        """
         return self.DeviceManager(self, key, **kwargs)
 
     devmap: dict[tuple, DeviceManager]
-    """Map of registered devices, the tuple keys are components = (address, channel)"""
+    """Map of registered devices, the tuple keys are `component = (address, channel)`"""
 
     settings: dict[str, Any]
     """A settings map to contain driver-specific settings such as `dllpath` for BioLogic"""
@@ -143,25 +205,37 @@ class ModelInterface(metaclass=ABCMeta):
 
     def dev_register(self, address: str, channel: int, **kwargs: dict) -> None:
         """
-        Register a Device and its Component in this DriverInterface, creating a
-        :obj:`self.DeviceManager` object in the :obj:`self.devmap` if necessary, or
-        updating existing channels in :obj:`self.devmap`.
+        Register a new device component in this driver.
+
+        Creates a :class:`DeviceManager` representing a device component, storing it in
+        the :obj:`self.devmap` using the provided `address` and `channel`.
         """
         key = (address, channel)
         self.devmap[key] = self.CreateDeviceManager(key, **kwargs)
 
-    def dev_teardown(self, address: str, channel: int, **kwargs: dict) -> None:
+    @in_devmap
+    def dev_teardown(self, key: tuple, **kwargs: dict) -> None:
         """
-        Emergency stop function. Set the device into a documented, safe state.
+        Emergency stop function.
 
-        The function is to be only called in case of critical errors, not as part of
-        normal operation.
+        Should set the device component into a documented, safe state. The function is
+        to be only called in case of critical errors, or when the component is being
+        removed, not as part of normal operation (i.e. it is not intended as a clean-up
+        after task completion).
         """
-        pass
+        status = self.task_status(key=key, **kwargs)
+        if status.data:
+            logger.warning("tearing down component '%s' with a running task!")
+            self.task_stop(key=key, **kwargs)
+        del self.devmap[key]
 
     @in_devmap
-    def attrs(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
-        key = (address, channel)
+    def attrs(self, key: tuple, **kwargs: dict) -> Union[Reply, None]:
+        """
+        Query available :class:`Attrs` on the specified device component.
+
+        Pass-through to the :func:`DeviceManager.attrs` function.
+        """
         ret = self.devmap[key].attrs(**kwargs)
         return Reply(
             success=True,
@@ -171,9 +245,14 @@ class ModelInterface(metaclass=ABCMeta):
 
     @in_devmap
     def dev_set_attr(
-        self, attr: str, val: Any, address: str, channel: int, **kwargs
+        self, attr: str, val: Any, key: tuple, **kwargs: dict
     ) -> Union[Reply, None]:
-        key = (address, channel)
+        """
+        Set value of the :class:`Attr` of the specified device component.
+
+        Pass-through to the :func:`DeviceManager.set_attr` function. No type or
+        read-write validation performed here!
+        """
         self.devmap[key].set_attr(attr=attr, val=val, **kwargs)
         return Reply(
             success=True,
@@ -182,10 +261,14 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_get_attr(
-        self, attr: str, address: str, channel: int, **kwargs
-    ) -> Union[Reply, None]:
-        key = (address, channel)
+    def dev_get_attr(self, attr: str, key: tuple, **kwargs: dict) -> Union[Reply, None]:
+        """
+        Get value of the :class:`Attr` from the specified device component.
+
+        Pass-through to the :func:`DeviceManager.get_attr` function. Units are not
+        returned; those can be queried for all :class:`Attrs` using :func:`attrs`.
+
+        """
         ret = self.devmap[key].get_attr(attr=attr, **kwargs)
         return Reply(
             success=True,
@@ -194,28 +277,41 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_status(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
-        key = (address, channel)
-        running = self.devmap[key].running
+    def dev_status(self, key: tuple, **kwargs: dict) -> Union[Reply, None]:
+        """
+        Get the status report from the specified device component.
+
+        Iterates over all :class:`Attrs` on the component that have `status=True` and
+        returns their values in a :class:`dict`.
+        """
+        ret = {}
+        for k, attr in self.devmap[key].attrs(key=key, **kwargs).items():
+            if attr.status:
+                ret[k] = self.devmap[key].get_attr(attr=k, **kwargs)
+
+        ret["running"] = self.devmap[key].running
         return Reply(
             success=True,
-            msg=f"component {key} is{' ' if running else ' not ' }running",
-            data=running,
+            msg=f"component {key} is{' ' if ret['running'] else ' not ' }running",
+            data=ret,
         )
 
     @in_devmap
-    def task_start(
-        self, address: str, channel: int, task: Task, **kwargs
-    ) -> Union[Reply, None]:
-        key = (address, channel)
+    def task_start(self, key: tuple, task: Task, **kwargs) -> Union[Reply, None]:
+        """
+        Submit a :class:`Task` onto the specified device component.
+
+        Pushes the supplied :class:`Task` into the :class:`Queue` of the component,
+        then starts the worker thread. Checks that the :class:`Task` is among the
+        capabilities of this component.
+        """
         if task.technique_name not in self.devmap[key].capabilities(**kwargs):
             return Reply(
                 success=False,
                 msg=f"unknown task {task.technique_name!r} requested",
-                data=self.tasks(address=address, channel=channel),
+                data=self.capabilities(key=key),
             )
 
-        key = (address, channel)
         self.devmap[key].task_list.put(task)
         self.devmap[key].run()
         return Reply(
@@ -225,30 +321,51 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def task_status(self, address: str, channel: int):
-        key = (address, channel)
-        started = self.devmap[key].running
-        if not started:
-            return Reply(success=True, msg="ready")
+    def task_status(self, key: tuple, **kwargs: dict) -> Reply:
+        """
+        Returns the task readiness status of the specified device component.
+
+        The `running` entry in the data slot of the :class:`Reply` indicates whether
+        a :class:`Task` is running. The `can_submit` entry indicates whether another
+        :class:`Task` can be queued onto the device component already.
+        """
+        running = self.devmap[key].running
+        data = dict(running=running, can_submit=not running)
+        if running:
+            return Reply(success=True, msg="running", data=data)
         else:
-            return Reply(success=True, msg="running")
+            return Reply(success=True, msg="ready", data=data)
 
     @in_devmap
-    def task_stop(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
-        key = (address, channel)
+    def task_stop(self, key: tuple, **kwargs) -> Union[Reply, None]:
+        """
+        Stops a running task and returns any collected data.
+
+        Pass-through to :func:`DriverManager.stop_task` and :func:`task_data`.
+        """
         ret = self.devmap[key].stop_task(**kwargs)
         if ret is not None:
             return Reply(success=False, msg="failed to stop task", data=ret)
 
-        ret = self.task_data(self, address, channel)
+        ret = self.task_data(self, key=key)
         if ret.success:
             return Reply(success=True, msg=f"task stopped, {ret.msg}", data=ret.data)
         else:
             return Reply(success=True, msg=f"task stopped, {ret.msg}")
 
     @in_devmap
-    def task_data(self, address: str, channel: int, **kwargs) -> Union[Reply, None]:
-        key = (address, channel)
+    def task_data(self, key: tuple, **kwargs) -> Union[Reply, None]:
+        """
+        Return cached task data on the device component and clean the cache.
+
+        Pass-through for :func:`DeviceManager.get_data`, with the caveat that the
+        :class:`dict[list]` which is returned from the component is here converted to a
+        :class:`Dataset` and annotated using units from :func:`attrs`.
+
+        This function gets called by the job thread every `device.pollrate`, it therefore
+        incurs some IPC cost.
+
+        """
         data = self.devmap[key].get_data(**kwargs)
 
         if len(data) == 0:
@@ -264,6 +381,11 @@ class ModelInterface(metaclass=ABCMeta):
         return Reply(success=True, msg=f"found {len(data)} new datapoints", data=ds)
 
     def status(self):
+        """
+        Returns the driver status. Currently that is the names of the components in
+        the `devmap`.
+
+        """
         devkeys = self.devmap.keys()
         return Reply(
             success=True,
@@ -272,25 +394,29 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     def teardown(self):
+        """
+        Tears down the driver.
+
+        Called when the driver process is quitting. Instructs all remaining tasks to
+        stop. Warns when devices linger. This is not a pass-through to :func:`dev_teardown`.
+
+        """
         for key, dev in self.devmap.items():
-            dev.thread.do_run = False
+            setattr(dev.thread, "do_run", False)
             dev.thread.join(1)
             if dev.thread.is_alive():
                 logger.error(f"device {key!r} is still alive")
             else:
                 logger.debug(f"device {key!r} successfully closed")
 
-    def dev_get_data(self, address: str, channel: int, **kwargs):
-        ret = {}
-        for k in self.attrs(address=address, channel=channel, **kwargs).keys():
-            ret[k] = self.dev_get_attr(
-                attr=k, address=address, channel=channel, **kwargs
-            )
-        return ret
+    @in_devmap
+    def capabilities(self, key: tuple, **kwargs) -> dict:
+        """
+        Returns the capabilities of the device component.
 
-    def capabilities(self, address: str, channel: int, **kwargs) -> dict:
-        key = (address, channel)
-        ret = self.devmap[key].tasks(**kwargs)
+        Pass-through to :func:`DriverManager.capabilities`.
+        """
+        ret = self.devmap[key].capabilities(**kwargs)
         return Reply(
             success=True,
             msg=f"capabilities supported by component {key!r} are: {ret}",

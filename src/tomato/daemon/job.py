@@ -21,7 +21,7 @@ import argparse
 from importlib import metadata
 from datetime import datetime, timezone
 from pathlib import Path
-from threading import currentThread, Thread
+from threading import current_thread, Thread
 from typing import Any
 import zmq
 import psutil
@@ -227,7 +227,7 @@ def manager(port: int, timeout: int = 500):
     """
     context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
-    thread = currentThread()
+    thread = current_thread()
     logger.info("launched successfully")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -423,12 +423,7 @@ def job_thread(
 
     Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
     """
-    sender = f"{__name__}.job_thread"
-    # logging.basicConfig(
-    #    level=logging.DEBUG,
-    #    format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
-    #    handlers=[logging.FileHandler(logpath, mode="a")],
-    # )
+    sender = f"{__name__}.job_thread({current_thread().ident})"
     logger = logging.getLogger(sender)
     logger.debug(f"in job thread of {component.role!r}")
 
@@ -444,36 +439,43 @@ def job_thread(
     for task in tasks:
         logger.debug(f"{task=}")
         while True:
+            logger.debug("polling component '%s' for task readiness", component.role)
             req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
             ret = req.recv_pyobj()
-            logger.debug(f"{ret=}")
-            if ret.success and ret.msg == "ready":
+            if ret.success and ret.data["can_submit"]:
                 break
-
+            logger.warning("cannot submit onto component '%s', waiting", component.role)
+            time.sleep(1e-1)
+        logger.debug("sending task to component '%s'", component.role)
         req.send_pyobj(dict(cmd="task_start", params={"task": task, **kwargs}))
         ret = req.recv_pyobj()
-        logger.debug(f"{ret=}")
 
         t0 = time.perf_counter()
         while True:
             tN = time.perf_counter()
             if tN - t0 > device.pollrate:
+                logger.debug("polling component '%s' for data", component.role)
                 req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
                 ret = req.recv_pyobj()
                 if ret.success:
+                    logger.debug("pickling received data")
                     data_to_pickle(ret.data, datapath, role=component.role)
                 t0 += device.pollrate
+
+            logger.debug("polling component '%s' for task completion", component.role)
             req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
             ret = req.recv_pyobj()
-            logger.debug(f"{ret=}")
-            if ret.success and ret.msg == "ready":
+            if ret.success and not ret.data["running"]:
+                logger.debug("task no longer running, break")
                 break
-            time.sleep(device.pollrate - (tN - t0))
-            logger.debug("tock")
+            time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
+
+        logger.debug("fetching final data for task")
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
         if ret.success:
             data_to_pickle(ret.data, datapath, role=component.role)
+    logger.debug("all tasks done on component '%s'", component.role)
 
 
 def job_main_loop(
@@ -519,11 +521,11 @@ def job_main_loop(
     threads = {}
     for role, tasks in plan.items():
         component = pipeline.devs[role]
-        logger.debug(f"{component=}")
+        logger.debug(" component=%s", component)
         device = daemon.devs[component.name]
-        logger.debug(f"{device=}")
+        logger.debug(" device=%s", device)
         driver = daemon.drvs[device.driver]
-        logger.debug(f"{driver=}")
+        logger.debug(" driver=%s", driver)
         threads[role] = Thread(
             target=job_thread,
             args=(tasks, component, device, driver, jobpath, logpath),
