@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar, Any, Union
 from pydantic import BaseModel
-from threading import Thread, currentThread
+from threading import Thread, currentThread, RLock
 from queue import Queue
 from tomato.models import Reply
 from dgbowl_schemas.tomato.payload import Task
@@ -36,6 +36,7 @@ class Attr(BaseModel):
     type: T
     rw: bool = False
     status: bool = False
+    units: str = None
 
 
 class DriverInterface(metaclass=ABCMeta):
@@ -44,6 +45,7 @@ class DriverInterface(metaclass=ABCMeta):
     class DeviceInterface(metaclass=ABCMeta):
         driver: object
         data: dict[str, list]
+        datalock: RLock
         key: tuple
         thread: Thread
         task_list: Queue
@@ -56,6 +58,7 @@ class DriverInterface(metaclass=ABCMeta):
             self.thread = Thread(target=self.task_runner, daemon=True)
             self.data = defaultdict(list)
             self.running = False
+            self.datalock = RLock()
 
         def run(self):
             self.thread.do_run = True
@@ -72,7 +75,8 @@ class DriverInterface(metaclass=ABCMeta):
             while getattr(thread, "do_run"):
                 tN = time.perf_counter()
                 if tN - tD > task.sampling_interval:
-                    self.do_task(task, t0=t0, tN=tN, tD=tD)
+                    with self.datalock:
+                        self.do_task(task, t0=t0, tN=tN, tD=tD)
                     tD += task.sampling_interval
                 if tN - t0 > task.max_duration:
                     break
@@ -83,8 +87,9 @@ class DriverInterface(metaclass=ABCMeta):
             self.thread = Thread(target=self.task_runner, daemon=True)
 
         def prepare_task(self, task: Task, **kwargs: dict):
-            for k, v in task.technique_params.items():
-                self.set_attr(attr=k, val=v)
+            if task.technique_params is not None:
+                for k, v in task.technique_params.items():
+                    self.set_attr(attr=k, val=v)
 
         @abstractmethod
         def do_task(self, task: Task, **kwargs: dict):
@@ -102,12 +107,13 @@ class DriverInterface(metaclass=ABCMeta):
             pass
 
         def get_data(self, **kwargs: dict) -> dict[str, list]:
-            ret = self.data
-            self.data = defaultdict(list)
+            with self.datalock:
+                ret = self.data
+                self.data = defaultdict(list)
             return ret
 
         @abstractmethod
-        def attrs(**kwargs) -> dict:
+        def attrs(**kwargs) -> dict[str, Attr]:
             pass
 
         @abstractmethod
@@ -248,9 +254,13 @@ class DriverInterface(metaclass=ABCMeta):
         if len(data) == 0:
             return Reply(success=False, msg="found no new datapoints")
 
+        attrs = self.devmap[key].attrs(**kwargs)
         uts = {"uts": data.pop("uts")}
-        data = {k: ("uts", v) for k, v in data.items()}
-        ds = Dataset(data_vars=data, coords=uts)
+        data_vars = {}
+        for k, v in data.items():
+            units = {} if attrs[k].units is None else {"units": attrs[k].units}
+            data_vars[k] = ("uts", v, units)
+        ds = Dataset(data_vars=data_vars, coords=uts)
         return Reply(success=True, msg=f"found {len(data)} new datapoints", data=ds)
 
     def status(self):
