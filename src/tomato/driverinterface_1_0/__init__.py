@@ -39,10 +39,10 @@ class Attr(BaseModel):
     units: str = None
 
 
-class DriverInterface(metaclass=ABCMeta):
+class ModelInterface(metaclass=ABCMeta):
     version: str = "1.0"
 
-    class DeviceInterface(metaclass=ABCMeta):
+    class DeviceManager(metaclass=ABCMeta):
         driver: object
         data: dict[str, list]
         datalock: RLock
@@ -117,7 +117,7 @@ class DriverInterface(metaclass=ABCMeta):
             pass
 
         @abstractmethod
-        def tasks(**kwargs) -> set:
+        def capabilities(**kwargs) -> set:
             pass
 
         def status(self, **kwargs) -> dict:
@@ -127,11 +127,11 @@ class DriverInterface(metaclass=ABCMeta):
                     status[attr] = self.get_attr(attr)
             return status
 
-    def CreateDeviceInterface(self, key, **kwargs):
+    def CreateDeviceManager(self, key, **kwargs):
         """Factory function which passes DriverInterface to the DeviceInterface"""
-        return self.DeviceInterface(self, key, **kwargs)
+        return self.DeviceManager(self, key, **kwargs)
 
-    devmap: dict[tuple, DeviceInterface]
+    devmap: dict[tuple, DeviceManager]
     """Map of registered devices, the tuple keys are components = (address, channel)"""
 
     settings: dict[str, Any]
@@ -144,11 +144,11 @@ class DriverInterface(metaclass=ABCMeta):
     def dev_register(self, address: str, channel: int, **kwargs: dict) -> None:
         """
         Register a Device and its Component in this DriverInterface, creating a
-        :obj:`self.DeviceInterface` object in the :obj:`self.devmap` if necessary, or
+        :obj:`self.DeviceManager` object in the :obj:`self.devmap` if necessary, or
         updating existing channels in :obj:`self.devmap`.
         """
         key = (address, channel)
-        self.devmap[key] = self.CreateDeviceInterface(key, **kwargs)
+        self.devmap[key] = self.CreateDeviceManager(key, **kwargs)
 
     def dev_teardown(self, address: str, channel: int, **kwargs: dict) -> None:
         """
@@ -208,7 +208,7 @@ class DriverInterface(metaclass=ABCMeta):
         self, address: str, channel: int, task: Task, **kwargs
     ) -> Union[Reply, None]:
         key = (address, channel)
-        if task.technique_name not in self.devmap[key].tasks(**kwargs):
+        if task.technique_name not in self.devmap[key].capabilities(**kwargs):
             return Reply(
                 success=False,
                 msg=f"unknown task {task.technique_name!r} requested",
@@ -288,11 +288,11 @@ class DriverInterface(metaclass=ABCMeta):
             )
         return ret
 
-    def tasks(self, address: str, channel: int, **kwargs) -> dict:
+    def capabilities(self, address: str, channel: int, **kwargs) -> dict:
         key = (address, channel)
         ret = self.devmap[key].tasks(**kwargs)
         return Reply(
             success=True,
-            msg=f"tasks supported by component {key} are: {ret}",
+            msg=f"capabilities supported by component {key!r} are: {ret}",
             data=ret,
         )
