@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; tomato 0.2.dev22 documentation</title>
+  <title>Index &mdash; tomato 0.2.dev23 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=b79c6e09"></script>
+        <script src="_static/documentation_options.js?v=13e4ea10"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -38,7 +38,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.2.dev22
+                0.2.dev23
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -54,10 +54,6 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.drivers.example_counter.html">tomato.drivers.example_counter package</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
 <ul>
@@ -107,6 +103,7 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  
 </div>
@@ -125,8 +122,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.appdir">appdir (tomato.models.Daemon attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.attrs">attrs (tomato.drivers.example_counter.Driver attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.attrs">attrs() (tomato.driverinterface_1_0.ModelInterface method)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.attrs">(tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -137,21 +138,25 @@
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Device.capabilities">capabilities (tomato.models.Device attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.html#tomato.models.Component.channel">channel (tomato.models.Component attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.capabilities">capabilities() (tomato.driverinterface_1_0.ModelInterface method)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.capabilities">(tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
-      <li><a href="apidoc/tomato.html#tomato.models.Device.channels">channels (tomato.models.Device attribute)</a>
+      </ul></li>
+      <li><a href="apidoc/tomato.html#tomato.models.Component.channel">channel (tomato.models.Component attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.html#tomato.models.Device.channels">channels (tomato.models.Device attribute)</a>
+</li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.job.check_queued_jobs">check_queued_jobs() (in module tomato.daemon.job)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Job.completed_at">completed_at (tomato.models.Job attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device.conn">conn (tomato.drivers.example_counter.Driver.Device attribute)</a>
-</li>
       <li><a href="apidoc/tomato.html#tomato.models.Driver.connected_at">connected_at (tomato.models.Driver attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter">Counter (class in tomato.drivers.example_counter.counter)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.CreateDeviceManager">CreateDeviceManager() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -159,27 +164,33 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.html#tomato.models.Reply.data">data (tomato.models.Reply attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.data">data (tomato.driverinterface_1_0.ModelInterface.DeviceManager attribute)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.html#tomato.models.Reply.data">(tomato.models.Reply attribute)</a>
 </li>
+      </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.io.data_to_pickle">data_to_pickle() (in module tomato.daemon.io)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.delay">delay (tomato.drivers.example_counter.counter.Counter attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.datalock">datalock (tomato.driverinterface_1_0.ModelInterface.DeviceManager attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device.dev">dev (tomato.drivers.example_counter.Driver.Device attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.dev_get_attr">dev_get_attr() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_attr_get">dev_attr_get() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.dev_register">dev_register() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_attr_set">dev_attr_set() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.dev_reset">dev_reset() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_register">dev_register() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.dev_set_attr">dev_set_attr() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.dev_status">dev_status() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.dev_status">dev_status() (tomato.driverinterface_1_0.ModelInterface method)</a>
+</li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.dev_teardown">dev_teardown() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.device">device() (in module tomato.daemon.cmd)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.devmap">devmap (tomato.drivers.example_counter.Driver attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.devmap">devmap (tomato.driverinterface_1_0.ModelInterface attribute)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.devs">devs (tomato.models.Daemon attribute)</a>
 
@@ -187,13 +198,17 @@
         <li><a href="apidoc/tomato.html#tomato.models.Pipeline.devs">(tomato.models.Pipeline attribute)</a>
 </li>
       </ul></li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver">Driver (class in tomato.drivers.example_counter)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.do_task">do_task() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
-      <li><a href="apidoc/tomato.html#tomato.models.Device.driver">driver (tomato.models.Device attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.driver">driver (tomato.driverinterface_1_0.ModelInterface.DeviceManager attribute)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.html#tomato.models.Device.driver">(tomato.models.Device attribute)</a>
 </li>
+      </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.driver">driver() (in module tomato.daemon.cmd)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device">Driver.Device (class in tomato.drivers.example_counter)</a>
+      <li><a href="apidoc/tomato.html#tomato.drivers.driver_to_interface">driver_to_interface() (in module tomato.drivers)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.drvs">drvs (tomato.models.Daemon attribute)</a>
 </li>
@@ -203,15 +218,13 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.end">end (tomato.drivers.example_counter.counter.Counter attribute)</a>
-</li>
       <li><a href="apidoc/tomato.html#tomato.models.Job.executed_at">executed_at (tomato.models.Job attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_0_2.Payload.extract_methodfile">extract_methodfile() (dgbowl_schemas.tomato.payload_0_2.Payload class method)</a>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile">extract_methodfile() (dgbowl_schemas.tomato.payload_1_0.Payload class method)</a>
 </li>
-      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_0_2.Payload.extract_samplefile">extract_samplefile() (dgbowl_schemas.tomato.payload_0_2.Payload class method)</a>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile">extract_samplefile() (dgbowl_schemas.tomato.payload_1_0.Payload class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -227,6 +240,12 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.get_attr">get_attr() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.get_data">get_data() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
+</li>
       <li><a href="apidoc/tomato.tomato.html#tomato.tomato.get_pipelines">get_pipelines() (in module tomato.tomato)</a>
 </li>
   </ul></td>
@@ -239,7 +258,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.in_devmap">in_devmap() (in module tomato.drivers.example_counter)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.in_devmap">in_devmap() (in module tomato.driverinterface_1_0)</a>
 </li>
       <li><a href="apidoc/tomato.tomato.html#tomato.tomato.init">init() (in module tomato.tomato)</a>
 </li>
@@ -270,6 +289,10 @@
 
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.key">key (tomato.driverinterface_1_0.ModelInterface.DeviceManager attribute)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.job.kill_tomato_job">kill_tomato_job() (in module tomato.daemon.job)</a>
 </li>
@@ -307,7 +330,11 @@
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.merge_pipelines">merge_pipelines() (in module tomato.daemon.cmd)</a>
 </li>
-      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_0_2.Payload.method">method (dgbowl_schemas.tomato.payload_0_2.Payload attribute)</a>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_1_0.Payload.method">method (dgbowl_schemas.tomato.payload_1_0.Payload attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface">ModelInterface (class in tomato.driverinterface_1_0)</a>
+</li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager">ModelInterface.DeviceManager (class in tomato.driverinterface_1_0)</a>
 </li>
       <li>
     module
@@ -325,11 +352,9 @@
 </li>
         <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.job">tomato.daemon.job</a>
 </li>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers">tomato.drivers</a>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#module-tomato.driverinterface_1_0">tomato.driverinterface_1_0</a>
 </li>
-        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter">tomato.drivers.example_counter</a>
-</li>
-        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter.counter">tomato.drivers.example_counter.counter</a>
+        <li><a href="apidoc/tomato.html#module-tomato.drivers">tomato.drivers</a>
 </li>
         <li><a href="apidoc/tomato.ketchup.html#module-tomato.ketchup">tomato.ketchup</a>
 </li>
@@ -396,7 +421,7 @@
         <li><a href="apidoc/tomato.html#tomato.models.Driver.port">(tomato.models.Driver attribute)</a>
 </li>
       </ul></li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.Device.proc">proc (tomato.drivers.example_counter.Driver.Device attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.prepare_task">prepare_task() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -408,17 +433,27 @@
 </li>
       <li><a href="apidoc/tomato.tomato.html#tomato.tomato.reload">reload() (in module tomato.tomato)</a>
 </li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.reset">reset() (tomato.driverinterface_1_0.ModelInterface method)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.reset">(tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
+</li>
+      </ul></li>
       <li><a href="apidoc/tomato.html#tomato.models.Job.respath">respath (tomato.models.Job attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.html#tomato.models.Component.role">role (tomato.models.Component attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.run_counter">run_counter() (tomato.drivers.example_counter.counter.Counter method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.run">run() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.run_ketchup">run_ketchup() (in module tomato)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.run_tomato">run_tomato() (in module tomato)</a>
+</li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.running">running (tomato.driverinterface_1_0.ModelInterface.DeviceManager attribute)</a>
+</li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.Attr.rw">rw (tomato.driverinterface_1_0.Attr attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -426,11 +461,13 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_0_2.Payload.sample">sample (dgbowl_schemas.tomato.payload_0_2.Payload attribute)</a>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_1_0.Payload.sample">sample (dgbowl_schemas.tomato.payload_1_0.Payload attribute)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Pipeline.sampleid">sampleid (tomato.models.Pipeline attribute)</a>
 </li>
       <li><a href="apidoc/tomato.ketchup.html#tomato.ketchup.search">search() (in module tomato.ketchup)</a>
+</li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.set_attr">set_attr() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.set_loglevel">set_loglevel() (in module tomato)</a>
 
@@ -438,9 +475,11 @@
         <li><a href="apidoc/tomato.tomato.html#tomato.tomato.set_loglevel">(in module tomato.tomato)</a>
 </li>
       </ul></li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.settings">settings (tomato.drivers.example_counter.Driver attribute)</a>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_1_0.Payload.settings">settings (dgbowl_schemas.tomato.payload_1_0.Payload attribute)</a>
 
       <ul>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.settings">(tomato.driverinterface_1_0.ModelInterface attribute)</a>
+</li>
         <li><a href="apidoc/tomato.html#tomato.models.Daemon.settings">(tomato.models.Daemon attribute)</a>
 </li>
         <li><a href="apidoc/tomato.html#tomato.models.Driver.settings">(tomato.models.Driver attribute)</a>
@@ -458,17 +497,15 @@
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Driver.spawned_at">spawned_at (tomato.models.Driver attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.start">start() (in module tomato.tomato)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.started">started (tomato.drivers.example_counter.counter.Counter attribute)</a>
+      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.start">start() (in module tomato.tomato)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.started_at">started_at (tomato.drivers.example_counter.counter.Counter attribute)</a>
-</li>
-      <li><a href="apidoc/tomato.html#tomato.models.Daemon.status">status (tomato.models.Daemon attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.Attr.status">status (tomato.driverinterface_1_0.Attr attribute)</a>
 
       <ul>
+        <li><a href="apidoc/tomato.html#tomato.models.Daemon.status">(tomato.models.Daemon attribute)</a>
+</li>
         <li><a href="apidoc/tomato.html#tomato.models.Job.status">(tomato.models.Job attribute)</a>
 </li>
       </ul></li>
@@ -479,7 +516,9 @@
 </li>
         <li><a href="apidoc/tomato.tomato.html#tomato.tomato.status">(in module tomato.tomato)</a>
 </li>
-        <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.status">(tomato.drivers.example_counter.Driver method)</a>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.status">(tomato.driverinterface_1_0.ModelInterface method)</a>
+</li>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.status">(tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
       </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.stop">stop() (in module tomato.daemon.cmd)</a>
@@ -488,6 +527,8 @@
         <li><a href="apidoc/tomato.tomato.html#tomato.tomato.stop">(in module tomato.tomato)</a>
 </li>
       </ul></li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.stop_task">stop_task() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
+</li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.stop_tomato_driver">stop_tomato_driver() (in module tomato.daemon.driver)</a>
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.io.store">store() (in module tomato.daemon.io)</a>
@@ -504,17 +545,19 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.task_data">task_data() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.task_data">task_data() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.task_start">task_start() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.task_list">task_list (tomato.driverinterface_1_0.ModelInterface.DeviceManager attribute)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.task_status">task_status() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.task_runner">task_runner() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.tasks">tasks (tomato.drivers.example_counter.Driver attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.task_start">task_start() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.Driver.teardown">teardown() (tomato.drivers.example_counter.Driver method)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.task_status">task_status() (tomato.driverinterface_1_0.ModelInterface method)</a>
 </li>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.time">time (tomato.drivers.example_counter.counter.Counter attribute)</a>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.task_stop">task_stop() (tomato.driverinterface_1_0.ModelInterface method)</a>
+</li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.thread">thread (tomato.driverinterface_1_0.ModelInterface.DeviceManager attribute)</a>
 </li>
       <li>
     tomato
@@ -523,8 +566,6 @@
         <li><a href="apidoc/tomato.html#module-tomato">module</a>
 </li>
       </ul></li>
-      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_0_2.Payload.tomato">tomato (dgbowl_schemas.tomato.payload_0_2.Payload attribute)</a>
-</li>
       <li>
     tomato.daemon
 
@@ -563,24 +604,17 @@
 </li>
       </ul></li>
       <li>
+    tomato.driverinterface_1_0
+
+      <ul>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#module-tomato.driverinterface_1_0">module</a>
+</li>
+      </ul></li>
+      <li>
     tomato.drivers
 
       <ul>
-        <li><a href="apidoc/tomato.drivers.html#module-tomato.drivers">module</a>
-</li>
-      </ul></li>
-      <li>
-    tomato.drivers.example_counter
-
-      <ul>
-        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter">module</a>
-</li>
-      </ul></li>
-      <li>
-    tomato.drivers.example_counter.counter
-
-      <ul>
-        <li><a href="apidoc/tomato.drivers.example_counter.html#module-tomato.drivers.example_counter.counter">module</a>
+        <li><a href="apidoc/tomato.html#module-tomato.drivers">module</a>
 </li>
       </ul></li>
       <li>
@@ -610,20 +644,32 @@
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.job.tomato_job">tomato_job() (in module tomato.daemon.job)</a>
 </li>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.Attr.type">type (tomato.driverinterface_1_0.Attr attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.Attr.units">units (tomato.driverinterface_1_0.Attr attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.drivers.example_counter.html#tomato.drivers.example_counter.counter.Counter.val">val (tomato.drivers.example_counter.counter.Counter attribute)</a>
+      <li><a href="apidoc/tomato.html#tomato.models.Daemon.verbosity">verbosity (tomato.models.Daemon attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.html#tomato.models.Daemon.verbosity">verbosity (tomato.models.Daemon attribute)</a>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_1_0.Payload.version">version (dgbowl_schemas.tomato.payload_1_0.Payload attribute)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.version">(tomato.driverinterface_1_0.ModelInterface attribute)</a>
 </li>
-      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload_0_2.Payload.version">version (dgbowl_schemas.tomato.payload_0_2.Payload attribute)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -652,7 +698,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 0.2.dev22
+      v: 0.2.dev23
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

@@ -13,12 +13,18 @@ Subpackages
    :maxdepth: 4
 
    tomato.daemon
-   tomato.drivers
+   tomato.driverinterface_1_0
    tomato.ketchup
    tomato.tomato
 
 Submodules
 ----------
+
+
+.. automodule:: tomato.drivers
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 
 .. automodule:: tomato.models
