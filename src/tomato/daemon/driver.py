@@ -128,7 +128,7 @@ def tomato_driver() -> None:
         logger.debug(f"{ret=}")
         return
 
-    logger.info(f"driver {args.driver!r} is entering main loop")
+    logger.info("driver '%s' is entering main loop", args.driver)
 
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
@@ -164,7 +164,9 @@ def tomato_driver() -> None:
                 )
             elif hasattr(interface, msg["cmd"]):
                 ret = getattr(interface, msg["cmd"])(**msg["params"])
-            logger.debug("replying Reply(success=%s, msg='%s')", ret.success, ret.msg)
+            else:
+                logger.critical("unknown command: '%s'", msg["cmd"])
+            logger.debug("replying %s", ret)
             rep.send_pyobj(ret)
         if status == "stop":
             break

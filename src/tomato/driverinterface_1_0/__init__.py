@@ -223,7 +223,7 @@ class ModelInterface(metaclass=ABCMeta):
         return Reply(
             success=True,
             msg=f"device {key!r} registered",
-            data=self.devmap[key],
+            data=key,
         )
 
     @in_devmap

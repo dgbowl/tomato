@@ -39,6 +39,7 @@ from tomato.models import Reply, Pipeline, Device, Driver
 
 logger = logging.getLogger(__name__)
 VERSION = metadata.version("tomato")
+MAX_RETRIES = 10
 
 
 def set_loglevel(delta: int):
@@ -48,7 +49,7 @@ def set_loglevel(delta: int):
 
 
 def load_device_file(yamlpath: Path) -> dict:
-    logger.debug(f"loading device file from '{yamlpath}'")
+    logger.debug("loading device file from '%s'", yamlpath)
     try:
         with yamlpath.open("r") as infile:
             jsdata = yaml.safe_load(infile)
@@ -127,7 +128,7 @@ def status(
 
     If ``with_data`` is specified, the state of the daemon will be retrieved.
     """
-    logger.debug(f"checking status of tomato on port {port}")
+    logger.debug("checking status of tomato on port %d", port)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     req.send_pyobj(dict(cmd="status", with_data=with_data, sender=f"{__name__}.status"))
@@ -163,7 +164,7 @@ def start(
     """
     Start the tomato daemon.
     """
-    logger.debug(f"checking for availability of port {port}.")
+    logger.debug("checking for availability of port %d", port)
     try:
         rep = context.socket(zmq.REP)
         rep.bind(f"tcp://127.0.0.1:{port}")
@@ -188,7 +189,7 @@ def start(
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
-    logger.debug(f"starting tomato on port {port}")
+    logger.debug("starting tomato on port %d", port)
     cmd = [
         "tomato-daemon",
         "-p",
@@ -284,7 +285,7 @@ def init(
         """
     )
     if not appdir.exists():
-        logger.debug(f"creating directory '{appdir.resolve()}'")
+        logger.debug("creating directory '%s'", appdir.resolve())
         os.makedirs(appdir)
     with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
         of.write(defaults)
@@ -327,8 +328,6 @@ def reload(
     if not stat.success:
         return stat
     daemon = stat.data
-    logger.debug(f"{daemon.status=}")
-    logger.debug(f"{daemon.pips=}")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
     if daemon.status == "bootstrap":
@@ -343,17 +342,16 @@ def reload(
             )
         )
         rep = req.recv_pyobj()
-        logger.debug(rep)
     elif daemon.status == "running":
         retries = 0
         while True:
             if any([drv.port is None for drv in daemon.drvs.values()]):
                 retries += 1
                 logger.warning("not all tomato-drivers are online yet, waiting")
-                logger.debug(f"{retries=}")
+                logger.debug("retry number %d / %d", retries, MAX_RETRIES)
                 time.sleep(timeout / 1000)
                 daemon = status(**kwargs, with_data=True).data
-            elif retries == 10:
+            elif retries == MAX_RETRIES:
                 return Reply(
                     success=False, msg="tomato-drivers are not online", data=daemon
                 )
@@ -389,6 +387,7 @@ def reload(
                         capabilities=dev.capabilities,
                     )
                     logger.debug(f"{params=}")
+                    logger.debug(f"{daemon.drvs[drv.name]}=")
                     ret = _updater(
                         context, daemon.drvs[drv.name].port, "dev_register", params
                     )
