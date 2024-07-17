@@ -1,3 +1,10 @@
+"""
+**tomato.models**: Pydantic models for internal tomato use
+----------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+"""
+
 from pydantic import BaseModel, Field
 from typing import Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path

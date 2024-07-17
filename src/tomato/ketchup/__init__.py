@@ -21,12 +21,15 @@ from pathlib import Path
 from datetime import datetime, timezone
 import yaml
 import zmq
+from packaging.version import Version
 from dgbowl_schemas.tomato import to_payload
 
 from tomato.daemon.io import merge_netcdfs
 from tomato.models import Reply, Daemon
 
 log = logging.getLogger(__name__)
+
+__latest_payload__ = "1.0"
 
 
 def submit(
@@ -95,15 +98,23 @@ def submit(
             return Reply(success=False, msg="payload must be a yaml or a json file")
 
     payload = to_payload(**pldict)
-    if payload.tomato.output.path is None:
+    maxver = Version(__latest_payload__)
+    while hasattr(payload, "update"):
+        temp = payload.update()
+        if hasattr(temp, "version"):
+            if Version(temp.version) > maxver:
+                break
+        payload = temp
+    print(f"{payload=}")
+
+    if payload.settings.output.path is None:
         cwd = str(Path().resolve())
         log.info(f"Output path not set. Setting output path to {cwd}")
-        payload.tomato.output.path = cwd
-    if hasattr(payload.tomato, "snapshot"):
-        if payload.tomato.snapshot is not None and payload.tomato.snapshot.path is None:
-            cwd = str(Path().resolve())
-            log.info(f"Snapshot path not set. Setting output path to {cwd}")
-            payload.tomato.snapshot.path = cwd
+        payload.settings.output.path = cwd
+    if payload.settings.snapshot is not None and payload.settings.snapshot.path is None:
+        cwd = str(Path().resolve())
+        log.info(f"Snapshot path not set. Setting output path to {cwd}")
+        payload.settings.snapshot.path = cwd
 
     log.debug("queueing 'payload' into 'queue'")
     req = context.socket(zmq.REQ)

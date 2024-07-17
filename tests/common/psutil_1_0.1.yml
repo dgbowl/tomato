@@ -1,0 +1,10 @@
+version: "1.0"
+sample:
+    name: psutil_1_0.1
+method:
+  - component_tag: "psutil"
+    technique_name: "all_info"
+    max_duration: 1.0
+    sampling_interval: 0.1
+settings:
+    verbosity: "DEBUG"

@@ -1,0 +1,29 @@
+{
+    "devices": [
+        {
+            "name": "dev-counter",
+            "driver": "example_counter",
+            "address": "counter-addr",
+            "channels": [1],
+            "capabilities": ["count", "random"],
+            "pollrate": 1
+        },
+        {
+            "name": "dev-psutil",
+            "driver": "psutil",
+            "address": "psutil-addr",
+            "channels": [10],
+            "capabilities": ["all_info", "cpu_info", "mem_info"],
+            "pollrate": 1
+        }
+    ],
+    "pipelines": [
+        {
+            "name": "pip-multidev",
+            "devices": [
+                {"tag": "counter", "name": "dev-counter", "channel": 1},
+                {"tag": "psutil", "name": "dev-psutil", "channel": 10}
+            ]
+        }
+    ]
+}
