@@ -1,7 +1,0 @@
-tomato.tomato package
-=====================
-
-.. automodule:: tomato.tomato
-   :members:
-   :undoc-members:
-   :show-inheritance:
