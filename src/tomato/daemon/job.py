@@ -475,7 +475,11 @@ def job_thread(
         ret = req.recv_pyobj()
         if ret.success:
             data_to_pickle(ret.data, datapath, role=component.role)
-    logger.debug("all tasks done on component '%s'", component.role)
+    logger.debug("all tasks done on component '%s', resetting", component.role)
+    req.send_pyobj(dict(cmd="dev_reset", params={**kwargs}))
+    ret = req.recv_pyobj()
+    if not ret.success:
+        logger.warning("could not reset component '%s': %s", component.role, ret.msg)
 
 
 def job_main_loop(

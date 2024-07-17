@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Any, Union
+from typing import TypeVar, Any
 from pydantic import BaseModel
 from threading import Thread, current_thread, RLock
 from queue import Queue
@@ -186,6 +186,14 @@ class ModelInterface(metaclass=ABCMeta):
                     status[attr] = self.get_attr(attr)
             return status
 
+        def reset(self, **kwargs) -> None:
+            """Resets the component to an initial status."""
+            self.task_list = Queue()
+            self.thread = Thread(target=self.task_runner, daemon=True)
+            self.data = defaultdict(list)
+            self.running = False
+            self.datalock = RLock()
+
     def CreateDeviceManager(self, key, **kwargs):
         """
         A factory function which is used to pass this :class:`ModelInterface` to the new
@@ -203,7 +211,7 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap = {}
         self.settings = settings if settings is not None else {}
 
-    def dev_register(self, address: str, channel: int, **kwargs: dict) -> None:
+    def dev_register(self, address: str, channel: int, **kwargs: dict) -> Reply:
         """
         Register a new device component in this driver.
 
@@ -212,9 +220,14 @@ class ModelInterface(metaclass=ABCMeta):
         """
         key = (address, channel)
         self.devmap[key] = self.CreateDeviceManager(key, **kwargs)
+        return Reply(
+            success=True,
+            msg=f"device {key!r} registered",
+            data=self.devmap[key],
+        )
 
     @in_devmap
-    def dev_teardown(self, key: tuple, **kwargs: dict) -> None:
+    def dev_teardown(self, key: tuple, **kwargs: dict) -> Reply:
         """
         Emergency stop function.
 
@@ -227,10 +240,30 @@ class ModelInterface(metaclass=ABCMeta):
         if status.data:
             logger.warning("tearing down component '%s' with a running task!")
             self.task_stop(key=key, **kwargs)
+        self.dev_reset(key=key, **kwargs)
         del self.devmap[key]
+        return Reply(
+            success=True,
+            msg=f"device {key!r} torn down",
+        )
 
     @in_devmap
-    def attrs(self, key: tuple, **kwargs: dict) -> Union[Reply, None]:
+    def dev_reset(self, key: tuple, **kwargs: dict) -> Reply:
+        """
+        Component reset function.
+
+        Should set the device component into a documented, safe state. This function
+        is executed at the end of every job.
+        """
+        logger.debug("resetting component '%s'", key)
+        self.devmap[key].reset()
+        return Reply(
+            success=True,
+            msg=f"component {key!r} reset successfully",
+        )
+
+    @in_devmap
+    def attrs(self, key: tuple, **kwargs: dict) -> Reply:
         """
         Query available :class:`Attrs` on the specified device component.
 
@@ -239,14 +272,12 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[key].attrs(**kwargs)
         return Reply(
             success=True,
-            msg=f"attrs of component {key} are: {ret}",
+            msg=f"attrs of component {key!r} are: {ret}",
             data=ret,
         )
 
     @in_devmap
-    def dev_set_attr(
-        self, attr: str, val: Any, key: tuple, **kwargs: dict
-    ) -> Union[Reply, None]:
+    def dev_set_attr(self, attr: str, val: Any, key: tuple, **kwargs: dict) -> Reply:
         """
         Set value of the :class:`Attr` of the specified device component.
 
@@ -261,7 +292,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_get_attr(self, attr: str, key: tuple, **kwargs: dict) -> Union[Reply, None]:
+    def dev_get_attr(self, attr: str, key: tuple, **kwargs: dict) -> Reply:
         """
         Get value of the :class:`Attr` from the specified device component.
 
@@ -277,7 +308,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_status(self, key: tuple, **kwargs: dict) -> Union[Reply, None]:
+    def dev_status(self, key: tuple, **kwargs: dict) -> Reply:
         """
         Get the status report from the specified device component.
 
@@ -297,7 +328,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def task_start(self, key: tuple, task: Task, **kwargs) -> Union[Reply, None]:
+    def task_start(self, key: tuple, task: Task, **kwargs) -> Reply:
         """
         Submit a :class:`Task` onto the specified device component.
 
@@ -337,7 +368,7 @@ class ModelInterface(metaclass=ABCMeta):
             return Reply(success=True, msg="ready", data=data)
 
     @in_devmap
-    def task_stop(self, key: tuple, **kwargs) -> Union[Reply, None]:
+    def task_stop(self, key: tuple, **kwargs) -> Reply:
         """
         Stops a running task and returns any collected data.
 
@@ -354,7 +385,7 @@ class ModelInterface(metaclass=ABCMeta):
             return Reply(success=True, msg=f"task stopped, {ret.msg}")
 
     @in_devmap
-    def task_data(self, key: tuple, **kwargs) -> Union[Reply, None]:
+    def task_data(self, key: tuple, **kwargs) -> Reply:
         """
         Return cached task data on the device component and clean the cache.
 
@@ -380,7 +411,7 @@ class ModelInterface(metaclass=ABCMeta):
         ds = Dataset(data_vars=data_vars, coords=uts)
         return Reply(success=True, msg=f"found {len(data)} new datapoints", data=ds)
 
-    def status(self):
+    def status(self) -> Reply:
         """
         Returns the driver status. Currently that is the names of the components in
         the `devmap`.
@@ -393,24 +424,32 @@ class ModelInterface(metaclass=ABCMeta):
             data=dict(devkeys=devkeys),
         )
 
-    def teardown(self):
+    def reset(self) -> Reply:
         """
-        Tears down the driver.
+        Resets the driver.
 
         Called when the driver process is quitting. Instructs all remaining tasks to
-        stop. Warns when devices linger. This is not a pass-through to :func:`dev_teardown`.
+        stop. Warns when devices linger. Passes through to :func:`dev_reset`. This is
+        not a pass-through to :func:`dev_teardown`.
 
         """
         for key, dev in self.devmap.items():
-            setattr(dev.thread, "do_run", False)
-            dev.thread.join(1)
             if dev.thread.is_alive():
-                logger.error(f"device {key!r} is still alive")
+                logger.warning("stopping task on component '%s'", key)
+                setattr(dev.thread, "do_run", False)
+                dev.thread.join(timeout=1)
+            if dev.thread.is_alive():
+                logger.error("task on component '%s' is still running", key)
             else:
-                logger.debug(f"device {key!r} successfully closed")
+                logger.debug("component '%s' has no running task", key)
+            self.dev_reset(key=key)
+        return Reply(
+            success=True,
+            msg="all components on driver have been reset",
+        )
 
     @in_devmap
-    def capabilities(self, key: tuple, **kwargs) -> dict:
+    def capabilities(self, key: tuple, **kwargs) -> Reply:
         """
         Returns the capabilities of the device component.
 

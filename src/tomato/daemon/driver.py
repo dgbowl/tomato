@@ -18,6 +18,7 @@ from threading import currentThread
 import zmq
 import psutil
 
+from tomato.driverinterface_1_0 import ModelInterface
 from tomato.drivers import driver_to_interface
 from tomato.models import Reply
 
@@ -100,7 +101,7 @@ def tomato_driver() -> None:
     if Interface is None:
         logger.critical(f"library of driver {args.driver!r} not found")
         return
-    interface = Interface(settings=daemon.drvs[args.driver].settings)
+    interface: ModelInterface = Interface(settings=daemon.drvs[args.driver].settings)
 
     logger.info(f"registering devices in driver {args.driver!r}")
     for dev in daemon.devs.values():
@@ -136,7 +137,7 @@ def tomato_driver() -> None:
         socks = dict(poller.poll(100))
         if rep in socks:
             msg = rep.recv_pyobj()
-            logger.debug(f"received {msg=}")
+            logger.debug("received msg=%s", msg)
             if "cmd" not in msg:
                 logger.error(f"received msg without cmd: {msg=}")
                 ret = Reply(success=False, msg="received msg without cmd", data=msg)
@@ -161,26 +162,16 @@ def tomato_driver() -> None:
                     msg="settings received",
                     data=msg.get("params"),
                 )
-            elif msg["cmd"] == "dev_register":
-                interface.dev_register(**msg["params"])
-                ret = Reply(
-                    success=True,
-                    msg="device registered",
-                    data=msg.get("params"),
-                )
-            elif msg["cmd"] == "task_status":
-                ret = interface.task_status(**msg["params"])
-            elif msg["cmd"] == "task_start":
-                ret = interface.task_start(**msg["params"])
-            elif msg["cmd"] == "task_data":
-                ret = interface.task_data(**msg["params"])
+            elif hasattr(interface, msg["cmd"]):
+                ret = getattr(interface, msg["cmd"])(**msg["params"])
+            logger.debug("replying Reply(success=%s, msg='%s')", ret.success, ret.msg)
             rep.send_pyobj(ret)
         if status == "stop":
             break
 
-    logger.info(f"driver {args.driver!r} is beginning teardown")
+    logger.info(f"driver {args.driver!r} is beginning reset")
 
-    interface.teardown()
+    interface.reset()
 
     logger.critical(f"driver {args.driver!r} is quitting")
 
