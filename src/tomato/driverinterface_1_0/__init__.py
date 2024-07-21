@@ -217,13 +217,17 @@ class ModelInterface(metaclass=ABCMeta):
 
         Creates a :class:`DeviceManager` representing a device component, storing it in
         the :obj:`self.devmap` using the provided `address` and `channel`.
+
+        The returned :class:`Reply` should contain the capabilities of the registered
+        component in the ``data`` slot.
         """
         key = (address, channel)
         self.devmap[key] = self.CreateDeviceManager(key, **kwargs)
+        capabs = self.devmap[key].capabilities()
         return Reply(
             success=True,
             msg=f"device {key!r} registered",
-            data=key,
+            data=capabs,
         )
 
     @in_devmap

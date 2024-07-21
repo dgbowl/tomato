@@ -95,6 +95,7 @@ def run_tomato():
             "-p",
             help="Port number of tomato's reply socket",
             default=DEFAULT_TOMATO_PORT,
+            type=int,
         )
         p.add_argument(
             "--timeout",
