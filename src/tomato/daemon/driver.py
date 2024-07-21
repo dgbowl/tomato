@@ -104,16 +104,16 @@ def tomato_driver() -> None:
     drv = daemon.drvs[args.driver]
     interface: ModelInterface = Interface(settings=drv.settings)
 
-    logger.info("registering devices in driver '%s'", args.driver)
+    logger.info("registering components for driver '%s'", args.driver)
     for comp in daemon.cmps.values():
         if comp.driver == args.driver:
+            logger.info("registering component '%s'", comp.name)
             ret = interface.dev_register(address=comp.address, channel=comp.channel)
             logger.debug(f"iface  {ret=}")
             params = dict(name=comp.name, capabilities=ret.data)
             req.send_pyobj(dict(cmd="component", params=params))
             ret = req.recv_pyobj()
             logger.debug(f"daemon {ret=}")
-    logger.debug(f"{interface.devmap=}")
 
     logger.info("driver '%s' bootstrapped successfully", args.driver)
 
@@ -129,7 +129,7 @@ def tomato_driver() -> None:
     )
     ret = req.recv_pyobj()
     if not ret.success:
-        logger.error(f"could not push driver {args.driver!r} state to tomato-daemon")
+        logger.error("could not push driver '%s' state to tomato-daemon", args.driver)
         logger.debug(f"{ret=}")
         return
 
@@ -177,10 +177,9 @@ def tomato_driver() -> None:
             break
 
     logger.info("driver '%s' is beginning reset", args.driver)
-
     interface.reset()
 
-    logger.critical(f"driver {args.driver!r} is quitting")
+    logger.info("driver '%s' is quitting", args.driver)
 
 
 def spawn_tomato_driver(port: int, driver: str, req: zmq.Socket, verbosity: int):
