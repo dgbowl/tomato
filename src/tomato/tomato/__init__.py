@@ -389,10 +389,6 @@ def reload(
         # check changes in devices
         for dev in devs.values():
             logger.debug(f"{dev=}")
-            if dev.name in daemon.devs:
-                logger.error("Hmmmm")
-                logger.debug(f"{dev=}")
-                logger.debug(f"{daemon.devs=}")
             ddev = daemon.devs[dev.name]
             if dev.channels != ddev.channels:
                 for channel in dev.channels:
