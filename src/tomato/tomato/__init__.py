@@ -35,7 +35,7 @@ import zmq
 import yaml
 import toml
 
-from tomato.models import Reply, Pipeline, Device, Driver
+from tomato.models import Reply, Pipeline, Device, Driver, Component
 
 logger = logging.getLogger(__name__)
 VERSION = metadata.version("tomato")
@@ -61,8 +61,11 @@ def load_device_file(yamlpath: Path) -> dict:
     return jsdata
 
 
-def get_pipelines(devs: dict[str, Device], pipelines: list) -> dict[str, Pipeline]:
+def get_pipelines(
+    devs: dict[str, Device], pipelines: list
+) -> tuple[dict[str, Pipeline], dict[str, Component]]:
     pips = {}
+    cmps = {}
     for pip in pipelines:
         if "*" in pip["name"]:
             data = {"name": pip["name"], "devs": {}}
@@ -70,40 +73,51 @@ def get_pipelines(devs: dict[str, Device], pipelines: list) -> dict[str, Pipelin
                 logger.error("more than one component in a wildcard pipeline")
                 continue
             for comp in pip["devices"]:
-                if comp["name"] not in devs:
-                    logger.error(f"component {comp['name']} not found among devices")
+                if comp["device"] not in devs:
+                    logger.error("device '%s' not found", comp["device"])
                     break
-                dev = devs[comp["name"]]
+                dev = devs[comp["device"]]
                 for ch in dev.channels:
                     name = pip["name"].replace("*", f"{ch}")
-                    d = {
-                        comp["tag"]: dict(
-                            name=dev.name,
-                            role=comp["tag"],
-                            channel=ch,
-                            address=dev.address,
-                        )
-                    }
-                    p = dict(name=name, devs=d)
-                    pips[name] = Pipeline(**p)
+                    h = "/".join((dev.driver, dev.address, str(ch)))
+                    c = Component(
+                        name=h,
+                        driver=dev.driver,
+                        device=dev.name,
+                        address=dev.address,
+                        channel=ch,
+                        role=comp["role"],
+                    )
+                    cmps[h] = c
+                    p = Pipeline(name=name, components=[h])
+                    pips[p.name] = p
         else:
-            data = {"name": pip["name"], "devs": {}}
+            data = {"name": pip["name"], "components": []}
             for comp in pip["devices"]:
-                if comp["name"] not in devs:
-                    logger.error(f"component {comp['name']} not found among devices")
+                if comp["device"] not in devs:
+                    logger.error("device '%s' not found", comp["device"])
                     break
-                dev = devs[comp["name"]]
+                dev = devs[comp["device"]]
                 if comp["channel"] not in dev.channels:
-                    logger.error(f"channel {comp['channel']} not found among channels")
+                    logger.error(
+                        "channel %d not found on device '%s'",
+                        comp["channel"],
+                        comp["device"],
+                    )
                     break
-                data["devs"][comp["tag"]] = dict(
-                    name=dev.name,
-                    role=comp["tag"],
-                    channel=comp["channel"],
+                h = "/".join((dev.driver, dev.address, str(comp["channel"])))
+                c = Component(
+                    name=h,
+                    driver=dev.driver,
+                    device=dev.name,
                     address=dev.address,
+                    channel=comp["channel"],
+                    role=comp["role"],
                 )
-            pips[pip["name"]] = Pipeline(**data)
-    return pips
+                data["components"].append(h)
+                cmps[h] = c
+            pips[data["name"]] = Pipeline(**data)
+    return pips, cmps
 
 
 def _updater(context, port, cmd, params):
@@ -318,11 +332,11 @@ def reload(
 
     devicefile = load_device_file(Path(settings["devices"]["config"]))
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
-    pips = get_pipelines(devs, devicefile["pipelines"])
+    pips, cmps = get_pipelines(devs, devicefile["pipelines"])
     drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
-    for drv in drvs.values():
-        if drv.name in settings["drivers"]:
-            drv.settings.update(settings["drivers"][drv.name])
+    for drv in drvs.keys():
+        if drv in settings["drivers"]:
+            drvs[drv].settings.update(settings["drivers"][drv])
 
     stat = status(**kwargs, with_data=True)
     if not stat.success:
@@ -338,6 +352,7 @@ def reload(
                 pips=pips,
                 devs=devs,
                 drvs=drvs,
+                cmps=cmps,
                 sender=f"{__name__}.reload",
             )
         )
@@ -345,52 +360,51 @@ def reload(
     elif daemon.status == "running":
         retries = 0
         while True:
-            if any([drv.port is None for drv in daemon.drvs.values()]):
+            if retries == MAX_RETRIES:
+                return Reply(
+                    success=False, msg="tomato-drivers are not online", data=daemon
+                )
+            elif any(drv.port is None for drv in daemon.drvs.values()):
                 retries += 1
                 logger.warning("not all tomato-drivers are online yet, waiting")
                 logger.debug("retry number %d / %d", retries, MAX_RETRIES)
                 time.sleep(timeout / 1000)
                 daemon = status(**kwargs, with_data=True).data
-            elif retries == MAX_RETRIES:
-                return Reply(
-                    success=False, msg="tomato-drivers are not online", data=daemon
-                )
             else:
                 break
 
         # check changes in driver settings
         for drv in drvs.values():
             logger.debug(f"{drv=}")
-            if drv.settings != daemon.drvs[drv.name].settings:
-                ret = _updater(
-                    context, daemon.drvs[drv.name].port, "settings", drv.settings
-                )
+            ddrv = daemon.drvs[drv.name]
+            if drv.settings != ddrv.settings:
+                ret = _updater(context, ddrv.port, "settings", drv.settings)
                 if ret.success is False:
                     return ret
-                ret = _updater(
-                    context, port, "driver", dict(name=drv.name, settings=drv.settings)
-                )
+                msg = dict(name=drv.name, settings=drv.settings)
+                ret = _updater(context, port, "driver", msg)
                 if ret.success is False:
                     return ret
 
         # check changes in devices
         for dev in devs.values():
             logger.debug(f"{dev=}")
-            if (
-                dev.name not in daemon.devs
-                or dev.channels != daemon.devs[dev.name].channels
-            ):
+            if dev.name in daemon.devs:
+                logger.error("Hmmmm")
+                logger.debug(f"{dev=}")
+                logger.debug(f"{daemon.devs=}")
+            ddev = daemon.devs[dev.name]
+            if dev.channels != ddev.channels:
                 for channel in dev.channels:
                     params = dict(
                         address=dev.address,
                         channel=channel,
-                        capabilities=dev.capabilities,
                     )
+                    drv = daemon.drvs[dev.driver]
                     logger.debug(f"{params=}")
-                    logger.debug(f"{daemon.drvs[drv.name]}=")
-                    ret = _updater(
-                        context, daemon.drvs[drv.name].port, "dev_register", params
-                    )
+                    logger.debug(f"{ddev=}")
+                    logger.debug(f"{drv=}")
+                    ret = _updater(context, drv.port, "dev_register", params)
                     logger.debug(f"{ret=}")
                     if ret.success is False:
                         return ret
@@ -398,16 +412,18 @@ def reload(
                 ret = _updater(context, port, "device", params)
                 if ret.success is False:
                     return ret
-            elif dev != daemon.devs[dev.name]:
+            elif dev != ddev.name:
                 logger.error("updating devices not yet implemented")
-        for devname in daemon.devs:
-            if devname not in devs:
+        for ddev in daemon.devs.values():
+            if ddev.name not in devs:
                 logger.error("removing devices not yet implemented")
         # check changes in pipelines
         for pip in pips.values():
             logger.debug(f"{pip=}")
             if pip.name not in daemon.pips:
+                logger.debug(f"{daemon.pips=}")
                 ret = _updater(context, port, "pipeline", pip.model_dump())
+                logger.debug(f"{ret=}")
                 if ret.success is False:
                     return ret
             else:

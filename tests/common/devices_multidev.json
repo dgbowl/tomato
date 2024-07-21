@@ -5,7 +5,6 @@
             "driver": "example_counter",
             "address": "example-addr-1",
             "channels": [1, 2, 3, 4],
-            "capabilities": ["count"],
             "pollrate": 2
         },
         {
@@ -13,7 +12,6 @@
             "driver": "example_counter",
             "address": "example-addr-2",
             "channels": [5, 6, 7, 8],
-            "capabilities": ["count"],
             "pollrate": 1
         }
     ],
@@ -21,14 +19,14 @@
         {
             "name": "pip-counter",
             "devices": [
-                {"tag": "counter", "name": "dev-counter-1", "channel": 1}
+                {"role": "counter", "device": "dev-counter-1", "channel": 1}
             ]
         },
         {
             "name": "pip-multidev",
             "devices": [
-                {"tag": "counter-1", "name": "dev-counter-1", "channel": 4},
-                {"tag": "counter-2", "name": "dev-counter-2", "channel": 5}
+                {"role": "counter-1", "device": "dev-counter-1", "channel": 4},
+                {"role": "counter-2", "device": "dev-counter-2", "channel": 5}
             ]
         }
     ]

@@ -219,11 +219,15 @@ class ModelInterface(metaclass=ABCMeta):
         the :obj:`self.devmap` using the provided `address` and `channel`.
         """
         key = (address, channel)
+        logger.debug(f"{key=}")
         self.devmap[key] = self.CreateDeviceManager(key, **kwargs)
+        logger.debug(f"{self.devmap[key]=}")
+        capabs = self.devmap[key].capabilities()
+        logger.debug(f"{capabs=}")
         return Reply(
             success=True,
             msg=f"device {key!r} registered",
-            data=key,
+            data=capabs,
         )
 
     @in_devmap

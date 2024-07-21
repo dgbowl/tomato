@@ -5,7 +5,6 @@
             "driver": "example_counter",
             "address": "example-addr",
             "channels": [1, 2, 3, 4],
-            "capabilities": ["count"],
             "pollrate": 2
         }
     ],
@@ -13,7 +12,7 @@
         {
             "name": "pip-counter-*",
             "devices": [
-                {"tag": "counter", "name": "dev-counter", "channel": "each"}
+                {"role": "counter", "device": "dev-counter", "channel": "each"}
             ]
         }
     ]

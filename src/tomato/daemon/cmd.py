@@ -12,7 +12,9 @@ All functions in this module return a :class:`~tomato.models.Reply`.
 
 """
 
-from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job
+from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job, Component
+from pydantic import BaseModel
+from typing import Any
 import logging
 
 import tomato.daemon.io as io
@@ -52,6 +54,7 @@ def status(msg: dict, daemon: Daemon) -> Reply:
 
 def stop(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.stop")
+    logger.debug("%s", msg)
     io.store(daemon)
     if any([pip.jobid is not None for pip in daemon.pips.values()]):
         logger.error("cannot stop tomato-daemon as jobs are running")
@@ -64,40 +67,49 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
 
 def setup(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.setup")
+    logger.debug("%s", msg)
     if daemon.status == "bootstrap":
-        for key in ["drvs", "devs", "pips"]:
+        for key in ["drvs", "devs", "pips", "cmps"]:
             if key in msg:
                 setattr(daemon, key, msg[key])
-        logger.info(f"setup successful with pipelines: {list(daemon.pips.keys())}")
+        logger.info("setup successful with pipelines: '%s'", daemon.pips.keys())
         daemon.status = "running"
     else:
-        logger.info(f"reload successful with pipelines: {list(daemon.pips.keys())}")
+        logger.info("reload successful with pipelines: '%s'", daemon.pips.keys())
     return Reply(success=True, msg=daemon.status, data=daemon)
 
 
 def pipeline(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.pipeline")
+    logger.debug("%s", msg)
     pip = msg["params"]
     if pip["name"] is None:
         logger.error()
         return Reply(success=False, msg="no pipeline name supplied", data=msg)
     if pip["name"] not in daemon.pips:
-        daemon.pips[pip["name"]] = Pipeline(**pip)
-    elif pip.get("delete", False) and daemon.pips[pip["name"]].jobid is None:
-        logger.warning(f"deleting pipeline {pip['name']!r}")
+        dest = Pipeline(**pip)
+        daemon.pips[pip["name"]] = dest
+        return Reply(success=True, msg="pipeline created", data=dest)
+
+    dest = daemon.pips[pip["name"]]
+    if pip.get("delete", False) and dest.jobid is None:
+        logger.warning("deleting pipeline '%s'", dest.name)
         del daemon.pips[pip["name"]]
+        return Reply(success=True, msg="pipeline deleted")
+
     elif pip.get("delete", False):
-        logger.error(f"cannot delete pipeline {pip['name']!r} as a job is running")
-        return Reply(success=False, msg=daemon.status, data=daemon.pips[pip["name"]])
+        logger.error("cannot delete pipeline '%s' as a job is running", dest.name)
+        return Reply(success=False, msg="pipeline cannot be deleted", data=dest)
     else:
         for k, v in pip.items():
-            logger.debug(f"setting pipeline '{pip['name']}.{k}' to {v}")
-            setattr(daemon.pips[pip["name"]], k, v)
-    return Reply(success=True, msg=daemon.status, data=daemon.pips.get(pip["name"]))
+            logger.debug("setting pipeline '%s.%s' to '%s'", dest.name, k, v)
+            setattr(dest, k, v)
+        return Reply(success=True, msg="pipeline updated", data=dest)
 
 
 def job(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.job")
+    logger.debug("%s", msg)
     jobid = msg.get("id", None)
     if jobid is None:
         jobid = daemon.nextjob
@@ -108,34 +120,57 @@ def job(msg: dict, daemon: Daemon) -> Reply:
         for k, v in msg.get("params", {}).items():
             logger.debug(f"setting job {jobid}.{k} to {v}")
             setattr(daemon.jobs[jobid], k, v)
-    return Reply(success=True, msg=daemon.status, data=daemon.jobs[jobid])
+    return Reply(success=True, msg="job updated", data=daemon.jobs[jobid])
 
 
 def driver(msg: dict, daemon: Daemon) -> Reply:
-    logger = logging.getLogger(f"{__name__}.driver")
-    drv = msg["params"]
-    if drv["name"] is None:
-        logger.error()
-        return Reply(success=False, msg="no driver name supplied", data=msg)
-    if drv["name"] not in daemon.drvs:
-        daemon.drvs[drv["name"]] = Driver(**drv)
-    else:
-        for k, v in drv.items():
-            logger.debug(f"setting driver '{drv['name']}.{k}' to {v}")
-            setattr(daemon.drvs[drv["name"]], k, v)
-    return Reply(success=True, msg=daemon.status, data=daemon.drvs[drv["name"]])
+    return _api(
+        otype="driver",
+        msg=msg,
+        ddict=daemon.drvs,
+        Cls=Driver,
+    )
 
 
 def device(msg: dict, daemon: Daemon) -> Reply:
-    logger = logging.getLogger(f"{__name__}.device")
-    dev = msg["params"]
-    if dev["name"] is None:
-        logger.error()
-        return Reply(success=False, msg="no device name supplied", data=msg)
-    if dev["name"] not in daemon.devs:
-        daemon.devs[dev["name"]] = Device(**dev)
+    return _api(
+        otype="device",
+        msg=msg,
+        ddict=daemon.devs,
+        Cls=Device,
+    )
+
+
+def component(msg: dict, daemon: Daemon) -> Reply:
+    return _api(
+        otype="component",
+        msg=msg,
+        ddict=daemon.cmps,
+        Cls=Component,
+    )
+
+
+def _api(otype: str, msg: dict, ddict: dict[str, Any], Cls: BaseModel) -> Reply:
+    logger = logging.getLogger(f"{__name__}.{otype}")
+    logger.debug("%s", msg)
+    obj = msg["params"]
+    if obj["name"] is None:
+        logger.error("no %s name supplied", otype)
+        return Reply(success=False, msg=f"no {otype} name supplied", data=msg)
+
+    if obj["name"] not in ddict:
+        ddict[obj["name"]] = Cls(**obj)
+        return Reply(
+            success=True,
+            msg=f"{otype} {obj['name']!r} created",
+            data=ddict[obj["name"]],
+        )
     else:
-        for k, v in dev.items():
-            logger.debug(f"setting device '{dev['name']}.{k}' to {v}")
-            setattr(daemon.devs[dev["name"]], k, v)
-    return Reply(success=True, msg=daemon.status, data=daemon.devs[dev["name"]])
+        for k, v in obj.items():
+            logger.debug("setting %s '%s.%s' to '%s'", otype, obj["name"], k, v)
+            setattr(ddict[obj["name"]], k, v)
+        return Reply(
+            success=True,
+            msg=f"{otype} {obj['name']!r} updated",
+            data=ddict[obj["name"]],
+        )

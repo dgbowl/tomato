@@ -101,16 +101,26 @@ def tomato_driver() -> None:
     if Interface is None:
         logger.critical(f"library of driver {args.driver!r} not found")
         return
-    interface: ModelInterface = Interface(settings=daemon.drvs[args.driver].settings)
+    drv = daemon.drvs[args.driver]
+    interface: ModelInterface = Interface(settings=drv.settings)
 
-    logger.info(f"registering devices in driver {args.driver!r}")
+    logger.info("registering devices in driver '%s'", args.driver)
     for dev in daemon.devs.values():
         if dev.driver == args.driver:
             for channel in dev.channels:
-                interface.dev_register(address=dev.address, channel=channel)
+                ret = interface.dev_register(address=dev.address, channel=channel)
+                logger.debug(f"iface  {ret=}")
+                name = "/".join((args.driver, dev.address, str(channel)))
+                req.send_pyobj(
+                    dict(
+                        cmd="component", params={"name": name, "capabilities": ret.data}
+                    )
+                )
+                ret = req.recv_pyobj()
+                logger.debug(f"daemon {ret=}")
     logger.debug(f"{interface.devmap=}")
 
-    logger.info(f"driver {args.driver!r} bootstrapped successfully")
+    logger.info("driver '%s' bootstrapped successfully", args.driver)
 
     params = dict(
         name=args.driver,
@@ -237,11 +247,10 @@ def manager(port: int, timeout: int = 1000):
         elif to > timeout:
             to = timeout
         daemon = req.recv_pyobj().data
-        drivers_needed = {v.driver for v in daemon.devs.values()}
         action_counter = 0
-        for driver in drivers_needed:
+        for driver in daemon.drvs.keys():
             if driver not in daemon.drvs:
-                logger.debug(f"spawning driver {driver!r}")
+                logger.debug("spawning driver '%s'", driver)
                 spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
                 action_counter += 1
             else:
@@ -267,9 +276,9 @@ def manager(port: int, timeout: int = 1000):
     req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
     daemon = req.recv_pyobj().data
     for driver in daemon.drvs.values():
-        logger.debug(f"stopping driver {driver.name!r} on port {driver.port}")
+        logger.debug("stopping driver '%s' on port %d", driver.name, driver.port)
         ret = stop_tomato_driver(driver.port, context)
         if ret.success:
-            logger.info(f"stopped driver {driver.name!r}")
+            logger.info("stopped driver '%s'", driver.name)
         else:
-            logger.warning(f"could not stop driver {driver.name!r}")
+            logger.warning("could not stop driver '%s'", driver.name)

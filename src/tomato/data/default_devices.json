@@ -12,7 +12,7 @@
         {
             "name": "pip-counter",
             "devices": [
-                {"tag": "counter", "name": "dev-counter", "channel": 1}
+                {"role": "counter", "device": "dev-counter", "channel": 1}
             ]
         }
     ]

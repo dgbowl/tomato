@@ -29,29 +29,29 @@ import psutil
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.models import Pipeline, Daemon, Component, Device, Driver
 from dgbowl_schemas.tomato import to_payload
-from dgbowl_schemas.tomato.payload import Payload
+from dgbowl_schemas.tomato.payload import Payload, Task
 
 logger = logging.getLogger(__name__)
 
 
-def find_matching_pipelines(daemon: Daemon, method: list[dict]) -> list[str]:
+def find_matching_pipelines(
+    pips: dict[str, Pipeline], cmps: dict[str, Component], method: list[Task]
+) -> list[Pipeline]:
     req_tags = set([item.component_tag for item in method])
     req_capabs = set([item.technique_name for item in method])
 
     candidates = []
-    for pip in daemon.pips.values():
-        dnames = set([comp.role for comp in pip.devs.values()])
-        if req_tags.intersection(dnames) == req_tags:
-            candidates.append(pip)
-
-    matched = []
-    for cd in candidates:
-        capabs = []
-        for dev in cd.devs.values():
-            capabs += daemon.devs[dev.name].capabilities
-        if req_capabs.intersection(set(capabs)) == req_capabs:
-            matched.append(cd)
-    return matched
+    for pip in pips.values():
+        roles = set()
+        capabs = set()
+        for comp in pip.components:
+            c = cmps[comp]
+            roles.add(c.role)
+            capabs.update(c.capabilities)
+        if req_tags.intersection(roles) == req_tags:
+            if req_capabs.intersection(capabs) == req_capabs:
+                candidates.append(pip)
+    return candidates
 
 
 def kill_tomato_job(process: psutil.Process):
@@ -146,7 +146,9 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
     matched = {}
     queue = [job for job in daemon.jobs.values() if job.status in {"q", "qw"}]
     for job in queue:
-        matched[job.id] = find_matching_pipelines(daemon, job.payload.method)
+        matched[job.id] = find_matching_pipelines(
+            daemon.pips, daemon.cmps, job.payload.method
+        )
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
                 f"job {job.id} can queue on pips: {[p.name for p in matched[job.id]]}"
@@ -523,19 +525,21 @@ def job_main_loop(
 
     # distribute plan into threads
     threads = {}
-    for role, tasks in plan.items():
-        component = pipeline.devs[role]
+    for cmpk in pipeline.components:
+        component = daemon.cmps[cmpk]
         logger.debug(" component=%s", component)
-        device = daemon.devs[component.name]
+        tasks = plan[component.role]
+        logger.debug(" tasks=%s", tasks)
+        device = daemon.devs[component.device]
         logger.debug(" device=%s", device)
-        driver = daemon.drvs[device.driver]
+        driver = daemon.drvs[component.driver]
         logger.debug(" driver=%s", driver)
-        threads[role] = Thread(
+        threads[component.role] = Thread(
             target=job_thread,
             args=(tasks, component, device, driver, jobpath, logpath),
             name="job-thread",
         )
-        threads[role].start()
+        threads[component.role].start()
 
     # wait until threads join or we're killed
     snapshot = payload.settings.snapshot
