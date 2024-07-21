@@ -79,5 +79,5 @@ class Daemon(BaseModel, arbitrary_types_allowed=True):
 
 class Reply(BaseModel):
     success: bool
-    msg: str
+    msg: Optional[str] = None
     data: Optional[Any] = None

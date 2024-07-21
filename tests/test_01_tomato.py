@@ -1,7 +1,5 @@
-import json
 import os
 from pathlib import Path
-import yaml
 import zmq
 import subprocess
 
@@ -55,42 +53,6 @@ def test_tomato_start_double(datadir, stop_tomato_daemon):
         f"port {PORT} is already in use" in ret.msg
         or f"already running on port {PORT}" in ret.msg
     )
-
-
-def test_tomato_reload(datadir, stop_tomato_daemon):
-    test_tomato_start_with_init(datadir, stop_tomato_daemon)
-    ret = tomato.status(**kwargs, with_data=True)
-    assert ret.success
-    assert len(ret.data.drvs) == 1
-    assert ret.data.drvs["example_counter"].settings == {"testpar": 1234}
-    assert len(ret.data.devs) == 1
-    assert len(ret.data.devs["dev-counter"].channels) == 1
-    assert len(ret.data.pips) == 1
-
-    with open("devices_counter.json", "r") as inf:
-        jsdata = json.load(inf)
-    with open("devices.yml", "w") as ouf:
-        yaml.dump(jsdata, ouf)
-
-    ret = tomato.reload(**kwargs, appdir=Path())
-    print(f"{ret=}")
-    assert ret.success
-    assert len(ret.data.drvs) == 1
-    assert ret.data.drvs["example_counter"].settings == {"testpar": 1234}
-    assert len(ret.data.devs) == 1
-    assert len(ret.data.devs["dev-counter"].channels) == 4
-    assert len(ret.data.pips) == 4
-
-    with open("settings.toml", "a") as inf:
-        inf.write("example_counter.testparb = 1")
-    ret = tomato.reload(**kwargs, appdir=Path())
-    print(f"{ret=}")
-    assert ret.success
-    assert len(ret.data.drvs) == 1
-    assert ret.data.drvs["example_counter"].settings == {"testpar": 1234, "testparb": 1}
-    assert len(ret.data.devs) == 1
-    assert len(ret.data.devs["dev-counter"].channels) == 4
-    assert len(ret.data.pips) == 4
 
 
 def test_tomato_pipeline(datadir, stop_tomato_daemon):

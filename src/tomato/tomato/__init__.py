@@ -27,7 +27,6 @@ import json
 from pathlib import Path
 from datetime import datetime, timezone
 from importlib import metadata
-import time
 
 import logging
 import psutil
@@ -333,121 +332,42 @@ def reload(
     devicefile = load_device_file(Path(settings["devices"]["config"]))
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
     pips, cmps = get_pipelines(devs, devicefile["pipelines"])
+    drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
     logger.debug(f"{pips=}")
     logger.debug(f"{cmps=}")
-    drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
+    logger.debug(f"{devs=}")
+    logger.debug(f"{drvs=}")
     for drv in drvs.keys():
         if drv in settings["drivers"]:
             drvs[drv].settings.update(settings["drivers"][drv])
-
-    stat = status(**kwargs, with_data=True)
-    if not stat.success:
-        return stat
-    daemon = stat.data
+    ret = status(**kwargs)
+    if not ret.success:
+        return ret
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    if daemon.status == "bootstrap":
-        req.send_pyobj(
-            dict(
-                cmd="setup",
-                settings=settings,
-                pips=pips,
-                devs=devs,
-                drvs=drvs,
-                cmps=cmps,
-                sender=f"{__name__}.reload",
-            )
+    req.send_pyobj(
+        dict(
+            cmd="setup",
+            settings=settings,
+            pips=pips,
+            devs=devs,
+            drvs=drvs,
+            cmps=cmps,
+            sender=f"{__name__}.reload",
         )
-        rep = req.recv_pyobj()
-    elif daemon.status == "running":
-        retries = 0
-        while True:
-            if retries == MAX_RETRIES:
-                return Reply(
-                    success=False, msg="tomato-drivers are not online", data=daemon
-                )
-            elif any(drv.port is None for drv in daemon.drvs.values()):
-                retries += 1
-                logger.warning("not all tomato-drivers are online yet, waiting")
-                logger.debug("retry number %d / %d", retries, MAX_RETRIES)
-                time.sleep(timeout / 1000)
-                daemon = status(**kwargs, with_data=True).data
-            else:
-                break
-
-        # check changes in driver settings
-        for drv in drvs.values():
-            logger.debug(f"{drv=}")
-            ddrv = daemon.drvs[drv.name]
-            if drv.settings != ddrv.settings:
-                ret = _updater(context, ddrv.port, "settings", drv.settings)
-                if ret.success is False:
-                    return ret
-                msg = dict(name=drv.name, settings=drv.settings)
-                ret = _updater(context, port, "driver", msg)
-                if ret.success is False:
-                    return ret
-
-        # check changes in devices
-        for dev in devs.values():
-            logger.debug(f"{dev=}")
-            ddev = daemon.devs[dev.name]
-            if dev.channels != ddev.channels:
-                for channel in dev.channels:
-                    params = dict(
-                        address=dev.address,
-                        channel=channel,
-                    )
-                    drv = daemon.drvs[dev.driver]
-                    logger.debug(f"{params=}")
-                    logger.debug(f"{ddev=}")
-                    logger.debug(f"{drv=}")
-                    ret = _updater(context, drv.port, "dev_register", params)
-                    logger.debug(f"{ret=}")
-                    if ret.success is False:
-                        return ret
-                params = dev.model_dump()
-                ret = _updater(context, port, "device", params)
-                if ret.success is False:
-                    return ret
-            elif dev != ddev.name:
-                logger.error("updating devices not yet implemented")
-        for ddev in daemon.devs.values():
-            if ddev.name not in devs:
-                logger.error("removing devices not yet implemented")
-        # check changes in pipelines
-        for pip in pips.values():
-            logger.debug(f"{pip=}")
-            if pip.name not in daemon.pips:
-                logger.debug(f"{daemon.pips=}")
-                ret = _updater(context, port, "pipeline", pip.model_dump())
-                logger.debug(f"{ret=}")
-                if ret.success is False:
-                    return ret
-            else:
-                logger.error("updating pipelines not yet implemented")
-        for pip in daemon.pips.values():
-            if pip.name not in pips:
-                params = dict(name=pip.name, delete=True)
-                ret = _updater(context, port, "pipeline", params)
-                if ret.success is False:
-                    return ret
-        req.send_pyobj(
-            dict(cmd="setup", settings=settings, sender=f"{__name__}.reload")
-        )
-        rep = req.recv_pyobj()
-
-    if rep.msg == "running":
+    )
+    ret = req.recv_pyobj()
+    if ret.success:
         return Reply(
             success=True,
-            msg=f"tomato configured on port {port} with settings from {appdir}",
-            data=rep.data,
+            msg=f"tomato on port {port} reloaded with settings from {appdir}",
+            data=ret.data,
         )
     else:
         return Reply(
             success=False,
-            msg=f"tomato configuration on port {port} failed: {rep.msg}",
-            data=rep.data,
+            msg=f"tomato on port {port} could not be reloaded",
+            data=ret.data,
         )
 
 

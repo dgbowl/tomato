@@ -13,7 +13,7 @@ import time
 import argparse
 from importlib import metadata
 from datetime import datetime, timezone
-from threading import currentThread
+from threading import current_thread
 
 import zmq
 import psutil
@@ -23,6 +23,28 @@ from tomato.drivers import driver_to_interface
 from tomato.models import Reply
 
 logger = logging.getLogger(__name__)
+
+
+def tomato_driver_bootstrap(
+    req: zmq.Socket, logger: logging.Logger, interface: ModelInterface, driver: str
+):
+    logger.debug("getting daemon status")
+    req.send_pyobj(dict(cmd="status", with_data=True))
+    daemon = req.recv_pyobj().data
+    drv = daemon.drvs[driver]
+    interface.settings = drv.settings
+
+    logger.info("registering components for driver '%s'", driver)
+    for comp in daemon.cmps.values():
+        if comp.driver == driver:
+            logger.info("registering component '%s'", comp.name)
+            ret = interface.dev_register(address=comp.address, channel=comp.channel)
+            logger.debug(f"iface  {ret=}")
+            params = dict(name=comp.name, capabilities=ret.data)
+            req.send_pyobj(dict(cmd="component", params=params))
+            ret = req.recv_pyobj()
+            logger.debug(f"daemon {ret=}")
+    logger.info("driver '%s' bootstrapped successfully", driver)
 
 
 def tomato_driver() -> None:
@@ -89,33 +111,14 @@ def tomato_driver() -> None:
     elif psutil.POSIX:
         pid = os.getpid()
 
-    logger.debug("getting daemon status")
-    req.send_pyobj(
-        dict(cmd="status", with_data=True, sender=f"{__name__}.tomato_driver_bootstrap")
-    )
-    daemon = req.recv_pyobj().data
-    logger.debug(f"{daemon=}")
-
-    logger.info(f"attempting to spawn driver {args.driver!r}")
+    logger.info("attempting to create Interface for driver '%s'", args.driver)
     Interface = driver_to_interface(args.driver)
     if Interface is None:
-        logger.critical(f"library of driver {args.driver!r} not found")
+        logger.critical("class DriverInterface driver '%s' not found", args.driver)
         return
-    drv = daemon.drvs[args.driver]
-    interface: ModelInterface = Interface(settings=drv.settings)
 
-    logger.info("registering components for driver '%s'", args.driver)
-    for comp in daemon.cmps.values():
-        if comp.driver == args.driver:
-            logger.info("registering component '%s'", comp.name)
-            ret = interface.dev_register(address=comp.address, channel=comp.channel)
-            logger.debug(f"iface  {ret=}")
-            params = dict(name=comp.name, capabilities=ret.data)
-            req.send_pyobj(dict(cmd="component", params=params))
-            ret = req.recv_pyobj()
-            logger.debug(f"daemon {ret=}")
-
-    logger.info("driver '%s' bootstrapped successfully", args.driver)
+    interface: ModelInterface = Interface()
+    tomato_driver_bootstrap(req, logger, interface, args.driver)
 
     params = dict(
         name=args.driver,
@@ -151,6 +154,13 @@ def tomato_driver() -> None:
                     success=True,
                     msg=f"status of driver {params['name']!r} is {status!r}",
                     data=dict(**params, status=status),
+                )
+            elif msg["cmd"] == "register":
+                tomato_driver_bootstrap(req, logger, interface, args.driver)
+                ret = Reply(
+                    success=True,
+                    msg="components re-registered successfully",
+                    data=interface.devmap.keys(),
                 )
             elif msg["cmd"] == "stop":
                 status = "stop"
@@ -220,10 +230,10 @@ def manager(port: int, timeout: int = 1000):
     This manager ensures individual driver processes are (re-)spawned and instructed to
     quit as necessary.
     """
-
+    sender = f"{__name__}.manager"
     context = zmq.Context()
-    logger = logging.getLogger(f"{__name__}.manager")
-    thread = currentThread()
+    logger = logging.getLogger(sender)
+    thread = current_thread()
     logger.info("launched successfully")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -232,10 +242,10 @@ def manager(port: int, timeout: int = 1000):
     to = timeout
 
     while getattr(thread, "do_run"):
-        req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
+        req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
         events = dict(poller.poll(to))
         if req not in events:
-            logger.warning(f"could not contact tomato-daemon in {to} ms")
+            logger.warning("could not contact tomato-daemon in %d ms", to)
             to = to * 2
             continue
         elif to > timeout:
@@ -250,24 +260,33 @@ def manager(port: int, timeout: int = 1000):
             else:
                 drv = daemon.drvs[driver]
                 if drv.pid is not None and not psutil.pid_exists(drv.pid):
-                    logger.warning(f"respawning crashed driver {driver!r}")
+                    logger.warning("respawning crashed driver '%s'", driver)
                     spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
                     action_counter += 1
                 elif drv.pid is None and drv.spawned_at is None:
-                    logger.debug(f"spawning driver {driver!r}")
+                    logger.debug("spawning driver '%s'", driver)
                     spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
                     action_counter += 1
-                elif drv.pid is None:
-                    tspawn = datetime.fromisoformat(drv.spawned_at)
-                    if (datetime.now(timezone.utc) - tspawn).seconds > 10:
-                        logger.warning(f"respawning late driver {driver!r}")
-                        spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
-                        action_counter += 1
-        logger.debug("tick")
+        if action_counter == 0:
+            contact_drivers = set()
+            for comp in daemon.cmps.values():
+                if comp.capabilities is None:
+                    contact_drivers.add(comp.driver)
+            for driver in contact_drivers:
+                drv = daemon.drvs[driver]
+                if drv.port is None:
+                    continue
+                logger.debug("contacting driver '%s' to re-register components", driver)
+                dreq = context.socket(zmq.REQ)
+                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                dreq.send_pyobj(dict(cmd="register", params=None, sender=sender))
+                ret = dreq.recv_pyobj()
+                logger.debug(f"{ret=}")
+                dreq.close()
         time.sleep(1 if action_counter > 0 else 0.1)
 
     logger.info("instructed to quit")
-    req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
+    req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
     daemon = req.recv_pyobj().data
     for driver in daemon.drvs.values():
         logger.debug("stopping driver '%s' on port %d", driver.name, driver.port)

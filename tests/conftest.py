@@ -46,7 +46,6 @@ def stop_tomato_daemon(port: int = 12345):
         subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"])
         subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-job.exe"])
         subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"])
-
     else:
         subprocess.run(["killall", "tomato-daemon"])
         subprocess.run(["killall", "tomato-job"])
@@ -64,6 +63,4 @@ def stop_tomato_daemon(port: int = 12345):
                         proc.terminate()
                     except psutil.NoSuchProcess:
                         pass
-    gone, alive = psutil.wait_procs(procs, timeout=5)
-    print(f"{gone=}")
-    print(f"{alive=}")
+    gone, alive = psutil.wait_procs(procs, timeout=1)
