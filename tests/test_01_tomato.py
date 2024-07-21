@@ -148,7 +148,7 @@ def test_tomato_stop(start_tomato_daemon, stop_tomato_daemon):
     assert wait_until_tomato_running(port=PORT, timeout=5000)
     ret = tomato.stop(**kwargs)
     assert ret.success
-    wait_until_tomato_stopped(port=PORT, timeout=5000)
+    assert wait_until_tomato_stopped(port=PORT, timeout=5000)
 
     assert Path("daemon_12345.log").exists()
     with Path("daemon_12345.log").open() as logf:

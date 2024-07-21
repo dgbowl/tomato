@@ -249,12 +249,13 @@ def stop(
         req.connect(f"tcp://127.0.0.1:{port}")
         req.send_pyobj(dict(cmd="stop"))
         rep = req.recv_pyobj()
-        if rep.msg == "stop":
+        logger.debug(f"{rep=}")
+        if rep.data == "stop":
             return Reply(
                 success=True,
                 msg=f"tomato-daemon on port {port} was instructed to stop",
             )
-        elif rep.msg == "running":
+        elif rep.data == "running":
             return Reply(
                 success=False,
                 msg=f"tomato-daemon on port {port} cannot stop as jobs are running",
@@ -263,7 +264,7 @@ def stop(
         else:
             return Reply(
                 success=False,
-                msg=f"unknown error: {rep.msg}",
+                msg=f"unknown error: {rep}",
                 data=rep.data,
             )
     else:
