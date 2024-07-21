@@ -95,16 +95,15 @@ def test_counter_snapshot(
         ("counter_multistep_multidev", {"counter-1": 10, "counter-2": 20}),
     ],
 )
-def test_counter_multidev(
-    casename, npoints, datadir, start_tomato_daemon, stop_tomato_daemon
-):
+def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     os.chdir(datadir)
     with open("devices_multidev.json", "r") as inf:
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
+    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", "."])
+    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-L", ".", "-vv"])
     utils.wait_until_tomato_running(port=PORT, timeout=3000)
-    subprocess.run(["tomato", "reload", "-p", f"{PORT}", "-A", "."])
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
     utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=10000)

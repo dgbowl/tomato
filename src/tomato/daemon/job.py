@@ -527,7 +527,9 @@ def job_main_loop(
     threads = {}
     for cmpk in pipeline.components:
         component = daemon.cmps[cmpk]
-        logger.debug(" component=%s", component)
+        logger.debug(f"{component=}")
+        if component.role not in plan:
+            continue
         tasks = plan[component.role]
         logger.debug(" tasks=%s", tasks)
         device = daemon.devs[component.device]

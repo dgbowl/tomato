@@ -105,7 +105,6 @@ def submit(
             if Version(temp.version) > maxver:
                 break
         payload = temp
-    print(f"{payload=}")
 
     if payload.settings.output.path is None:
         cwd = str(Path().resolve())

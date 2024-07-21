@@ -105,19 +105,14 @@ def tomato_driver() -> None:
     interface: ModelInterface = Interface(settings=drv.settings)
 
     logger.info("registering devices in driver '%s'", args.driver)
-    for dev in daemon.devs.values():
-        if dev.driver == args.driver:
-            for channel in dev.channels:
-                ret = interface.dev_register(address=dev.address, channel=channel)
-                logger.debug(f"iface  {ret=}")
-                name = "/".join((args.driver, dev.address, str(channel)))
-                req.send_pyobj(
-                    dict(
-                        cmd="component", params={"name": name, "capabilities": ret.data}
-                    )
-                )
-                ret = req.recv_pyobj()
-                logger.debug(f"daemon {ret=}")
+    for comp in daemon.cmps.values():
+        if comp.driver == args.driver:
+            ret = interface.dev_register(address=comp.address, channel=comp.channel)
+            logger.debug(f"iface  {ret=}")
+            params = dict(name=comp.name, capabilities=ret.data)
+            req.send_pyobj(dict(cmd="component", params=params))
+            ret = req.recv_pyobj()
+            logger.debug(f"daemon {ret=}")
     logger.debug(f"{interface.devmap=}")
 
     logger.info("driver '%s' bootstrapped successfully", args.driver)
@@ -181,7 +176,7 @@ def tomato_driver() -> None:
         if status == "stop":
             break
 
-    logger.info(f"driver {args.driver!r} is beginning reset")
+    logger.info("driver '%s' is beginning reset", args.driver)
 
     interface.reset()
 

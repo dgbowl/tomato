@@ -333,6 +333,8 @@ def reload(
     devicefile = load_device_file(Path(settings["devices"]["config"]))
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
     pips, cmps = get_pipelines(devs, devicefile["pipelines"])
+    logger.debug(f"{pips=}")
+    logger.debug(f"{cmps=}")
     drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
     for drv in drvs.keys():
         if drv in settings["drivers"]:
