@@ -77,13 +77,11 @@ process for managing all devices of a certain driver type.
 `````````````````````````````
 The following concepts are used in **tomato**:
 
-- *devices*, which represent individually-addressable and optionally multichannel
-  instruments in the lab,
-- *pipelines*, which represent the real world organisation of *devices* into independent
-  experimental set-ups, optionally containing one or more *device* (or their channels),
-- *jobs*, which are processes that carry out a *payload* (i.e. a set of experimental
-  instructions) on a *pipeline*, and
-- *drivers*, which are processes managing all devices of a certain driver type:
+- *devices*, which represent separately addressable and optionally multichannel instruments in the lab,
+- *components*, which represent the individual channels of each *device*, describing the role of this *component* and its associated capabilities,
+- *pipelines*, which represent the real world organisation of device *components* into independent experimental set-ups, optionally containing *components* from one or more *device*,
+- *jobs*, which are processes that carry out a *payload* (i.e. a set of experimental instructions) on a *pipeline*, and
+- *drivers*, which are processes managing all *devices* of a certain driver type and their *component*:
 
 .. mermaid::
 
@@ -210,14 +208,10 @@ The ``devices`` section of the default *devices file* is shown below:
         address: "example-addr"
         channels: [1]
         pollrate: 1
-        capabilities:
-          - count
 
 Here, we define a single device using the :mod:`~tomato.drivers.example_counter` driver.
 The definition includes the ``address`` of the device (:class:`str` type) as well as an
 enumeration of individually-addressable channels the device has (:class:`list[int]`).
-The ``capabilities`` list enumerates all "techniques" or "methods" the device can
-perform (:class:`list[str]`).
 
 For example, the devices shown in the :ref:`concepts flowchart <concepts>` above would
 be defined as:
@@ -231,19 +225,16 @@ be defined as:
         address: "192.168.1.1"
         channels: [1, 2, 3]
         pollrate: 1
-        capabilities: [...]
       - name: device a
         driver: "driver abc"
         address: "COM1"
         channels: [100]
         pollrate: 5
-        capabilities: [...]
       - name: device b
         driver: "driver abc"
         address: "COM2"
         channels: [100]
         pollrate: 5
-        capabilities: [...]
 
 
 .. note::
@@ -262,9 +253,9 @@ The default ``pipelines`` section looks as follows:
 
     pipelines:
       - name: pip-counter
-        devices:
-          - tag: counter
-            name: dev-counter
+        components:
+          - role: counter
+            device: dev-counter
             channel: 1
 
 Here, a single *pipeline* called ``pip-counter`` is defined to contain the one available
@@ -278,9 +269,9 @@ For example, with the following definition:
 
     pipelines:
       - name: pip-counter-*
-        devices:
-          - tag: counter
-            name: dev-counter
+        components:
+          - role: counter
+            device: dev-counter
             channel: each
 
 a set of pipelines would be created using each of the available channels in
@@ -294,27 +285,27 @@ above can be defined as:
 .. code-block:: yaml
    :linenos:
 
-    devices:
+    pipelines:
       - name: pipeline a1
-        devices:
-          - tag: dev 123
-            name: device 1
+        components:
+          - role: dev 123
+            device: device 1
             channel: 1
-          - tag: dev abc
-            name: device a
+          - role: dev abc
+            device: device a
             channel: 100
       - name: pipeline b2
-        devices:
-          - tag: dev 123
-            name: device 1
+        components:
+          - role: dev 123
+            device: device 1
             channel: 2
-          - tag: dev abc
-            name: device b
+          - role: dev abc
+            device: device b
             channel: 100
       - name: pipeline 3
-        devices:
-          - tag: dev 123
-            name: device 1
+        components:
+          - role: dev 123
+            device: device 1
             channel: 3
 
 .. _payfile:

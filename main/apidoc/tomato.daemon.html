@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.daemon package &mdash; tomato 0.2.dev23 documentation</title>
+  <title>tomato.daemon package &mdash; tomato 0.2.dev24 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=13e4ea10"></script>
+        <script src="../_static/documentation_options.js?v=d86d7add"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.2.dev23
+                0.2.dev24
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -77,6 +77,7 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.job"><code class="docutils literal notranslate"><span class="pre">job()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.driver"><code class="docutils literal notranslate"><span class="pre">driver()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.device"><code class="docutils literal notranslate"><span class="pre">device()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.component"><code class="docutils literal notranslate"><span class="pre">component()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato-daemon-driver-the-driver-manager-of-tomato-daemon"><strong>tomato.daemon.driver</strong>: the driver manager of tomato daemon</a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.tomato_driver"><code class="docutils literal notranslate"><span class="pre">tomato_driver()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.spawn_tomato_driver"><code class="docutils literal notranslate"><span class="pre">spawn_tomato_driver()</span></code></a></li>
@@ -212,6 +213,11 @@ current <code class="xref py py-class docutils literal notranslate"><span class=
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.daemon.cmd.device" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.component">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.daemon.cmd.component" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <section id="tomato-daemon-driver-the-driver-manager-of-tomato-daemon">
 <span id="module-tomato.daemon.driver"></span><h3><strong>tomato.daemon.driver</strong>: the driver manager of tomato daemon<a class="headerlink" href="#tomato-daemon-driver-the-driver-manager-of-tomato-daemon" title="Link to this heading"></a></h3>
 <p><em>Code author: Peter Kraus</em></p>
@@ -290,7 +296,7 @@ be propagated via the <a class="reference internal" href="#module-tomato.daemon.
 </section>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.find_matching_pipelines">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">find_matching_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.daemon.job.find_matching_pipelines" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">find_matching_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pips</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="tomato.html#tomato.models.Component" title="tomato.models.Component"><span class="pre">Component</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Task</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.daemon.job.find_matching_pipelines" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -400,7 +406,7 @@ for data, and moves on to the next task as instructed in the payload.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 0.2.dev23
+      v: 0.2.dev24
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
