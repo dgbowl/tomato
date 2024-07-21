@@ -116,11 +116,12 @@ def test_recover_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
     ret = tomato.status(**kwargs, with_data=True)
     print(f"{ret=}")
+    pid = ret.data.jobs[1].pid
 
     ret = tomato.stop(**kwargs)
     kill_tomato_daemon(port=PORT)
 
-    proc = psutil.Process(pid=ret.data.jobs[1].pid)
+    proc = psutil.Process(pid=pid)
     proc.terminate()
     psutil.wait_procs([proc], timeout=3)
 
