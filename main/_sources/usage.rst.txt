@@ -167,7 +167,7 @@ to check the status of and to cancel *jobs* in the queue.
 *Jobs* submitted to the queue will remain in the queue until a *pipeline* meets all
 of the following criteria:
 
-  - A *pipeline* where all of the ``techniques`` specified in the *payload* are matched
+  - A *pipeline* where all of the ``tasks`` specified in the *payload* are matched
     by its ``capabilities`` must exist. Once the :mod:`tomato.daemon` finds such a
     *pipeline*, the status of the *job* will change to ``qw``.
   - The matching *pipeline* must contain a *sample* with a ``samplename`` that matches
