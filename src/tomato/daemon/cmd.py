@@ -58,11 +58,11 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
     io.store(daemon)
     if any([pip.jobid is not None for pip in daemon.pips.values()]):
         logger.error("cannot stop tomato-daemon as jobs are running")
-        return Reply(success=False, msg=daemon.status, data=daemon)
+        return Reply(success=False, msg="jobs are running", data=daemon.jobs)
     else:
         daemon.status = "stop"
         logger.critical("stopping tomato-daemon")
-        return Reply(success=True, msg=daemon.status)
+        return Reply(success=True)
 
 
 def setup(msg: dict, daemon: Daemon) -> Reply:
@@ -70,13 +70,123 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
     logger.debug("%s", msg)
     if daemon.status == "bootstrap":
         for key in ["drvs", "devs", "pips", "cmps"]:
-            if key in msg:
-                setattr(daemon, key, msg[key])
+            setattr(daemon, key, msg[key])
         logger.info("setup successful with pipelines: '%s'", daemon.pips.keys())
         daemon.status = "running"
     else:
+        # First, check that we're not touching anything associated with a running job
+        check_components = set()
+        check_devices = set()
+        check_drivers = set()
+        for dpip in daemon.pips.values():
+            if dpip.jobid is None:
+                continue
+            if dpip.name not in msg["pips"]:
+                return Reply(
+                    success=False,
+                    msg="reload would delete a running pipeline",
+                    data=dpip,
+                )
+            pip = msg["pips"][dpip.name]
+            if pip.components != dpip.components:
+                return Reply(
+                    success=False,
+                    msg="reload would modify components of a running pipeline",
+                    data=dpip,
+                )
+            check_components.update(dpip.components)
+
+        for cname in check_components:
+            dcomp = daemon.cmps[cname]
+            if cname not in msg["cmps"]:
+                return Reply(
+                    success=False,
+                    msg="reload would delete a component of a running pipeline",
+                    data=dcomp,
+                )
+            comp = msg["cmps"][cname]
+            if (
+                dcomp.name != comp.name
+                or dcomp.driver != comp.driver
+                or dcomp.device != comp.device
+                or dcomp.address != comp.address
+                or dcomp.channel != comp.channel
+                or dcomp.role != comp.role
+            ):
+                return Reply(
+                    success=False,
+                    msg="reload would modify a component of a running pipeline",
+                    data=dcomp,
+                )
+            check_devices.add(dcomp.device)
+            check_drivers.add(dcomp.driver)
+
+        for dname in check_devices:
+            ddev = daemon.devs[dname]
+            if dname not in msg["devs"]:
+                return Reply(
+                    success=False,
+                    msg="reload would delete a device of a component in a running pipeline",
+                    data=ddev,
+                )
+            dev = msg["devs"][dname]
+            if (
+                ddev.name != dev.name
+                or ddev.driver != dev.driver
+                or ddev.address != dev.address
+                or ddev.pollrate != dev.pollrate
+                or any(ch not in dev.channels for ch in ddev.channels)
+            ):
+                return Reply(
+                    success=False,
+                    msg="reload would modify a device of a component in a running pipeline",
+                    data=ddev,
+                )
+
+        for dname in check_drivers:
+            ddrv = daemon.drvs[dname]
+            if dname not in msg["drvs"]:
+                return Reply(
+                    success=False,
+                    msg="reload would delete a driver of a device in a running pipeline",
+                    data=ddev,
+                )
+            drv = msg["drvs"][dname]
+            if ddrv.name != drv.name or ddrv.settings != drv.settings:
+                return Reply(
+                    success=False,
+                    msg="reload would modify a driver of a device in a running pipeline",
+                    data=ddrv,
+                )
+
+        _api_reload(msg["drvs"], daemon.drvs, "driver", ["settings"])
+
+        _api_reload(msg["pips"], daemon.pips, "pipeline", ["components"])
+
+        attrlist = ["driver", "device", "address", "channel", "role"]
+        _api_reload(msg["cmps"], daemon.cmps, "component", attrlist)
+
+        _api_reload(msg["devs"], daemon.devs, "device", ["channels", "pollrate"])
+
         logger.info("reload successful with pipelines: '%s'", daemon.pips.keys())
-    return Reply(success=True, msg=daemon.status, data=daemon)
+    return Reply(success=True, data=daemon)
+
+
+def _api_reload(mdict: dict, ddict: dict, objname: str, attrlist: list[str]):
+    for obj in mdict.values():
+        if obj.name not in ddict:
+            logger.debug("adding new %s '%s'", objname, obj.name)
+            ddict[obj.name] = obj
+            continue
+        dobj = ddict[obj.name]
+        for attr in attrlist:
+            if getattr(dobj, attr) != getattr(obj, attr):
+                logger.debug("%s '%s.%s' updated", objname, dobj.name, attr)
+                setattr(dobj, attr, getattr(obj, attr))
+    for dobj in ddict.copy().values():
+        if dobj.name not in mdict:
+            logger.warning("removing unused %s '%s'", objname, dobj.name)
+            del ddict[dobj.name]
 
 
 def pipeline(msg: dict, daemon: Daemon) -> Reply:

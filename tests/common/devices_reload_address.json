@@ -1,0 +1,19 @@
+{
+    "devices": [
+        {
+            "name": "dev-counter",
+            "driver": "example_counter",
+            "address": "example-addr-new",
+            "channels": [1],
+            "pollrate": 1
+        }
+    ],
+    "pipelines": [
+        {
+            "name": "pip-counter",
+            "devices": [
+                {"role": "counter", "device": "dev-counter", "channel": 1}
+            ]
+        }
+    ]
+}
