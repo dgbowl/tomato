@@ -350,7 +350,7 @@ def reload(
     else:
         return Reply(
             success=False,
-            msg=f"tomato on port {port} could not be reloaded",
+            msg=f"tomato on port {port} could not be reloaded: {ret.msg}",
             data=ret.data,
         )
 
