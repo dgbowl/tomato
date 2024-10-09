@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 0.2.dev25 documentation</title>
+  <title>Quick start guide &mdash; tomato 0.2.dev26 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=7c15fec4"></script>
+        <script src="_static/documentation_options.js?v=4bed74ae"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -41,7 +41,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.2.dev25
+                0.2.dev26
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -382,7 +382,7 @@ above can be defined as:</p>
 <span id="payfile"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Link to this heading"></a></h2>
 <p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and
 allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined
-in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas vmaster)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/master/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas vmaster)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
+in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v118.dev6)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v118.dev6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload">
 <em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload_1_0.</span></span><span class="sig-name descname"><span class="pre">Payload</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload" title="Link to this definition"></a></dt>
@@ -629,7 +629,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.settings">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Settings</span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.settings" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.settings.Settings" title="(in dgbowl-schemas v118.dev6)"><span class="pre">Settings</span></a></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.settings" title="Link to this definition"></a></dt>
 <dd><p>Additional configuration options for tomato.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
@@ -643,7 +643,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.sample">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sample</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.sample" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.sample.Sample" title="(in dgbowl-schemas v118.dev6)"><span class="pre">Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.sample" title="Link to this definition"></a></dt>
 <dd><p>Specification of the experimental sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
@@ -657,7 +657,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.method">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Task</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.method" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v118.dev6)"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.method" title="Link to this definition"></a></dt>
 <dd><p>A sequence of the experimental <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
@@ -713,7 +713,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 0.2.dev25
+      v: 0.2.dev26
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
