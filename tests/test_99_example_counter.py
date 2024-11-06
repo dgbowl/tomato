@@ -36,7 +36,8 @@ def test_counter_npoints(
     assert "job-1.log" in files
     if prefix is not None:
         assert os.path.exists(f"{prefix}.nc")
-        ds = xr.load_dataset(f"{prefix}.nc", group="counter")
+        dt = xr.open_datatree(f"{prefix}.nc")
+        ds = dt["counter"]
         print(f"{ds=}")
         assert ds["uts"].size == npoints
 
@@ -117,7 +118,7 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
+    dt = xr.open_datatree("results.1.nc")
     for group, points in npoints.items():
-        ds = xr.load_dataset("results.1.nc", group=group)
-        print(f"{ds=}")
-        assert ds["uts"].size == points
+        print(f"{dt[group]=}")
+        assert dt[group]["uts"].size == points
