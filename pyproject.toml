@@ -39,8 +39,8 @@ dependencies = [
 [project.optional-dependencies]
 testing = [
     "pytest",
-    "tomato-example-counter @ git+https://github.com/dgbowl/tomato-example-counter.git",
-    "tomato-psutil @ git+https://github.com/dgbowl/tomato-psutil.git",
+    "tomato-example-counter >= 1.0.0",
+    "tomato-psutil >= 1.0.0",
 ]
 docs = [
     "sphinx ~= 7.2",
@@ -61,7 +61,6 @@ tomato-job = "tomato.daemon.job:tomato_job"
 tomato-driver = "tomato.daemon.driver:tomato_driver"
 tomato-daemon = "tomato.daemon:tomato_daemon"
 
-
 [tool.setuptools-git-versioning]
 enabled = true
 dev_template = "{tag}.dev{ccount}"
@@ -70,5 +69,5 @@ dirty_template = "{tag}.dev{ccount}"
 [tool.ruff]
 
 [tool.pytest.ini_options]
-log_cli = true
-log_cli_level = "DEBUG"
+# log_cli = true
+# log_cli_level = "DEBUG"
