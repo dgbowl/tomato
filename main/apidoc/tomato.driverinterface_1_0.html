@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.driverinterface_1_0 package &mdash; tomato 0.2.dev26 documentation</title>
+  <title>tomato.driverinterface_1_0 package &mdash; tomato 1.0rc1.dev1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=4bed74ae"></script>
+        <script src="../_static/documentation_options.js?v=d45864b8"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.2.dev26
+                1.0rc1.dev1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -297,14 +297,14 @@ of this function.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_1_0.ModelInterface.DeviceManager.prepare_task">
-<span class="sig-name descname"><span class="pre">prepare_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v118.dev6)"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_1_0.ModelInterface.DeviceManager.prepare_task" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepare_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v119.dev1)"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_1_0.ModelInterface.DeviceManager.prepare_task" title="Link to this definition"></a></dt>
 <dd><p>Given a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>, prepare this component for execution by settin all
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Attrs</span></code> as specified in the <cite>task.technique_params</cite> dictionary.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_1_0.ModelInterface.DeviceManager.do_task">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v118.dev6)"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_1_0.ModelInterface.DeviceManager.do_task" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v119.dev1)"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_1_0.ModelInterface.DeviceManager.do_task" title="Link to this definition"></a></dt>
 <dd><p>Periodically called task execution function.</p>
 <p>This function is responsible for updating <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.data</span></code> with new data, i.e.
 performing the measurement. It should also update the values of all
@@ -441,7 +441,7 @@ returns their values in a <code class="xref py py-class docutils literal notrans
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_1_0.ModelInterface.task_start">
-<span class="sig-name descname"><span class="pre">task_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v118.dev6)"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_1_0.ModelInterface.task_start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">task_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v119.dev1)"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_1_0.ModelInterface.task_start" title="Link to this definition"></a></dt>
 <dd><p>Submit a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> onto the specified device component.</p>
 <p>Pushes the supplied <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> into the <code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code> of the component,
 then starts the worker thread. Checks that the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> is among the
@@ -529,7 +529,7 @@ not a pass-through to <a class="reference internal" href="#tomato.driverinterfac
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 0.2.dev26
+      v: 1.0rc1.dev1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
