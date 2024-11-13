@@ -78,7 +78,7 @@ def get_pipelines(
                 dev = devs[comp["device"]]
                 for ch in dev.channels:
                     name = pip["name"].replace("*", f"{ch}")
-                    h = "/".join((dev.driver, dev.address, str(ch)))
+                    h = f"{dev.driver}:({dev.address},{ch})"
                     c = Component(
                         name=h,
                         driver=dev.driver,
@@ -97,14 +97,20 @@ def get_pipelines(
                     logger.error("device '%s' not found", comp["device"])
                     break
                 dev = devs[comp["device"]]
+                if isinstance(comp["channel"], int):
+                    logger.warning(
+                        "Supplying 'channel' as an int is deprecated "
+                        "and will stop working in tomato-2.0."
+                    )
+                    comp["channel"] = str(comp["channel"])
                 if comp["channel"] not in dev.channels:
                     logger.error(
-                        "channel %d not found on device '%s'",
+                        "channel %s not found on device '%s'",
                         comp["channel"],
                         comp["device"],
                     )
                     break
-                h = "/".join((dev.driver, dev.address, str(comp["channel"])))
+                h = f"{dev.driver}:({dev.address},{comp['channel']})"
                 c = Component(
                     name=h,
                     driver=dev.driver,

@@ -14,6 +14,7 @@ import argparse
 from importlib import metadata
 from datetime import datetime, timezone
 from threading import current_thread
+from pathlib import Path
 
 import zmq
 import psutil
@@ -37,13 +38,11 @@ def tomato_driver_bootstrap(
     logger.info("registering components for driver '%s'", driver)
     for comp in daemon.cmps.values():
         if comp.driver == driver:
-            logger.info("registering component '%s'", comp.name)
+            logger.info("registering component %s", (comp.address, comp.channel))
             ret = interface.dev_register(address=comp.address, channel=comp.channel)
-            logger.debug(f"iface  {ret=}")
             params = dict(name=comp.name, capabilities=ret.data)
             req.send_pyobj(dict(cmd="component", params=params))
             ret = req.recv_pyobj()
-            logger.debug(f"daemon {ret=}")
     logger.info("driver '%s' bootstrapped successfully", driver)
 
 
@@ -83,6 +82,12 @@ def tomato_driver() -> None:
         type=int,
     )
     parser.add_argument(
+        "--logdir",
+        help="Logging directory for the tomato-driver.",
+        default=".",
+        type=str,
+    )
+    parser.add_argument(
         "driver",
         type=str,
         help="Name of the driver module.",
@@ -90,12 +95,13 @@ def tomato_driver() -> None:
     args = parser.parse_args()
 
     # LOGFILE
-    logfile = f"drivers_{args.port}.log"
-    logger = logging.getLogger(f"{__name__}.tomato_drivers({args.driver!r})")
+    logfile = f"driver_{args.driver}_{args.port}.log"
+    logpath = Path(args.logdir) / logfile
+    logger = logging.getLogger(f"{__name__}.tomato_driver({args.driver!r})")
     logging.basicConfig(
         level=args.verbosity,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
-        handlers=[logging.FileHandler(logfile, mode="a")],
+        handlers=[logging.FileHandler(logpath, mode="a")],
     )
 
     # PORTS
@@ -192,9 +198,19 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is quitting", args.driver)
 
 
-def spawn_tomato_driver(port: int, driver: str, req: zmq.Socket, verbosity: int):
-    # cmd = ["tomato-driver", "--port", str(port), "--verbosity", str(verbosity), driver]
-    cmd = ["tomato-driver", "--port", str(port), driver]
+def spawn_tomato_driver(
+    port: int, driver: str, req: zmq.Socket, verbosity: int, logpath: str
+):
+    cmd = [
+        "tomato-driver",
+        "--port",
+        str(port),
+        "--verbosity",
+        str(verbosity),
+        "--logdir",
+        str(logpath),
+        driver,
+    ]
     if psutil.WINDOWS:
         cfs = subprocess.CREATE_NO_WINDOW
         cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
@@ -211,9 +227,9 @@ def spawn_tomato_driver(port: int, driver: str, req: zmq.Socket, verbosity: int)
     )
     ret = req.recv_pyobj()
     if ret.success:
-        logger.info(f"driver {driver!r} started")
+        logger.info("driver process for driver '%s' launched", driver)
     else:
-        logger.error(f"could not start {driver!r}")
+        logger.error("could not launch driver process for driver '%s'", driver)
 
 
 def stop_tomato_driver(port: int, context):
@@ -241,6 +257,8 @@ def manager(port: int, timeout: int = 1000):
     poller.register(req, zmq.POLLIN)
     to = timeout
 
+    spawned_drivers = dict()
+
     while getattr(thread, "do_run"):
         req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
         events = dict(poller.poll(to))
@@ -250,24 +268,31 @@ def manager(port: int, timeout: int = 1000):
             continue
         elif to > timeout:
             to = timeout
+
         daemon = req.recv_pyobj().data
-        action_counter = 0
         for driver in daemon.drvs.keys():
+            args = [daemon.port, driver, req, daemon.verbosity, daemon.logdir]
             if driver not in daemon.drvs:
                 logger.debug("spawning driver '%s'", driver)
-                spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
-                action_counter += 1
-            else:
+                spawn_tomato_driver(*args)
+                spawned_drivers[driver] = 1
+            elif driver not in spawned_drivers or spawned_drivers[driver] > 5:
                 drv = daemon.drvs[driver]
                 if drv.pid is not None and not psutil.pid_exists(drv.pid):
                     logger.warning("respawning crashed driver '%s'", driver)
-                    spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
-                    action_counter += 1
+                    spawn_tomato_driver(*args)
+                    spawned_drivers[driver] = 1
                 elif drv.pid is None and drv.spawned_at is None:
                     logger.debug("spawning driver '%s'", driver)
-                    spawn_tomato_driver(daemon.port, driver, req, daemon.verbosity)
-                    action_counter += 1
-        if action_counter == 0:
+                    spawn_tomato_driver(*args)
+                    spawned_drivers[driver] = 1
+                elif driver in spawned_drivers:
+                    logger.info("driver '%s' spawned at pid %d", driver, drv.pid)
+                    spawned_drivers.pop(driver)
+            elif driver in spawned_drivers:
+                spawned_drivers[driver] += 1
+
+        if len(spawned_drivers) == 0:
             contact_drivers = set()
             for comp in daemon.cmps.values():
                 if comp.capabilities is None:
@@ -283,7 +308,7 @@ def manager(port: int, timeout: int = 1000):
                 ret = dreq.recv_pyobj()
                 logger.debug(f"{ret=}")
                 dreq.close()
-        time.sleep(1 if action_counter > 0 else 0.1)
+        time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
 
     logger.info("instructed to quit")
     req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
