@@ -5,10 +5,11 @@
     Peter Kraus
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Any, Mapping, Sequence, Literal
 from pathlib import Path
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +27,18 @@ class Device(BaseModel):
     name: str
     driver: str
     address: str
-    channels: Sequence[int]
+    channels: Sequence[str]
     pollrate: int = 1
+
+    @field_validator("channels", mode="before")
+    def coerce_channels(cls, v):
+        if any([isinstance(vv, int) for vv in v]):
+            logger.warning(
+                "Supplying 'channels' as a Sequence[int] is deprecated "
+                "and will stop working in tomato-2.0."
+            )
+            return [str(vv) for vv in v]
+        return v
 
 
 class Component(BaseModel):
@@ -35,9 +46,19 @@ class Component(BaseModel):
     driver: str
     device: str
     address: str
-    channel: int
+    channel: str
     role: str
     capabilities: Optional[set[str]] = None
+
+    @field_validator("channel", mode="before")
+    def coerce_channel(cls, v):
+        if isinstance(v, int):
+            logger.warning(
+                "Supplying 'channel' as an int is deprecated "
+                "and will stop working in tomato-2.0."
+            )
+            return str(v)
+        return v
 
 
 class Pipeline(BaseModel):
