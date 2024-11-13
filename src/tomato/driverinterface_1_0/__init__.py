@@ -10,6 +10,7 @@ from functools import wraps
 from xarray import Dataset
 from collections import defaultdict
 import time
+import atexit
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,7 @@ class ModelInterface(metaclass=ABCMeta):
             self.data = defaultdict(list)
             self.running = False
             self.datalock = RLock()
+            atexit.register(self.reset)
 
         def run(self):
             """Helper function for starting the :obj:`self.thread`."""
