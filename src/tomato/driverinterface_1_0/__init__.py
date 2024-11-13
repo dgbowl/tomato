@@ -128,6 +128,9 @@ class ModelInterface(metaclass=ABCMeta):
             self.task_list.task_done()
             self.running = False
             self.thread = Thread(target=self.task_runner, daemon=True)
+            logger.info(
+                "task '%s' on component %s is done", task.technique_name, self.key
+            )
 
         def prepare_task(self, task: Task, **kwargs: dict):
             """
@@ -151,6 +154,7 @@ class ModelInterface(metaclass=ABCMeta):
 
         def stop_task(self, **kwargs: dict):
             """Stops the currently running task."""
+            logger.info("stopping running task on component %s", self.key)
             setattr(self.thread, "do_run", False)
 
         @abstractmethod
@@ -190,6 +194,7 @@ class ModelInterface(metaclass=ABCMeta):
 
         def reset(self, **kwargs) -> None:
             """Resets the component to an initial status."""
+            logger.info("resetting component %s", self.key)
             self.task_list = Queue()
             self.thread = Thread(target=self.task_runner, daemon=True)
             self.data = defaultdict(list)
@@ -244,7 +249,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         status = self.task_status(key=key, **kwargs)
         if status.data:
-            logger.warning("tearing down component '%s' with a running task!")
+            logger.warning("tearing down component %s with a running task!", key)
             self.task_stop(key=key, **kwargs)
         self.dev_reset(key=key, **kwargs)
         del self.devmap[key]
@@ -261,7 +266,6 @@ class ModelInterface(metaclass=ABCMeta):
         Should set the device component into a documented, safe state. This function
         is executed at the end of every job.
         """
-        logger.debug("resetting component '%s'", key)
         self.devmap[key].reset()
         return Reply(
             success=True,
@@ -342,6 +346,7 @@ class ModelInterface(metaclass=ABCMeta):
         then starts the worker thread. Checks that the :class:`Task` is among the
         capabilities of this component.
         """
+        logger.info("starting task '%s' on component %s", task.technique_name, key)
         if task.technique_name not in self.devmap[key].capabilities(**kwargs):
             return Reply(
                 success=False,
@@ -351,6 +356,7 @@ class ModelInterface(metaclass=ABCMeta):
 
         self.devmap[key].task_list.put(task)
         self.devmap[key].run()
+        logger.info("task '%s' on component %s started", task.technique_name, key)
         return Reply(
             success=True,
             msg=f"task {task!r} started successfully",
@@ -439,15 +445,16 @@ class ModelInterface(metaclass=ABCMeta):
         not a pass-through to :func:`dev_teardown`.
 
         """
+        logger.info("resetting all components on this driver")
         for key, dev in self.devmap.items():
             if dev.thread.is_alive():
-                logger.warning("stopping task on component '%s'", key)
+                logger.warning("stopping task on component %s", key)
                 setattr(dev.thread, "do_run", False)
                 dev.thread.join(timeout=1)
             if dev.thread.is_alive():
-                logger.error("task on component '%s' is still running", key)
+                logger.error("task on component %s is still running", key)
             else:
-                logger.debug("component '%s' has no running task", key)
+                logger.debug("component %s has no running task", key)
             self.dev_reset(key=key)
         return Reply(
             success=True,
