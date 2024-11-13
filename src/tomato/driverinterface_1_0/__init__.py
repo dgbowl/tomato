@@ -218,7 +218,7 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap = {}
         self.settings = settings if settings is not None else {}
 
-    def dev_register(self, address: str, channel: int, **kwargs: dict) -> Reply:
+    def dev_register(self, address: str, channel: str, **kwargs: dict) -> Reply:
         """
         Register a new device component in this driver.
 
