@@ -175,8 +175,8 @@ def start(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: Path,
-    logdir: Path,
+    appdir: str,
+    logdir: str,
     verbosity: int,
     **_: dict,
 ) -> Reply:
@@ -202,7 +202,7 @@ def start(
             msg=f"required port {port} is already in use, choose a different one",
         )
 
-    if not (appdir / "settings.toml").exists():
+    if not (Path(appdir) / "settings.toml").exists():
         return Reply(
             success=False,
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
@@ -262,8 +262,8 @@ def stop(
 
 def init(
     *,
-    appdir: Path,
-    datadir: Path,
+    appdir: str,
+    datadir: str,
     **_: dict,
 ) -> Reply:
     """
@@ -271,6 +271,8 @@ def init(
 
     Will overwrite any existing settings.toml file.
     """
+    appdir = Path(appdir)
+    datadir = Path(datadir)
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
@@ -303,7 +305,7 @@ def reload(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: Path,
+    appdir: str,
     **_: dict,
 ) -> Reply:
     """
@@ -312,7 +314,7 @@ def reload(
     kwargs = dict(port=port, timeout=timeout, context=context)
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
-        settings = toml.load(appdir / "settings.toml")
+        settings = toml.load(Path(appdir) / "settings.toml")
     except FileNotFoundError:
         return Reply(
             success=False,

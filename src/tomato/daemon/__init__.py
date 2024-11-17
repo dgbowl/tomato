@@ -50,22 +50,21 @@ def tomato_daemon():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--port", "-p", type=int, default=1234)
     parser.add_argument("--verbosity", "-V", type=int, default=logging.INFO)
-    parser.add_argument("--appdir", "-A", type=Path, default=Path.cwd())
-    parser.add_argument("--logdir", "-L", type=Path, default=Path.cwd())
+    parser.add_argument("--appdir", "-A", type=str, default=str(Path.cwd()))
+    parser.add_argument("--logdir", "-L", type=str, default=str(Path.cwd()))
     args = parser.parse_args()
-    settings = toml.load(args.appdir / "settings.toml")
+    settings = toml.load(Path(args.appdir) / "settings.toml")
 
     daemon = Daemon(**vars(args), status="bootstrap", settings=settings)
     setup_logging(daemon)
-    logger.info(f"logging set up with verbosity {daemon.verbosity}")
+    logger.info("logging set up with verbosity %s", daemon.verbosity)
 
     logger.debug("attempting to restore daemon state")
     io.load(daemon)
-    logger.debug(f"{daemon=}")
 
     context = zmq.Context()
     rep = context.socket(zmq.REP)
-    logger.debug(f"binding zmq.REP socket on port {daemon.port}")
+    logger.debug("binding zmq.REP socket on port %d", daemon.port)
     rep.bind(f"tcp://127.0.0.1:{daemon.port}")
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
@@ -93,7 +92,7 @@ def tomato_daemon():
         if daemon.status == "stop":
             for mgr, label in [(jmgr, "job"), (dmgr, "driver")]:
                 if mgr is not None and mgr.do_run:
-                    logger.debug(f"stopping {label} manager thread")
+                    logger.debug("stopping %s manager thread", label)
                     mgr.do_run = False
             if jmgr is not None:
                 jmgr.join(1e-3)
@@ -112,4 +111,4 @@ def tomato_daemon():
         if tN - t0 > 10:
             io.store(daemon)
             t0 = tN
-    logger.critical(f"tomato-daemon on port {daemon.port} exiting")
+    logger.critical("tomato-daemon on port %d is exiting", daemon.port)

@@ -7,7 +7,6 @@
 
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Any, Mapping, Sequence, Literal
-from pathlib import Path
 import logging
 
 
@@ -87,8 +86,8 @@ class Daemon(BaseModel, arbitrary_types_allowed=True):
     status: Literal["bootstrap", "running", "stop"]
     port: int
     verbosity: int
-    logdir: Path
-    appdir: Path
+    logdir: str
+    appdir: str
     settings: dict
     pips: Mapping[str, Pipeline] = Field(default_factory=dict)
     devs: Mapping[str, Device] = Field(default_factory=dict)
