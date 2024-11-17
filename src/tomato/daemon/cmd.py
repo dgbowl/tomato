@@ -240,7 +240,7 @@ def job(msg: dict, daemon: Daemon) -> Reply:
             logger.debug("setting job parameter %s.%s to %s", jobid, k, v)
             setattr(daemon.jobs[jobid], k, v)
         cjob = daemon.jobs[jobid]
-        if cjob.status in {"c", "ce", "cd"}:
+        if cjob.status in {"c"}:
             daemon.jobs[jobid] = CompletedJob(
                 id=cjob.id,
                 status=cjob.status,
