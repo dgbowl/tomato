@@ -103,6 +103,13 @@ def run_tomato():
             type=int,
             default=3000,
         )
+        p.add_argument(
+            "--yaml",
+            "-y",
+            help="Return output as a yaml.",
+            action="store_true",
+            default=False,
+        )
 
     for p in [start, init, reload]:
         p.add_argument(
@@ -140,7 +147,10 @@ def run_tomato():
     context = zmq.Context()
     if "func" in args:
         ret = args.func(**vars(args), context=context, verbosity=verbosity)
-        print(yaml.dump(ret.dict()))
+        if args.yaml:
+            print(yaml.dump(ret.dict()))
+        else:
+            print(f"{'Success' if ret.success else 'Failure'}: {ret.msg}")
 
 
 def run_ketchup():
@@ -253,6 +263,13 @@ def run_ketchup():
             type=int,
             default=3000,
         )
+        p.add_argument(
+            "--yaml",
+            "-y",
+            help="Return output as a yaml.",
+            action="store_true",
+            default=False,
+        )
 
     args, extras = parser.parse_known_args()
     args, extras = verbose.parse_known_args(extras, args)
@@ -264,9 +281,15 @@ def run_ketchup():
         context = zmq.Context()
         status = tomato.status(**vars(args), context=context, with_data=True)
         if not status.success:
-            print(yaml.dump(status.dict()))
+            if args.yaml:
+                print(yaml.dump(status.dict()))
+            else:
+                print(f"Failure: {status.msg}")
         else:
             ret = args.func(
                 **vars(args), verbosity=verbosity, context=context, status=status
             )
-            print(yaml.dump(ret.dict()))
+            if args.yaml:
+                print(yaml.dump(ret.dict()))
+            else:
+                print(f"{'Success' if ret.success else 'Failure'}: {ret.msg}")

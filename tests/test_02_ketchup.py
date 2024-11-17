@@ -71,7 +71,7 @@ def test_ketchup_status_one_queued(datadir, start_tomato_daemon, stop_tomato_dae
     assert ret.success
     assert "found 1" in ret.msg
     assert len(ret.data) == 1
-    assert 2 in ret.data.keys()
+    assert ret.data[0].id == 2
 
 
 def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -83,8 +83,8 @@ def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_dae
     assert ret.success
     assert "found 2" in ret.msg
     assert len(ret.data) == 2
-    assert 1 in ret.data.keys()
-    assert 2 in ret.data.keys()
+    assert ret.data[0].id == 1
+    assert ret.data[1].id == 2
 
 
 @pytest.mark.parametrize(
@@ -105,7 +105,7 @@ def test_ketchup_status_running(pl, datadir, start_tomato_daemon, stop_tomato_da
     assert ret.success
     assert "found 1" in ret.msg
     assert len(ret.data) == 1
-    assert ret.data[1].status == "r"
+    assert ret.data[0].status == "r"
 
 
 @pytest.mark.parametrize(
@@ -124,7 +124,7 @@ def test_ketchup_status_complete(pl, datadir, start_tomato_daemon, stop_tomato_d
     ret = ketchup.status(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
     assert ret.success
-    assert ret.data[1].status == "c"
+    assert ret.data[0].status == "c"
     assert os.path.exists("results.1.nc")
 
 
@@ -146,7 +146,7 @@ def test_ketchup_cancel_running(pl, datadir, start_tomato_daemon, stop_tomato_da
     ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
     assert ret.success
-    assert ret.data[1].status == "rd"
+    assert ret.data[0].status == "rd"
 
     assert wait_until_ketchup_status(jobid=1, status="cd", port=PORT, timeout=5000)
     status = tomato.status(**kwargs, with_data=True)
@@ -155,7 +155,7 @@ def test_ketchup_cancel_running(pl, datadir, start_tomato_daemon, stop_tomato_da
     print(f"{os.listdir()=}")
     print(f"{os.listdir('Jobs')=}")
     print(f"{os.listdir(os.path.join('Jobs', '1'))=}")
-    assert ret.data[1].status == "cd"
+    assert ret.data[0].status == "cd"
     assert os.path.exists("results.1.nc")
 
 
@@ -175,7 +175,7 @@ def test_ketchup_cancel_queued(pl, datadir, start_tomato_daemon, stop_tomato_dae
     ret = ketchup.cancel(**kwargs, status=status, verbosity=0, jobids=[1])
     print(f"{ret=}")
     assert ret.success
-    assert ret.data[1].status == "cd"
+    assert ret.data[0].status == "cd"
 
 
 @pytest.mark.parametrize(

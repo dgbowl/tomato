@@ -26,10 +26,10 @@ def test_counter_npoints(
 ):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
-    status = utils.job_status(1)["data"][1]["status"]
+    status = utils.job_status(1)
     while status in {"q", "qw", "r"}:
         time.sleep(1)
-        status = utils.job_status(1)["data"][1]["status"]
+        status = utils.job_status(1)
     assert status == "c"
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
@@ -52,16 +52,14 @@ def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daem
     os.chdir(datadir)
     cancel = True
     utils.run_casenames([casename], [None], ["pip-counter"])
-    ret = utils.job_status(1)
-    status = ret["data"][1]["status"]
+    status = utils.job_status(1)
     while status in {"q", "qw", "r", "rd"}:
         time.sleep(2)
         if cancel and status == "r":
             subprocess.run(["ketchup", "cancel", "-p", "12345", "1"])
             cancel = False
             time.sleep(2)
-        ret = utils.job_status(1)
-        status = ret["data"][1]["status"]
+        status = utils.job_status(1)
     assert status == "cd"
 
 
@@ -78,13 +76,13 @@ def test_counter_snapshot(
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
     time.sleep(5)
-    status = utils.job_status(1)["data"][1]["status"]
+    status = utils.job_status(1)
     while status in {"q", "qw", "r"}:
         time.sleep(1)
         if external and status == "r":
             subprocess.run(["ketchup", "snapshot", "-p", "12345", "1"])
             external = False
-        status = utils.job_status(1)["data"][1]["status"]
+        status = utils.job_status(1)
     assert status == "c"
     assert os.path.exists("snapshot.1.nc")
 
@@ -110,9 +108,7 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=10000)
     utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=10000)
 
-    ret = utils.job_status(1)
-    print(f"{ret=}")
-    status = utils.job_status(1)["data"][1]["status"]
+    status = utils.job_status(1)
     assert status == "c"
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
