@@ -151,12 +151,14 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
         )
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
-                f"job {job.id} can queue on pips: {[p.name for p in matched[job.id]]}"
+                "job %d can queue on pips: {%s}",
+                job.id,
+                [p.name for p in matched[job.id]]
             )
             req.send_pyobj(dict(cmd="job", id=job.id, params=dict(status="qw")))
             ret = req.recv_pyobj()
             if not ret.success:
-                logger.error(f"could not set status of job {job.id}")
+                logger.error("could not set status of job %d", job.id)
                 continue
             else:
                 job.status = "qw"
@@ -399,12 +401,12 @@ def tomato_job() -> None:
         logger.error("could not set job status for unknown reason")
         return 1
 
-    logger.info(f"resetting pipeline {pip!r}")
+    logger.info("resetting pipeline '%s'", pip)
     params = dict(jobid=None, ready=ready, name=pip)
     ret = lazy_pirate(pyobj=dict(cmd="pipeline", params=params), **pkwargs)
     logger.debug(f"{ret=}")
     if not ret.success:
-        logger.error(f"could not reset pipeline {pip!r}")
+        logger.error("could not reset pipeline '%s'", pip)
         return 1
     logger.info("exiting tomato-job")
 
