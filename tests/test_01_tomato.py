@@ -20,7 +20,7 @@ def test_tomato_status_down():
 
 
 def test_tomato_status_up(start_tomato_daemon, stop_tomato_daemon):
-    ret = tomato.status(**kwargs, with_data=True)
+    ret = tomato.status(**kwargs)
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.pips) == 1

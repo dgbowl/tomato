@@ -55,10 +55,7 @@ def merge_pipelines(
 
 
 def status(msg: dict, daemon: Daemon) -> Reply:
-    if msg.get("with_data", False):
-        return Reply(success=True, msg=daemon.status, data=daemon)
-    else:
-        return Reply(success=True, msg=daemon.status)
+    return Reply(success=True, msg=daemon.status, data=daemon)
 
 
 def stop(msg: dict, daemon: Daemon) -> Reply:

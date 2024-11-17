@@ -240,7 +240,7 @@ def manager(port: int, timeout: int = 500):
     to = timeout
     while getattr(thread, "do_run"):
         logger.debug("tick")
-        req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
+        req.send_pyobj(dict(cmd="status", sender=f"{__name__}.manager"))
         events = dict(poller.poll(to))
         if req not in events:
             logger.warning(f"could not contact tomato-daemon in {to} ms")
@@ -506,7 +506,7 @@ def job_main_loop(
     req.connect(f"tcp://127.0.0.1:{port}")
 
     while True:
-        req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
+        req.send_pyobj(dict(cmd="status", sender=sender))
         daemon = req.recv_pyobj().data
         if all([drv.port is not None for drv in daemon.drvs.values()]):
             break

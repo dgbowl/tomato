@@ -37,12 +37,6 @@ def run_tomato():
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
     status = subparsers.add_parser("status")
-    status.add_argument(
-        "--with-data",
-        action="store_true",
-        default=False,
-        help="Return full daemon status. If false, only daemon.status will be returned",
-    )
     status.set_defaults(func=tomato.status)
 
     start = subparsers.add_parser("start")
@@ -279,7 +273,7 @@ def run_ketchup():
 
     if "func" in args:
         context = zmq.Context()
-        status = tomato.status(**vars(args), context=context, with_data=True)
+        status = tomato.status(**vars(args), context=context)
         if not status.success:
             if args.yaml:
                 print(yaml.dump(status.dict()))

@@ -31,7 +31,7 @@ def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon)
 
     tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
-    ret = tomato.status(**kwargs, with_data=True)
+    ret = tomato.status(**kwargs)
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.jobs) == 2
@@ -66,7 +66,7 @@ def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
-    ret = tomato.status(**kwargs, with_data=True)
+    ret = tomato.status(**kwargs)
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.jobs) == 1
@@ -74,7 +74,7 @@ def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert ret.data.jobs[1].status == "r"
 
     assert wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=25000)
-    ret = tomato.status(**kwargs, with_data=True)
+    ret = tomato.status(**kwargs)
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.jobs) == 1
@@ -97,7 +97,7 @@ def test_recover_waiting_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     assert wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
-    ret = tomato.status(**kwargs, with_data=True)
+    ret = tomato.status(**kwargs)
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.jobs) == 1
@@ -114,7 +114,7 @@ def test_recover_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_20_5")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
-    ret = tomato.status(**kwargs, with_data=True)
+    ret = tomato.status(**kwargs)
     print(f"{ret=}")
     pid = ret.data.jobs[1].pid
 
@@ -127,7 +127,7 @@ def test_recover_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
 
     tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
-    ret = tomato.status(**kwargs, with_data=True)
+    ret = tomato.status(**kwargs)
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.jobs) == 1
