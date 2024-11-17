@@ -116,7 +116,7 @@ def submit(
         msg = f"job submitted successfully with jobid {ret.data.id}"
         if ret.data.jobname is not None:
             msg += f" and jobname {ret.data.jobname!r}"
-        return Reply(success=True, msg=msg,data=ret.data)
+        return Reply(success=True, msg=msg, data=ret.data)
     else:
         return Reply(success=False, msg="unknown error", data=ret.data)
 
@@ -183,11 +183,7 @@ def status(
             msg = f"found {len(rets)} job with status {[job.status for job in rets]}"
         else:
             msg = f"found {len(rets)} jobs with statuses {[job.status for job in rets]}"
-        return Reply(
-            success=True,
-            msg=msg,
-            data=rets
-        )
+        return Reply(success=True, msg=msg, data=rets)
 
 
 def cancel(

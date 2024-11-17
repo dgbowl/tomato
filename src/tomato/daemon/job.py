@@ -153,7 +153,7 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
             logger.info(
                 "job %d can queue on pips: {%s}",
                 job.id,
-                [p.name for p in matched[job.id]]
+                [p.name for p in matched[job.id]],
             )
             req.send_pyobj(dict(cmd="job", id=job.id, params=dict(status="qw")))
             ret = req.recv_pyobj()
