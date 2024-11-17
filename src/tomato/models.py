@@ -86,6 +86,7 @@ class CompletedJob(BaseModel):
     id: int
     status: Literal["c", "cd", "ce"]
     completed_at: str
+    jobname: Optional[str] = None
     jobpath: str
     respath: str
 

@@ -303,32 +303,25 @@ def search(
     Examples
     --------
 
-    >>> # Create a snapshot in current working directory:
+    >>> # Search for a valid jobname
     >>> ketchup search counter
-    data:
-      1:
-        completed_at: null
-        executed_at: null
-        id: 1
-        jobname: counter
-        [...]
-        status: qw
-        submitted_at: '2024-03-03 15:40:21.205806+00:00'
-    msg: jobs matching 'counter' found
-    success: true
+    Success: job matching 'counter' found: [1]
 
+    >>> # Search for an invalid jobname
     >>> ketchup search nothing
-    data: null
-    msg: no job matching 'nothing' found
-    success: false
+    Failure: no job matching 'nothing' found
 
     """
     jobs = status.data.jobs
-    ret = {}
+    ret = []
     for jobid, job in jobs.items():
         if job.jobname is not None and jobname in job.jobname:
-            ret[jobid] = job
+            ret.append(job)
     if len(ret) > 0:
-        return Reply(success=True, msg=f"jobs matching {jobname!r} found", data=ret)
+        if len(ret) == 1:
+            msg = f"job matching {jobname!r} found: {[j.id for j in ret]}"
+        else:
+            msg = f"jobs matching {jobname!r} found: {[j.id for j in ret]}"
+        return Reply(success=True, msg=msg, data=ret)
     else:
         return Reply(success=False, msg=f"no job matching {jobname!r} found")

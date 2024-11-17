@@ -242,6 +242,7 @@ def job(msg: dict, daemon: Daemon) -> Reply:
                 id=cjob.id,
                 status=cjob.status,
                 completed_at=cjob.completed_at,
+                jobname=cjob.jobname,
                 jobpath=cjob.jobpath,
                 respath=cjob.respath,
             )
