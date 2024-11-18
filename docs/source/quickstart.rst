@@ -21,7 +21,7 @@ The easiest way to do create this file is using the provided ``tomato init`` com
 
 .. code-block::
    :linenos:
-   :emphasize-lines: 3
+   :emphasize-lines: 2
 
     kraus@dorje:/home/kraus/$ tomato init
     Success: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
