@@ -146,11 +146,12 @@ def status(
 
     >>> # Get status of a given job
     >>> ketchup status 1
-    Success: found 1 job with status ['qw']
+    Success: found 1 job with status 'qw': [1]
 
     >>> # Get status of multiple jobs
     >>> ketchup status 1 2
-    Success: found 2 jobs with statuses ['qw', 'qw']
+    Success: found 2 job with status 'qw': [1]
+             found 1 job with status 'c' : [2]
 
     >>> # Get status of non-existent job
     >>> ketchup status 3
@@ -174,16 +175,31 @@ def status(
     if len(jobs) == 0:
         return Reply(success=False, msg="job queue is empty")
     elif len(jobids) == 0:
-        return Reply(success=True, msg=f"found {len(jobs)} queued jobs", data=jobs)
+        rets = [job for job in jobs.values()]
     else:
         rets = [job for job in jobs.values() if job.id in jobids]
-        if len(rets) == 0:
-            return Reply(success=False, msg=f"found no jobs with jobids {jobids!r}")
-        elif len(rets) == 1:
-            msg = f"found {len(rets)} job with status {[job.status for job in rets]}"
+    if len(rets) == 0:
+        if len(jobids) == 1:
+            msg = f"found no job with jobid {jobids}"
         else:
-            msg = f"found {len(rets)} jobs with statuses {[job.status for job in rets]}"
-        return Reply(success=True, msg=msg, data=rets)
+            msg = f"found no jobs with jobids {jobids}"
+        return Reply(success=False, msg=msg)
+    elif len(rets) == 1:
+        msg = f"found {len(rets)} job with status {[job.status for job in rets]}"
+    else:
+        msg = ""
+        for st in ["q", "qw", "r", "rd", "c", "cd", "ce"]:
+            jobst = [j.id for j in rets if j.status == st]
+            if len(jobst) > 1:
+                msg += (
+                    f"found {len(jobst)} jobs with status {st!r:4s}: {jobst}\n         "
+                )
+            elif len(jobst) == 1:
+                msg += (
+                    f"found {len(jobst)} job with status {st!r:4s}: {jobst}\n         "
+                )
+        msg = msg.strip()
+    return Reply(success=True, msg=msg, data=rets)
 
 
 def cancel(

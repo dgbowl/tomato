@@ -24,9 +24,7 @@ The easiest way to do create this file is using the provided ``tomato init`` com
    :emphasize-lines: 3
 
     kraus@dorje:/home/kraus/$ tomato init
-    data: null
-    msg: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
-    success: true
+    Success: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
 
 Where *appdir* is ``/home/kraus/.config/tomato/1.0a1/``. The *appdir* can be specified
 using the ``--appdir`` argument to **tomato**.
@@ -206,12 +204,12 @@ The ``devices`` section of the default *devices file* is shown below:
       - name: dev-counter
         driver: "example_counter"
         address: "example-addr"
-        channels: [1]
+        channels: ["1"]
         pollrate: 1
 
 Here, we define a single device using the :mod:`~tomato.drivers.example_counter` driver.
 The definition includes the ``address`` of the device (:class:`str` type) as well as an
-enumeration of individually-addressable channels the device has (:class:`list[int]`).
+enumeration of individually-addressable channels the device has (:class:`list[str]`).
 
 For example, the devices shown in the :ref:`concepts flowchart <concepts>` above would
 be defined as:
@@ -223,17 +221,17 @@ be defined as:
       - name: device 1
         driver: "driver 123"
         address: "192.168.1.1"
-        channels: [1, 2, 3]
+        channels: ["1", "2", "3"]
         pollrate: 1
       - name: device a
         driver: "driver abc"
         address: "COM1"
-        channels: [100]
+        channels: ["100"]
         pollrate: 5
       - name: device b
         driver: "driver abc"
         address: "COM2"
-        channels: [100]
+        channels: ["100"]
         pollrate: 5
 
 
@@ -256,7 +254,7 @@ The default ``pipelines`` section looks as follows:
         components:
           - role: counter
             device: dev-counter
-            channel: 1
+            channel: "1"
 
 Here, a single *pipeline* called ``pip-counter`` is defined to contain the one available
 channel of the ``dev-counter`` device (defined on line 5) shown further above. For multi
@@ -290,23 +288,23 @@ above can be defined as:
         components:
           - role: dev 123
             device: device 1
-            channel: 1
+            channel: "1"
           - role: dev abc
             device: device a
-            channel: 100
+            channel: "100"
       - name: pipeline b2
         components:
           - role: dev 123
             device: device 1
-            channel: 2
+            channel: "2"
           - role: dev abc
             device: device b
-            channel: 100
+            channel: "100"
       - name: pipeline 3
         components:
           - role: dev 123
             device: device 1
-            channel: 3
+            channel: "3"
 
 .. _payfile:
 
