@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.ketchup package &mdash; tomato 1.0rc2.dev2 documentation</title>
+  <title>tomato.ketchup package &mdash; tomato 1.0rc2.dev3 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=9916553d"></script>
+        <script src="../_static/documentation_options.js?v=3d6ed124"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0rc2.dev2
+                1.0rc2.dev3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -132,33 +132,24 @@ and submit it to tomato’s queue.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="n">counter_15_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span>
-<span class="go">data:</span>
-<span class="go">  completed_at: null</span>
-<span class="go">  executed_at: null</span>
-<span class="go">  id: 1</span>
-<span class="go">  jobname: null</span>
-<span class="go">  payload:</span>
-<span class="go">    [...]</span>
-<span class="go">  pid: null</span>
-<span class="go">  status: q</span>
-<span class="go">  submitted_at: &#39;2024-03-03 15:16:49.522866+00:00&#39;</span>
-<span class="go">msg: job submitted successfully</span>
-<span class="go">success: true</span>
+<span class="go">Success: job submitted successfully with jobid 1</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With a job name:</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job with a job name:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="n">counter_15_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">j</span> <span class="n">jobname_is_this</span>
+<span class="go">Success: job submitted successfully with jobid 1 and jobname &#39;jobname_is_this&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job with yaml output:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="n">counter_15_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
-<span class="go">  completed_at: null</span>
-<span class="go">  executed_at: null</span>
-<span class="go">  id: 2</span>
-<span class="go">  jobname: jobname_is_this</span>
-<span class="go">  payload:</span>
+<span class="go">    completed_at: null</span>
+<span class="go">    executed_at: null</span>
+<span class="go">    id: 1</span>
 <span class="go">    [...]</span>
-<span class="go">  pid: null</span>
-<span class="go">  status: q</span>
-<span class="go">  submitted_at: &#39;2024-03-03 15:19:09.856354+00:00&#39;</span>
-<span class="go">msg: job submitted successfully</span>
+<span class="go">    status: q</span>
+<span class="go">    submitted_at: &#39;2024-11-17 19:39:16.972593+00:00&#39;</span>
+<span class="go">msg: job submitted successfully with jobid 1</span>
 <span class="go">success: true</span>
 </pre></div>
 </div>
@@ -177,53 +168,30 @@ and submit it to tomato’s queue.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of a given job</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span>
-<span class="go">data:</span>
-<span class="go">  1:</span>
-<span class="go">    completed_at: null</span>
-<span class="go">    executed_at: null</span>
-<span class="go">    id: 1</span>
-<span class="go">    jobname: null</span>
-<span class="go">    payload:</span>
-<span class="go">      [...]</span>
-<span class="go">    pid: null</span>
-<span class="go">    status: qw</span>
-<span class="go">    submitted_at: &#39;2024-03-03 15:16:49.522866+00:00&#39;</span>
-<span class="go">msg: found 1 queued jobs</span>
-<span class="go">success: true</span>
+<span class="go">Success: found 1 job with status &#39;qw&#39;: [1]</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of multiple jobs</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span> <span class="mi">2</span>
-<span class="go">data:</span>
-<span class="go">  1:</span>
-<span class="go">    completed_at: null</span>
-<span class="go">    executed_at: null</span>
-<span class="go">    id: 1</span>
-<span class="go">    jobname: counter</span>
-<span class="go">    payload:</span>
-<span class="go">      [...]</span>
-<span class="go">    pid: null</span>
-<span class="go">    status: qw</span>
-<span class="go">    submitted_at: &#39;2024-03-03 15:16:49.522866+00:00&#39;</span>
-<span class="go">data:</span>
-<span class="go">  1:</span>
-<span class="go">    completed_at: &#39;2024-03-03 15:27:44.660493+00:00&#39;</span>
-<span class="go">    executed_at: &#39;2024-03-03 15:27:28.593896+00:00&#39;</span>
-<span class="go">    id: 1</span>
-<span class="go">    jobname: null</span>
-<span class="go">    payload:</span>
-<span class="go">      [...]</span>
-<span class="go">    pid: 514771</span>
-<span class="go">    status: c</span>
-<span class="go">    submitted_at: &#39;2024-03-03 15:23:40.987074+00:00&#39;</span>
-<span class="go">msg: found 2 queued jobs</span>
-<span class="go">success: true</span>
+<span class="go">Success: found 2 job with status &#39;qw&#39;: [1]</span>
+<span class="go">         found 1 job with status &#39;c&#39; : [2]</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of non-existent job</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">3</span>
-<span class="go">data: {}</span>
-<span class="go">msg: found 0 queued jobs</span>
+<span class="go">Failure: found no jobs with jobids [3]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get a status of a job with yaml output</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span> <span class="o">-</span><span class="n">y</span>
+<span class="go">data:</span>
+<span class="go">  - completed_at: null</span>
+<span class="go">    executed_at: null</span>
+<span class="go">    id: 1</span>
+<span class="go">    [...]</span>
+<span class="go">    status: qw</span>
+<span class="go">    submitted_at: &#39;2024-11-17 17:53:46.133355+00:00&#39;</span>
+<span class="go">msg: found 1 job with status [&#39;qw&#39;]</span>
 <span class="go">success: true</span>
 </pre></div>
 </div>
@@ -240,37 +208,21 @@ job to <code class="docutils literal notranslate"><span class="pre">rd</span></c
 <a class="reference internal" href="tomato.daemon.html#module-tomato.daemon.job" title="tomato.daemon.job"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon.job</span></code></a> module.</p>
 </div>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a queued job:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">2</span>
-<span class="go">data:</span>
-<span class="go">  2:</span>
-<span class="go">    completed_at: null</span>
-<span class="go">    executed_at: null</span>
-<span class="go">    id: 2</span>
-<span class="go">    jobname: null</span>
-<span class="go">    payload:</span>
-<span class="go">      [...]</span>
-<span class="go">    pid: null</span>
-<span class="go">    status: cd</span>
-<span class="go">    submitted_at: &#39;2024-03-03 15:23:50.702504+00:00&#39;</span>
-<span class="go">msg: cancelled jobs successfully</span>
-<span class="go">success: true</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a job:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">1</span>
+<span class="go">Success: job [1] cancelled successfully</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a running job:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">3</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a job with yaml output:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">2</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
-<span class="go">  3:</span>
-<span class="go">    completed_at: null</span>
-<span class="go">    executed_at: &#39;2024-03-03 15:37:45.635442+00:00&#39;</span>
-<span class="go">    id: 3</span>
-<span class="go">    jobname: null</span>
-<span class="go">    payload:</span>
-<span class="go">      [...]</span>
-<span class="go">    pid: 515678</span>
-<span class="go">    status: rd</span>
-<span class="go">    submitted_at: &#39;2024-03-03 15:37:44.858713+00:00&#39;</span>
-<span class="go">msg: cancelled jobs successfully</span>
+<span class="go">  - completed_at: null</span>
+<span class="go">    executed_at: null</span>
+<span class="go">    id: 2</span>
+<span class="go">    [...]</span>
+<span class="go">    status: cd</span>
+<span class="go">    submitted_at: &#39;2024-03-03 15:23:50.702504+00:00&#39;</span>
+<span class="go">msg: job [2] cancelled successfully</span>
 <span class="go">success: true</span>
 </pre></div>
 </div>
@@ -285,9 +237,7 @@ Checks whether the job is running, raises a warning if job has been finished.</p
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a snapshot in current working directory:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">snapshot</span> <span class="mi">3</span>
-<span class="go">data: null</span>
-<span class="go">msg: snapshot for job(s) [3] created successfully</span>
-<span class="go">success: true</span>
+<span class="go">Success: snapshot for job [3] created successfully</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -299,25 +249,14 @@ Checks whether the job is running, raises a warning if job has been finished.</p
 <p>Searches the queue for a job that matches the <code class="docutils literal notranslate"><span class="pre">jobname</span></code>, returns the
 job status and <code class="docutils literal notranslate"><span class="pre">jobid</span></code>.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a snapshot in current working directory:</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Search for a valid jobname</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">search</span> <span class="n">counter</span>
-<span class="go">data:</span>
-<span class="go">  1:</span>
-<span class="go">    completed_at: null</span>
-<span class="go">    executed_at: null</span>
-<span class="go">    id: 1</span>
-<span class="go">    jobname: counter</span>
-<span class="go">    [...]</span>
-<span class="go">    status: qw</span>
-<span class="go">    submitted_at: &#39;2024-03-03 15:40:21.205806+00:00&#39;</span>
-<span class="go">msg: jobs matching &#39;counter&#39; found</span>
-<span class="go">success: true</span>
+<span class="go">Success: job matching &#39;counter&#39; found: [1]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">search</span> <span class="n">nothing</span>
-<span class="go">data: null</span>
-<span class="go">msg: no job matching &#39;nothing&#39; found</span>
-<span class="go">success: false</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Search for an invalid jobname</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">search</span> <span class="n">nothing</span>
+<span class="go">Failure: no job matching &#39;nothing&#39; found</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -351,7 +290,7 @@ job status and <code class="docutils literal notranslate"><span class="pre">jobi
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0rc2.dev2
+      v: 1.0rc2.dev3
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

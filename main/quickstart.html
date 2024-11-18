@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 1.0rc2.dev2 documentation</title>
+  <title>Quick start guide &mdash; tomato 1.0rc2.dev3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=9916553d"></script>
+        <script src="_static/documentation_options.js?v=3d6ed124"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -41,7 +41,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0rc2.dev2
+                1.0rc2.dev3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -127,10 +127,8 @@ default, the <em>appdir</em> path is:</p>
 </ul>
 <p>The easiest way to do create this file is using the provided <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> kraus@dorje:/home/kraus/$ tomato init
-<span class="linenos">2</span> data: null
-<span class="hll"><span class="linenos">3</span> msg: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
-</span><span class="linenos">4</span> success: true
-</pre></div>
+<span class="hll"><span class="linenos">2</span> Success: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
+</span></pre></div>
 </div>
 <p>Where <em>appdir</em> is <code class="docutils literal notranslate"><span class="pre">/home/kraus/.config/tomato/1.0a1/</span></code>. The <em>appdir</em> can be specified
 using the <code class="docutils literal notranslate"><span class="pre">--appdir</span></code> argument to <strong>tomato</strong>.</p>
@@ -289,30 +287,30 @@ used instead:</p>
 <span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
 <span class="linenos">3</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example_counter&quot;</span>
 <span class="linenos">4</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example-addr&quot;</span>
-<span class="linenos">5</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">]</span>
+<span class="linenos">5</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;1&quot;</span><span class="p p-Indicator">]</span>
 <span class="linenos">6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
 <p>Here, we define a single device using the <code class="xref py py-mod docutils literal notranslate"><span class="pre">example_counter</span></code> driver.
 The definition includes the <code class="docutils literal notranslate"><span class="pre">address</span></code> of the device (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> type) as well as an
-enumeration of individually-addressable channels the device has (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>).</p>
+enumeration of individually-addressable channels the device has (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>).</p>
 <p>For example, the devices shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a> above would
 be defined as:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
 <span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
 <span class="linenos"> 3</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;driver</span><span class="nv"> </span><span class="s">123&quot;</span>
 <span class="linenos"> 4</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.1.1&quot;</span>
-<span class="linenos"> 5</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 5</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;1&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;2&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;3&quot;</span><span class="p p-Indicator">]</span>
 <span class="linenos"> 6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="linenos"> 7</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
 <span class="linenos"> 8</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;driver</span><span class="nv"> </span><span class="s">abc&quot;</span>
 <span class="linenos"> 9</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;COM1&quot;</span>
-<span class="linenos">10</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">100</span><span class="p p-Indicator">]</span>
+<span class="linenos">10</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;100&quot;</span><span class="p p-Indicator">]</span>
 <span class="linenos">11</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 <span class="linenos">12</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
 <span class="linenos">13</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;driver</span><span class="nv"> </span><span class="s">abc&quot;</span>
 <span class="linenos">14</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;COM2&quot;</span>
-<span class="linenos">15</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">100</span><span class="p p-Indicator">]</span>
+<span class="linenos">15</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;100&quot;</span><span class="p p-Indicator">]</span>
 <span class="linenos">16</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 </pre></div>
 </div>
@@ -331,7 +329,7 @@ with which the job interacting with the device driver asks the driver for data,
 <span class="linenos">3</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
 <span class="linenos">4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">counter</span>
 <span class="hll"><span class="linenos">5</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
-</span><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</span><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
 </pre></div>
 </div>
 <p>Here, a single <em>pipeline</em> called <code class="docutils literal notranslate"><span class="pre">pip-counter</span></code> is defined to contain the one available
@@ -357,23 +355,23 @@ above can be defined as:</p>
 <span class="linenos"> 3</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
 <span class="linenos"> 4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
 <span class="linenos"> 5</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
-<span class="linenos"> 6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
 <span class="linenos"> 7</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
 <span class="linenos"> 8</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
-<span class="linenos"> 9</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos"> 9</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;100&quot;</span>
 <span class="linenos">10</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline b2</span>
 <span class="linenos">11</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
 <span class="linenos">12</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
 <span class="linenos">13</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
-<span class="linenos">14</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="linenos">14</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
 <span class="linenos">15</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
 <span class="linenos">16</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
-<span class="linenos">17</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="linenos">17</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;100&quot;</span>
 <span class="linenos">18</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline 3</span>
 <span class="linenos">19</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
 <span class="linenos">20</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
 <span class="linenos">21</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
-<span class="linenos">22</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="linenos">22</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
 </pre></div>
 </div>
 </section>
@@ -382,7 +380,7 @@ above can be defined as:</p>
 <span id="payfile"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Link to this heading"></a></h2>
 <p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and
 allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined
-in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v119.dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v119.dev1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
+in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload">
 <em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload_1_0.</span></span><span class="sig-name descname"><span class="pre">Payload</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload" title="Link to this definition"></a></dt>
@@ -629,7 +627,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.settings">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.settings.Settings" title="(in dgbowl-schemas v119.dev1)"><span class="pre">Settings</span></a></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.settings" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.settings.Settings" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Settings</span></a></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.settings" title="Link to this definition"></a></dt>
 <dd><p>Additional configuration options for tomato.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
@@ -643,7 +641,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.sample">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.sample.Sample" title="(in dgbowl-schemas v119.dev1)"><span class="pre">Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.sample" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.sample.Sample" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.sample" title="Link to this definition"></a></dt>
 <dd><p>Specification of the experimental sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
@@ -657,7 +655,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.method">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v119.dev1)"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.method" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.method" title="Link to this definition"></a></dt>
 <dd><p>A sequence of the experimental <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
@@ -713,7 +711,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0rc2.dev2
+      v: 1.0rc2.dev3
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
