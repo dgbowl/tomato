@@ -31,9 +31,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=2000)
     utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=2000)
 
-    ret = utils.job_status(1)
-    print(f"{ret=}")
-    status = utils.job_status(1)["data"][1]["status"]
+    status = utils.job_status(1)
     assert status == "c"
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files

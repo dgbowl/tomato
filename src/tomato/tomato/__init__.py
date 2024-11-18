@@ -139,18 +139,51 @@ def status(
     port: int,
     timeout: int,
     context: zmq.Context,
-    with_data: bool = False,
     **_: dict,
 ) -> Reply:
     """
     Get status of the tomato daemon.
 
-    If ``with_data`` is specified, the state of the daemon will be retrieved.
+    Examples
+    --------
+
+    >>> # Status with a running daemon
+    >>> tomato status
+    Success: tomato running on port 1234
+
+    >>> # Status without a running daemon
+    >>> tomato status
+    Failure: tomato not running on port 1234
+
+    >>> # Status of a running daemon with data
+    >>> tomato status -y
+    data:
+      appdir: /home/kraus/.config/tomato/1.0rc2.dev2
+      cmps:
+        [...]
+      devs:
+        [...]
+      drvs:
+        [...]
+      jobs:
+        [...]
+      logdir: /home/kraus/.cache/tomato/1.0rc2.dev2/log
+      nextjob: 1
+      pips:
+        [...]
+      port: 1234
+      settings:
+        [...]
+      status: running
+      verbosity: 20
+    msg: tomato running on port 1234
+    success: true
+
     """
     logger.debug("checking status of tomato on port %d", port)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="status", with_data=with_data, sender=f"{__name__}.status"))
+    req.send_pyobj(dict(cmd="status", sender=f"{__name__}.status"))
     poller = zmq.Poller()
     poller.register(req, zmq.POLLIN)
     events = dict(poller.poll(timeout))
@@ -175,13 +208,29 @@ def start(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: Path,
-    logdir: Path,
+    appdir: str,
+    logdir: str,
     verbosity: int,
     **_: dict,
 ) -> Reply:
     """
     Start the tomato daemon.
+
+    Examples
+    --------
+
+    >>> # Start tomato
+    >>> tomato start
+    Success: tomato on port 1234 reloaded with settings from /home/kraus/.config/tomato/1.0rc2.dev2
+
+    >>> # Start tomato with a custom port
+    >>> tomato start -p 1235
+    Success: tomato on port 1235 reloaded with settings from /home/kraus/.config/tomato/1.0rc2.dev2
+
+    >>> # Start tomato with another tomato running
+    >>> tomato start
+    Failure: required port 1234 is already in use, choose a different one
+
     """
     logger.debug("checking for availability of port %d", port)
     try:
@@ -202,7 +251,7 @@ def start(
             msg=f"required port {port} is already in use, choose a different one",
         )
 
-    if not (appdir / "settings.toml").exists():
+    if not (Path(appdir) / "settings.toml").exists():
         return Reply(
             success=False,
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
@@ -248,6 +297,22 @@ def stop(
     Stop a running tomato daemon.
 
     Will not stop the daemon if any jobs are running. Will create a state snapshot.
+
+    Examples
+    --------
+
+    >>> # Stop tomato daemon without running jobs
+    >>> tomato stop
+    Success: tomato on port 1234 closed successfully
+
+    >>> # Attempt to stop tomato daemon with running jobs
+    >>> tomato stop
+    Failure: jobs are running
+
+    >>> # Attempt to stop tomato daemon which is not running
+    >>> tomato stop -p 1235
+    Failure: tomato not running on port 1235
+
     """
     stat = status(port=port, timeout=timeout, context=context)
     if stat.success:
@@ -255,22 +320,34 @@ def stop(
         req.connect(f"tcp://127.0.0.1:{port}")
         req.send_pyobj(dict(cmd="stop"))
         rep = req.recv_pyobj()
-        return rep
+        if rep.success:
+            return Reply(success=True, msg=f"tomato on port {port} closed successfully")
+        else:
+            return rep
     else:
         return stat
 
 
 def init(
     *,
-    appdir: Path,
-    datadir: Path,
+    appdir: str,
+    datadir: str,
     **_: dict,
 ) -> Reply:
     """
     Create a default settings.toml file.
 
     Will overwrite any existing settings.toml file.
+
+    Examples
+    --------
+
+    >>> tomato init
+    Success: wrote default settings into /home/kraus/.config/tomato/1.0rc2.dev2/settings.toml
+
     """
+    appdir = Path(appdir)
+    datadir = Path(datadir)
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
@@ -303,16 +380,24 @@ def reload(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: Path,
+    appdir: str,
     **_: dict,
 ) -> Reply:
     """
     Reload settings.toml and devices.yaml files and reconfigure tomato daemon.
+
+    Examples
+    --------
+
+    >>> # Reload with compatible changes
+    >>> tomato reload
+    Success: tomato on port 1234 reloaded with settings from /home/kraus/.config/tomato/1.0rc2.dev2
+
     """
     kwargs = dict(port=port, timeout=timeout, context=context)
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
-        settings = toml.load(appdir / "settings.toml")
+        settings = toml.load(Path(appdir) / "settings.toml")
     except FileNotFoundError:
         return Reply(
             success=False,
@@ -378,7 +463,7 @@ def pipeline_load(
         tomato pipeline load <pipeline> <sampleid>
 
     """
-    stat = status(port=port, timeout=timeout, context=context, with_data=True)
+    stat = status(port=port, timeout=timeout, context=context)
     if not stat.success:
         return stat
 
@@ -422,7 +507,7 @@ def pipeline_eject(
         tomato pipeline eject <pipeline>
 
     """
-    stat = status(port=port, timeout=timeout, context=context, with_data=True)
+    stat = status(port=port, timeout=timeout, context=context)
     if not stat.success:
         return stat
 
@@ -475,7 +560,7 @@ def pipeline_ready(
         pipeline ready <pipeline>
 
     """
-    stat = status(port=port, timeout=timeout, context=context, with_data=True)
+    stat = status(port=port, timeout=timeout, context=context)
     if not stat.success:
         return stat
 

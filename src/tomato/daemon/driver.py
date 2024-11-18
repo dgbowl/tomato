@@ -30,7 +30,7 @@ def tomato_driver_bootstrap(
     req: zmq.Socket, logger: logging.Logger, interface: ModelInterface, driver: str
 ):
     logger.debug("getting daemon status")
-    req.send_pyobj(dict(cmd="status", with_data=True))
+    req.send_pyobj(dict(cmd="status"))
     daemon = req.recv_pyobj().data
     drv = daemon.drvs[driver]
     interface.settings = drv.settings
@@ -260,7 +260,7 @@ def manager(port: int, timeout: int = 1000):
     spawned_drivers = dict()
 
     while getattr(thread, "do_run"):
-        req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
+        req.send_pyobj(dict(cmd="status", sender=sender))
         events = dict(poller.poll(to))
         if req not in events:
             logger.warning("could not contact tomato-daemon in %d ms", to)
@@ -311,7 +311,7 @@ def manager(port: int, timeout: int = 1000):
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
 
     logger.info("instructed to quit")
-    req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
+    req.send_pyobj(dict(cmd="status", sender=sender))
     daemon = req.recv_pyobj().data
     for driver in daemon.drvs.values():
         logger.debug("stopping driver '%s' on port %d", driver.name, driver.port)

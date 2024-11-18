@@ -1,6 +1,5 @@
 import subprocess
 import time
-import yaml
 import logging
 import os
 import psutil
@@ -27,8 +26,8 @@ def job_status(jobid):
         capture_output=True,
         text=True,
     )
-    yml = yaml.safe_load(ret.stdout)
-    return yml
+    status = ret.stdout.split("'")[1]
+    return status
 
 
 def wait_until_tomato_running(port: int, timeout: int):
@@ -39,8 +38,7 @@ def wait_until_tomato_running(port: int, timeout: int):
             capture_output=True,
             text=True,
         )
-        data = yaml.safe_load(ret.stdout)
-        if data["success"]:
+        if "Success" in ret.stdout:
             return True
         time.sleep(0.5)
     return False
@@ -54,8 +52,7 @@ def wait_until_tomato_stopped(port: int, timeout: int):
             capture_output=True,
             text=True,
         )
-        data = yaml.safe_load(ret.stdout)
-        if not data["success"]:
+        if "Failure" in ret.stdout:
             return True
         time.sleep(0.5)
     return False
@@ -69,8 +66,7 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
             capture_output=True,
             text=True,
         )
-        data = yaml.safe_load(ret.stdout)["data"]
-        if data[jobid]["status"] == status:
+        if f"[{status!r}]" in ret.stdout:
             return True
         time.sleep(0.5)
     return False

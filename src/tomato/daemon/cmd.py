@@ -12,7 +12,16 @@ All functions in this module return a :class:`~tomato.models.Reply`.
 
 """
 
-from tomato.models import Daemon, Driver, Device, Reply, Pipeline, Job, Component
+from tomato.models import (
+    Daemon,
+    Driver,
+    Device,
+    Reply,
+    Pipeline,
+    Job,
+    Component,
+    CompletedJob,
+)
 from pydantic import BaseModel
 from typing import Any
 import logging
@@ -46,10 +55,7 @@ def merge_pipelines(
 
 
 def status(msg: dict, daemon: Daemon) -> Reply:
-    if msg.get("with_data", False):
-        return Reply(success=True, msg=daemon.status, data=daemon)
-    else:
-        return Reply(success=True, msg=daemon.status)
+    return Reply(success=True, msg=daemon.status, data=daemon)
 
 
 def stop(msg: dict, daemon: Daemon) -> Reply:
@@ -224,12 +230,22 @@ def job(msg: dict, daemon: Daemon) -> Reply:
     if jobid is None:
         jobid = daemon.nextjob
         daemon.jobs[jobid] = Job(id=jobid, **msg.get("params", {}))
-        logger.info(f"received job {jobid}")
+        logger.info("received job %d", jobid)
         daemon.nextjob += 1
     else:
         for k, v in msg.get("params", {}).items():
-            logger.debug(f"setting job {jobid}.{k} to {v}")
+            logger.debug("setting job parameter %s.%s to %s", jobid, k, v)
             setattr(daemon.jobs[jobid], k, v)
+        cjob = daemon.jobs[jobid]
+        if cjob.status in {"c"}:
+            daemon.jobs[jobid] = CompletedJob(
+                id=cjob.id,
+                status=cjob.status,
+                completed_at=cjob.completed_at,
+                jobname=cjob.jobname,
+                jobpath=cjob.jobpath,
+                respath=cjob.respath,
+            )
     return Reply(success=True, msg="job updated", data=daemon.jobs[jobid])
 
 

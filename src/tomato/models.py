@@ -6,8 +6,7 @@
 """
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Any, Mapping, Sequence, Literal
-from pathlib import Path
+from typing import Optional, Any, Mapping, Sequence, Literal, Union
 import logging
 
 
@@ -83,18 +82,27 @@ class Job(BaseModel):
     snappath: Optional[str] = None
 
 
+class CompletedJob(BaseModel):
+    id: int
+    status: Literal["c", "cd", "ce"]
+    completed_at: str
+    jobname: Optional[str] = None
+    jobpath: str
+    respath: str
+
+
 class Daemon(BaseModel, arbitrary_types_allowed=True):
     status: Literal["bootstrap", "running", "stop"]
     port: int
     verbosity: int
-    logdir: Path
-    appdir: Path
+    logdir: str
+    appdir: str
     settings: dict
     pips: Mapping[str, Pipeline] = Field(default_factory=dict)
     devs: Mapping[str, Device] = Field(default_factory=dict)
     drvs: Mapping[str, Driver] = Field(default_factory=dict)
     cmps: Mapping[str, Component] = Field(default_factory=dict)
-    jobs: Mapping[int, Job] = Field(default_factory=dict)
+    jobs: Mapping[int, Union[Job, CompletedJob]] = Field(default_factory=dict)
     nextjob: int = 1
 
 

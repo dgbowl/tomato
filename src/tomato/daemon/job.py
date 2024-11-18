@@ -151,12 +151,14 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
         )
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
-                f"job {job.id} can queue on pips: {[p.name for p in matched[job.id]]}"
+                "job %d can queue on pips: {%s}",
+                job.id,
+                [p.name for p in matched[job.id]],
             )
             req.send_pyobj(dict(cmd="job", id=job.id, params=dict(status="qw")))
             ret = req.recv_pyobj()
             if not ret.success:
-                logger.error(f"could not set status of job {job.id}")
+                logger.error("could not set status of job %d", job.id)
                 continue
             else:
                 job.status = "qw"
@@ -238,7 +240,7 @@ def manager(port: int, timeout: int = 500):
     to = timeout
     while getattr(thread, "do_run"):
         logger.debug("tick")
-        req.send_pyobj(dict(cmd="status", with_data=True, sender=f"{__name__}.manager"))
+        req.send_pyobj(dict(cmd="status", sender=f"{__name__}.manager"))
         events = dict(poller.poll(to))
         if req not in events:
             logger.warning(f"could not contact tomato-daemon in {to} ms")
@@ -399,12 +401,12 @@ def tomato_job() -> None:
         logger.error("could not set job status for unknown reason")
         return 1
 
-    logger.info(f"resetting pipeline {pip!r}")
+    logger.info("resetting pipeline '%s'", pip)
     params = dict(jobid=None, ready=ready, name=pip)
     ret = lazy_pirate(pyobj=dict(cmd="pipeline", params=params), **pkwargs)
     logger.debug(f"{ret=}")
     if not ret.success:
-        logger.error(f"could not reset pipeline {pip!r}")
+        logger.error("could not reset pipeline '%s'", pip)
         return 1
     logger.info("exiting tomato-job")
 
@@ -504,7 +506,7 @@ def job_main_loop(
     req.connect(f"tcp://127.0.0.1:{port}")
 
     while True:
-        req.send_pyobj(dict(cmd="status", with_data=True, sender=sender))
+        req.send_pyobj(dict(cmd="status", sender=sender))
         daemon = req.recv_pyobj().data
         if all([drv.port is not None for drv in daemon.drvs.values()]):
             break
