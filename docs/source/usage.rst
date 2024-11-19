@@ -11,34 +11,25 @@ Starting :mod:`tomato.daemon`
 
 .. note::
 
-    For instructions on how to set **tomato** up for a first run, see the
-    :ref:`quickstart`.
+    For instructions on how to set **tomato** up for a first run, see the :ref:`quickstart`.
 
-Provided a :ref:`settings file <setfile>` exists, the job scheduler ``tomato`` can be
-started on the default *port* using:
+Provided a :ref:`settings file <setfile>` exists, the daemon process ``tomato-daemon`` can be started on the default *port* using:
 
 .. code:: bash
 
     tomato start
 
-The daemon keeps track of *pipelines* configured in the :ref:`device file <devfile>`,
-and schedules *jobs* from the queue onto them. See the :ref:`concepts flowchart <concepts>`
-for a more detailed overview.
+The daemon keeps track of *pipelines* configured in the :ref:`device file <devfile>`, and schedules *jobs* from the queue onto them. See the :ref:`concepts flowchart <concepts>` for a more detailed overview.
 
 .. note::
 
-    Multiple instances of the :mod:`tomato.daemon` can be running at a single PC,
-    provided a different *port* is specified using ``--port`` argument to ``tomato``
-    and ``ketchup``.
+    Multiple instances of the :mod:`tomato.daemon` can be running at a single PC, provided a different *port* is specified using ``--port`` argument to ``tomato`` and ``ketchup``.
 
 Using :mod:`~tomato.tomato`
 ```````````````````````````
-The :mod:`tomato.tomato` executable is used to configure, start, and manage the
-**tomato** daemon, as well as load / eject samples to / from *pipelines* and mark them
-ready.
+The :mod:`tomato.tomato` executable is used to configure, start, and manage the **tomato** daemon, as well as load / eject samples to / from *pipelines* and mark them ready.
 
-    #. **To configure** the **tomato** daemon by creating a default
-       :ref:`settings file <setfile>`, run:
+    #. **To configure** the **tomato** daemon by creating a default :ref:`settings file <setfile>`, run:
 
         .. code-block:: bash
 
@@ -50,9 +41,7 @@ ready.
 
             >>> tomato start
 
-        This will read the :ref:`settings file <setfile>`, and parse the
-        :ref:`device file <devfile>` listed within. To start the **daemon on an
-        alternative port**, run:
+        This will read the :ref:`settings file <setfile>`, and parse the :ref:`device file <devfile>` listed within. To start the **daemon on an alternative port**, run:
 
         .. code-block:: bash
 
@@ -60,9 +49,7 @@ ready.
 
         .. warning::
 
-            All ``tomato`` and ``ketchup`` commands intended to interact with the
-            **tomato** daemon running on an alternative port will have to be executed
-            with the same ``--port <int>`` argument.
+            All ``tomato`` and ``ketchup`` commands intended to interact with the **tomato** daemon running on an alternative port will have to be executed with the same ``--port <int>`` argument.
 
     #. **To stop** the **tomato** daemon, run:
 
@@ -70,9 +57,9 @@ ready.
 
             >>> tomato stop
 
-        The daemon will only stop if there are no running jobs. However, a snapshot
-        of the daemon state will be generated. There is currently no way to stop the
-        **tomato** daemon cleanly while jobs are running.
+        .. note::
+
+            The daemon will only stop if there are no running jobs. However, a snapshot of the daemon state will be generated in any case. There is currently no clean way to stop the **tomato** daemon cleanly while jobs are running.
 
     #. **To reload settings** of a running **tomato** daemon, run:
 
@@ -80,12 +67,13 @@ ready.
 
             >>> tomato reload
 
-        Currently, reloading *driver* settings from the :ref:`settings file <setfile>`
-        and adding *pipelines* and/or *devices* from the :ref:`device file <devfile>` is
-        supported.
+        Currently, reloading *driver* settings from the :ref:`settings file <setfile>` and managing *pipelines* and/or *devices* from the :ref:`device file <devfile>` is supported. Any *component* not present in a *pipeline* is automatically removed.
 
-    #. **To manage individual pipelines** of a running **tomato** daemon, the following
-        commands are available:
+        .. note::
+
+            The daemon will only remove *pipelines*, *devices* and *components* if they are not used by any running *job*.
+
+    #. **To manage individual pipelines** of a running **tomato** daemon, the following commands are available:
 
         - For loading a sample into a *pipeline*:
 
@@ -101,10 +89,11 @@ ready.
 
                 >>> tomato pipeline eject <pipeline>
 
-            This will also succeed if the *pipeline* was already empty. It will fail
-            if the *pipeline* has a job running.
+            This will also succeed if the *pipeline* was already empty. It will fail if the *pipeline* has a job running.
 
-            Ejecting a sample from any *pipeline* will mark the *pipeline* as not ready.
+            .. note::
+
+                As a precaution, ejecting a sample from any *pipeline* will always mark the *pipeline* as not ready.
 
         - To mark a *pipeline* as ready:
 
@@ -118,8 +107,7 @@ ready.
 Using :mod:`~tomato.ketchup`
 ````````````````````````````
 
-The :mod:`tomato.ketchup` executable is used to submit *payloads* to the daemon, and
-to check the status of and to cancel *jobs* in the queue.
+The :mod:`tomato.ketchup` executable is used to submit *payloads* to the daemon, and to check the status of and to cancel *jobs* in the queue.
 
     #.  **To submit** a *job* using a *payload* contained in a :ref:`payfile`, run:
 
@@ -131,8 +119,7 @@ to check the status of and to cancel *jobs* in the queue.
 
         .. note::
 
-            For more information about how *jobs* are matched against *pipelines*, see the
-            documentation of the :mod:`~tomato.daemon` module.
+            For more information about how *jobs* are matched against *pipelines*, see the documentation of the :mod:`~tomato.daemon` module.
 
     #.  **To check the status** of one or several *jobs* with known ``jobids``, run:
 
@@ -140,8 +127,7 @@ to check the status of and to cancel *jobs* in the queue.
 
             >>> ketchup status <jobids>
 
-        When executed without argument, the status of the whole queue will be returned.
-        The list of possible *job* statuses is:
+        When executed without argument, the status of the whole queue will be returned. The list of possible *job* statuses is:
 
         ======== ===========================================================
          Status  Meaning
@@ -161,61 +147,55 @@ to check the status of and to cancel *jobs* in the queue.
 
             >>> ketchup cancel <jobids>
 
-        This will mark the *jobs* for cancellation by setting their status to ``rd``.
-        The :mod:`tomato.daemon` will then proceed with cancelling each *job*.
+        This will mark the *jobs* for cancellation by setting their status to ``rd``. The :mod:`tomato.daemon` will then proceed with cancelling each *job*.
 
-*Jobs* submitted to the queue will remain in the queue until a *pipeline* meets all
-of the following criteria:
+*Jobs* submitted to the queue will remain in the queue until a *pipeline* meets all of the following criteria:
 
-  - A *pipeline* where all of the ``tasks`` specified in the *payload* are matched
-    by its ``capabilities`` must exist. Once the :mod:`tomato.daemon` finds such a
-    *pipeline*, the status of the *job* will change to ``qw``.
-  - The matching *pipeline* must contain a *sample* with a ``samplename`` that matches
-    the name specified in the *payload*.
+  - A *pipeline* where all of the ``technique_names`` specified in all :class:`Tasks` within the *payload* are matched by its ``capabilities`` must exist. Once the :mod:`tomato.daemon` finds such a *pipeline*, the status of the *job* will change to ``qw`` to indicate a suitable *pipeline* exists.
+  - The matching *pipeline* must contain a *sample* with a ``samplename`` that matches the name specified in the *payload*.
   - The matching *pipeline* must be marked as ``ready``.
 
 .. note::
 
-    Further information about :mod:`~tomato.ketchup` is available in the documentation
-    of the :mod:`~tomato.ketchup` module.
+    Further information about :mod:`~tomato.ketchup` is available in the documentation of the :mod:`~tomato.ketchup` module.
+
+Machine-readable output
+```````````````````````
+As of ``tomato-1.0``, the outputs of :mod:`~tomato.tomato` and :mod:`~tomato.ketchup` utilities can be requested as a yaml-formatted text, by passing the ``--yaml`` (or ``-y``) command-line parameter to the executables.
 
 Accessing output data
 `````````````````````
-Each *job* stores its data and logs in its own *job* folder, which is a subfolder of the
-``jobs.storage`` folder specified in the :ref:`settings file <setfile>`.
+Each *job* stores its data and logs in its own *job* folder, which is a subfolder of the ``jobs.storage`` folder specified in the :ref:`settings file <setfile>`.
 
 .. warning::
 
-    While "live" *job* data is available in the *job* folder in pickled form, accessing
-    those files directly is not supported and may lead to race conditions and crashes.
-    If you need an up-to-date data archive, request a :ref:`snapshot <snapshotting>`.
-    If you need the current status of a *device*, probe the responsible driver process.
+    While "live" *job* data is available in the *job* folder in pickled form, accessing those files directly is not supported and may lead to race conditions and crashes. If you need an up-to-date data archive, request a :ref:`snapshot <snapshotting>`. If you need the current status of a *device*, probe the responsible driver process.
+
+    Note that a *pipeline* dashboard functionality is planned for a future version of ``tomato``.
 
 
 Final job data
 **************
-By default, all data in the *job* folder is processed to create a NetCDF file.
-a *datagram*, and zipped into a zip archive. This zip archive includes all raw
-data files, the log file of the **tomato** job, and a copy of the full *payload*
-in a ``json`` file. The *datagram* contains timestamped, unit-annotated raw data,
-and includes instrumental uncertainties.
+By default, all data in the *job* folder is processed to create a NetCDF file. The NetCDF files can be read using :func:`xaray.open_datatree`, returning a :class:`xarray.DataTree`.
 
-Unless specified within the *payload*, the default location where these output files
-will be placed is the ``cwd()`` where the ``ketchup submit`` command was executed;
-the default filenames of the returned files are ``results.<jobid>.[zip,json]``.
+In the root node of the :class:`~xarray.DataTree`, a copy of the full *payload* is included, serialised as a json :class:`str`. Additionally, execution-specific metadata, such as the *pipeline* ``name``, and *job* submission/execution/completion time are stored on the root node, too.
+
+The child nodes of the :class:`~xarray.DataTree` contain the actual data from each *pipeline* *component*, unit-annotated using the CF Metadata Conventions. The node names correspond to the ``role`` that *component* fullfils in a *pipeline*.
+
+.. note::
+
+    As opposed to ``tomato-0.2``, in ``tomato-1.0`` we currently do not output measurement uncertainties.
+
+Unless specified within the *payload*, the default location where these output files will be placed is the ``cwd()`` where the ``ketchup submit`` command was executed; the default filenames of the returned files are ``results.<jobid>.[zip,json]``.
 
 .. _snapshotting:
 
 Data snapshotting
 *****************
-While the *job* is running, access to an up-to-date snapshot of the data is provided
-by :mod:`~tomato.ketchup`:
+While the *job* is running, access to an up-to-date snapshot of the data is provided by :mod:`~tomato.ketchup`:
 
 .. code:: bash
 
     >>> ketchup snapshot <jobid>
 
-This will create an up-to-date ``snapshot.<jobid>.nc`` file in the current working dir.
-The files are overwritten on subsequent invocations of ``ketchup snapshot``. An
-automated, periodic snapshotting can be further configured within the *payload*
-of the *job*.
+This will create an up-to-date ``snapshot.<jobid>.nc`` file in the current working dir. The files are overwritten on subsequent invocations of ``ketchup snapshot``. An automated, periodic snapshotting stored in a custom location can be further configured within the *payload* of the *job*.

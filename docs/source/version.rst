@@ -14,8 +14,9 @@ Version history
 
 Developed at the ConCat lab at TU Berlin.
 
-The code has been restructured and the interprocess communication is now using :mod:`zmq`
-instead of :mod:`sqlite`. The dependency on :mod:`yadg` has also been removed.
+The code has been restructured and the interprocess communication is now using :mod:`zmq` instead of :mod:`sqlite`. The dependency on :mod:`yadg` has also been removed.
+
+The driver library is now separate from **tomato**. A :class:`ModelInterface` class is provided to facilitate new driver development.
 
 .. codeauthor::
     Peter Kraus
@@ -32,21 +33,16 @@ instead of :mod:`sqlite`. The dependency on :mod:`yadg` has also been removed.
 .. sectionauthor::
     Peter Kraus
 
-Developed in the Materials for Energy Conversion lab at Empa, in Dübendorf, with
-contributions from the THEOS lab at EPFL, in Lausanne.
+Developed in the Materials for Energy Conversion lab at Empa, in Dübendorf, with contributions from the THEOS lab at EPFL, in Lausanne.
 
-First public release, corresponding to the code developed for the BIG-MAP Stakeholder
-Initiative Aurora, Deliverable D2. Includes:
+First public release, corresponding to the code developed for the BIG-MAP Stakeholder Initiative Aurora, Deliverable D2. Includes:
 
 - driver for BioLogic devices;
 - a dummy driver for testing;
 - basic scheduling/queueing functionality;
 - data snapshotting and parsing.
 
-This project has received funding from the European Union’s Horizon 2020 research
-and innovation programme under grant agreement No 957189. The project is part of
-BATTERY 2030+, the large-scale European research initiative for inventing the
-sustainable batteries of the future.
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 957189. The project is part of BATTERY 2030+, the large-scale European research initiative for inventing the sustainable batteries of the future.
 
 .. codeauthor::
     Peter Kraus,
