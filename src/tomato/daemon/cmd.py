@@ -232,11 +232,13 @@ def job(msg: dict, daemon: Daemon) -> Reply:
         daemon.jobs[jobid] = Job(id=jobid, **msg.get("params", {}))
         logger.info("received job %d", jobid)
         daemon.nextjob += 1
+        ret = daemon.jobs[jobid]
     else:
         for k, v in msg.get("params", {}).items():
             logger.debug("setting job parameter %s.%s to %s", jobid, k, v)
             setattr(daemon.jobs[jobid], k, v)
         cjob = daemon.jobs[jobid]
+        ret = cjob
         if cjob.status in {"c"}:
             daemon.jobs[jobid] = CompletedJob(
                 id=cjob.id,
@@ -246,7 +248,7 @@ def job(msg: dict, daemon: Daemon) -> Reply:
                 jobpath=cjob.jobpath,
                 respath=cjob.respath,
             )
-    return Reply(success=True, msg="job updated", data=daemon.jobs[jobid])
+    return Reply(success=True, msg="job updated", data=ret)
 
 
 def driver(msg: dict, daemon: Daemon) -> Reply:

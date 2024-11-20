@@ -25,7 +25,7 @@ from packaging.version import Version
 from dgbowl_schemas.tomato import to_payload
 
 from tomato.daemon.io import merge_netcdfs
-from tomato.models import Reply, Daemon
+from tomato.models import Reply, Daemon, Job
 
 log = logging.getLogger(__name__)
 
@@ -288,7 +288,7 @@ def snapshot(
     Success: snapshot for job [3] created successfully
 
     """
-    jobs = status.data.jobs
+    jobs: list[Job] = status.data.jobs
     for jobid in jobids:
         if jobid not in jobs:
             return Reply(success=False, msg=f"job {jobid} does not exist")
@@ -296,7 +296,8 @@ def snapshot(
             return Reply(success=False, msg=f"job {jobid} is still queued")
 
     for jobid in jobids:
-        merge_netcdfs(Path(jobs[jobid].jobpath), Path(f"snapshot.{jobid}.nc"))
+        jobs[jobid].snappath = Path(f"snapshot.{jobid}.nc")
+        merge_netcdfs(jobs[jobid], snapshot=True)
     if len(jobids) > 1:
         msg = f"snapshot for jobs {jobids} created successfully"
     else:

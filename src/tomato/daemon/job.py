@@ -27,9 +27,9 @@ import zmq
 import psutil
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
-from tomato.models import Pipeline, Daemon, Component, Device, Driver
+from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job
 from dgbowl_schemas.tomato import to_payload
-from dgbowl_schemas.tomato.payload import Payload, Task
+from dgbowl_schemas.tomato.payload import Task
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ def manage_running_pips(daemon: Daemon, req):
             proc = psutil.Process(pid=job.pid)
             kill_tomato_job(proc)
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
-            merge_netcdfs(Path(job.jobpath), Path(job.respath))
+            merge_netcdfs(job)
             reset = True
             params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
@@ -259,7 +259,6 @@ def manager(port: int, timeout: int = 500):
 def lazy_pirate(
     pyobj: Any, retries: int, timeout: int, address: str, context: zmq.Context
 ) -> Any:
-    logger.debug("Here")
     req = context.socket(zmq.REQ)
     req.connect(address)
     poller = zmq.Poller()
@@ -384,19 +383,27 @@ def tomato_job() -> None:
     respath = outpath / f"{prefix}.nc"
     snappath = outpath / f"snapshot.{jobid}.nc"
     params = dict(respath=str(respath), snappath=str(snappath), jobpath=str(jobpath))
-    lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
+    ret = lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
+    if ret.success is False:
+        logger.error("could not set job status for unknown reason")
+        return 1
+    job: Job = ret.data
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
-    job_main_loop(context, args.port, payload, pip, jobpath, snappath, logpath)
+    job_main_loop(context, args.port, job, pip, logpath)
     logger.info("==============================")
 
-    merge_netcdfs(jobpath, respath)
+    logger.info("job finished successfully")
+    job.completed_at = str(datetime.now(timezone.utc))
+    job.status = "c"
 
-    logger.info("job finished successfully, attempting to set status to 'c'")
-    params = dict(status="c", completed_at=str(datetime.now(timezone.utc)))
+    logger.info("writing final data to a NetCDF file")
+    merge_netcdfs(job)
+
+    logger.info("attempting to set job status to 'c'")
+    params = dict(status=job.status, completed_at=job.completed_at)
     ret = lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
-    logger.debug(f"{ret=}")
     if ret.success is False:
         logger.error("could not set job status for unknown reason")
         return 1
@@ -438,7 +445,7 @@ def job_thread(
 
     kwargs = dict(address=component.address, channel=component.channel)
 
-    datapath = jobpath / f"{component.role}.pkl"
+    datapath = Path(jobpath) / f"{component.role}.pkl"
     logger.debug("distributing tasks:")
     for task in tasks:
         logger.debug(f"{task=}")
@@ -489,10 +496,8 @@ def job_thread(
 def job_main_loop(
     context: zmq.Context,
     port: int,
-    payload: Payload,
+    job: Job,
     pipname: str,
-    jobpath: Path,
-    snappath: Path,
     logpath: Path,
 ) -> None:
     """
@@ -507,7 +512,7 @@ def job_main_loop(
 
     while True:
         req.send_pyobj(dict(cmd="status", sender=sender))
-        daemon = req.recv_pyobj().data
+        daemon: Daemon = req.recv_pyobj().data
         if all([drv.port is not None for drv in daemon.drvs.values()]):
             break
         else:
@@ -519,7 +524,7 @@ def job_main_loop(
 
     # collate steps by role
     plan = {}
-    for step in payload.method:
+    for step in job.payload.method:
         if step.component_tag not in plan:
             plan[step.component_tag] = []
         plan[step.component_tag].append(step)
@@ -540,20 +545,20 @@ def job_main_loop(
         logger.debug(" driver=%s", driver)
         threads[component.role] = Thread(
             target=job_thread,
-            args=(tasks, component, device, driver, jobpath, logpath),
+            args=(tasks, component, device, driver, job.jobpath, logpath),
             name="job-thread",
         )
         threads[component.role].start()
 
     # wait until threads join or we're killed
-    snapshot = payload.settings.snapshot
+    snapshot = job.payload.settings.snapshot
     t0 = time.perf_counter()
     while True:
         logger.debug("tick")
         tN = time.perf_counter()
         if snapshot is not None and tN - t0 > snapshot.frequency:
             logger.debug("creating snapshot")
-            merge_netcdfs(jobpath, snappath)
+            merge_netcdfs(job, snapshot=True)
             t0 += snapshot.frequency
         joined = [proc.is_alive() is False for proc in threads.values()]
         if all(joined):
