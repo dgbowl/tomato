@@ -84,5 +84,6 @@ autodoc_pydantic_model_show_field_summary = False
 # autodoc_pydantic_model_show_validator_summary = False
 autodoc_pydantic_model_member_order = "bysource"
 intersphinx_mapping = {
-    "dgbowl_schemas": ("https://dgbowl.github.io/dgbowl-schemas/main", None)
+    "dgbowl_schemas": ("https://dgbowl.github.io/dgbowl-schemas/main", None),
+    "xarray": ("https://docs.xarray.dev/en/stable", None),
 }

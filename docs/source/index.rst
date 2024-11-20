@@ -18,14 +18,20 @@
 - the job and job queue configuration utility, :mod:`tomato.ketchup`;
 - a set of device drivers, see the :ref:`driver library`.
 
-This project has received funding from the European Union’s Horizon 2020 research
-and innovation programme under grant agreement No 957189. The project is part of
-BATTERY 2030+, the large-scale European research initiative for inventing the
-sustainable batteries of the future.
+This project has received funding from:
+
+- the European Union’s Horizon 2020 research and innovation programme under grant agreement No. 957189,
+- the Emmy Noether Programme of the DFG, under project No. 490703766
+- the Priority Programme 2419 HyCAM of the DFG, under project No. 523873650
+
+The project is part of BATTERY 2030+, the large-scale European research initiative for inventing the sustainable batteries of the future.
 
 .. codeauthor::
     Peter Kraus,
-    Loris Ercole
+    Alexandre Gbocho,
+    Graham Kimbell,
+    Loris Ercole,
+
 
 .. toctree::
    :maxdepth: 1
@@ -34,6 +40,7 @@ sustainable batteries of the future.
    installation
    quickstart
    usage
+   driver_develop
    version
 
 .. _driver library:
@@ -42,6 +49,10 @@ sustainable batteries of the future.
    :maxdepth: 1
    :caption: tomato driver library
 
+   tomato-example-counter <https://github.com/dgbowl/tomato-example-counter>
+   tomato-psutil <https://github.com/dgbowl/tomato-psutil>
+   tomato-bronkhorst <https://github.com/dgbowl/tomato-bronkhorst/>
+   tomato-jumo <https://github.com/dgbowl/tomato-jumo>
 
 .. toctree::
    :maxdepth: 1
