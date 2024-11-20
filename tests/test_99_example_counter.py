@@ -46,7 +46,6 @@ def test_counter_npoints_metadata(
         assert "tomato_Component" in ds.attrs
 
 
-
 @pytest.mark.parametrize(
     "casename",
     [
