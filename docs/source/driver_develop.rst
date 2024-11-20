@@ -2,7 +2,7 @@
 
 Developing **tomato** drivers
 -----------------------------
-As of ``tomato-1.0``, all device *drivers* are developed as separate Python packages with their own documentation and versioning. To ensure compatibility of the Manager between the ``tomato-driver`` process and the implementation of the *driver*, an abstract class :class:`~tomato.driverManager_1_0.ModelManager` is provided. A class inheriting from this abstract class, with the name :class:`DriverManager`, **has** to be available when the selected *driver* module is imported.
+As of ``tomato-1.0``, all device *drivers* are developed as separate Python packages with their own documentation and versioning. To ensure compatibility of the Manager between the ``tomato-driver`` process and the implementation of the *driver*, an abstract class :class:`~tomato.driverManager_1_0.ModelInterface` is provided. A class inheriting from this abstract class, with the name :class:`DriverManager`, **has** to be available when the selected *driver* module is imported.
 
 .. note::
 
@@ -18,13 +18,13 @@ When the *driver* process is launched (as a ``tomato-driver``), it's given infor
 
 Communication between *jobs* and *drivers*
 ``````````````````````````````````````````
-After the *driver* process is bootstrapped, it enters the main loop, listening for commands to action or pass to the :class:`ModelManager`. Therefore, if a *job* needs to submit a :class:`Task`, it passes the :class:`Task` to the ``tomato-driver`` process, which actions it on the appropriate *component* using the :func:`task_submit` function. Similarly, if a *job* decides to poll the *driver* for data, it does so using the :func:`task_data` function.
+After the *driver* process is bootstrapped, it enters the main loop, listening for commands to action or pass to the :class:`ModelInterface`. Therefore, if a *job* needs to submit a :class:`Task`, it passes the :class:`Task` to the ``tomato-driver`` process, which actions it on the appropriate *component* using the :func:`task_submit` function. Similarly, if a *job* decides to poll the *driver* for data, it does so using the :func:`task_data` function.
 
-In general, methods of the :class:`ModelManager` that are prefixed with ``dev`` deal with managing *devices* or their *components* on the *driver*, methods prefixed with ``task`` deal with managing :class:`Tasks` running or submitted to *components*, and methods without a prefix deal with configuration or status of the *driver* itself.
+In general, methods of the :class:`ModelInterface` that are prefixed with ``dev`` deal with managing *devices* or their *components* on the *driver*, methods prefixed with ``task`` deal with managing :class:`Tasks` running or submitted to *components*, and methods without a prefix deal with configuration or status of the *driver* itself.
 
 .. note::
 
-    The :class:`ModelManager` contains a sub-class :class:`DriverManager`. In general, the :class:`ModelManager` acts as a pass-through to the (abstract) methods of the :class:`DriverManager`; e.g. :func:`ModelManager.dev_get_attr` is a passthrough function to the appropriate :func:`DriverManager.get_attr`.
+    The :class:`ModelInterface` contains a sub-class :class:`DriverManager`. In general, the :class:`ModelInterface` acts as a pass-through to the (abstract) methods of the :class:`DriverManager`; e.g. :func:`ModelInterface.dev_get_attr` is a passthrough function to the appropriate :func:`DriverManager.get_attr`.
 
     We expect most of the work in implementing a new *driver* will actually take place in the :class:`DriverManager` class.
 
@@ -47,9 +47,9 @@ Best Practices when developing a *driver*
 - Each :class:`DriverManager` contains a link to its parent :class:`ModelInterface` in the :obj:`DriverManager.driver` object.
 - Internal functions of the :class:`DriverManager` and :class:`ModelInterface` should be re-used wherever possible. E.g., reading *component* attributes should always be carried out using :func:`get_attr`.
 
-ModelManager ver. 1.0
-`````````````````````
+ModelInterface ver. 1.0
+```````````````````````
 
-.. autoclass:: tomato.driverManager_1_0.ModelManager
+.. autoclass:: tomato.driverinterface_1_0.ModelInterface
     :no-index:
     :members:
