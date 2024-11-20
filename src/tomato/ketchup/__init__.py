@@ -296,7 +296,7 @@ def snapshot(
             return Reply(success=False, msg=f"job {jobid} is still queued")
 
     for jobid in jobids:
-        jobs[jobid].snappath = Path(f"snapshot.{jobid}.nc")
+        jobs[jobid].snappath = f"snapshot.{jobid}.nc"
         merge_netcdfs(jobs[jobid], snapshot=True)
     if len(jobids) > 1:
         msg = f"snapshot for jobs {jobids} created successfully"
