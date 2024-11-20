@@ -70,7 +70,7 @@ def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daem
 @pytest.mark.parametrize(
     "casename,  external",
     [
-        ("counter_60_0.1", True),
+        ("counter_20_5", True),
         ("counter_snapshot", False),
     ],
 )
