@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 1.0rc2.dev3 documentation</title>
+  <title>Quick start guide &mdash; tomato 1.0rc3.dev1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=3d6ed124"></script>
+        <script src="_static/documentation_options.js?v=31ac4bcd"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -41,7 +41,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0rc2.dev3
+                1.0rc3.dev1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -65,13 +65,22 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#payload-file">Payload file</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload"><code class="docutils literal notranslate"><span class="pre">Payload</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.version"><code class="docutils literal notranslate"><span class="pre">Payload.version</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.settings"><code class="docutils literal notranslate"><span class="pre">Payload.settings</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.sample"><code class="docutils literal notranslate"><span class="pre">Payload.sample</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.method"><code class="docutils literal notranslate"><span class="pre">Payload.method</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile"><code class="docutils literal notranslate"><span class="pre">Payload.extract_samplefile</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile"><code class="docutils literal notranslate"><span class="pre">Payload.extract_methodfile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Payload"><code class="docutils literal notranslate"><span class="pre">Payload</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Payload.version"><code class="docutils literal notranslate"><span class="pre">Payload.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Payload.settings"><code class="docutils literal notranslate"><span class="pre">Payload.settings</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Payload.sample"><code class="docutils literal notranslate"><span class="pre">Payload.sample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Payload.method"><code class="docutils literal notranslate"><span class="pre">Payload.method</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Payload.extract_samplefile"><code class="docutils literal notranslate"><span class="pre">Payload.extract_samplefile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Payload.extract_methodfile"><code class="docutils literal notranslate"><span class="pre">Payload.extract_methodfile</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task"><code class="docutils literal notranslate"><span class="pre">Task</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.component_tag"><code class="docutils literal notranslate"><span class="pre">Task.component_tag</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.max_duration"><code class="docutils literal notranslate"><span class="pre">Task.max_duration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.sampling_interval"><code class="docutils literal notranslate"><span class="pre">Task.sampling_interval</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.polling_interval"><code class="docutils literal notranslate"><span class="pre">Task.polling_interval</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.technique_name"><code class="docutils literal notranslate"><span class="pre">Task.technique_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.technique_params"><code class="docutils literal notranslate"><span class="pre">Task.technique_params</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -79,7 +88,15 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-example-counter">tomato-example-counter</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-psutil">tomato-psutil</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-bronkhorst/">tomato-bronkhorst</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-jumo">tomato-jumo</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
 <ul>
@@ -118,9 +135,7 @@
 <p class="admonition-title">Note</p>
 <p>This section assumes that <strong>tomato</strong> has been successfully <a class="reference internal" href="installation.html#installation"><span class="std std-ref">installed</span></a>.</p>
 </div>
-<p>To prepare <strong>tomato</strong> for its first execution, a <em>settings file</em> containing the basic
-configuration of the driver needs to be placed in <strong>tomato’s</strong> <em>appdir</em> folder. By
-default, the <em>appdir</em> path is:</p>
+<p>To prepare <strong>tomato</strong> before its first run, a <em>settings file</em> containing the basic configuration for the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> needs to be placed in <strong>tomato’s</strong> <em>appdir</em> folder. By default, the <em>appdir</em> path is:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">$env:localappdata\dgbowl\tomato\&lt;version&gt;</span></code> on Windows,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">$HOME/.config/tomato/&lt;version&gt;</span></code> on Linux.</p></li>
@@ -130,19 +145,16 @@ default, the <em>appdir</em> path is:</p>
 <span class="hll"><span class="linenos">2</span> Success: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
 </span></pre></div>
 </div>
-<p>Where <em>appdir</em> is <code class="docutils literal notranslate"><span class="pre">/home/kraus/.config/tomato/1.0a1/</span></code>. The <em>appdir</em> can be specified
-using the <code class="docutils literal notranslate"><span class="pre">--appdir</span></code> argument to <strong>tomato</strong>.</p>
+<p>Where <em>appdir</em> is <code class="docutils literal notranslate"><span class="pre">/home/kraus/.config/tomato/1.0a1/</span></code>. A custom <em>appdir</em> can be specified using the <code class="docutils literal notranslate"><span class="pre">--appdir</span></code> argument to <strong>tomato</strong>.</p>
 </section>
 <section id="tomato-program-flowchart">
 <h2><strong>tomato</strong> program flowchart<a class="headerlink" href="#tomato-program-flowchart" title="Link to this heading"></a></h2>
 <p><strong>tomato</strong> currently contains two command line user-facing utilities/executables:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>, responsible for management of the state daemon process, and</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>, responsible for management of the daemon process, and</p></li>
 <li><p><a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>, responsible for job submission and management.</p></li>
 </ul>
-<p>These two executables then internally spawn other processes, including the state daemon
-<code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process for every running job, and a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code>
-process for managing all devices of a certain driver type.</p>
+<p>These two executables then internally spawn other processes, including the state daemon process <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process for every running job, and a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process for each driver type, managing all devices of a that type.</p>
 <div class="mermaid">
             flowchart TB
     subgraph daemon[tomato-daemon]
@@ -174,11 +186,11 @@ process for managing all devices of a certain driver type.</p>
 <span id="concepts"></span><h2><strong>tomato</strong> concepts flowchart<a class="headerlink" href="#tomato-concepts-flowchart" title="Link to this heading"></a></h2>
 <p>The following concepts are used in <strong>tomato</strong>:</p>
 <ul class="simple">
-<li><p><em>devices</em>, which represent separately addressable and optionally multichannel instruments in the lab,</p></li>
+<li><p><em>devices</em>, which represent separately addressable (and optionally multichannel) instruments in the lab,</p></li>
 <li><p><em>components</em>, which represent the individual channels of each <em>device</em>, describing the role of this <em>component</em> and its associated capabilities,</p></li>
-<li><p><em>pipelines</em>, which represent the real world organisation of device <em>components</em> into independent experimental set-ups, optionally containing <em>components</em> from one or more <em>device</em>,</p></li>
-<li><p><em>jobs</em>, which are processes that carry out a <em>payload</em> (i.e. a set of experimental instructions) on a <em>pipeline</em>, and</p></li>
-<li><p><em>drivers</em>, which are processes managing all <em>devices</em> of a certain driver type and their <em>component</em>:</p></li>
+<li><p><em>pipelines</em>, which represent the real world organisation of device <em>components</em> into independent experimental set-ups, containing <em>components</em> from one or more <em>device</em>,</p></li>
+<li><p><em>jobs</em>, which are processes that carry out a <em>payload</em> (i.e. a set of experimental instructions) on a <em>pipeline</em> by instructing its <em>components</em> to perform individual <em>tasks</em>, and</p></li>
+<li><p><em>drivers</em>, which are separate processes, each managing all defined <em>devices</em> of a certain driver type as well as their <em>components</em>:</p></li>
 </ul>
 <div class="mermaid">
             flowchart LR
@@ -242,9 +254,7 @@ process for managing all devices of a certain driver type.</p>
         </div></section>
 <section id="settings-file">
 <span id="setfile"></span><h2>Settings file<a class="headerlink" href="#settings-file" title="Link to this heading"></a></h2>
-<p>The <em>settings file</em> contains the basic information required to start the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>.
-This is a <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> file, which has to be located in the <em>appdir</em>. The default
-file generated by <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> looks similar to the below example:</p>
+<p>The <em>settings file</em> contains the basic information required to start the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>. The filename is hard-coded to be a <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> file, which has to be located in the <em>appdir</em>. The default file generated by <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> looks similar to the below example:</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="n">datadir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.local/share/tomato/1.0a1&#39;</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="w"> </span><span class="k">[jobs]</span>
@@ -257,29 +267,22 @@ file generated by <code class="docutils literal notranslate"><span class="pre">t
 <span class="linenos">10</span><span class="w"> </span><span class="n">example_counter</span><span class="p">.</span><span class="n">testpar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1234</span>
 </pre></div>
 </div>
-<p>In addition to the <em>appdir</em>, a second path, <em>datadir</em>, is used to specify the location of
-the data created by <strong>tomato</strong>. The default <em>datadir</em> is:</p>
+<p>In addition to the <em>appdir</em>, a second path, <em>datadir</em>, is used to specify the location of the data created by <strong>tomato</strong>. The default <em>datadir</em> is:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">$env:localappdata\dgbowl\tomato\&lt;version&gt;</span></code> on Windows,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">$HOME/.local/share/tomato/&lt;version&gt;</span></code> on Linux.</p></li>
 </ul>
 <p>In the default <em>settings file</em> shown above, the following entries are specified:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">jobs.storage</span></code> which is the directory where the data and logs of <strong>tomato</strong> jobs
-will be stored,</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">devices.config</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted <a class="reference internal" href="#devfile"><span class="std std-ref">devices file</span></a>,
-defining the hardware configuration of the devices managed by <strong>tomato</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">jobs.storage</span></code> which is the directory where the data and logs of <strong>tomato</strong> jobs will be stored,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">devices.config</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted <a class="reference internal" href="#devfile"><span class="std std-ref">devices file</span></a>, defining the hardware configuration of the devices managed by <strong>tomato</strong>.</p></li>
 </ul>
-<p>Additional, <em>driver</em>-specific settings may be provided in the <code class="docutils literal notranslate"><span class="pre">[drivers]</span></code> section,
-following the example of the <code class="docutils literal notranslate"><span class="pre">drivers.example_counter.testpar</span></code> entry.</p>
+<p>Additional, <em>driver</em>-specific settings may be provided in the <code class="docutils literal notranslate"><span class="pre">[drivers]</span></code> section, following the example of the <code class="docutils literal notranslate"><span class="pre">drivers.example_counter.testpar</span></code> entry. These <em>driver</em>-specific settings are passed to each <em>driver</em> when its process is launched and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DriverInterface</span></code> is initialised, and can therefore contain paths to various libraries or other files necessary for the <em>driver</em> to function.</p>
 </section>
 <section id="devices-file">
 <span id="devfile"></span><h2>Devices file<a class="headerlink" href="#devices-file" title="Link to this heading"></a></h2>
-<p>This <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted file contains information about each <em>device</em>, corresponding to
-an individual piece of hardware managed by <strong>tomato</strong>, as well as information about the
-organisation of such <em>devices</em> into <em>pipelines</em>.</p>
-<p>When the devices file is not present, the default file shipped with <strong>tomato</strong> will be
-used instead:</p>
+<p>This <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted file contains information about each <em>device</em>, corresponding to an individual piece of hardware managed by <strong>tomato</strong>, as well as information about the organisation of the individually-addressable <em>components</em> of those <em>devices</em> into <em>pipelines</em>.</p>
+<p>When the devices file is not present, the default file shipped with <strong>tomato</strong> will be used instead:</p>
 <section id="devices-section">
 <h3><strong>devices</strong> section<a class="headerlink" href="#devices-section" title="Link to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">devices</span></code> section of the default <em>devices file</em> is shown below:</p>
@@ -291,11 +294,8 @@ used instead:</p>
 <span class="linenos">6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
-<p>Here, we define a single device using the <code class="xref py py-mod docutils literal notranslate"><span class="pre">example_counter</span></code> driver.
-The definition includes the <code class="docutils literal notranslate"><span class="pre">address</span></code> of the device (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> type) as well as an
-enumeration of individually-addressable channels the device has (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>).</p>
-<p>For example, the devices shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a> above would
-be defined as:</p>
+<p>Here, we define a single device using the <code class="xref py py-mod docutils literal notranslate"><span class="pre">example_counter</span></code> driver. The definition includes the <code class="docutils literal notranslate"><span class="pre">address</span></code> of the device (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> type) as well as an enumeration of individually-addressable channels the device has (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>).</p>
+<p>For example, the devices shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a> above would be defined as:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
 <span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
 <span class="linenos"> 3</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;driver</span><span class="nv"> </span><span class="s">123&quot;</span>
@@ -316,9 +316,7 @@ be defined as:</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> here is an internal setting for <strong>tomato</strong>. It is the frequency
-with which the job interacting with the device driver asks the driver for data,
-<strong>not</strong> the frequency with which the driver asks the hardware for data!</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> here is an internal setting for <strong>tomato</strong>. It is the frequency with which the <em>job</em> interacting with the device <em>driver</em> asks the <em>driver</em> for data, <strong>not</strong> the frequency with which the <em>driver</em> asks the hardware for data! This latter “sampling” frequency can be defined in each individual <em>task</em> submitted as a <em>payload</em> of a <em>job</em>.</p>
 </div>
 </section>
 <section id="pipelines-section">
@@ -332,10 +330,7 @@ with which the job interacting with the device driver asks the driver for data,
 </span><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
 </pre></div>
 </div>
-<p>Here, a single <em>pipeline</em> called <code class="docutils literal notranslate"><span class="pre">pip-counter</span></code> is defined to contain the one available
-channel of the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> device (defined on line 5) shown further above. For multi
-channel devices, it is also possible to define a <em>pipeline</em> for each channel automatically.
-For example, with the following definition:</p>
+<p>Here, a single <em>pipeline</em> called <code class="docutils literal notranslate"><span class="pre">pip-counter</span></code> is defined to contain the one available channel of the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> device (defined on line 5) shown further above. For multi channel devices, it is also possible to define a <em>pipeline</em> for each channel automatically, e.g. using the following definition:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
 <span class="hll"><span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-counter-*</span>
 </span><span class="linenos">3</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
@@ -344,12 +339,8 @@ For example, with the following definition:</p>
 <span class="hll"><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">each</span>
 </span></pre></div>
 </div>
-<p>a set of pipelines would be created using each of the available channels in
-<code class="docutils literal notranslate"><span class="pre">dev-counter</span></code>, replacing the <code class="docutils literal notranslate"><span class="pre">*</span></code> in line 2 using the channel. Therefore, one
-<em>pipeline</em>  with name <code class="docutils literal notranslate"><span class="pre">pip-counter-1</span></code> would be created. However, if the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code>
-contained more than one channel, a <em>pipeline</em> would be generated for each channel.</p>
-<p>Finally, a definition for the pipelines shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a>
-above can be defined as:</p>
+<p>Here, a set of pipelines would be created using each of the available channels in <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code>, replacing the <code class="docutils literal notranslate"><span class="pre">*</span></code> in line 2 using the channel. Therefore, one <em>pipeline</em>  with name <code class="docutils literal notranslate"><span class="pre">pip-counter-1</span></code> would be created. However, if the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> were to contain more than one channel, a <em>pipeline</em> would be generated for each channel.</p>
+<p>Finally, a definition for the pipelines shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a> above can be defined as:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
 <span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline a1</span>
 <span class="linenos"> 3</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
@@ -378,12 +369,10 @@ above can be defined as:</p>
 </section>
 <section id="payload-file">
 <span id="payfile"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Link to this heading"></a></h2>
-<p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and
-allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined
-in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
+<p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>:</p>
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload">
-<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload_1_0.</span></span><span class="sig-name descname"><span class="pre">Payload</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Payload">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload.</span></span><span class="sig-name descname"><span class="pre">Payload</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Payload" title="Link to this definition"></a></dt>
 <dd><p><details  class="autodoc_pydantic_collapsable_json">
 <summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Payload&quot;</span><span class="p">,</span>
@@ -607,80 +596,196 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
 </dd>
 <dt class="field-even">Validators<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.version">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'1.0'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.version" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Payload.version">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'1.0'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Payload.version" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.settings">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.settings.Settings" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Settings</span></a></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.settings" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Payload.settings">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.settings.Settings" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Settings</span></a></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Payload.settings" title="Link to this definition"></a></dt>
 <dd><p>Additional configuration options for tomato.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.sample">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.sample.Sample" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.sample" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Payload.sample">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.sample.Sample" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Payload.sample" title="Link to this definition"></a></dt>
 <dd><p>Specification of the experimental sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.method">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.task.Task" title="(in dgbowl-schemas v120.dev1)"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.method" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Payload.method">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload_1_0.task.Task"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Payload.method" title="Link to this definition"></a></dt>
 <dd><p>A sequence of the experimental <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference internal" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_1_0.html#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="(in dgbowl-schemas v120.dev1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method pydantic_validator">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_samplefile</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_samplefile" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Payload.extract_samplefile">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_samplefile</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Payload.extract_samplefile" title="Link to this definition"></a></dt>
 <dd><p>If <code class="docutils literal notranslate"><span class="pre">samplefile</span></code> is provided in <code class="docutils literal notranslate"><span class="pre">values</span></code>, parse the file as <code class="docutils literal notranslate"><span class="pre">sample</span></code>.</p>
 </dd></dl>
 
 <dl class="py method pydantic_validator">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_methodfile</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload_1_0.Payload.extract_methodfile" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Payload.extract_methodfile">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_methodfile</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Payload.extract_methodfile" title="Link to this definition"></a></dt>
 <dd><p>If <code class="docutils literal notranslate"><span class="pre">methodfile</span></code> is provided in <code class="docutils literal notranslate"><span class="pre">values</span></code>, parse the file as <code class="docutils literal notranslate"><span class="pre">method</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
 
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Of particular importance here is the specification of the individual <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>. Some general <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> parameters are abstracted by <strong>tomato</strong>, such as the <code class="docutils literal notranslate"><span class="pre">max_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">sampling_interval</span></code> and <code class="docutils literal notranslate"><span class="pre">polling_interval</span></code>. The other are <em>driver</em> or <em>component</em> specific, and can be specified using the <code class="docutils literal notranslate"><span class="pre">technique_params</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>.</p>
+</div>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task" title="Link to this definition"></a></dt>
+<dd><p>The <a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> is a driver/device-independent abstraction describing the
+measurement steps. The driver-specific information for the <a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> can be
+provided via the <code class="docutils literal notranslate"><span class="pre">technique</span></code> parameter.</p>
+<p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The :class:`Task` is a driver/device-independent abstraction describing the\nmeasurement steps. The driver-specific information for the :class:`Task` can be\nprovided via the ``technique`` parameter.&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;component_tag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Component Tag&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;max_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Max Duration&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;sampling_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sampling Interval&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;polling_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Polling Interval&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;technique_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique Name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;technique_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique Params&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;component_tag&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;max_duration&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;sampling_interval&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;technique_name&quot;</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details></p><dl class="field-list simple">
+<dt class="field-odd">Config<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extra</strong>: <em>str = forbid</em></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.component_tag">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">component_tag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.component_tag" title="Link to this definition"></a></dt>
+<dd><p>tag of the pipeline component on which this <code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code> should run</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.max_duration">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.max_duration" title="Link to this definition"></a></dt>
+<dd><p>the maximum duration of this <a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a>, in seconds</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.sampling_interval">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sampling_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.sampling_interval" title="Link to this definition"></a></dt>
+<dd><p>the interval between measurements, in seconds</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.polling_interval">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">polling_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.polling_interval" title="Link to this definition"></a></dt>
+<dd><p>the interval between polling for data, in seconds; defaults to the value in driver settings</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.technique_name">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">technique_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.technique_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.technique_params">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">technique_params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.technique_params" title="Link to this definition"></a></dt>
+<dd><p>a <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> of additional parameters required to specify the experimental technique</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently, <strong>tomato</strong> performs no validation of any <code class="docutils literal notranslate"><span class="pre">technique_params</span></code> at <em>job</em> submission. It also does not check whether the <code class="docutils literal notranslate"><span class="pre">sampling_interval</span></code> is realistic. This means your <em>jobs</em> may crash when the <code class="docutils literal notranslate"><span class="pre">technique_params</span></code> are out of bounds when the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> is being executed.</p>
+<p>However, such validation is planned for <code class="docutils literal notranslate"><span class="pre">tomato-2.0</span></code>, see <a class="reference external" href="https://github.com/dgbowl/tomato/issues/99">https://github.com/dgbowl/tomato/issues/99</a>.</p>
+</div>
 </section>
 </section>
 
@@ -711,7 +816,7 @@ in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schem
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0rc2.dev3
+      v: 1.0rc3.dev1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
