@@ -40,6 +40,7 @@ The project is part of BATTERY 2030+, the large-scale European research initiati
    installation
    quickstart
    usage
+   driver_develop
    version
 
 .. _driver library:

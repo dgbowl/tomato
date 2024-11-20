@@ -2,8 +2,7 @@
 
 Installation
 ------------
-Pre-built wheels of **tomato** are available on `PyPI <https://pypi.org/project/tomato/>`_
-and can be installed using:
+Pre-built wheels of **tomato** are available on `PyPI <https://pypi.org/project/tomato/>`_ and can be installed using:
 
 .. code::
 
