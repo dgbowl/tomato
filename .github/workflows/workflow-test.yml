@@ -33,4 +33,4 @@ jobs:
             run: tomato --version
           - name: Run pytest
             shell: bash
-            run: pytest -vv
+            run: pytest -vvv --durations=0

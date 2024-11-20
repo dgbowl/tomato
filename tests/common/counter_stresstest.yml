@@ -1,0 +1,11 @@
+version: "1.0"
+sample:
+    name: counter_stresstest
+method:
+  - component_tag: "counter"
+    technique_name: "count"
+    max_duration: 0.2
+    sampling_interval: 0.1
+settings:
+    unlock_when_done: true
+    verbosity: DEBUG
