@@ -46,7 +46,7 @@ class Attr(BaseModel):
 
 class ModelInterface(metaclass=ABCMeta):
     """
-    An abstract base class specifying the a driver interface.
+    An abstract base class specifying the driver interface.
 
     Individual driver modules should expose a :class:`DriverInterface` which inherits
     from this abstract class. Only the methods of this class should be used to interact
@@ -58,9 +58,13 @@ class ModelInterface(metaclass=ABCMeta):
     class DeviceManager(metaclass=ABCMeta):
         """
         An abstract base class specifying a manager for an individual component.
+
+        This class should handle determining attributes and capabilities of the component,
+        the reading/writing of those attributes, processing of tasks, and caching and
+        returning of task data.
         """
 
-        driver: super
+        driver: "ModelInterface"
         """The parent :class:`DriverInterface` instance."""
 
         data: dict[str, list]
@@ -70,7 +74,7 @@ class ModelInterface(metaclass=ABCMeta):
         """Lock object for thread-safe data manipulation."""
 
         key: tuple
-        """The key in :obj:`driver.devmap` referring to this object."""
+        """The key in :obj:`self.driver.devmap` referring to this object."""
 
         thread: Thread
         """The worker :class:`Thread`."""
@@ -203,8 +207,8 @@ class ModelInterface(metaclass=ABCMeta):
 
     def CreateDeviceManager(self, key, **kwargs):
         """
-        A factory function which is used to pass this :class:`ModelInterface` to the new
-        :class:`DeviceManager` instance.
+        A factory function which is used to pass this instance of the :class:`ModelInterface`
+        to the new :class:`DeviceManager` instance.
         """
         return self.DeviceManager(self, key, **kwargs)
 
@@ -273,20 +277,6 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def attrs(self, key: tuple, **kwargs: dict) -> Reply:
-        """
-        Query available :class:`Attrs` on the specified device component.
-
-        Pass-through to the :func:`DeviceManager.attrs` function.
-        """
-        ret = self.devmap[key].attrs(**kwargs)
-        return Reply(
-            success=True,
-            msg=f"attrs of component {key!r} are: {ret}",
-            data=ret,
-        )
-
-    @in_devmap
     def dev_set_attr(self, attr: str, val: Any, key: tuple, **kwargs: dict) -> Reply:
         """
         Set value of the :class:`Attr` of the specified device component.
@@ -307,7 +297,7 @@ class ModelInterface(metaclass=ABCMeta):
         Get value of the :class:`Attr` from the specified device component.
 
         Pass-through to the :func:`DeviceManager.get_attr` function. Units are not
-        returned; those can be queried for all :class:`Attrs` using :func:`attrs`.
+        returned; those can be queried for all :class:`Attrs` using :func:`self.attrs`.
 
         """
         ret = self.devmap[key].get_attr(attr=attr, **kwargs)
@@ -322,8 +312,8 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Get the status report from the specified device component.
 
-        Iterates over all :class:`Attrs` on the component that have `status=True` and
-        returns their values in a :class:`dict`.
+        Iterates over all :class:`Attrs` on the component that have ``status=True`` and
+        returns their values in the :obj:`Reply.data` as a :class:`dict`.
         """
         ret = {}
         for k, attr in self.devmap[key].attrs(key=key, **kwargs).items():
@@ -472,5 +462,19 @@ class ModelInterface(metaclass=ABCMeta):
         return Reply(
             success=True,
             msg=f"capabilities supported by component {key!r} are: {ret}",
+            data=ret,
+        )
+
+    @in_devmap
+    def attrs(self, key: tuple, **kwargs: dict) -> Reply:
+        """
+        Query available :class:`Attrs` on the specified device component.
+
+        Pass-through to the :func:`DeviceManager.attrs` function.
+        """
+        ret = self.devmap[key].attrs(**kwargs)
+        return Reply(
+            success=True,
+            msg=f"attrs of component {key!r} are: {ret}",
             data=ret,
         )
