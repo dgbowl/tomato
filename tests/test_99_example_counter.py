@@ -21,7 +21,7 @@ PORT = 12345
         ("counter_multistep", 15, "results.1"),
     ],
 )
-def test_counter_npoints(
+def test_counter_npoints_metadata(
     casename, npoints, prefix, datadir, start_tomato_daemon, stop_tomato_daemon
 ):
     os.chdir(datadir)
@@ -37,9 +37,13 @@ def test_counter_npoints(
     if prefix is not None:
         assert os.path.exists(f"{prefix}.nc")
         dt = xr.open_datatree(f"{prefix}.nc")
+        assert "tomato_version" in dt.attrs
+        assert "tomato_Job" in dt.attrs
+
         ds = dt["counter"]
         print(f"{ds=}")
         assert ds["uts"].size == npoints
+        assert "tomato_Component" in ds.attrs
 
 
 @pytest.mark.parametrize(
@@ -70,7 +74,7 @@ def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daem
         ("counter_snapshot", False),
     ],
 )
-def test_counter_snapshot(
+def test_counter_snapshot_metadata(
     casename, external, datadir, start_tomato_daemon, stop_tomato_daemon
 ):
     os.chdir(datadir)
@@ -85,6 +89,11 @@ def test_counter_snapshot(
         status = utils.job_status(1)
     assert status == "c"
     assert os.path.exists("snapshot.1.nc")
+    dt = xr.open_datatree("snapshot.1.nc")
+    assert "tomato_version" in dt.attrs
+    assert "tomato_Job" in dt.attrs
+    for group in dt:
+        assert "tomato_Component" in dt[group].attrs
 
 
 @pytest.mark.parametrize(

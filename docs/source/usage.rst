@@ -174,13 +174,23 @@ Each *job* stores its data and logs in its own *job* folder, which is a subfolde
     Note that a *pipeline* dashboard functionality is planned for a future version of ``tomato``.
 
 
-Final job data
-**************
+Final job data and metadata
+***************************
 By default, all data in the *job* folder is processed to create a NetCDF file. The NetCDF files can be read using :func:`xaray.open_datatree`, returning a :class:`xarray.DataTree`.
 
-In the root node of the :class:`~xarray.DataTree`, a copy of the full *payload* is included, serialised as a json :class:`str`. Additionally, execution-specific metadata, such as the *pipeline* ``name``, and *job* submission/execution/completion time are stored on the root node, too.
+In the root node of the :class:`~xarray.DataTree`, the :obj:`attrs` dictionary contains all **tomato**-relevant metadata. This currently includes:
 
-The child nodes of the :class:`~xarray.DataTree` contain the actual data from each *pipeline* *component*, unit-annotated using the CF Metadata Conventions. The node names correspond to the ``role`` that *component* fullfils in a *pipeline*.
+- ``tomato_version`` which is the version of **tomato** used to create the NetCDF file,
+- ``tomato_Job`` which is the *job* object serialised as a json :class:`str`, containing the full *payload*, sample information, as well as *job* submission/execution/completion time.
+
+The child nodes of the :class:`~xarray.DataTree` contain:
+
+- the actual data from each *pipeline* *component*, unit-annotated using the CF Metadata Conventions. The node names correspond to the ``role`` that *component* fullfils in a *pipeline*.
+- a ``tomato_Component`` entry in the :obj:`attrs` object, which is the *component* object serialised as a json :class:`str`, containing information about the *device* address and channel that define the *component*, the *driver* and *device* names, as well as the *component* capabilities.
+
+.. note::
+
+    The ``tomato_Job`` and ``tomato_Component`` entries can be converted back to the source objects using :func:`tomato.models.Job.model_validate_json` and :func:`tomato.models.Component.model_validate_json`, respectively.
 
 .. note::
 
