@@ -470,7 +470,9 @@ def job_thread(
                 ret = req.recv_pyobj()
                 if ret.success:
                     logger.debug("pickling received data")
-                    data_to_pickle(ret.data, datapath, role=component.role)
+                    ds = ret.data
+                    ds.attrs["tomato_Component"] = component.model_dump_json()
+                    data_to_pickle(ds, datapath, role=component.role)
                 t0 += device.pollrate
 
             logger.debug("polling component '%s' for task completion", component.role)

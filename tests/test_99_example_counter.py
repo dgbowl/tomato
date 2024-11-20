@@ -37,11 +37,14 @@ def test_counter_npoints_metadata(
     if prefix is not None:
         assert os.path.exists(f"{prefix}.nc")
         dt = xr.open_datatree(f"{prefix}.nc")
+        assert "tomato_version" in dt.attrs
+        assert "tomato_Job" in dt.attrs
+
         ds = dt["counter"]
         print(f"{ds=}")
         assert ds["uts"].size == npoints
-        assert "tomato_version" in dt.attrs
-        assert "tomato_Job" in dt.attrs
+        assert "tomato_Component" in ds.attrs
+
 
 
 @pytest.mark.parametrize(
@@ -90,6 +93,8 @@ def test_counter_snapshot_metadata(
     dt = xr.open_datatree("snapshot.1.nc")
     assert "tomato_version" in dt.attrs
     assert "tomato_Job" in dt.attrs
+    for group in dt:
+        assert "tomato_Component" in dt[group].attrs
 
 
 @pytest.mark.parametrize(
