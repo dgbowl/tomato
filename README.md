@@ -10,6 +10,7 @@
 - [`tomato-example-counter`](https://github.com/dgbowl/tomato-example-counter): an example device for testing purposes.
 - [`tomato-psutil`](https://github.com/dgbowl/tomato-psutil): an interface to the `psutil` library for CPU and memory usage statistics
 - [`tomato-bronkhorst`](https://github.com/dgbowl/tomato-bronkhorst): an interface to the `bronkhorst-propar` library for control of Bronkhorst MFCs and PCs
+- [`tomato-jumo`](https://github.com/dgbowl/tomato-jumo): a driver for control of Jumo Quantrol heater controllers using `minimalmodbus`
 
 See the [Documentation](https://dgbowl.github.io/tomato) for more detailed info.
 

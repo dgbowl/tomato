@@ -57,6 +57,9 @@ def load_device_file(yamlpath: Path) -> dict:
         devpath = Path(__file__).parent / ".." / "data" / "default_devices.json"
         with devpath.open() as inp:
             jsdata = json.load(inp)
+        logger.debug("writing default devices to '%s'", yamlpath)
+        with yamlpath.open("w") as outfile:
+            yaml.dump(jsdata, outfile)
     return jsdata
 
 
