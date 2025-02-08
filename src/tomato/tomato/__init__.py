@@ -266,6 +266,26 @@ def status(
     msg: tomato running on port 1234
     success: true
 
+    >>> # Status of all configured pipelines
+    >>> tomato status --pipeline
+    Success: tomato running on port 1234 with the following pipelines:
+         name:pip-counter       ready:False     sampleid:counter_1_0.1  jobid:None
+    
+    >>> # Status of all configured drivers
+    >>> tomato status --drivers
+    Success: tomato running on port 1234 with the following drivers:
+         name:example_counter   port:34747      pid:192318
+    
+    >>> # Status of all configured devices
+    >>> tomato status --devices
+    Success: tomato running on port 1234 with the following devices:
+         name:dev-counter       driver:example_counter  address:example-addr    channels:['1']
+
+    >>> # Status of all configured components:
+    >>> tomato status --components
+    Success: tomato running on port 1234 with the following components:
+         name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      role:counter
+
     """
     logger.debug("checking status of tomato on port %d", port)
     req = context.socket(zmq.REQ)
