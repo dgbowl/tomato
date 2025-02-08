@@ -95,7 +95,6 @@ class Daemon(BaseModel, arbitrary_types_allowed=True):
     status: Literal["bootstrap", "running", "stop"]
     port: int
     verbosity: int
-    logdir: str
     appdir: str
     settings: dict
     pips: Mapping[str, Pipeline] = Field(default_factory=dict)

@@ -29,7 +29,7 @@ def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon)
     assert wait_until_tomato_stopped(port=PORT, timeout=5000)
     assert os.path.exists("tomato_state_12345.pkl")
 
-    tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
+    tomato.start(**kwargs, appdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     ret = tomato.status(**kwargs)
     print(f"{ret=}")
@@ -63,7 +63,7 @@ def test_recover_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     kill_tomato_daemon(port=PORT)
 
     assert os.path.exists("tomato_state_12345.pkl")
-    ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
+    ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     ret = tomato.status(**kwargs)
@@ -94,7 +94,7 @@ def test_recover_waiting_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     kill_tomato_daemon(port=PORT)
 
     time.sleep(5)
-    tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
+    tomato.start(**kwargs, appdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     assert wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
     ret = tomato.status(**kwargs)
@@ -125,7 +125,7 @@ def test_recover_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     proc.terminate()
     psutil.wait_procs([proc], timeout=3)
 
-    tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
+    tomato.start(**kwargs, appdir=Path(), verbosity=0)
     assert wait_until_tomato_running(port=PORT, timeout=WAIT)
     ret = tomato.status(**kwargs)
     print(f"{ret=}")

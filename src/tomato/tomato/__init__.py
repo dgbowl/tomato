@@ -212,7 +212,6 @@ def start(
     timeout: int,
     context: zmq.Context,
     appdir: str,
-    logdir: str,
     verbosity: int,
     **_: dict,
 ) -> Reply:
@@ -267,8 +266,6 @@ def start(
         f"{port}",
         "-A",
         f"{appdir}",
-        "-L",
-        f"{logdir}",
         "-V",
         f"{verbosity}",
     ]
@@ -335,6 +332,7 @@ def init(
     *,
     appdir: str,
     datadir: str,
+    logdir: str,
     **_: dict,
 ) -> Reply:
     """
@@ -351,11 +349,13 @@ def init(
     """
     appdir = Path(appdir)
     datadir = Path(datadir)
+    logdir = Path(logdir)
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
         # Generated on {str(datetime.now(timezone.utc))}
         datadir = '{datadir.resolve()}'
+        logdir = '{logdir.resolve()}'
 
         [jobs]
         storage = '{datadir.resolve() / 'Jobs'}'
@@ -370,6 +370,9 @@ def init(
     if not appdir.exists():
         logger.debug("creating directory '%s'", appdir.resolve())
         os.makedirs(appdir)
+    if not logdir.exists():
+        logger.debug("creating directory '%s'", logdir.resolve())
+        os.makedirs(logdir)
     with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
         of.write(defaults)
     return Reply(

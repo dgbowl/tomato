@@ -109,8 +109,8 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", "."])
-    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-L", ".", "-vv"])
+    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
+    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
     utils.wait_until_tomato_running(port=PORT, timeout=3000)
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
