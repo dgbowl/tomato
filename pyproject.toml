@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 dynamic = ["version"]
 name = "tomato"
 authors = [
+    {name = "Peter Kraus"},
     {name = "Graham Kimbell"},
-    {name = "Peter Kraus", email = "peter.kraus@tu-berlin.de"},
 ]
 maintainers = [
     {name = "Peter Kraus", email = "peter.kraus@tu-berlin.de"},
