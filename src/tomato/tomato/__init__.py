@@ -34,7 +34,7 @@ import zmq
 import yaml
 import toml
 
-from tomato.models import Reply, Pipeline, Device, Driver, Component
+from tomato.models import Reply, Pipeline, Device, Driver, Component, Daemon
 
 logger = logging.getLogger(__name__)
 VERSION = metadata.version("tomato")
@@ -137,11 +137,95 @@ def _updater(context, port, cmd, params):
     return ret
 
 
+def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
+    if stgrp == "tom":
+        rep = Reply(
+            success=True,
+            msg=f"tomato running on port {daemon.port}",
+            data=daemon,
+        )
+    elif stgrp == "pip":
+        if yaml:
+            rep = Reply(
+                success=True,
+                msg=f"tomato running on port {daemon.port}",
+                data=daemon.pips,
+            )
+        else:
+            ii = []
+            for i in daemon.pips.values():
+                line = f"name:{i.name}\tready:{i.ready}\tsampleid:{i.sampleid}\tjobid:{i.jobid}"
+                ii.append(line)
+            if len(ii) == 0:
+                msg = f"tomato running on port {daemon.port} with no pipelines"
+            else:
+                msg = f"tomato running on port {daemon.port} with the following pipelines:\n\t "
+                msg += "\n\t ".join(ii)
+            rep = Reply(success=True, msg=msg)
+    elif stgrp == "drv":
+        if yaml:
+            rep = Reply(
+                success=True,
+                msg=f"tomato running on port {daemon.port}",
+                data=daemon.drvs,
+            )
+        else:
+            ii = []
+            for i in daemon.drvs.values():
+                line = f"name:{i.name}\tport:{i.port}\tpid:{i.pid}"
+                ii.append(line)
+            if len(ii) == 0:
+                msg = f"tomato running on port {daemon.port} with no drivers"
+            else:
+                msg = f"tomato running on port {daemon.port} with the following drivers:\n\t "
+                msg += "\n\t ".join(ii)
+            rep = Reply(success=True, msg=msg)
+    elif stgrp == "dev":
+        if yaml:
+            rep = Reply(
+                success=True,
+                msg=f"tomato running on port {daemon.port}",
+                data=daemon.devs,
+            )
+        else:
+            ii = []
+            for i in daemon.devs.values():
+                line = f"name:{i.name}\tdriver:{i.driver}\taddress:{i.address}\tchannels:{i.channels}"
+                ii.append(line)
+            if len(ii) == 0:
+                msg = f"tomato running on port {daemon.port} with no devices"
+            else:
+                msg = f"tomato running on port {daemon.port} with the following devices:\n\t "
+                msg += "\n\t ".join(ii)
+            rep = Reply(success=True, msg=msg)
+    elif stgrp == "cmp":
+        if yaml:
+            rep = Reply(
+                success=True,
+                msg=f"tomato running on port {daemon.port}",
+                data=daemon.cmps,
+            )
+        else:
+            ii = []
+            for i in daemon.cmps.values():
+                line = f"name:{i.name}\tdriver:{i.driver}\tdevice:{i.device}\trole:{i.role}"
+                ii.append(line)
+            if len(ii) == 0:
+                msg = f"tomato running on port {daemon.port} with no components"
+            else:
+                msg = f"tomato running on port {daemon.port} with the following components:\n\t "
+                msg += "\n\t ".join(ii)
+            rep = Reply(success=True, msg=msg)
+    return rep
+
+
 def status(
     *,
     port: int,
     timeout: int,
     context: zmq.Context,
+    stgrp: str = "tom",
+    yaml: bool = True,
     **_: dict,
 ) -> Reply:
     """
@@ -192,11 +276,7 @@ def status(
     events = dict(poller.poll(timeout))
     if req in events:
         rep = req.recv_pyobj()
-        return Reply(
-            success=True,
-            msg=f"tomato running on port {port}",
-            data=rep.data,
-        )
+        return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
     else:
         req.setsockopt(zmq.LINGER, 0)
         req.close()
