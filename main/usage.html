@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; tomato 1.0 documentation</title>
+  <title>Usage &mdash; tomato 1.0.post1+git.a41b8200 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="_static/documentation_options.js?v=060f688b"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0
+                1.0.post1+git.a41b8200
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -302,13 +302,13 @@
 </div>
 <section id="final-job-data-and-metadata">
 <h3>Final job data and metadata<a class="headerlink" href="#final-job-data-and-metadata" title="Link to this heading"></a></h3>
-<p>By default, all data in the <em>job</em> folder is processed to create a NetCDF file. The NetCDF files can be read using <code class="xref py py-func docutils literal notranslate"><span class="pre">xaray.open_datatree()</span></code>, returning a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataTree.html#xarray.DataTree" title="(in xarray v2024.10.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataTree</span></code></a>.</p>
-<p>In the root node of the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataTree.html#xarray.DataTree" title="(in xarray v2024.10.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataTree</span></code></a>, the <code class="xref py py-obj docutils literal notranslate"><span class="pre">attrs</span></code> dictionary contains all <strong>tomato</strong>-relevant metadata. This currently includes:</p>
+<p>By default, all data in the <em>job</em> folder is processed to create a NetCDF file. The NetCDF files can be read using <code class="xref py py-func docutils literal notranslate"><span class="pre">xaray.open_datatree()</span></code>, returning a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataTree.html#xarray.DataTree" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataTree</span></code></a>.</p>
+<p>In the root node of the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataTree.html#xarray.DataTree" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataTree</span></code></a>, the <code class="xref py py-obj docutils literal notranslate"><span class="pre">attrs</span></code> dictionary contains all <strong>tomato</strong>-relevant metadata. This currently includes:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tomato_version</span></code> which is the version of <strong>tomato</strong> used to create the NetCDF file,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tomato_Job</span></code> which is the <em>job</em> object serialised as a json <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, containing the full <em>payload</em>, sample information, as well as <em>job</em> submission/execution/completion time.</p></li>
 </ul>
-<p>The child nodes of the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataTree.html#xarray.DataTree" title="(in xarray v2024.10.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataTree</span></code></a> contain:</p>
+<p>The child nodes of the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataTree.html#xarray.DataTree" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataTree</span></code></a> contain:</p>
 <ul class="simple">
 <li><p>the actual data from each <em>pipeline</em> <em>component</em>, unit-annotated using the CF Metadata Conventions. The node names correspond to the <code class="docutils literal notranslate"><span class="pre">role</span></code> that <em>component</em> fullfils in a <em>pipeline</em>.</p></li>
 <li><p>a <code class="docutils literal notranslate"><span class="pre">tomato_Component</span></code> entry in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">attrs</span></code> object, which is the <em>component</em> object serialised as a json <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, containing information about the <em>device</em> address and channel that define the <em>component</em>, the <em>driver</em> and <em>device</em> names, as well as the <em>component</em> capabilities.</p></li>
@@ -361,7 +361,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0
+      v: 1.0.post1+git.a41b8200
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

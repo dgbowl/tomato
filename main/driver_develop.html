@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developing tomato drivers &mdash; tomato 1.0 documentation</title>
+  <title>Developing tomato drivers &mdash; tomato 1.0.post1+git.a41b8200 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="_static/documentation_options.js?v=060f688b"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0
+                1.0.post1+git.a41b8200
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -111,7 +111,7 @@
 <p>When the <em>driver</em> process is launched (as a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code>), it’s given information about how to connect to the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process and which device <em>driver</em> to spawn. Once a connection to the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> is established, the <em>driver</em> settings are fetched, and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DriverManager</span></code> is instantiated passing any settings to the constructor. Then, all <em>components</em> on all <em>devices</em> of this <em>driver</em> type that are known to <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> are registered using the <code class="xref py py-func docutils literal notranslate"><span class="pre">dev_register()</span></code> function.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Each <em>driver</em> creates a separate log file for each port <strong>tomato</strong> has been executed with. The logfile is stored in the same location as the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> logs, i.e. as configured under the <code class="docutils literal notranslate"><span class="pre">jobs.storage</span></code> option. The verbosity of the <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process is inherited from the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process.</p>
+<p>Each <em>driver</em> creates a separate log file for each port <strong>tomato</strong> has been executed with. The logfile is stored in the same location as the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> logs, i.e. as configured under the <code class="docutils literal notranslate"><span class="pre">logdir</span></code> option in the <em>settings file</em>. The verbosity of the <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process is inherited from the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process.</p>
 </div>
 </section>
 <section id="communication-between-jobs-and-drivers">
@@ -449,7 +449,7 @@ not a pass-through to <a class="reference internal" href="apidoc/tomato.driverin
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0
+      v: 1.0.post1+git.a41b8200
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

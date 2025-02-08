@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato package &mdash; tomato 1.0 documentation</title>
+  <title>tomato package &mdash; tomato 1.0.post1+git.a41b8200 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=f2a433a1"></script>
+        <script src="../_static/documentation_options.js?v=060f688b"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0
+                1.0.post1+git.a41b8200
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -145,7 +145,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.status"><code class="docutils literal notranslate"><span class="pre">Daemon.status</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.port"><code class="docutils literal notranslate"><span class="pre">Daemon.port</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.verbosity"><code class="docutils literal notranslate"><span class="pre">Daemon.verbosity</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.logdir"><code class="docutils literal notranslate"><span class="pre">Daemon.logdir</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.appdir"><code class="docutils literal notranslate"><span class="pre">Daemon.appdir</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.settings"><code class="docutils literal notranslate"><span class="pre">Daemon.settings</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Daemon.pips"><code class="docutils literal notranslate"><span class="pre">Daemon.pips</span></code></a></li>
@@ -1056,10 +1055,6 @@
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Verbosity&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;logdir&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Logdir&quot;</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
-<span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;appdir&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Appdir&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
@@ -1510,7 +1505,6 @@
 <span class="w">      </span><span class="s2">&quot;status&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;port&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;verbosity&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;logdir&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;appdir&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;settings&quot;</span>
 <span class="w">   </span><span class="p">]</span>
@@ -1537,11 +1531,6 @@
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Daemon.verbosity">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbosity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Daemon.verbosity" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="tomato.models.Daemon.logdir">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logdir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Daemon.logdir" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -1675,7 +1664,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0
+      v: 1.0.post1+git.a41b8200
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
