@@ -270,12 +270,12 @@ def status(
     >>> tomato status --pipeline
     Success: tomato running on port 1234 with the following pipelines:
          name:pip-counter       ready:False     sampleid:counter_1_0.1  jobid:None
-    
+
     >>> # Status of all configured drivers
     >>> tomato status --drivers
     Success: tomato running on port 1234 with the following drivers:
          name:example_counter   port:34747      pid:192318
-    
+
     >>> # Status of all configured devices
     >>> tomato status --devices
     Success: tomato running on port 1234 with the following devices:
