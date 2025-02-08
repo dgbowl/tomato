@@ -323,7 +323,7 @@ class ModelInterface(metaclass=ABCMeta):
         ret["running"] = self.devmap[key].running
         return Reply(
             success=True,
-            msg=f"component {key} is{' ' if ret['running'] else ' not ' }running",
+            msg=f"component {key} is{' ' if ret['running'] else ' not '}running",
             data=ret,
         )
 

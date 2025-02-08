@@ -269,7 +269,7 @@ def lazy_pirate(
         req.send_pyobj(pyobj)
         events = dict(poller.poll(timeout))
         if req not in events:
-            logger.warning(f"could not contact tomato-daemon in {timeout/1000} s")
+            logger.warning(f"could not contact tomato-daemon in {timeout / 1000} s")
             req.setsockopt(zmq.LINGER, 0)
             req.close()
             poller.unregister(req)
@@ -297,7 +297,7 @@ def tomato_job() -> None:
     parser.add_argument(
         "--version",
         action="version",
-        version=f'%(prog)s version {metadata.version("tomato")}',
+        version=f"%(prog)s version {metadata.version('tomato')}",
     )
     parser.add_argument(
         "--port",
