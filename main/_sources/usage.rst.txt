@@ -75,6 +75,13 @@ The :mod:`tomato.tomato` executable is used to configure, start, and manage the 
 
     #. **To manage individual pipelines** of a running **tomato** daemon, the following commands are available:
 
+        - For checking the status of all configured *pipelines*:
+
+            .. code-block:: bash
+
+                >>> tomato status --pipeline
+
+
         - For loading a sample into a *pipeline*:
 
             .. code-block:: bash

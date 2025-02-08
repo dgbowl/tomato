@@ -1,5 +1,21 @@
 Version history
 ===============
+**tomato**-v1.1
+---------------
+
+.. sectionauthor::
+     Peter Kraus
+
+Developed at the ConCat lab at TU Berlin.
+
+Changes from ``tomato-1.0`` include:
+
+- ``logdir`` can now be set in *settings file*, with the default value configurable using ``tomato init``.
+- ``tomato status`` now supports further arguments: ``--pipelines``, ``--drivers``, ``--devices``, and ``--components`` can be used to query status of subsets of the running **tomato**
+
+.. codeauthor::
+    Peter Kraus
+    
 
 **tomato**-v1.0
 ---------------
