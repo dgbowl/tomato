@@ -28,7 +28,7 @@ def setup_logging(daemon: Daemon):
     Helper function to set up logging (folder, filename, verbosity, format) based on
     the passed daemon state.
     """
-    logdir = Path(daemon.logdir)
+    logdir = Path(daemon.settings["logdir"])
     logdir.mkdir(parents=True, exist_ok=True)
     logfile = logdir / f"daemon_{daemon.port}.log"
     logging.basicConfig(
@@ -51,7 +51,7 @@ def tomato_daemon():
     parser.add_argument("--port", "-p", type=int, default=1234)
     parser.add_argument("--verbosity", "-V", type=int, default=logging.INFO)
     parser.add_argument("--appdir", "-A", type=str, default=str(Path.cwd()))
-    parser.add_argument("--logdir", "-L", type=str, default=str(Path.cwd()))
+
     args = parser.parse_args()
     settings = toml.load(Path(args.appdir) / "settings.toml")
 

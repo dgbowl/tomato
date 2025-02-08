@@ -212,7 +212,6 @@ def start(
     timeout: int,
     context: zmq.Context,
     appdir: str,
-    logdir: str,
     verbosity: int,
     **_: dict,
 ) -> Reply:
@@ -267,8 +266,6 @@ def start(
         f"{port}",
         "-A",
         f"{appdir}",
-        "-L",
-        f"{logdir}",
         "-V",
         f"{verbosity}",
     ]

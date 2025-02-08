@@ -271,7 +271,13 @@ def manager(port: int, timeout: int = 1000):
 
         daemon = req.recv_pyobj().data
         for driver in daemon.drvs.keys():
-            args = [daemon.port, driver, req, daemon.verbosity, daemon.logdir]
+            args = [
+                daemon.port,
+                driver,
+                req,
+                daemon.verbosity,
+                daemon.settings["logdir"],
+            ]
             if driver not in daemon.drvs:
                 logger.debug("spawning driver '%s'", driver)
                 spawn_tomato_driver(*args)

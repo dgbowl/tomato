@@ -28,7 +28,7 @@ def test_tomato_status_up(start_tomato_daemon, stop_tomato_daemon):
 
 def test_tomato_start_no_init(datadir, stop_tomato_daemon):
     os.chdir(datadir)
-    ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
+    ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert ret.success is False
     assert "settings file not found" in ret.msg
@@ -36,9 +36,9 @@ def test_tomato_start_no_init(datadir, stop_tomato_daemon):
 
 def test_tomato_start_with_init(datadir, stop_tomato_daemon):
     os.chdir(datadir)
-    ret = tomato.init(appdir=Path(), datadir=Path())
+    ret = tomato.init(appdir=Path(), datadir=Path(), logdir=Path())
     assert ret.success
-    ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
+    ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert ret.success
 
@@ -46,7 +46,7 @@ def test_tomato_start_with_init(datadir, stop_tomato_daemon):
 def test_tomato_start_double(datadir, stop_tomato_daemon):
     test_tomato_start_with_init(datadir, stop_tomato_daemon)
     assert wait_until_tomato_running(port=PORT, timeout=5000)
-    ret = tomato.start(**kwargs, appdir=Path(), logdir=Path(), verbosity=0)
+    ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert ret.success is False
     assert (
@@ -126,8 +126,8 @@ def test_tomato_log_verbosity_testing(datadir, start_tomato_daemon, stop_tomato_
 
 def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
     os.chdir(datadir)
-    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", "."])
-    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-L", "."])
+    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
+    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", "."])
     assert wait_until_tomato_running(port=PORT, timeout=5000)
     assert Path("daemon_12345.log").exists()
     assert Path("daemon_12345.log").stat().st_size > 0

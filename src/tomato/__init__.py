@@ -121,7 +121,6 @@ def run_tomato():
             help="Data directory for tomato",
             default=Path(dirs.user_data_dir),
         )
-    for p in [init, start]:
         p.add_argument(
             "--logdir",
             "-L",
