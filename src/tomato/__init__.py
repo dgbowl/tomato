@@ -37,6 +37,28 @@ def run_tomato():
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
     status = subparsers.add_parser("status")
+    stgrp = status.add_mutually_exclusive_group()
+    grpargs = dict(dest="stgrp", action="store_const")
+    stgrp.add_argument(
+        "--tomato",
+        "--tom",
+        **grpargs,
+        const="tom",
+        help="Show tomato status.",
+        default="tom",
+    )
+    stgrp.add_argument(
+        "--pipelines", "--pip", **grpargs, const="pip", help="Show tomato pipelines."
+    )
+    stgrp.add_argument(
+        "--drivers", "--drv", **grpargs, const="drv", help="Show tomato drivers."
+    )
+    stgrp.add_argument(
+        "--devices", "--dev", **grpargs, const="dev", help="Show tomato devices."
+    )
+    stgrp.add_argument(
+        "--components", "--cmp", **grpargs, const="cmp", help="Show tomato components."
+    )
     status.set_defaults(func=tomato.status)
 
     start = subparsers.add_parser("start")
