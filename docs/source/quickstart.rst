@@ -148,6 +148,7 @@ The *settings file* contains the basic information required to start the ``tomat
    :linenos:
 
     datadir = '/home/kraus/.local/share/tomato/1.0a1'
+    logdir = '/home/kraus/.cache/tomato/1.0a1/log'
 
     [jobs]
     storage = '/home/kraus/.local/share/tomato/1.0a1/Jobs'
@@ -164,9 +165,14 @@ In addition to the *appdir*, a second path, *datadir*, is used to specify the lo
 - ``$env:localappdata\dgbowl\tomato\<version>`` on Windows,
 - ``$HOME/.local/share/tomato/<version>`` on Linux.
 
+Finally, another path, *logdir*, is used to specify where logs for **tomato** are placed. By default, *logdir* is:
+
+- ``$env:localappdata\dgbowl\tomato\<version>`` on Windows,
+- ``$HOME/.cache/tomato/<version>/log`` on Linux.
+
 In the default *settings file* shown above, the following entries are specified:
 
-- ``jobs.storage`` which is the directory where the data and logs of **tomato** jobs will be stored,
+- ``jobs.storage`` which is the directory where the data of **tomato** jobs will be stored,
 - ``devices.config`` which points to a ``yaml``-formatted :ref:`devices file <devfile>`, defining the hardware configuration of the devices managed by **tomato**.
 
 Additional, *driver*-specific settings may be provided in the ``[drivers]`` section, following the example of the ``drivers.example_counter.testpar`` entry. These *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.

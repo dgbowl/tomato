@@ -14,7 +14,7 @@ When the *driver* process is launched (as a ``tomato-driver``), it's given infor
 
 .. note::
 
-    Each *driver* creates a separate log file for each port **tomato** has been executed with. The logfile is stored in the same location as the ``tomato-daemon`` logs, i.e. as configured under the ``jobs.storage`` option. The verbosity of the ``tomato-driver`` process is inherited from the ``tomato-daemon`` process.
+    Each *driver* creates a separate log file for each port **tomato** has been executed with. The logfile is stored in the same location as the ``tomato-daemon`` logs, i.e. as configured under the ``logdir`` option in the *settings file*. The verbosity of the ``tomato-driver`` process is inherited from the ``tomato-daemon`` process.
 
 Communication between *jobs* and *drivers*
 ``````````````````````````````````````````
