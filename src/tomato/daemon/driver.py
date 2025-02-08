@@ -67,7 +67,7 @@ def tomato_driver() -> None:
     parser.add_argument(
         "--version",
         action="version",
-        version=f'%(prog)s version {metadata.version("tomato")}',
+        version=f"%(prog)s version {metadata.version('tomato')}",
     )
     parser.add_argument(
         "--port",

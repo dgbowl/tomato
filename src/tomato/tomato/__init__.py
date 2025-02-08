@@ -358,10 +358,10 @@ def init(
         logdir = '{logdir.resolve()}'
 
         [jobs]
-        storage = '{datadir.resolve() / 'Jobs'}'
+        storage = '{datadir.resolve() / "Jobs"}'
 
         [devices]
-        config = '{appdir.resolve() / 'devices.yml'}'
+        config = '{appdir.resolve() / "devices.yml"}'
 
         [drivers]
         example_counter.testpar = 1234
