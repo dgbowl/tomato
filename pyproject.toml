@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 dynamic = ["version"]
 name = "tomato"
 authors = [
-    {name = "Peter Kraus", email = "peter.kraus@tu-berlin.de"},
+    {name = "Peter Kraus"},
     {name = "Graham Kimbell"},
 ]
 maintainers = [
@@ -63,8 +63,8 @@ tomato-daemon = "tomato.daemon:tomato_daemon"
 
 [tool.setuptools-git-versioning]
 enabled = true
-# dev_template = "{tag}.dev{ccount}"
-# dirty_template = "{tag}.dev{ccount}"
+dev_template = "{tag}.post{ccount}"
+dirty_template = "{tag}.post{ccount}+dirty"
 
 [tool.ruff]
 
