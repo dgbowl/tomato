@@ -10,6 +10,7 @@ Developed at the ConCat lab at TU Berlin.
 
 Changes from ``tomato-1.0`` include:
 
+- *jobs* are now tracked in a queue stored in a ``sqlite3`` database instead of on the ``tomato.daemon``.
 - ``logdir`` can now be set in *settings file*, with the default value configurable using ``tomato init``.
 - ``tomato status`` now supports further arguments: ``--pipelines``, ``--drivers``, ``--devices``, and ``--components`` can be used to query status of subsets of the running **tomato**
 

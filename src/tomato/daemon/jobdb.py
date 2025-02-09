@@ -1,3 +1,10 @@
+"""
+**tomato.daemon.jobdb**: the sqlite database for jobs in tomato
+---------------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+
+"""
 import sqlite3
 import logging
 import os
