@@ -35,6 +35,7 @@ import yaml
 import toml
 
 from tomato.models import Reply, Pipeline, Device, Driver, Component, Daemon
+from tomato.daemon.jobdb import jobdb_setup
 
 logger = logging.getLogger(__name__)
 VERSION = metadata.version("tomato")
@@ -447,34 +448,42 @@ def init(
     Success: wrote default settings into /home/kraus/.config/tomato/1.0rc2.dev2/settings.toml
 
     """
-    appdir = Path(appdir)
-    datadir = Path(datadir)
-    logdir = Path(logdir)
+    appdir = Path(appdir).resolve()
+    datadir = Path(datadir).resolve()
+    logdir = Path(logdir).resolve()
+    storage = datadir.resolve() / "Jobs"
+    dbpath = storage / "dbpath.sqlite"
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
         # Generated on {str(datetime.now(timezone.utc))}
-        datadir = '{datadir.resolve()}'
-        logdir = '{logdir.resolve()}'
+        datadir = '{datadir}'
+        logdir = '{logdir}'
 
         [jobs]
-        storage = '{datadir.resolve() / "Jobs"}'
+        storage = '{storage}'
+        dbpath = '{dbpath}'
 
         [devices]
-        config = '{appdir.resolve() / "devices.yml"}'
+        config = '{appdir / "devices.yml"}'
 
         [drivers]
         example_counter.testpar = 1234
         """
     )
     if not appdir.exists():
-        logger.debug("creating directory '%s'", appdir.resolve())
+        logger.debug("creating directory '%s'", appdir)
         os.makedirs(appdir)
-    if not logdir.exists():
-        logger.debug("creating directory '%s'", logdir.resolve())
-        os.makedirs(logdir)
     with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
         of.write(defaults)
+    if not logdir.exists():
+        logger.debug("creating directory '%s'", logdir)
+        os.makedirs(logdir)
+    if not storage.exists():
+        logger.debug("creating directory '%s'", storage)
+        os.makedirs(storage)
+    if not dbpath.exists():
+        jobdb_setup(dbpath)
     return Reply(
         success=True,
         msg=f"wrote default settings into {appdir / 'settings.toml'}",

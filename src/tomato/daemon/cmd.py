@@ -20,13 +20,13 @@ from tomato.models import (
     Pipeline,
     Job,
     Component,
-    CompletedJob,
 )
 from pydantic import BaseModel
 from typing import Any
 import logging
 
 import tomato.daemon.io as io
+import tomato.daemon.jobdb as jobdb
 
 logger = logging.getLogger(__name__)
 
@@ -226,29 +226,13 @@ def pipeline(msg: dict, daemon: Daemon) -> Reply:
 def job(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.job")
     logger.debug("%s", msg)
-    jobid = msg.get("id", None)
-    if jobid is None:
-        jobid = daemon.nextjob
-        daemon.jobs[jobid] = Job(id=jobid, **msg.get("params", {}))
-        logger.info("received job %d", jobid)
-        daemon.nextjob += 1
-        ret = daemon.jobs[jobid]
-    else:
-        for k, v in msg.get("params", {}).items():
-            logger.debug("setting job parameter %s.%s to %s", jobid, k, v)
-            setattr(daemon.jobs[jobid], k, v)
-        cjob = daemon.jobs[jobid]
-        ret = cjob
-        if cjob.status in {"c"}:
-            daemon.jobs[jobid] = CompletedJob(
-                id=cjob.id,
-                status=cjob.status,
-                completed_at=cjob.completed_at,
-                jobname=cjob.jobname,
-                jobpath=cjob.jobpath,
-                respath=cjob.respath,
-            )
-    return Reply(success=True, msg="job updated", data=ret)
+    newjob = Job(**msg.get("params", {}))
+    logger.debug(f"{newjob=}")
+    logger.debug(f"{daemon.settings['jobs']['dbpath']=}")
+    jobid = jobdb.job_to_db(newjob, daemon.settings["jobs"]["dbpath"])
+    logger.info("received job %d", jobid)
+    newjob.id = jobid
+    return Reply(success=True, msg="job updated", data=newjob)
 
 
 def driver(msg: dict, daemon: Daemon) -> Reply:

@@ -27,7 +27,7 @@ import zmq
 import psutil
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
-from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job, CompletedJob
+from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Task
 
@@ -100,7 +100,7 @@ def manage_running_pips(daemon: Daemon, req):
     logger.debug(f"{running=}")
     for pip in running:
         job = daemon.jobs[pip.jobid]
-        if isinstance(job, CompletedJob):
+        if job.status in {"rd", "c", "cd", "ce"}:
             continue
         elif job.pid is None:
             continue

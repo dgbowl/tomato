@@ -19,6 +19,7 @@ import tomato.daemon.cmd as cmd
 import tomato.daemon.job
 import tomato.daemon.driver
 import tomato.daemon.io as io
+import tomato.daemon.jobdb as jobdb
 
 logger = logging.getLogger(__name__)
 
