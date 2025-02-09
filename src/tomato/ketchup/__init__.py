@@ -110,7 +110,7 @@ def submit(
     req.connect(f"tcp://127.0.0.1:{port}")
     dt = str(datetime.now(timezone.utc))
     params = dict(payload=payload, jobname=jobname, submitted_at=dt)
-    req.send_pyobj(dict(cmd="job", id=None, params=params))
+    req.send_pyobj(dict(cmd="set_job", id=None, params=params))
     ret = req.recv_pyobj()
     if ret.success:
         msg = f"job submitted successfully with jobid {ret.data.id}"
@@ -128,7 +128,6 @@ def status(
     context: zmq.Context,
     verbosity: int,
     jobids: list[int],
-    status: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -171,20 +170,25 @@ def status(
 
 
     """
-    jobs = status.data.jobs
-    if len(jobs) == 0:
-        return Reply(success=False, msg="job queue is empty")
-    elif len(jobids) == 0:
-        rets = [job for job in jobs.values()]
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    
+    if len(jobids) == 0:
+        req.send_pyobj(dict(cmd="get_jobs", where="id IS NOT NULL"))
+        rets = req.recv_pyobj().data
+        if len(rets) == 0:
+            return Reply(success=False, msg="job queue is empty")
     else:
-        rets = [job for job in jobs.values() if job.id in jobids]
-    if len(rets) == 0:
-        if len(jobids) == 1:
-            msg = f"found no job with jobid {jobids}"
-        else:
-            msg = f"found no jobs with jobids {jobids}"
-        return Reply(success=False, msg=msg)
-    elif len(rets) == 1:
+        where = f"id IN ({', '.join([str(j) for j in jobids])})"
+        req.send_pyobj(dict(cmd="get_jobs", where=where))
+        rets = req.recv_pyobj().data
+        if len(rets) == 0:
+            if len(jobids) == 1:
+                msg = f"found no job with jobid {jobids}"
+            else:
+                msg = f"found no jobs with jobids {jobids}"
+            return Reply(success=False, msg=msg)
+    if len(rets) == 1:
         msg = f"found {len(rets)} job with status {[job.status for job in rets]}"
     else:
         msg = ""
@@ -208,7 +212,6 @@ def cancel(
     timeout: int,
     context: zmq.Context,
     jobids: list[int],
-    status: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -240,7 +243,12 @@ def cancel(
     success: true
 
     """
-    jobs = status.data.jobs
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    where = f"id IN ({', '.join([str(j) for j in jobids])})"
+    req.send_pyobj(dict(cmd="get_jobs", where=where))
+    jobs = req.recv_pyobj().data
+        
     for jobid in jobids:
         if jobid not in jobs:
             return Reply(success=False, msg=f"job with jobid {jobid} does not exist")
@@ -255,7 +263,7 @@ def cancel(
             params = dict(status="rd")
         elif jobs[jobid].status in {"cd", "ce", "c"}:
             continue
-        req.send_pyobj(dict(cmd="job", id=jobid, params=params))
+        req.send_pyobj(dict(cmd="set_job", id=jobid, params=params))
         ret = req.recv_pyobj()
         if ret.success:
             data.append(ret.data)

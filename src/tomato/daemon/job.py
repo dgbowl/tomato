@@ -27,6 +27,7 @@ import zmq
 import psutil
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
+from tomato.daemon import jobdb
 from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Task
@@ -99,10 +100,11 @@ def manage_running_pips(daemon: Daemon, req):
     running = [pip for pip in daemon.pips.values() if pip.jobid is not None]
     logger.debug(f"{running=}")
     for pip in running:
-        job = daemon.jobs[pip.jobid]
-        if job.status in {"rd", "c", "cd", "ce"}:
-            continue
-        elif job.pid is None:
+        job = jobdb.get_job_id(pip.jobid, daemon.settings["jobs"]["dbpath"])
+        logger.debug(f"{job=}")
+        #if job.status in {"rd", "c", "cd", "ce"}:
+        #    continue
+        if job.pid is None:
             continue
         pidexists = psutil.pid_exists(job.pid)
         logger.debug(f"{pidexists=}")
@@ -123,7 +125,7 @@ def manage_running_pips(daemon: Daemon, req):
             params = dict(status="ce")
         if reset:
             params.update(dict(completed_at=str(datetime.now(timezone.utc)), pid=None))
-            req.send_pyobj(dict(cmd="job", id=job.id, params=params))
+            req.send_pyobj(dict(cmd="set_job", id=job.id, params=params))
             ret = req.recv_pyobj()
             if not ret.success:
                 logger.error(f"could not set job {job.id} status {params['status']!r}")
@@ -146,7 +148,10 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
     """
     logger = logging.getLogger(f"{__name__}.check_queued_jobs")
     matched = {}
-    queue = [job for job in daemon.jobs.values() if job.status in {"q", "qw"}]
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    queue = jobdb.get_jobs_where("status IN ('q', 'qw')", dbpath)
+    logger.debug(f"{queue=}")
+    #queue = [job for job in daemon.jobs.values() if job.status in {"q", "qw"}]
     for job in queue:
         matched[job.id] = find_matching_pipelines(
             daemon.pips, daemon.cmps, job.payload.method
@@ -157,7 +162,7 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
                 job.id,
                 [p.name for p in matched[job.id]],
             )
-            req.send_pyobj(dict(cmd="job", id=job.id, params=dict(status="qw")))
+            req.send_pyobj(dict(cmd="set_job", id=job.id, params=dict(status="qw")))
             ret = req.recv_pyobj()
             if not ret.success:
                 logger.error("could not set status of job %d", job.id)
@@ -175,7 +180,7 @@ def action_queued_jobs(daemon, matched, req):
     """
     logger = logging.getLogger(f"{__name__}.action_queued_jobs")
     for jobid in sorted(matched.keys()):
-        job = daemon.jobs[jobid]
+        job = jobdb.get_job_id(jobid, daemon.settings["jobs"]["dbpath"])
         for pip in matched[job.id]:
             if not pip.ready:
                 continue
@@ -211,6 +216,8 @@ def action_queued_jobs(daemon, matched, req):
                 str(daemon.port),
                 "--verbosity",
                 str(daemon.verbosity),
+                "--dbpath",
+                str(daemon.settings["jobs"]["dbpath"]),
                 str(jpath),
             ]
             if psutil.WINDOWS:
@@ -258,32 +265,6 @@ def manager(port: int, timeout: int = 500):
     logger.info("instructed to quit")
 
 
-def lazy_pirate(
-    pyobj: Any, retries: int, timeout: int, address: str, context: zmq.Context
-) -> Any:
-    req = context.socket(zmq.REQ)
-    req.connect(address)
-    poller = zmq.Poller()
-    poller.register(req, zmq.POLLIN)
-    for _ in range(retries):
-        req.send_pyobj(pyobj)
-        events = dict(poller.poll(timeout))
-        if req not in events:
-            logger.warning(f"could not contact tomato-daemon in {timeout / 1000} s")
-            req.setsockopt(zmq.LINGER, 0)
-            req.close()
-            poller.unregister(req)
-            req = context.socket(zmq.REQ)
-            req.connect(address)
-            poller.register(req, zmq.POLLIN)
-        else:
-            break
-    else:
-        logger.error(f"number of connection retries exceeded: {retries}")
-        raise RuntimeError(f"Number of connection retries exceeded: {retries}")
-    return req.recv_pyobj()
-
-
 def tomato_job() -> None:
     """
     The function called when `tomato-job` is executed.
@@ -322,6 +303,11 @@ def tomato_job() -> None:
         help="Verbosity of the tomato-job.",
         default=logging.INFO,
         type=int,
+    )
+    parser.add_argument(
+        "--dbpath",
+        help="Path to the sqlite3 job database.",
+        type=str,
     )
     parser.add_argument(
         "jobfile",
@@ -371,7 +357,7 @@ def tomato_job() -> None:
         context=context,
     )
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
-    lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
+    job = jobdb.update_job_id(jobid, params, args.dbpath)
 
     output = payload.settings.output
     outpath = Path(output.path)
@@ -385,11 +371,7 @@ def tomato_job() -> None:
     respath = outpath / f"{prefix}.nc"
     snappath = outpath / f"snapshot.{jobid}.nc"
     params = dict(respath=str(respath), snappath=str(snappath), jobpath=str(jobpath))
-    ret = lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
-    if ret.success is False:
-        logger.error("could not set job status for unknown reason")
-        return 1
-    job: Job = ret.data
+    job = jobdb.update_job_id(jobid, params, args.dbpath)
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
@@ -403,20 +385,10 @@ def tomato_job() -> None:
     logger.info("writing final data to a NetCDF file")
     merge_netcdfs(job)
 
-    logger.info("attempting to set job status to 'c'")
+    logger.info("setting job status to 'c'")
     params = dict(status=job.status, completed_at=job.completed_at)
-    ret = lazy_pirate(pyobj=dict(cmd="job", id=jobid, params=params), **pkwargs)
-    if ret.success is False:
-        logger.error("could not set job status for unknown reason")
-        return 1
-
-    logger.info("resetting pipeline '%s'", pip)
-    params = dict(jobid=None, ready=ready, name=pip)
-    ret = lazy_pirate(pyobj=dict(cmd="pipeline", params=params), **pkwargs)
-    logger.debug(f"{ret=}")
-    if not ret.success:
-        logger.error("could not reset pipeline '%s'", pip)
-        return 1
+    job = jobdb.update_job_id(jobid, params, args.dbpath)
+    logger.debug(f"{job=}")
     logger.info("exiting tomato-job")
 
 
@@ -525,6 +497,7 @@ def job_main_loop(
 
     pipeline = daemon.pips[pipname]
     logger.debug(f"{pipeline=}")
+    logger.debug(f"{job=}")
 
     # collate steps by role
     plan = {}

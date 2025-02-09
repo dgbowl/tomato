@@ -64,7 +64,7 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
     io.store(daemon)
     if any([pip.jobid is not None for pip in daemon.pips.values()]):
         logger.error("cannot stop tomato-daemon as jobs are running")
-        return Reply(success=False, msg="jobs are running", data=daemon.jobs)
+        return Reply(success=False, msg="jobs are running")
     else:
         daemon.status = "stop"
         logger.critical("stopping tomato-daemon")
@@ -223,16 +223,25 @@ def pipeline(msg: dict, daemon: Daemon) -> Reply:
         return Reply(success=True, msg="pipeline updated", data=dest)
 
 
-def job(msg: dict, daemon: Daemon) -> Reply:
-    logger = logging.getLogger(f"{__name__}.job")
+def set_job(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.set_job")
     logger.debug("%s", msg)
-    newjob = Job(**msg.get("params", {}))
-    logger.debug(f"{newjob=}")
-    logger.debug(f"{daemon.settings['jobs']['dbpath']=}")
-    jobid = jobdb.job_to_db(newjob, daemon.settings["jobs"]["dbpath"])
-    logger.info("received job %d", jobid)
-    newjob.id = jobid
-    return Reply(success=True, msg="job updated", data=newjob)
+    dbpath = daemon.settings['jobs']['dbpath']
+    if msg["id"] is None:
+        job = Job(**msg.get("params", {}))
+        job.id = jobdb.insert_job(job, dbpath)
+        logger.info("received job.id %d", job.id)
+    else:
+        job = jobdb.update_job_id(msg["id"], msg.get("params", {}), dbpath)
+        logger.info("updated job.id %d", job.id)
+    return Reply(success=True, msg="job updated", data=job)
+
+
+def get_jobs(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.get_jobs")
+    dbpath = daemon.settings['jobs']['dbpath']
+    jobs = jobdb.get_jobs_where(msg["where"], dbpath)
+    return Reply(success=True, msg=f"found {len(jobs)} jobs", data=jobs)
 
 
 def driver(msg: dict, daemon: Daemon) -> Reply:

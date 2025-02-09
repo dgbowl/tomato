@@ -88,6 +88,8 @@ def tomato_daemon():
                 ret = Reply(success=False, msg="received msg without cmd", data=msg)
             elif hasattr(cmd, msg["cmd"]):
                 ret = getattr(cmd, msg["cmd"])(msg, daemon)
+            else:
+                logger.error(f"received msg with an invalid cmd: {msg=}")
             logger.debug(f"reply with {ret=}")
             rep.send_pyobj(ret)
         if daemon.status == "stop":

@@ -59,55 +59,44 @@ def jobdb_setup(dbpath: str) -> None:
     conn.close()
 
 
-def job_to_db(job: Job, dbpath: str) -> int:
+def insert_job(job: Job, dbpath: str) -> int:
     conn, cur = connect_jobdb(dbpath)
-    if job.id is None:
-        cur.execute(
-            "INSERT INTO queue (payload, jobname, pid, status, submitted_at, "
-            "executed_at, completed_at, jobpath, respath, snappath)"
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-            (
-                pickle.dumps(job.payload),
-                job.jobname,
-                job.pid,
-                job.status,
-                job.submitted_at,
-                job.executed_at,
-                job.completed_at,
-                job.jobpath,
-                job.respath,
-                job.snappath,
-            ),
-        )
-    else:
-        cur.execute(
-            "UPDATE queue "
-            "SET payload = ?, jobname = ?, pid = ?, status = ?, "
-            "submitted_at = ?, executed_at = ?, completed_at = ?, "
-            "jobpath = ?, respath = ?, snappath = ?"
-            "WHERE id = ?",
-            (
-                pickle.dumps(job.payload),
-                job.jobname,
-                job.pid,
-                job.status,
-                job.submitted_at,
-                job.executed_at,
-                job.completed_at,
-                job.jobpath,
-                job.respath,
-                job.snappath,
-                job.id,
-            ),
-        )
+    cur.execute(
+        "INSERT INTO queue (payload, jobname, pid, status, submitted_at, "
+        "executed_at, completed_at, jobpath, respath, snappath)"
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+        (
+            pickle.dumps(job.payload),
+            job.jobname,
+            job.pid,
+            job.status,
+            job.submitted_at,
+            job.executed_at,
+            job.completed_at,
+            job.jobpath,
+            job.respath,
+            job.snappath,
+        ),
+    )
     conn.commit()
     cur.execute(f"SELECT id FROM queue WHERE submitted_at = '{job.submitted_at}';")
     ret = cur.fetchone()[0]
     conn.close()
     return ret
 
+def update_job_id(id: int, params: dict, dbpath: str) -> Job:
+    conn, cur = connect_jobdb(dbpath)
+    for k, v in params.items():
+        print(f"UPDATE queue SET {k} = {v} WHERE id = {id};")
+        cur.execute(
+            f"UPDATE queue SET {k} = ? WHERE id = {id};", (v,)
+        )
+    conn.commit()
+    conn.close()
+    return get_job_id(id, dbpath)
 
-def db_to_job(id: int, dbpath: str) -> Job:
+
+def get_job_id(id: int, dbpath: str) -> Job:
     conn, cur = connect_jobdb(dbpath)
     cur.execute("SELECT * FROM queue WHERE id = ?;", (id,))
     columns = [i[0] for i in cur.description]
@@ -117,21 +106,24 @@ def db_to_job(id: int, dbpath: str) -> Job:
     return j
 
 
+def get_jobs_where(where: str, dbpath: str) -> list[Job]:
+    conn, cur = connect_jobdb(dbpath)
+    cur.execute(f"SELECT * FROM queue WHERE {where};")
+    columns = [i[0] for i in cur.description]
+    data = cur.fetchall()
+    conn.close()
+    jobs = []
+    for row in data:
+        jobs.append(Job(**{k: v for k, v in zip(columns, row)}))
+    return jobs
+
+
 if __name__ == "__main__":
     dbpath = "testdb.sqlite"
-    jobdb_setup(dbpath)
-    payload = {
-        "version": "0.2",
-        "sample": {"name": "counter_1_0.1"},
-        "method": [
-            {"device": "counter", "technique": "count", "time": 1.0, "delay": 0.1},
-        ],
-        "tomato": {"verbosity": "DEBUG"},
-    }
-    job = Job(payload=payload, submitted_at=str(datetime.now(timezone.utc)))
-    print(job)
-    id = job_to_db(job, dbpath)
-    print(db_to_job(id, dbpath))
+    #job = Job(payload=payload, submitted_at=str(datetime.now(timezone.utc)), status='qw')
+    # print(job)
+    #id = job_to_db(job, dbpath)
+    #print(db_to_job(id, dbpath))
     # print(pickle.dumps(payload))
     # print(job)
     # j = db_to_job(1, dbpath)
@@ -140,3 +132,7 @@ if __name__ == "__main__":
     # print(j)
     # job_to_db(j, dbpath)
     # print(db_to_job(1, dbpath))
+    #print(db_to_jobs("status='q' OR status='qw'", dbpath))
+    #print(get_job_id(1, dbpath))
+    #print(update_job_id(1, {"status": "c"}, dbpath))
+    print(get_jobs_where("status IS NOT NULL", dbpath))
