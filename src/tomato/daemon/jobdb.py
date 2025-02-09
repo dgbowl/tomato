@@ -84,13 +84,12 @@ def insert_job(job: Job, dbpath: str) -> int:
     conn.close()
     return ret
 
+
 def update_job_id(id: int, params: dict, dbpath: str) -> Job:
     conn, cur = connect_jobdb(dbpath)
     for k, v in params.items():
         print(f"UPDATE queue SET {k} = {v} WHERE id = {id};")
-        cur.execute(
-            f"UPDATE queue SET {k} = ? WHERE id = {id};", (v,)
-        )
+        cur.execute(f"UPDATE queue SET {k} = ? WHERE id = {id};", (v,))
     conn.commit()
     conn.close()
     return get_job_id(id, dbpath)
@@ -116,23 +115,3 @@ def get_jobs_where(where: str, dbpath: str) -> list[Job]:
     for row in data:
         jobs.append(Job(**{k: v for k, v in zip(columns, row)}))
     return jobs
-
-
-if __name__ == "__main__":
-    dbpath = "testdb.sqlite"
-    #job = Job(payload=payload, submitted_at=str(datetime.now(timezone.utc)), status='qw')
-    # print(job)
-    #id = job_to_db(job, dbpath)
-    #print(db_to_job(id, dbpath))
-    # print(pickle.dumps(payload))
-    # print(job)
-    # j = db_to_job(1, dbpath)
-    # print(j)
-    # j.status = "c"
-    # print(j)
-    # job_to_db(j, dbpath)
-    # print(db_to_job(1, dbpath))
-    #print(db_to_jobs("status='q' OR status='qw'", dbpath))
-    #print(get_job_id(1, dbpath))
-    #print(update_job_id(1, {"status": "c"}, dbpath))
-    print(get_jobs_where("status IS NOT NULL", dbpath))

@@ -168,11 +168,10 @@ def status(
     msg: found 1 job with status ['qw']
     success: true
 
-
     """
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    
+
     if len(jobids) == 0:
         req.send_pyobj(dict(cmd="get_jobs", where="id IS NOT NULL"))
         rets = req.recv_pyobj().data
@@ -247,8 +246,8 @@ def cancel(
     req.connect(f"tcp://127.0.0.1:{port}")
     where = f"id IN ({', '.join([str(j) for j in jobids])})"
     req.send_pyobj(dict(cmd="get_jobs", where=where))
-    jobs = req.recv_pyobj().data
-        
+    jobs = {i.id: i for i in req.recv_pyobj().data}
+
     for jobid in jobids:
         if jobid not in jobs:
             return Reply(success=False, msg=f"job with jobid {jobid} does not exist")

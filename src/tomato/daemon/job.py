@@ -84,7 +84,7 @@ def kill_tomato_job(process: psutil.Process):
     logger.debug(f"{alive=}")
 
 
-def manage_running_pips(daemon: Daemon, req):
+def manage_running_pips(pips: dict, dbpath: str, req):
     """
     Function that manages jobs and `tomato-daemon` pipelines.
 
@@ -97,16 +97,15 @@ def manage_running_pips(daemon: Daemon, req):
 
     """
     logger = logging.getLogger(f"{__name__}.manage_running_pips")
-    running = [pip for pip in daemon.pips.values() if pip.jobid is not None]
+    running = [pip for pip in pips.values() if pip.jobid is not None]
     logger.debug(f"{running=}")
     for pip in running:
-        job = jobdb.get_job_id(pip.jobid, daemon.settings["jobs"]["dbpath"])
-        logger.debug(f"{job=}")
-        #if job.status in {"rd", "c", "cd", "ce"}:
-        #    continue
+        job = jobdb.get_job_id(pip.jobid, dbpath)
         if job.pid is None:
             continue
         pidexists = psutil.pid_exists(job.pid)
+        if pidexists:
+            pidexists = psutil.Process(job.pid).status() is not psutil.STATUS_ZOMBIE
         logger.debug(f"{pidexists=}")
         reset = False
         # running jobs scheduled for killing (status == 'rd') should be killed
@@ -117,19 +116,20 @@ def manage_running_pips(daemon: Daemon, req):
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
             merge_netcdfs(job)
             reset = True
-            params = dict(status="cd")
+            params = dict(status="cd", completed_at=str(datetime.now(timezone.utc)))
+        # pipelines of completed jobs should be reset
+        elif (not pidexists) and job.status == "c":
+            logging.debug(f"the pid {job.pid} of job {job.id} has not been found")
+            reset = True
+            params = dict()
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
             logging.warning(f"the pid {job.pid} of job {job.id} has not been found")
             reset = True
-            params = dict(status="ce")
+            params = dict(status="ce", completed_at=str(datetime.now(timezone.utc)))
         if reset:
-            params.update(dict(completed_at=str(datetime.now(timezone.utc)), pid=None))
-            req.send_pyobj(dict(cmd="set_job", id=job.id, params=params))
-            ret = req.recv_pyobj()
-            if not ret.success:
-                logger.error(f"could not set job {job.id} status {params['status']!r}")
-                continue
+            params["pid"] = None
+            jobdb.update_job_id(job.id, params, dbpath)
             logger.debug(f"pipeline {pip.name!r} will be reset")
             params = dict(jobid=None, ready=False, name=pip.name)
             req.send_pyobj(dict(cmd="pipeline", params=params))
@@ -139,7 +139,7 @@ def manage_running_pips(daemon: Daemon, req):
                 continue
 
 
-def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
+def check_queued_jobs(pips: dict, cmps: dict, dbpath: str) -> dict[int, list[Pipeline]]:
     """
     Function to check whether the queued jobs can be submitted onto any pipeline.
 
@@ -148,27 +148,17 @@ def check_queued_jobs(daemon: Daemon, req) -> dict[int, list[Pipeline]]:
     """
     logger = logging.getLogger(f"{__name__}.check_queued_jobs")
     matched = {}
-    dbpath = daemon.settings["jobs"]["dbpath"]
     queue = jobdb.get_jobs_where("status IN ('q', 'qw')", dbpath)
-    logger.debug(f"{queue=}")
-    #queue = [job for job in daemon.jobs.values() if job.status in {"q", "qw"}]
     for job in queue:
-        matched[job.id] = find_matching_pipelines(
-            daemon.pips, daemon.cmps, job.payload.method
-        )
+        matched[job.id] = find_matching_pipelines(pips, cmps, job.payload.method)
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
                 "job %d can queue on pips: {%s}",
                 job.id,
                 [p.name for p in matched[job.id]],
             )
-            req.send_pyobj(dict(cmd="set_job", id=job.id, params=dict(status="qw")))
-            ret = req.recv_pyobj()
-            if not ret.success:
-                logger.error("could not set status of job %d", job.id)
-                continue
-            else:
-                job.status = "qw"
+            params = dict(status="qw")
+            job = jobdb.update_job_id(job.id, params, dbpath)
     return matched
 
 
@@ -258,8 +248,9 @@ def manager(port: int, timeout: int = 500):
         elif to > timeout:
             to = timeout
         daemon = req.recv_pyobj().data
-        manage_running_pips(daemon, req)
-        matched_pips = check_queued_jobs(daemon, req)
+        dbpath = daemon.settings["jobs"]["dbpath"]
+        manage_running_pips(daemon.pips, dbpath, req)
+        matched_pips = check_queued_jobs(daemon.pips, daemon.cmps, dbpath)
         action_queued_jobs(daemon, matched_pips, req)
         time.sleep(timeout / 1e3)
     logger.info("instructed to quit")
@@ -347,15 +338,7 @@ def tomato_job() -> None:
 
     logger.debug(f"assigning job {jobid} with pid {pid} into pipeline {pip!r}")
     context = zmq.Context()
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{args.port}")
 
-    pkwargs = dict(
-        address=f"tcp://127.0.0.1:{args.port}",
-        retries=args.retries,
-        timeout=args.timeout,
-        context=context,
-    )
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
     job = jobdb.update_job_id(jobid, params, args.dbpath)
 
@@ -378,16 +361,14 @@ def tomato_job() -> None:
     job_main_loop(context, args.port, job, pip, logpath)
     logger.info("==============================")
 
-    logger.info("job finished successfully")
-    job.completed_at = str(datetime.now(timezone.utc))
-    job.status = "c"
-
     logger.info("writing final data to a NetCDF file")
     merge_netcdfs(job)
 
-    logger.info("setting job status to 'c'")
+    logger.info("job finished successfully, setting job status to 'c'")
+    job.completed_at = str(datetime.now(timezone.utc))
+    job.status = "c"
     params = dict(status=job.status, completed_at=job.completed_at)
-    job = jobdb.update_job_id(jobid, params, args.dbpath)
+    job = jobdb.update_job_id(job.id, params, args.dbpath)
     logger.debug(f"{job=}")
     logger.info("exiting tomato-job")
 
