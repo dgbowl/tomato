@@ -56,6 +56,10 @@ These two executables then internally spawn other processes, including the state
           mp([main loop]) --> tp>task process]
       end
 
+      cmd ==> db[(job db\nsqlite)]
+      jm -.-> db
+      mp -.-> db
+
       t>tomato] -.-> cmd
       k>ketchup] -.-> cmd
 
@@ -152,6 +156,7 @@ The *settings file* contains the basic information required to start the ``tomat
 
     [jobs]
     storage = '/home/kraus/.local/share/tomato/1.0a1/Jobs'
+    dbpath = '/home/kraus/.local/share/tomato/1.0a1/Jobs/dbpath.sqlite'
 
     [devices]
     config = '/home/kraus/.config/tomato/1.0a1/devices.yml'
@@ -172,7 +177,8 @@ Finally, another path, *logdir*, is used to specify where logs for **tomato** ar
 
 In the default *settings file* shown above, the following entries are specified:
 
-- ``jobs.storage`` which is the directory where the data of **tomato** jobs will be stored,
+- ``jobs.storage`` which is the directory where the data of **tomato** *jobs* will be stored,
+- ``jobs.dbpath`` which is the location of the ``sqlite3`` database used to track *jobs*, 
 - ``devices.config`` which points to a ``yaml``-formatted :ref:`devices file <devfile>`, defining the hardware configuration of the devices managed by **tomato**.
 
 Additional, *driver*-specific settings may be provided in the ``[drivers]`` section, following the example of the ``drivers.example_counter.testpar`` entry. These *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.

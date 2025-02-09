@@ -34,12 +34,10 @@ def load(daemon: Daemon):
         return
     with infile.open("rb") as inp:
         loaded = pickle.load(inp)
-    daemon.jobs = loaded.jobs
     daemon.pips = loaded.pips
     daemon.devs = loaded.devs
     daemon.drvs = loaded.drvs
     daemon.cmps = loaded.cmps
-    daemon.nextjob = loaded.nextjob
     daemon.status = "running"
 
 

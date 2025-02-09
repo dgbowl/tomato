@@ -20,13 +20,13 @@ from tomato.models import (
     Pipeline,
     Job,
     Component,
-    CompletedJob,
 )
 from pydantic import BaseModel
 from typing import Any
 import logging
 
 import tomato.daemon.io as io
+import tomato.daemon.jobdb as jobdb
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
     io.store(daemon)
     if any([pip.jobid is not None for pip in daemon.pips.values()]):
         logger.error("cannot stop tomato-daemon as jobs are running")
-        return Reply(success=False, msg="jobs are running", data=daemon.jobs)
+        return Reply(success=False, msg="jobs are running")
     else:
         daemon.status = "stop"
         logger.critical("stopping tomato-daemon")
@@ -223,32 +223,23 @@ def pipeline(msg: dict, daemon: Daemon) -> Reply:
         return Reply(success=True, msg="pipeline updated", data=dest)
 
 
-def job(msg: dict, daemon: Daemon) -> Reply:
-    logger = logging.getLogger(f"{__name__}.job")
-    logger.debug("%s", msg)
-    jobid = msg.get("id", None)
-    if jobid is None:
-        jobid = daemon.nextjob
-        daemon.jobs[jobid] = Job(id=jobid, **msg.get("params", {}))
-        logger.info("received job %d", jobid)
-        daemon.nextjob += 1
-        ret = daemon.jobs[jobid]
+def set_job(msg: dict, daemon: Daemon) -> Reply:
+    logger = logging.getLogger(f"{__name__}.set_job")
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    if msg["id"] is None:
+        job = Job(**msg.get("params", {}))
+        job.id = jobdb.insert_job(job, dbpath)
+        logger.info("received job.id %d", job.id)
     else:
-        for k, v in msg.get("params", {}).items():
-            logger.debug("setting job parameter %s.%s to %s", jobid, k, v)
-            setattr(daemon.jobs[jobid], k, v)
-        cjob = daemon.jobs[jobid]
-        ret = cjob
-        if cjob.status in {"c"}:
-            daemon.jobs[jobid] = CompletedJob(
-                id=cjob.id,
-                status=cjob.status,
-                completed_at=cjob.completed_at,
-                jobname=cjob.jobname,
-                jobpath=cjob.jobpath,
-                respath=cjob.respath,
-            )
-    return Reply(success=True, msg="job updated", data=ret)
+        job = jobdb.update_job_id(msg["id"], msg.get("params", {}), dbpath)
+        logger.info("updated job.id %d", job.id)
+    return Reply(success=True, msg="job updated", data=job)
+
+
+def get_jobs(msg: dict, daemon: Daemon) -> Reply:
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    jobs = jobdb.get_jobs_where(msg["where"], dbpath)
+    return Reply(success=True, msg=f"found {len(jobs)} jobs", data=jobs)
 
 
 def driver(msg: dict, daemon: Daemon) -> Reply:

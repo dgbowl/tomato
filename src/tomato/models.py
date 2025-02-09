@@ -6,8 +6,11 @@
 """
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Any, Mapping, Sequence, Literal, Union
+from typing import Optional, Any, Mapping, Sequence, Literal
+from dgbowl_schemas.tomato import to_payload
+from dgbowl_schemas.tomato.payload import Payload
 import logging
+import pickle
 
 
 logger = logging.getLogger(__name__)
@@ -70,7 +73,7 @@ class Pipeline(BaseModel):
 
 class Job(BaseModel):
     id: Optional[int] = None
-    payload: Any
+    payload: Payload
     jobname: Optional[str] = None
     pid: Optional[int] = None
     status: Literal["q", "qw", "r", "rd", "c", "cd", "ce"] = "q"
@@ -81,14 +84,15 @@ class Job(BaseModel):
     respath: Optional[str] = None
     snappath: Optional[str] = None
 
-
-class CompletedJob(BaseModel):
-    id: int
-    status: Literal["c", "cd", "ce"]
-    completed_at: str
-    jobname: Optional[str] = None
-    jobpath: str
-    respath: str
+    @field_validator("payload", mode="before")
+    def coerce_payload(cls, v):
+        if isinstance(v, bytes):
+            v = pickle.loads(v)
+        if isinstance(v, dict):
+            v = to_payload(**v)
+        # while hasattr(v, "update"):
+        #    v = v.update()
+        return v
 
 
 class Daemon(BaseModel, arbitrary_types_allowed=True):
@@ -101,8 +105,6 @@ class Daemon(BaseModel, arbitrary_types_allowed=True):
     devs: Mapping[str, Device] = Field(default_factory=dict)
     drvs: Mapping[str, Driver] = Field(default_factory=dict)
     cmps: Mapping[str, Component] = Field(default_factory=dict)
-    jobs: Mapping[int, Union[Job, CompletedJob]] = Field(default_factory=dict)
-    nextjob: int = 1
 
 
 class Reply(BaseModel):
