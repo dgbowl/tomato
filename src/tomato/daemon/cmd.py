@@ -225,7 +225,6 @@ def pipeline(msg: dict, daemon: Daemon) -> Reply:
 
 def set_job(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.set_job")
-    logger.debug("%s", msg)
     dbpath = daemon.settings["jobs"]["dbpath"]
     if msg["id"] is None:
         job = Job(**msg.get("params", {}))
@@ -238,7 +237,6 @@ def set_job(msg: dict, daemon: Daemon) -> Reply:
 
 
 def get_jobs(msg: dict, daemon: Daemon) -> Reply:
-    logger = logging.getLogger(f"{__name__}.get_jobs")
     dbpath = daemon.settings["jobs"]["dbpath"]
     jobs = jobdb.get_jobs_where(msg["where"], dbpath)
     return Reply(success=True, msg=f"found {len(jobs)} jobs", data=jobs)

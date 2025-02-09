@@ -13,6 +13,13 @@ functions:
 - :func:`snapshot` to create an up-to-date FAIR data archive of a running *job*
 - :func:`search` to find a ``jobid`` of a *job* from ``jobname``
 
+.. warning::
+
+    This module should interact with the job sqlite database only via the ``tomato.daemon.cmd``
+    interface functions ``set_job()`` and ``get_jobs()``, **not via the ``jobdb`` module**.
+    This is necessary to ensure users that don't have write access to the job database can
+    still submit/manage their jobs.
+
 """
 
 import json
@@ -25,7 +32,7 @@ from packaging.version import Version
 from dgbowl_schemas.tomato import to_payload
 
 from tomato.daemon.io import merge_netcdfs
-from tomato.models import Reply, Daemon, Job
+from tomato.models import Reply
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +42,6 @@ __latest_payload__ = "1.0"
 def submit(
     *,
     port: int,
-    timeout: int,
     context: zmq.Context,
     payload: str,
     jobname: str,
@@ -112,6 +118,7 @@ def submit(
     params = dict(payload=payload, jobname=jobname, submitted_at=dt)
     req.send_pyobj(dict(cmd="set_job", id=None, params=params))
     ret = req.recv_pyobj()
+    req.close()
     if ret.success:
         msg = f"job submitted successfully with jobid {ret.data.id}"
         if ret.data.jobname is not None:
@@ -124,7 +131,6 @@ def submit(
 def status(
     *,
     port: int,
-    timeout: int,
     context: zmq.Context,
     verbosity: int,
     jobids: list[int],
@@ -187,6 +193,9 @@ def status(
             else:
                 msg = f"found no jobs with jobids {jobids}"
             return Reply(success=False, msg=msg)
+
+    req.close()
+
     if len(rets) == 1:
         msg = f"found {len(rets)} job with status {[job.status for job in rets]}"
     else:
@@ -208,7 +217,6 @@ def status(
 def cancel(
     *,
     port: int,
-    timeout: int,
     context: zmq.Context,
     jobids: list[int],
     **_: dict,
@@ -252,8 +260,6 @@ def cancel(
         if jobid not in jobs:
             return Reply(success=False, msg=f"job with jobid {jobid} does not exist")
 
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
     data = []
     for jobid in jobids:
         if jobs[jobid].status in {"q", "qw"}:
@@ -268,6 +274,9 @@ def cancel(
             data.append(ret.data)
         else:
             return Reply(success=False, msg="unknown error", data=ret.data)
+
+    req.close()
+
     if len(data) == 1:
         msg = f"job {[j.id for j in data]} cancelled successfully"
     else:
@@ -277,8 +286,9 @@ def cancel(
 
 def snapshot(
     *,
+    port: int,
     jobids: list[int],
-    status: Daemon,
+    context: zmq.Context,
     **_: dict,
 ) -> Reply:
     """
@@ -295,7 +305,13 @@ def snapshot(
     Success: snapshot for job [3] created successfully
 
     """
-    jobs: list[Job] = status.data.jobs
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    where = f"id IN ({', '.join([str(j) for j in jobids])})"
+    req.send_pyobj(dict(cmd="get_jobs", where=where))
+    jobs = {i.id: i for i in req.recv_pyobj().data}
+    req.close()
+
     for jobid in jobids:
         if jobid not in jobs:
             return Reply(success=False, msg=f"job {jobid} does not exist")
@@ -314,8 +330,9 @@ def snapshot(
 
 def search(
     *,
+    port: int,
     jobname: str,
-    status: Daemon,
+    context: zmq.Context,
     **_: dict,
 ) -> Reply:
     """
@@ -336,16 +353,18 @@ def search(
     Failure: no job matching 'nothing' found
 
     """
-    jobs = status.data.jobs
-    ret = []
-    for jobid, job in jobs.items():
-        if job.jobname is not None and jobname in job.jobname:
-            ret.append(job)
-    if len(ret) > 0:
-        if len(ret) == 1:
-            msg = f"job matching {jobname!r} found: {[j.id for j in ret]}"
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    where = f"jobname LIKE '%{jobname}%'"
+    req.send_pyobj(dict(cmd="get_jobs", where=where))
+    jobs = req.recv_pyobj().data
+    req.close()
+
+    if len(jobs) > 0:
+        if len(jobs) == 1:
+            msg = f"job matching {jobname!r} found: {[j.id for j in jobs]}"
         else:
-            msg = f"jobs matching {jobname!r} found: {[j.id for j in ret]}"
-        return Reply(success=True, msg=msg, data=ret)
+            msg = f"jobs matching {jobname!r} found: {[j.id for j in jobs]}"
+        return Reply(success=True, msg=msg, data=jobs)
     else:
         return Reply(success=False, msg=f"no job matching {jobname!r} found")

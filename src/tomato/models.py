@@ -6,7 +6,7 @@
 """
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Any, Mapping, Sequence, Literal, Union
+from typing import Optional, Any, Mapping, Sequence, Literal
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Payload
 import logging

@@ -3,7 +3,6 @@ import logging
 import os
 import pickle
 from tomato.models import Job
-from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +27,7 @@ def jobdb_setup(dbpath: str) -> None:
         logger.debug("table 'queue' present at '%s'", dbpath)
         cur.execute("PRAGMA user_version;")
         curr_version = cur.fetchone()[0]
+        assert curr_version == user_version
         # Below is an example of upgrading databases to new user_version:
         # while curr_version < user_version:
         #    if curr_version == 0:

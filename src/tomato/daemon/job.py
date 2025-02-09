@@ -22,7 +22,6 @@ from importlib import metadata
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import current_thread, Thread
-from typing import Any
 import zmq
 import psutil
 
@@ -116,19 +115,23 @@ def manage_running_pips(pips: dict, dbpath: str, req):
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
             merge_netcdfs(job)
             reset = True
-            params = dict(status="cd", completed_at=str(datetime.now(timezone.utc)))
-        # pipelines of completed jobs should be reset
-        elif (not pidexists) and job.status == "c":
-            logging.debug(f"the pid {job.pid} of job {job.id} has not been found")
-            reset = True
-            params = dict()
+            params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
             logging.warning(f"the pid {job.pid} of job {job.id} has not been found")
             reset = True
-            params = dict(status="ce", completed_at=str(datetime.now(timezone.utc)))
+            params = dict(status="ce")
+        # pipelines of completed jobs should be reset
+        elif (not pidexists) and job.status == "c":
+            logger.debug(f"the pid {job.pid} of job {job.id} has not been found")
+            ready = job.payload.settings.unlock_when_done
+            params = dict(jobid=None, ready=ready, name=pip.name)
+            req.send_pyobj(dict(cmd="pipeline", params=params))
+            ret = req.recv_pyobj()
+            logger.debug(f"{ret=}")
         if reset:
             params["pid"] = None
+            params["completed_at"] = str(datetime.now(timezone.utc))
             jobdb.update_job_id(job.id, params, dbpath)
             logger.debug(f"pipeline {pip.name!r} will be reset")
             params = dict(jobid=None, ready=False, name=pip.name)
@@ -325,7 +328,6 @@ def tomato_job() -> None:
 
     logger.debug(f"{payload=}")
 
-    ready = payload.settings.unlock_when_done
     verbosity = payload.settings.verbosity
     loglevel = logging._checkLevel(verbosity)
     logger.debug("setting logger verbosity to '%s'", verbosity)
