@@ -363,14 +363,15 @@ def tomato_job() -> None:
     job_main_loop(context, args.port, job, pip, logpath)
     logger.info("==============================")
 
-    logger.info("writing final data to a NetCDF file")
-    merge_netcdfs(job)
-
     logger.info("job finished successfully, setting job status to 'c'")
     job.completed_at = str(datetime.now(timezone.utc))
     job.status = "c"
     params = dict(status=job.status, completed_at=job.completed_at)
     job = jobdb.update_job_id(job.id, params, args.dbpath)
+
+    logger.info("writing final data to a NetCDF file")
+    merge_netcdfs(job)
+
     logger.debug(f"{job=}")
     logger.info("exiting tomato-job")
 
