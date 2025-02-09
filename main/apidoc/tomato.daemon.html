@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.daemon package &mdash; tomato 1.0.post4 documentation</title>
+  <title>tomato.daemon package &mdash; tomato 1.0.post5 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=111b123e"></script>
+        <script src="../_static/documentation_options.js?v=b5639627"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.post4
+                1.0.post5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -82,7 +82,8 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.stop"><code class="docutils literal notranslate"><span class="pre">stop()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.setup"><code class="docutils literal notranslate"><span class="pre">setup()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.pipeline"><code class="docutils literal notranslate"><span class="pre">pipeline()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.job"><code class="docutils literal notranslate"><span class="pre">job()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.set_job"><code class="docutils literal notranslate"><span class="pre">set_job()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.get_jobs"><code class="docutils literal notranslate"><span class="pre">get_jobs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.driver"><code class="docutils literal notranslate"><span class="pre">driver()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.device"><code class="docutils literal notranslate"><span class="pre">device()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.cmd.component"><code class="docutils literal notranslate"><span class="pre">component()</span></code></a></li>
@@ -104,10 +105,16 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.check_queued_jobs"><code class="docutils literal notranslate"><span class="pre">check_queued_jobs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.action_queued_jobs"><code class="docutils literal notranslate"><span class="pre">action_queued_jobs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.lazy_pirate"><code class="docutils literal notranslate"><span class="pre">lazy_pirate()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.tomato_job"><code class="docutils literal notranslate"><span class="pre">tomato_job()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_thread"><code class="docutils literal notranslate"><span class="pre">job_thread()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.job.job_main_loop"><code class="docutils literal notranslate"><span class="pre">job_main_loop()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato-daemon-jobdb-the-sqlite-database-for-jobs-in-tomato"><strong>tomato.daemon.jobdb</strong>: the sqlite database for jobs in tomato</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.jobdb.connect_jobdb"><code class="docutils literal notranslate"><span class="pre">connect_jobdb()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.jobdb.jobdb_setup"><code class="docutils literal notranslate"><span class="pre">jobdb_setup()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.jobdb.insert_job"><code class="docutils literal notranslate"><span class="pre">insert_job()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.jobdb.update_job_id"><code class="docutils literal notranslate"><span class="pre">update_job_id()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.jobdb.get_job_id"><code class="docutils literal notranslate"><span class="pre">get_job_id()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.jobdb.get_jobs_where"><code class="docutils literal notranslate"><span class="pre">get_jobs_where()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -208,8 +215,13 @@ current <code class="xref py py-class docutils literal notranslate"><span class=
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.cmd.job">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.daemon.cmd.job" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.daemon.cmd.set_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">set_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.daemon.cmd.set_job" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.cmd.get_jobs">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.cmd.</span></span><span class="sig-name descname"><span class="pre">get_jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.daemon.cmd.get_jobs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -329,7 +341,7 @@ avoid killing.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.manage_running_pips">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">manage_running_pips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.manage_running_pips" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">manage_running_pips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pips</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.manage_running_pips" title="Link to this definition"></a></dt>
 <dd><p>Function that manages jobs and <cite>tomato-daemon</cite> pipelines.</p>
 <p>The function only affects pipelines marked as running, i.e. with a set <code class="docutils literal notranslate"><span class="pre">jobid</span></code>.
 Jobs scheduled for killing (i.e. <code class="docutils literal notranslate"><span class="pre">status</span> <span class="pre">==</span> <span class="pre">&quot;rd&quot;</span></code>) are terminated. Jobs that
@@ -340,7 +352,7 @@ Pipelines of both are reset.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.check_queued_jobs">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">check_queued_jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.daemon.job.check_queued_jobs" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">check_queued_jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pips</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.daemon.job.check_queued_jobs" title="Link to this definition"></a></dt>
 <dd><p>Function to check whether the queued jobs can be submitted onto any pipeline.</p>
 <p>Returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> containing the jobids as keys and lists of matched
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Pipelines</span></code> as values.</p>
@@ -361,11 +373,6 @@ Pipelines of both are reset.</p>
 Note that we poll the <cite>tomato-daemon</cite> for status only once per iteration of the main
 loop.</p>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="tomato.daemon.job.lazy_pirate">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">lazy_pirate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pyobj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#tomato.daemon.job.lazy_pirate" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.tomato_job">
@@ -391,6 +398,40 @@ for data, and moves on to the next task as instructed in the payload.</p>
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">job_main_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Job" title="tomato.models.Job"><span class="pre">Job</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.daemon.job.job_main_loop" title="Link to this definition"></a></dt>
 <dd><p>The main loop function of <cite>tomato-job</cite>, split for better readability.</p>
 </dd></dl>
+
+<section id="tomato-daemon-jobdb-the-sqlite-database-for-jobs-in-tomato">
+<span id="module-tomato.daemon.jobdb"></span><h3><strong>tomato.daemon.jobdb</strong>: the sqlite database for jobs in tomato<a class="headerlink" href="#tomato-daemon-jobdb-the-sqlite-database-for-jobs-in-tomato" title="Link to this heading"></a></h3>
+<p><em>Code author: Peter Kraus</em></p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.jobdb.connect_jobdb">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.jobdb.</span></span><span class="sig-name descname"><span class="pre">connect_jobdb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.jobdb.connect_jobdb" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.jobdb.jobdb_setup">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.jobdb.</span></span><span class="sig-name descname"><span class="pre">jobdb_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.daemon.jobdb.jobdb_setup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.jobdb.insert_job">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.jobdb.</span></span><span class="sig-name descname"><span class="pre">insert_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Job" title="tomato.models.Job"><span class="pre">Job</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#tomato.daemon.jobdb.insert_job" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.jobdb.update_job_id">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.jobdb.</span></span><span class="sig-name descname"><span class="pre">update_job_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Job" title="tomato.models.Job"><span class="pre">Job</span></a></span></span><a class="headerlink" href="#tomato.daemon.jobdb.update_job_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.jobdb.get_job_id">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.jobdb.</span></span><span class="sig-name descname"><span class="pre">get_job_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Job" title="tomato.models.Job"><span class="pre">Job</span></a></span></span><a class="headerlink" href="#tomato.daemon.jobdb.get_job_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.jobdb.get_jobs_where">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.jobdb.</span></span><span class="sig-name descname"><span class="pre">get_jobs_where</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tomato.html#tomato.models.Job" title="tomato.models.Job"><span class="pre">Job</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.daemon.jobdb.get_jobs_where" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 </section>
@@ -422,7 +463,7 @@ for data, and moves on to the next task as instructed in the payload.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0.post4
+      v: 1.0.post5
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

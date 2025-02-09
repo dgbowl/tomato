@@ -32,3 +32,9 @@ Submodules
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+.. automodule:: tomato.daemon.jobdb
+   :members:
+   :undoc-members:
+   :show-inheritance:
