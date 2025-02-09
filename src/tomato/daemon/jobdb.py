@@ -88,7 +88,6 @@ def insert_job(job: Job, dbpath: str) -> int:
 def update_job_id(id: int, params: dict, dbpath: str) -> Job:
     conn, cur = connect_jobdb(dbpath)
     for k, v in params.items():
-        print(f"UPDATE queue SET {k} = {v} WHERE id = {id};")
         cur.execute(f"UPDATE queue SET {k} = ? WHERE id = {id};", (v,))
     conn.commit()
     conn.close()
