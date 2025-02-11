@@ -23,6 +23,30 @@ def set_loglevel(loglevel: int):
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
 
 
+def parse_args(parser, verbose, is_tomato=False):
+    args, extras = parser.parse_known_args()
+    args, extras = verbose.parse_known_args(extras, args)
+
+    verbosity = min(max((2 + args.quiet - args.verbose) * 10, 10), 50)
+    set_loglevel(verbosity)
+
+    context = zmq.Context()
+    if not is_tomato:
+        status = tomato.status(**vars(args), context=context)
+        if not status.success:
+            if args.yaml:
+                print(yaml.dump(status.dict()))
+            else:
+                print(f"Failure: {status.msg}")
+
+    if "func" in args:
+        ret = args.func(**vars(args), verbosity=verbosity, context=context)
+        if args.yaml:
+            print(yaml.dump(ret.dict()))
+        else:
+            print(f"{'Success' if ret.success else 'Failure'}: {ret.msg}")
+
+
 def run_tomato():
     dirs = appdirs.AppDirs("tomato", "dgbowl", version=VERSION)
     parser = argparse.ArgumentParser(add_help=False)
@@ -136,21 +160,7 @@ def run_tomato():
             default=Path(dirs.user_log_dir),
         )
 
-    # parse subparser args
-    args, extras = parser.parse_known_args()
-    # parse extras for verbose tags
-    args, extras = verbose.parse_known_args(extras, args)
-
-    verbosity = min(max((2 + args.quiet - args.verbose) * 10, 10), 50)
-    set_loglevel(verbosity)
-
-    context = zmq.Context()
-    if "func" in args:
-        ret = args.func(**vars(args), context=context, verbosity=verbosity)
-        if args.yaml:
-            print(yaml.dump(ret.dict()))
-        else:
-            print(f"{'Success' if ret.success else 'Failure'}: {ret.msg}")
+    parse_args(parser, verbose, is_tomato=True)
 
 
 def run_ketchup():
@@ -271,25 +281,70 @@ def run_ketchup():
             default=False,
         )
 
-    args, extras = parser.parse_known_args()
-    args, extras = verbose.parse_known_args(extras, args)
+    parse_args(parse, verbose, is_tomato=False)
 
-    verbosity = min(max((2 + args.quiet - args.verbose) * 10, 10), 50)
-    set_loglevel(verbosity)
 
-    if "func" in args:
-        context = zmq.Context()
-        status = tomato.status(**vars(args), context=context)
-        if not status.success:
-            if args.yaml:
-                print(yaml.dump(status.dict()))
-            else:
-                print(f"Failure: {status.msg}")
-        else:
-            ret = args.func(
-                **vars(args), verbosity=verbosity, context=context, status=status
-            )
-            if args.yaml:
-                print(yaml.dump(ret.dict()))
-            else:
-                print(f"{'Success' if ret.success else 'Failure'}: {ret.msg}")
+def run_passata():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s version {VERSION}",
+    )
+
+    verbose = argparse.ArgumentParser(add_help=False)
+
+    for p in [parser, verbose]:
+        p.add_argument(
+            "--verbose",
+            "-v",
+            action="count",
+            default=0,
+            help="Increase verbosity by one level.",
+        )
+        p.add_argument(
+            "--quiet",
+            "-q",
+            action="count",
+            default=0,
+            help="Decrease verbosity by one level.",
+        )
+
+    subparsers = parser.add_subparsers(dest="subcommand", required=True)
+
+    cmp = subparsers.add_parser("component")
+    cmp.add_argument(
+        "component",
+        nargs="+",
+        help=(
+            "The Component.name(s) of the component(s) to be queried. "
+            "At least one Component.name has to be provided."
+        ),
+        type=str,
+        default=None,
+    )
+    cmp.set_defaults(func=passata.component)
+
+    for p in [cmp]:
+        p.add_argument(
+            "--port",
+            "-p",
+            help="Port number of tomato's reply socket",
+            default=DEFAULT_TOMATO_PORT,
+            type=int,
+        )
+        p.add_argument(
+            "--timeout",
+            help="Timeout for the tomato command, in milliseconds",
+            type=int,
+            default=3000,
+        )
+        p.add_argument(
+            "--yaml",
+            "-y",
+            help="Return output as a yaml.",
+            action="store_true",
+            default=False,
+        )
+
+    parse_args(parse, verbose, is_tomato=False)
