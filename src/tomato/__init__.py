@@ -8,7 +8,7 @@ import zmq
 import appdirs
 import yaml
 
-from tomato import tomato, ketchup
+from tomato import tomato, ketchup, passata
 
 sys.path += sys.modules["tomato"].__path__
 
@@ -315,12 +315,37 @@ def run_passata():
     cmp = subparsers.add_parser("component")
     cmp.add_argument(
         "name",
-        nargs="+",
         help=(
-            "The Component.name(s) of the component(s) to be queried. "
+            "The Component.name of the component to be queried. "
             "At least one Component.name has to be provided."
         ),
         type=str,
+    )
+    cmp.add_argument(
+        "--attr",
+        "-a",
+        help=(
+            "The attribute of the component to be queried / set. "
+            "When not set, component status is returned."
+        ),
+        type=str,
+        default=None,
+    )
+
+    def float_or_str(string: str):
+        try:
+            return float(string)
+        except ValueError:
+            return string
+
+    cmp.add_argument(
+        "--val",
+        "-v",
+        help=(
+            "The value the attribute of the component to be set to. "
+            "When not set, the current attribute value is returned."
+        ),
+        type=float_or_str,
         default=None,
     )
     cmp.set_defaults(func=passata.component)
