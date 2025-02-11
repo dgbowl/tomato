@@ -66,6 +66,7 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
             capture_output=True,
             text=True,
         )
+        print(f"{ret.stdout=}")
         if f"[{status!r}]" in ret.stdout:
             return True
         time.sleep(0.5)

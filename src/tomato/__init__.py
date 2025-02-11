@@ -281,7 +281,7 @@ def run_ketchup():
             default=False,
         )
 
-    parse_args(parse, verbose, is_tomato=False)
+    parse_args(parser, verbose, is_tomato=False)
 
 
 def run_passata():
@@ -314,7 +314,7 @@ def run_passata():
 
     cmp = subparsers.add_parser("component")
     cmp.add_argument(
-        "component",
+        "name",
         nargs="+",
         help=(
             "The Component.name(s) of the component(s) to be queried. "
@@ -347,4 +347,4 @@ def run_passata():
             default=False,
         )
 
-    parse_args(parse, verbose, is_tomato=False)
+    parse_args(parser, verbose, is_tomato=False)
