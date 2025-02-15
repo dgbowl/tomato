@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Any
+from typing import TypeVar, Any, Union
 from pydantic import BaseModel
 from threading import Thread, current_thread, RLock
 from queue import Queue
@@ -8,7 +8,6 @@ from dgbowl_schemas.tomato.payload import Task
 import logging
 from functools import wraps
 from xarray import Dataset
-from collections import defaultdict
 import time
 import atexit
 
@@ -300,17 +299,9 @@ class ModelInterface(metaclass=ABCMeta):
         """
         data = self.devmap[key].get_data(**kwargs)
 
-        if len(data) == 0:
+        if data is None:
             return Reply(success=False, msg="found no new datapoints")
-
-        attrs = self.devmap[key].attrs(**kwargs)
-        uts = {"uts": data.pop("uts")}
-        data_vars = {}
-        for k, v in data.items():
-            units = {} if attrs[k].units is None else {"units": attrs[k].units}
-            data_vars[k] = ("uts", v, units)
-        ds = Dataset(data_vars=data_vars, coords=uts)
-        return Reply(success=True, msg=f"found {len(data)} new datapoints", data=ds)
+        return Reply(success=True, msg=f"found {len(data)} new datapoints", data=data)
 
     def status(self) -> Reply:
         """
@@ -366,10 +357,10 @@ class ModelDevice(metaclass=ABCMeta):
     constants: dict[str, Any]
     """Constant metadata of this component."""
 
-    data: dict[str, list]
+    data: Union[DataArray, None]
     """Container for cached data on this component."""
 
-    last_data: dict[str, Any]
+    last_data: Union[DataArray, None]
     """Container for last datapoint on this component."""
 
     datalock: RLock
@@ -391,7 +382,8 @@ class ModelDevice(metaclass=ABCMeta):
         self.key = key
         self.task_list = Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
-        self.data = defaultdict(list)
+        self.data = None
+        self.last_data = None
         self.running = False
         self.datalock = RLock()
         self.constants = dict()
@@ -421,7 +413,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.prepare_task(task)
         t_start = time.perf_counter()
         t_prev = t_start
-        self.data = defaultdict(list)
+        self.data = None
         while getattr(thread, "do_run"):
             t_now = time.perf_counter()
             if t_now - t_prev > task.sampling_interval:
@@ -452,8 +444,18 @@ class ModelDevice(metaclass=ABCMeta):
         Periodically called task execution function.
 
         This function is responsible for updating :obj:`self.data` with new data, i.e.
-        performing the measurement. It should also update the values of all
-        :class:`Attrs`, so that the component status is consistent with the cached data.
+        performing the measurement. It should also update the value of :obj:`self.last_data`,
+        so that the component status is consistent with the cached data.
+        """
+        pass
+
+    @abstractmethod
+    def do_measure(self, **kwargs: dict) -> None:
+        """
+        One shot execution worker function.
+
+        This function is performs a measurement using the current configuration of
+        :obj:`self.attrs`, and stores the result in :obj:`self.last_data`.
         """
         pass
 
@@ -463,7 +465,7 @@ class ModelDevice(metaclass=ABCMeta):
         setattr(self.thread, "do_run", False)
 
     @abstractmethod
-    def set_attr(self, attr: str, val: Any, **kwargs: dict):
+    def set_attr(self, attr: str, val: Any, **kwargs: dict) -> Any:
         """Sets the specified :class:`Attr` to `val`."""
         pass
 
@@ -476,7 +478,7 @@ class ModelDevice(metaclass=ABCMeta):
         """Returns the cached :obj:`self.data` before clearing the cache."""
         with self.datalock:
             ret = self.data
-            self.data = defaultdict(list)
+            self.data = None
         return ret
 
     def get_last_data(self, **kwargs: dict) -> dict[str, list]:
@@ -506,6 +508,6 @@ class ModelDevice(metaclass=ABCMeta):
         logger.info("resetting component %s", self.key)
         self.task_list = Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
-        self.data = defaultdict(list)
+        self.data = None
         self.running = False
         self.datalock = RLock()
