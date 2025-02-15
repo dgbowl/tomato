@@ -96,7 +96,7 @@ def get_attrs(
     context: zmq.Context,
     name: str,
     attrs: list[str],
-    yaml: bool,
+    yaml: bool = False,
     **_: dict,
 ) -> Reply:
     ret = _name_to_cmp(name, port, timeout, context)
