@@ -57,6 +57,7 @@ Repository = "https://github.com/dgbowl/tomato/"
 [project.scripts]
 tomato = "tomato:run_tomato"
 ketchup = "tomato:run_ketchup"
+passata = "tomato:run_passata"
 tomato-job = "tomato.daemon.job:tomato_job"
 tomato-driver = "tomato.daemon.driver:tomato_driver"
 tomato-daemon = "tomato.daemon:tomato_daemon"
