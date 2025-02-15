@@ -56,6 +56,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
     utils.wait_until_tomato_running(port=PORT, timeout=3000)
+    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
 
     ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
     assert ret.success
