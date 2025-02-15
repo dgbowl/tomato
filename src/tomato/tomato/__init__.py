@@ -139,13 +139,13 @@ def _updater(context, port, cmd, params):
 
 
 def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
-    if stgrp == "tom":
+    if stgrp == "tomato":
         rep = Reply(
             success=True,
             msg=f"tomato running on port {daemon.port}",
             data=daemon,
         )
-    elif stgrp == "pip":
+    elif stgrp == "pipelines":
         if yaml:
             rep = Reply(
                 success=True,
@@ -163,7 +163,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following pipelines:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "drv":
+    elif stgrp == "drivers":
         if yaml:
             rep = Reply(
                 success=True,
@@ -181,7 +181,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following drivers:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "dev":
+    elif stgrp == "devices":
         if yaml:
             rep = Reply(
                 success=True,
@@ -199,7 +199,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following devices:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "cmp":
+    elif stgrp == "components":
         if yaml:
             rep = Reply(
                 success=True,
@@ -225,7 +225,7 @@ def status(
     port: int,
     timeout: int,
     context: zmq.Context,
-    stgrp: str = "tom",
+    stgrp: str = "tomato",
     yaml: bool = True,
     **_: dict,
 ) -> Reply:
@@ -268,22 +268,22 @@ def status(
     success: true
 
     >>> # Status of all configured pipelines
-    >>> tomato status --pipeline
+    >>> tomato status pipelines
     Success: tomato running on port 1234 with the following pipelines:
          name:pip-counter       ready:False     sampleid:counter_1_0.1  jobid:None
 
     >>> # Status of all configured drivers
-    >>> tomato status --drivers
+    >>> tomato status drivers
     Success: tomato running on port 1234 with the following drivers:
          name:example_counter   port:34747      pid:192318
 
     >>> # Status of all configured devices
-    >>> tomato status --devices
+    >>> tomato status devices
     Success: tomato running on port 1234 with the following devices:
          name:dev-counter       driver:example_counter  address:example-addr    channels:['1']
 
     >>> # Status of all configured components:
-    >>> tomato status --components
+    >>> tomato status components
     Success: tomato running on port 1234 with the following components:
          name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      role:counter
 

@@ -79,7 +79,7 @@ The :mod:`tomato.tomato` executable is used to configure, start, and manage the 
 
             .. code-block:: bash
 
-                >>> tomato status --pipeline
+                >>> tomato status pipelines
 
 
         - For loading a sample into a *pipeline*:
