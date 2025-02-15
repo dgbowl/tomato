@@ -1,7 +1,6 @@
-import pytest
-import os
 import zmq
 import random
+import subprocess
 
 from . import utils
 import tomato
@@ -62,3 +61,69 @@ def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert ret.data["max"] == val
+
+
+def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
+    utils.wait_until_tomato_running(port=PORT, timeout=3000)
+    ret = subprocess.run(
+        [
+            "passata",
+            "status",
+            "example_counter:(example-addr,1)",
+            "-p",
+            f"{PORT}",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    print(f"{ret=}")
+    assert "Success: component ('example-addr', '1')" in ret.stdout
+
+    ret = subprocess.run(
+        [
+            "passata",
+            "attrs",
+            "example_counter:(example-addr,1)",
+            "-p",
+            f"{PORT}",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    print(f"{ret=}")
+    assert "Success: attrs of component ('example-addr', '1') are" in ret.stdout
+
+    ret = subprocess.run(
+        [
+            "passata",
+            "capabilities",
+            "example_counter:(example-addr,1)",
+            "-p",
+            f"{PORT}",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    print(f"{ret=}")
+    assert (
+        "Success: capabilities supported by component ('example-addr', '1') are"
+        in ret.stdout
+    )
+
+    ret = subprocess.run(
+        [
+            "passata",
+            "get",
+            "example_counter:(example-addr,1)",
+            "max",
+            "-p",
+            f"{PORT}",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    print(f"{ret=}")
+    assert (
+        "Success: attr 'max' of component 'example_counter:(example-addr,1)' is"
+        in ret.stdout
+    )
