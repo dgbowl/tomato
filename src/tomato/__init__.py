@@ -311,46 +311,20 @@ def run_passata():
         )
 
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
+    stats = subparsers.add_parser("status")
+    attrs = subparsers.add_parser("attrs")
+    capbs = subparsers.add_parser("capabilities")
+    gattr = subparsers.add_parser("get")
 
-    cmp = subparsers.add_parser("component")
-    cmp.add_argument(
-        "name",
-        help=(
-            "The Component.name of the component to be queried. "
-            "At least one Component.name has to be provided."
-        ),
-        type=str,
-    )
-    cmp.add_argument(
-        "--attr",
-        "-a",
-        help=(
-            "The attribute of the component to be queried / set. "
-            "When not set, component status is returned."
-        ),
-        type=str,
-        default=None,
-    )
-
-    def float_or_str(string: str):
-        try:
-            return float(string)
-        except ValueError:
-            return string
-
-    cmp.add_argument(
-        "--val",
-        "-v",
-        help=(
-            "The value the attribute of the component to be set to. "
-            "When not set, the current attribute value is returned."
-        ),
-        type=float_or_str,
-        default=None,
-    )
-    cmp.set_defaults(func=passata.component)
-
-    for p in [cmp]:
+    for p in [stats, attrs, capbs, gattr]:
+        p.add_argument(
+            "name",
+            help=(
+                "The Component.name of the component to be queried. "
+                "At least one Component.name has to be provided."
+            ),
+            type=str,
+        )
         p.add_argument(
             "--port",
             "-p",
@@ -371,5 +345,16 @@ def run_passata():
             action="store_true",
             default=False,
         )
+
+    gattr.add_argument(
+        "attrs",
+        help="The attribute name(s) to be queried.",
+        nargs="+",
+    )
+
+    stats.set_defaults(func=passata.status)
+    attrs.set_defaults(func=passata.attrs)
+    capbs.set_defaults(func=passata.capabilities)
+    gattr.set_defaults(func=passata.get_attrs)
 
     parse_args(parser, verbose, is_tomato=False)

@@ -11,7 +11,7 @@ def _name_to_cmp(
     context: zmq.Context,
 ) -> tuple[Component, Driver]:
     ret = tomato.status(
-        port=port, timeout=timeout, context=context, stgrp="tom", yaml=True
+        port=port, timeout=timeout, context=context, stgrp="tomato", yaml=True
     )
     if not ret.success:
         return ret
@@ -23,7 +23,7 @@ def _name_to_cmp(
         )
     cmp = ret.data.cmps[name]
     drv = ret.data.drvs[cmp.driver]
-    return cmp, drv 
+    return cmp, drv
 
 
 def status(
@@ -90,12 +90,13 @@ def capabilities(
     return ret
 
 
-def get_attr(
+def get_attrs(
     port: int,
     timeout: int,
     context: zmq.Context,
     name: str,
-    attr: str,
+    attrs: list[str],
+    yaml: bool,
     **_: dict,
 ) -> Reply:
     ret = _name_to_cmp(name, port, timeout, context)
@@ -106,9 +107,24 @@ def get_attr(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_get_attr", params={"attr": attr, **kwargs}))
-    ret = req.recv_pyobj()
-    return ret
+    data = dict()
+    msg = ""
+    for attr in attrs:
+        req.send_pyobj(dict(cmd="dev_get_attr", params={"attr": attr, **kwargs}))
+        ret = req.recv_pyobj()
+        if not ret.success:
+            return ret
+        data[attr] = ret.data
+        msg += f"attr {attr!r} of component {name!r} is: {ret.data}\n         "
+    if yaml:
+        msg = f"attrs {list(data.keys())} of component {name!r} retrieved"
+    else:
+        msg = msg.rstrip()
+    return Reply(
+        success=True,
+        msg=msg,
+        data=data,
+    )
 
 
 def set_attr(
@@ -133,65 +149,3 @@ def set_attr(
     )
     ret = req.recv_pyobj()
     return ret
-
-
-if __name__ == "__main__":
-    import random
-
-    kwargs = dict(port=1234, timeout=1000, context=zmq.Context())
-    ret = status(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
-    print(ret.data)
-    ret = status(
-        name="psutil:(psutil-addr,1)",
-        **kwargs,
-    )
-    print(ret.data)
-    ret = attrs(
-        name="psutil:(psutil-addr,1)",
-        **kwargs,
-    )
-    print(ret.data)
-    ret = capabilities(
-        name="psutil:(psutil-addr,1)",
-        **kwargs,
-    )
-    
-    print(ret.data)
-    ret = get_attr(
-        name="psutil:(psutil-addr,1)",
-        attr="cpu_count",
-        **kwargs,
-    )
-    print(ret.data)
-    ret = attrs(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
-    print(ret.data)
-    ret = capabilities(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
-    print(ret.data)
-    ret = get_attr(
-        name="example_counter:(example-addr,1)",
-        attr="max",
-        **kwargs,
-    )
-    print(ret.data)
-    ret = set_attr(
-        name="example_counter:(example-addr,1)",
-        attr="max",
-        val=random.random() * 10,
-        **kwargs
-    )
-    print(ret.data)
-    ret = get_attr(
-        name="example_counter:(example-addr,1)",
-        attr="max",
-        **kwargs
-    )
-    print(ret.data)
