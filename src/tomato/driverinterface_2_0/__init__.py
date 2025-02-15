@@ -7,7 +7,7 @@ from tomato.models import Reply
 from dgbowl_schemas.tomato.payload import Task
 import logging
 from functools import wraps
-from xarray import Dataset, DataArray
+from xarray import Dataset
 import time
 import atexit
 
@@ -240,7 +240,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @in_devmap
     def dev_measure(self, key: tuple, **kwargs: dict) -> Reply:
-        ret = self.devmap[key].measure()
+        self.devmap[key].measure()
         return Reply(
             success=True,
             msg=f"measurement started on component {key!r}",
@@ -461,9 +461,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.do_measure()
         self.running = False
         self.thread = Thread(target=self.task_runner, daemon=True)
-        logger.info(
-            "measurement on component %s is done", task.technique_name, self.key
-        )
+        logger.info("measurement on component %s is done", self.key)
 
     def prepare_task(self, task: Task, **kwargs: dict):
         """
