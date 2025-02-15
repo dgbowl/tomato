@@ -7,7 +7,7 @@ from tomato.models import Reply
 from dgbowl_schemas.tomato.payload import Task
 import logging
 from functools import wraps
-from xarray import Dataset
+from xarray import Dataset, DataArray
 import time
 import atexit
 
@@ -222,8 +222,29 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_get_data(self, key: tuple, **kwargs: dict) -> Reply:
-        pass
+    def dev_last_data(self, key: tuple, **kwargs: dict) -> Reply:
+        """
+        Fetch the last stored data
+        """
+        ret = self.devmap[key].get_last_data(**kwargs)
+        if ret is None:
+            return Reply(
+                success=False,
+                msg=f"no data present on component {key!r}",
+            )
+        return Reply(
+            success=True,
+            msg=f"last datapoint on component {key!r} at {ret.uts}",
+            data=ret,
+        )
+
+    @in_devmap
+    def dev_measure(self, key: tuple, **kwargs: dict) -> Reply:
+        ret = self.devmap[key].measure()
+        return Reply(
+            success=True,
+            msg=f"measurement started on component {key!r}",
+        )
 
     @in_devmap
     def task_start(self, key: tuple, task: Task, **kwargs) -> Reply:
@@ -357,10 +378,10 @@ class ModelDevice(metaclass=ABCMeta):
     constants: dict[str, Any]
     """Constant metadata of this component."""
 
-    data: Union[DataArray, None]
+    data: Union[Dataset, None]
     """Container for cached data on this component."""
 
-    last_data: Union[DataArray, None]
+    last_data: Union[Dataset, None]
     """Container for last datapoint on this component."""
 
     datalock: RLock
@@ -390,7 +411,14 @@ class ModelDevice(metaclass=ABCMeta):
         atexit.register(self.reset)
 
     def run(self):
-        """Helper function for starting the :obj:`self.thread`."""
+        """Helper function for starting the :obj:`self.thread` as a task."""
+        self.thread.do_run = True
+        self.thread.start()
+        self.running = True
+
+    def measure(self):
+        """Helper function for starting the :obj:`self.thread` as a measurement."""
+        self.thread = Thread(target=self.meas_runner, daemon=True)
         self.thread.do_run = True
         self.thread.start()
         self.running = True
@@ -428,6 +456,14 @@ class ModelDevice(metaclass=ABCMeta):
         self.running = False
         self.thread = Thread(target=self.task_runner, daemon=True)
         logger.info("task '%s' on component %s is done", task.technique_name, self.key)
+
+    def meas_runner(self):
+        self.do_measure()
+        self.running = False
+        self.thread = Thread(target=self.task_runner, daemon=True)
+        logger.info(
+            "measurement on component %s is done", task.technique_name, self.key
+        )
 
     def prepare_task(self, task: Task, **kwargs: dict):
         """
