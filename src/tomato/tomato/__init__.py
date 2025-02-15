@@ -139,13 +139,13 @@ def _updater(context, port, cmd, params):
 
 
 def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
-    if stgrp == "tom":
+    if stgrp == "tomato":
         rep = Reply(
             success=True,
             msg=f"tomato running on port {daemon.port}",
             data=daemon,
         )
-    elif stgrp == "pip":
+    elif stgrp == "pipelines":
         if yaml:
             rep = Reply(
                 success=True,
@@ -163,7 +163,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following pipelines:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "drv":
+    elif stgrp == "drivers":
         if yaml:
             rep = Reply(
                 success=True,
@@ -181,7 +181,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following drivers:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "dev":
+    elif stgrp == "devices":
         if yaml:
             rep = Reply(
                 success=True,
@@ -199,7 +199,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following devices:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "cmp":
+    elif stgrp == "components":
         if yaml:
             rep = Reply(
                 success=True,
@@ -225,7 +225,7 @@ def status(
     port: int,
     timeout: int,
     context: zmq.Context,
-    stgrp: str = "tom",
+    status: str = "tomato",
     yaml: bool = True,
     **_: dict,
 ) -> Reply:
@@ -297,7 +297,7 @@ def status(
     events = dict(poller.poll(timeout))
     if req in events:
         rep = req.recv_pyobj()
-        return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
+        return _status_helper(daemon=rep.data, yaml=yaml, stgrp=status)
     else:
         req.setsockopt(zmq.LINGER, 0)
         req.close()
