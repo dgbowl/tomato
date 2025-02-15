@@ -225,7 +225,7 @@ def status(
     port: int,
     timeout: int,
     context: zmq.Context,
-    status: str = "tomato",
+    stgrp: str = "tomato",
     yaml: bool = True,
     **_: dict,
 ) -> Reply:
@@ -297,7 +297,7 @@ def status(
     events = dict(poller.poll(timeout))
     if req in events:
         rep = req.recv_pyobj()
-        return _status_helper(daemon=rep.data, yaml=yaml, stgrp=status)
+        return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
     else:
         req.setsockopt(zmq.LINGER, 0)
         req.close()

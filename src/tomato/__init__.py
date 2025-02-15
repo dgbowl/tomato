@@ -38,7 +38,7 @@ def run_tomato():
 
     status = subparsers.add_parser("status")
     status.add_argument(
-        "status",
+        "stgrp",
         choices=["tomato", "pipelines", "drivers", "devices", "components"],
         default="tomato",
         nargs="?",
