@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato package &mdash; tomato 1.0.post7 documentation</title>
+  <title>tomato package &mdash; tomato 1.0.post8 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=26e39854"></script>
+        <script src="../_static/documentation_options.js?v=cef93b96"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.post7
+                1.0.post8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -75,6 +75,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_1_0.html">tomato.driverinterface_1_0 package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html">tomato.driverinterface_2_0 package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.passata.html">tomato.passata package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a></li>
@@ -86,6 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#tomato-models-pydantic-models-for-internal-tomato-use"><strong>tomato.models</strong>: Pydantic models for internal tomato use</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tomato.models.Driver"><code class="docutils literal notranslate"><span class="pre">Driver</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.name"><code class="docutils literal notranslate"><span class="pre">Driver.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.version"><code class="docutils literal notranslate"><span class="pre">Driver.version</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.port"><code class="docutils literal notranslate"><span class="pre">Driver.port</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.pid"><code class="docutils literal notranslate"><span class="pre">Driver.pid</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Driver.spawned_at"><code class="docutils literal notranslate"><span class="pre">Driver.spawned_at</span></code></a></li>
@@ -317,6 +319,66 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tomato.driverinterface_2_0.html">tomato.driverinterface_2_0 package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.in_devmap"><code class="docutils literal notranslate"><span class="pre">in_devmap()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.Attr"><code class="docutils literal notranslate"><span class="pre">Attr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.Attr.type"><code class="docutils literal notranslate"><span class="pre">Attr.type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.Attr.rw"><code class="docutils literal notranslate"><span class="pre">Attr.rw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.Attr.status"><code class="docutils literal notranslate"><span class="pre">Attr.status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.Attr.units"><code class="docutils literal notranslate"><span class="pre">Attr.units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface"><code class="docutils literal notranslate"><span class="pre">ModelInterface</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.version"><code class="docutils literal notranslate"><span class="pre">ModelInterface.version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.CreateDeviceManager"><code class="docutils literal notranslate"><span class="pre">ModelInterface.CreateDeviceManager()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.devmap"><code class="docutils literal notranslate"><span class="pre">ModelInterface.devmap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.constants"><code class="docutils literal notranslate"><span class="pre">ModelInterface.constants</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.settings"><code class="docutils literal notranslate"><span class="pre">ModelInterface.settings</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_register"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_register()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_teardown"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_teardown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_reset"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_set_attr"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_set_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_get_attr"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_get_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_status"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_capabilities"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_capabilities()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_attrs"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_attrs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_constants"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_constants()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.dev_get_data"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_get_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_start"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_start()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_status"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_stop"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_stop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_data"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.status"><code class="docutils literal notranslate"><span class="pre">ModelInterface.status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.reset"><code class="docutils literal notranslate"><span class="pre">ModelInterface.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice"><code class="docutils literal notranslate"><span class="pre">ModelDevice</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.last_data"><code class="docutils literal notranslate"><span class="pre">ModelDevice.last_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.driver"><code class="docutils literal notranslate"><span class="pre">ModelDevice.driver</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.key"><code class="docutils literal notranslate"><span class="pre">ModelDevice.key</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.task_list"><code class="docutils literal notranslate"><span class="pre">ModelDevice.task_list</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.thread"><code class="docutils literal notranslate"><span class="pre">ModelDevice.thread</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.data"><code class="docutils literal notranslate"><span class="pre">ModelDevice.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.running"><code class="docutils literal notranslate"><span class="pre">ModelDevice.running</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.datalock"><code class="docutils literal notranslate"><span class="pre">ModelDevice.datalock</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.constants"><code class="docutils literal notranslate"><span class="pre">ModelDevice.constants</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.run"><code class="docutils literal notranslate"><span class="pre">ModelDevice.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.task_runner"><code class="docutils literal notranslate"><span class="pre">ModelDevice.task_runner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.prepare_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.prepare_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.do_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.do_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.stop_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.stop_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.set_attr"><code class="docutils literal notranslate"><span class="pre">ModelDevice.set_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.get_attr"><code class="docutils literal notranslate"><span class="pre">ModelDevice.get_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.get_data"><code class="docutils literal notranslate"><span class="pre">ModelDevice.get_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.get_last_data"><code class="docutils literal notranslate"><span class="pre">ModelDevice.get_last_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.attrs"><code class="docutils literal notranslate"><span class="pre">ModelDevice.attrs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.capabilities"><code class="docutils literal notranslate"><span class="pre">ModelDevice.capabilities()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.status"><code class="docutils literal notranslate"><span class="pre">ModelDevice.status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.reset"><code class="docutils literal notranslate"><span class="pre">ModelDevice.reset()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tomato.ketchup.html#tomato-ketchup-command-line-interface-to-the-tomato-job-queue"><strong>tomato.ketchup</strong>: command line interface to the tomato job queue</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.ketchup.html#tomato.ketchup.submit"><code class="docutils literal notranslate"><span class="pre">submit()</span></code></a></li>
@@ -330,6 +392,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tomato.passata.html#tomato.passata.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.passata.html#tomato.passata.attrs"><code class="docutils literal notranslate"><span class="pre">attrs()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.passata.html#tomato.passata.capabilities"><code class="docutils literal notranslate"><span class="pre">capabilities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.passata.html#tomato.passata.constants"><code class="docutils literal notranslate"><span class="pre">constants()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.passata.html#tomato.passata.get_attrs"><code class="docutils literal notranslate"><span class="pre">get_attrs()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.passata.html#tomato.passata.set_attr"><code class="docutils literal notranslate"><span class="pre">set_attr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.passata.html#tomato.passata.reset"><code class="docutils literal notranslate"><span class="pre">reset()</span></code></a></li>
@@ -380,6 +443,18 @@
 <span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Version&quot;</span>
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -443,6 +518,11 @@
 </details></p><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Driver.name">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Driver.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Driver.version">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Driver.version" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -1347,6 +1427,18 @@
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">                  </span><span class="p">},</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">                  </span><span class="p">}</span>
+<span class="w">               </span><span class="p">],</span>
+<span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Version&quot;</span>
+<span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                  </span><span class="p">{</span>
@@ -1609,7 +1701,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0.post7
+      v: 1.0.post8
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
