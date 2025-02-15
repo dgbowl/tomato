@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class Driver(BaseModel):
     name: str
+    version: Optional[str] = None
     port: Optional[int] = None
     pid: Optional[int] = None
     spawned_at: Optional[str] = None

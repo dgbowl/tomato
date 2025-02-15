@@ -3,6 +3,7 @@ import time
 import logging
 import os
 import psutil
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,24 @@ def wait_until_tomato_running(port: int, timeout: int):
             text=True,
         )
         if "Success" in ret.stdout:
+            return True
+        time.sleep(0.5)
+    return False
+
+
+def wait_until_tomato_drivers(port: int, timeout: int):
+    t0 = time.perf_counter()
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        ret = subprocess.run(
+            ["tomato", "status", "drivers", "-y", "-p", f"{port}"],
+            capture_output=True,
+            text=True,
+        )
+        yml = yaml.safe_load(ret.stdout)
+        for name, drv in yml["data"].items():
+            if drv["port"] is None:
+                break
+        else:
             return True
         time.sleep(0.5)
     return False

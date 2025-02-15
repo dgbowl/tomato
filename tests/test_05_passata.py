@@ -89,6 +89,17 @@ def test_passata_api_reset(start_tomato_daemon, stop_tomato_daemon):
     assert ret.success
 
 
+def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
+    utils.wait_until_tomato_running(port=PORT, timeout=3000)
+    ret = tomato.passata.constants(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    print(f"{ret=}")
+    assert ret.success
+    assert ret.data["example_meta"] == "example string"
+
+
 def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
     utils.wait_until_tomato_running(port=PORT, timeout=3000)
     ret = subprocess.run(
@@ -153,3 +164,18 @@ def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
         "Success: attr 'max' of component 'example_counter:(example-addr,1)' is"
         in ret.stdout
     )
+
+    ret = subprocess.run(
+        [
+            "passata",
+            "constants",
+            "example_counter:(example-addr,1)",
+            "max",
+            "-p",
+            f"{PORT}",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    print(f"{ret=}")
+    assert "Success: constants of component ('example-addr', '1') are" in ret.stdout

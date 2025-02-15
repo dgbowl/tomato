@@ -10,9 +10,12 @@ Developed at the ConCat lab at TU Berlin.
 
 Changes from ``tomato-1.0`` include:
 
-- *jobs* are now tracked in a queue stored in a ``sqlite3`` database instead of on the ``tomato.daemon``.
-- ``logdir`` can now be set in *settings file*, with the default value configurable using ``tomato init``.
-- ``tomato status`` now supports further arguments: ``pipelines``, ``drivers``, ``devices``, and ``components`` can be used to query status of subsets of the running **tomato**.
+- *Jobs* are now tracked in a queue stored in a ``sqlite3`` database instead of on the ``tomato.daemon``.
+- The ``logdir`` can now be set in *settings file*, with the default value configurable using ``tomato init``.
+- The ``tomato status`` command now supports further arguments: ``pipelines``, ``drivers``, ``devices``, and ``components`` can be used to query status of subsets of the running **tomato**.
+- A new ``passata`` command and :mod:`tomato.passata` module for interacting with *components* over CLI and API.
+- A new ``DriverInterface-2.0``, with the following changes:
+  - ``constants``: a container for constant *driver* and *component*-specific metadata
 
 .. codeauthor::
     Peter Kraus

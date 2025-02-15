@@ -173,7 +173,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
         else:
             ii = []
             for i in daemon.drvs.values():
-                line = f"name:{i.name}\tport:{i.port}\tpid:{i.pid}"
+                line = f"name:{i.name}\tport:{i.port}\tpid:{i.pid}\tversion:{i.version}"
                 ii.append(line)
             if len(ii) == 0:
                 msg = f"tomato running on port {daemon.port} with no drivers"
