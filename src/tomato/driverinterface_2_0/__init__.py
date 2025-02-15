@@ -74,6 +74,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     def __init__(self, settings=None):
         self.devmap = {}
+        self.constants = {}
         self.settings = settings if settings is not None else {}
 
     def dev_register(self, address: str, channel: str, **kwargs: dict) -> Reply:
@@ -214,7 +215,11 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Query constants on the specified device component and this driver.
         """
+        logger.critical(f"In func")
+        logger.critical(f"{self.constants}")
+        logger.critical(f"{self.devmap[key].constants}")
         ret = self.constants | self.devmap[key].constants
+        logger.critical(f"{ret=}")
         return Reply(
             success=True,
             msg=f"constants of component {key!r} are: {ret}",
