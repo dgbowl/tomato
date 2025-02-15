@@ -64,7 +64,10 @@ def attrs(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_attrs", params={**kwargs}))
+    if drv.version == "1.0":
+        req.send_pyobj(dict(cmd="attrs", params={**kwargs}))
+    else:
+        req.send_pyobj(dict(cmd="dev_attrs", params={**kwargs}))
     ret = req.recv_pyobj()
     return ret
 
@@ -85,7 +88,10 @@ def capabilities(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_capabilities", params={**kwargs}))
+    if drv.version == "1.0":
+        req.send_pyobj(dict(cmd="capabilities", params={**kwargs}))
+    else:
+        req.send_pyobj(dict(cmd="dev_capabilities", params={**kwargs}))
     ret = req.recv_pyobj()
     return ret
 
@@ -106,6 +112,12 @@ def constants(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
+    if drv.version == "1.0":
+        return Reply(
+            success=False,
+            msg=f"driver of component {name!r} is on version {drv.version}",
+            data=None,
+        )
     req.send_pyobj(dict(cmd="dev_constants", params={**kwargs}))
     ret = req.recv_pyobj()
     return ret

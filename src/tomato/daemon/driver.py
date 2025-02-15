@@ -15,15 +15,18 @@ from importlib import metadata
 from datetime import datetime, timezone
 from threading import current_thread
 from pathlib import Path
+from typing import Union
 
 import zmq
 import psutil
 
-from tomato.driverinterface_1_0 import ModelInterface
+from tomato.driverinterface_1_0 import ModelInterface as MI_1_0
+from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
 from tomato.drivers import driver_to_interface
 from tomato.models import Reply
 
 logger = logging.getLogger(__name__)
+ModelInterface = Union[MI_1_0, MI_2_0]
 
 
 def tomato_driver_bootstrap(
@@ -131,6 +134,7 @@ def tomato_driver() -> None:
         port=port,
         pid=pid,
         connected_at=str(datetime.now(timezone.utc)),
+        version=interface.version,
         settings=interface.settings,
     )
     req.send_pyobj(
