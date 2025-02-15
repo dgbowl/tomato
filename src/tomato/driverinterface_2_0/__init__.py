@@ -210,6 +210,18 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
+    def dev_constants(self, key: tuple, **kwargs: dict) -> Reply:
+        """
+        Query constants on the specified device component and this driver.
+        """
+        ret = self.constants | self.devmap[key].constants
+        return Reply(
+            success=True,
+            msg=f"constants of component {key!r} are: {ret}",
+            data=ret,
+        )
+
+    @in_devmap
     def dev_get_data(self, key: tuple, **kwargs: dict) -> Reply:
         pass
 
