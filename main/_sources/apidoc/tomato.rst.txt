@@ -15,6 +15,7 @@ Subpackages
    tomato.daemon
    tomato.driverinterface_1_0
    tomato.ketchup
+   tomato.passata
    tomato.tomato
 
 Submodules

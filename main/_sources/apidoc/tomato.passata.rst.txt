@@ -1,0 +1,7 @@
+tomato.passata package
+======================
+
+.. automodule:: tomato.passata
+   :members:
+   :undoc-members:
+   :show-inheritance:
