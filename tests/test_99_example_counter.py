@@ -144,7 +144,6 @@ def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_
 
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
     utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
-    status = utils.job_status(1)
     ret = tomato.passata.measure(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -153,7 +152,6 @@ def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_
     assert "measurement already running" in ret.msg
 
     utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
-    status = utils.job_status(1)
     ret = tomato.passata.measure(
         name="example_counter:(example-addr,1)",
         **kwargs,
