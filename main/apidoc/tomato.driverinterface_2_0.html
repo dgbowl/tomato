@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.driverinterface_2_0 package &mdash; tomato 1.0.post8 documentation</title>
+  <title>tomato.driverinterface_2_0 package &mdash; tomato 1.0.post9 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=cef93b96"></script>
+        <script src="../_static/documentation_options.js?v=6a81bf8f"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.post8
+                1.0.post9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -86,10 +86,10 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface"><code class="docutils literal notranslate"><span class="pre">ModelInterface</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.version"><code class="docutils literal notranslate"><span class="pre">ModelInterface.version</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.CreateDeviceManager"><code class="docutils literal notranslate"><span class="pre">ModelInterface.CreateDeviceManager()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.devmap"><code class="docutils literal notranslate"><span class="pre">ModelInterface.devmap</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.constants"><code class="docutils literal notranslate"><span class="pre">ModelInterface.constants</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.settings"><code class="docutils literal notranslate"><span class="pre">ModelInterface.settings</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.DeviceFactory"><code class="docutils literal notranslate"><span class="pre">ModelInterface.DeviceFactory()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_register"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_register()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_teardown"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_teardown()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_reset"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_reset()</span></code></a></li>
@@ -99,7 +99,8 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_capabilities"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_capabilities()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_attrs"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_attrs()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_constants"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_constants()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_get_data"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_get_data()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_last_data"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_last_data()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.dev_measure"><code class="docutils literal notranslate"><span class="pre">ModelInterface.dev_measure()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.task_start"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_start()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.task_status"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_status()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.task_stop"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_stop()</span></code></a></li>
@@ -109,19 +110,22 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice"><code class="docutils literal notranslate"><span class="pre">ModelDevice</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.last_data"><code class="docutils literal notranslate"><span class="pre">ModelDevice.last_data</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.driver"><code class="docutils literal notranslate"><span class="pre">ModelDevice.driver</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.key"><code class="docutils literal notranslate"><span class="pre">ModelDevice.key</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.task_list"><code class="docutils literal notranslate"><span class="pre">ModelDevice.task_list</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.thread"><code class="docutils literal notranslate"><span class="pre">ModelDevice.thread</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.data"><code class="docutils literal notranslate"><span class="pre">ModelDevice.data</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.last_data"><code class="docutils literal notranslate"><span class="pre">ModelDevice.last_data</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.running"><code class="docutils literal notranslate"><span class="pre">ModelDevice.running</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.datalock"><code class="docutils literal notranslate"><span class="pre">ModelDevice.datalock</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.constants"><code class="docutils literal notranslate"><span class="pre">ModelDevice.constants</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.run"><code class="docutils literal notranslate"><span class="pre">ModelDevice.run()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.measure"><code class="docutils literal notranslate"><span class="pre">ModelDevice.measure()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.task_runner"><code class="docutils literal notranslate"><span class="pre">ModelDevice.task_runner()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.meas_runner"><code class="docutils literal notranslate"><span class="pre">ModelDevice.meas_runner()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.prepare_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.prepare_task()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.do_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.do_task()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.do_measure"><code class="docutils literal notranslate"><span class="pre">ModelDevice.do_measure()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.stop_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.stop_task()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.set_attr"><code class="docutils literal notranslate"><span class="pre">ModelDevice.set_attr()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.get_attr"><code class="docutils literal notranslate"><span class="pre">ModelDevice.get_attr()</span></code></a></li>
@@ -248,16 +252,9 @@ with drivers and their devices.</p>
 <span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'2.0'</span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.version" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.CreateDeviceManager">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateDeviceManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.CreateDeviceManager" title="Link to this definition"></a></dt>
-<dd><p>A factory function which is used to pass this instance of the <a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface" title="tomato.driverinterface_2_0.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a>
-to the new <code class="xref py py-class docutils literal notranslate"><span class="pre">DeviceManager</span></code> instance.</p>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.devmap">
-<span class="sig-name descname"><span class="pre">devmap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface" title="tomato.driverinterface_2_0.ModelInterface"><span class="pre">ModelInterface</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.devmap" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">devmap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice" title="tomato.driverinterface_2_0.ModelDevice"><span class="pre">ModelDevice</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.devmap" title="Link to this definition"></a></dt>
 <dd><p>Map of registered devices, the tuple keys are <cite>component = (address, channel)</cite></p>
 </dd></dl>
 
@@ -271,6 +268,13 @@ to the new <code class="xref py py-class docutils literal notranslate"><span cla
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.settings">
 <span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.settings" title="Link to this definition"></a></dt>
 <dd><p>A settings map to contain driver-specific settings such as <cite>dllpath</cite> for BioLogic</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.DeviceFactory">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.DeviceFactory" title="Link to this definition"></a></dt>
+<dd><p>A factory function which is used to pass this instance of the <a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface" title="tomato.driverinterface_2_0.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a>
+to the new <a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice" title="tomato.driverinterface_2_0.ModelDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelDevice</span></code></a> instance.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -346,9 +350,17 @@ returns their values in the <code class="xref py py-obj docutils literal notrans
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.dev_get_data">
-<span class="sig-name descname"><span class="pre">dev_get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.dev_get_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.dev_last_data">
+<span class="sig-name descname"><span class="pre">dev_last_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.dev_last_data" title="Link to this definition"></a></dt>
+<dd><p>Fetch the last stored data on the component.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.dev_measure">
+<span class="sig-name descname"><span class="pre">dev_measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.dev_measure" title="Link to this definition"></a></dt>
+<dd><p>Do a single measurement on the component according to its current
+configuration.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.task_start">
@@ -413,12 +425,6 @@ not a pass-through to <a class="reference internal" href="#tomato.driverinterfac
 the reading/writing of those attributes, processing of tasks, and caching and
 returning of task data.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.last_data">
-<span class="sig-name descname"><span class="pre">last_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.last_data" title="Link to this definition"></a></dt>
-<dd><p>Container for last datapoint on this component.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.driver">
 <span class="sig-name descname"><span class="pre">driver</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface" title="tomato.driverinterface_2_0.ModelInterface"><span class="pre">ModelInterface</span></a></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.driver" title="Link to this definition"></a></dt>
 <dd><p>The parent <code class="xref py py-class docutils literal notranslate"><span class="pre">DriverInterface</span></code> instance.</p>
@@ -444,8 +450,14 @@ returning of task data.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.data" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.1.3.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.data" title="Link to this definition"></a></dt>
 <dd><p>Container for cached data on this component.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.last_data">
+<span class="sig-name descname"><span class="pre">last_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.1.3.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.last_data" title="Link to this definition"></a></dt>
+<dd><p>Container for last datapoint on this component.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -468,13 +480,19 @@ returning of task data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.run" title="Link to this definition"></a></dt>
-<dd><p>Helper function for starting the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code>.</p>
+<dd><p>Helper function for starting the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> as a task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.measure">
+<span class="sig-name descname"><span class="pre">measure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.measure" title="Link to this definition"></a></dt>
+<dd><p>Helper function for starting the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> as a measurement.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.task_runner">
 <span class="sig-name descname"><span class="pre">task_runner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.task_runner" title="Link to this definition"></a></dt>
-<dd><p>Target function for the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code>.</p>
+<dd><p>Target function for the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> when handling <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>.</p>
 <p>This function waits for a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> passed using <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.task_list</span></code>,
 then handles setting all <code class="xref py py-class docutils literal notranslate"><span class="pre">Attrs</span></code> using the <a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.prepare_task" title="tomato.driverinterface_2_0.ModelDevice.prepare_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare_task()</span></code></a>
 function, and finally handles the main loop of the task, periodically running
@@ -485,9 +503,17 @@ of this function.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.meas_runner">
+<span class="sig-name descname"><span class="pre">meas_runner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.meas_runner" title="Link to this definition"></a></dt>
+<dd><p>Target function for the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> when performing one shot measurements.</p>
+<p>Performs the measurement using <code class="xref py py-func docutils literal notranslate"><span class="pre">self.do_measure()</span></code>. Resets <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code>
+for future <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.prepare_task">
 <span class="sig-name descname"><span class="pre">prepare_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../quickstart.html#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload_1_0.task.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.prepare_task" title="Link to this definition"></a></dt>
-<dd><p>Given a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>, prepare this component for execution by settin all
+<dd><p>Given a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>, prepare this component for execution by setting all
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Attrs</span></code> as specified in the <cite>task.technique_params</cite> dictionary.</p>
 </dd></dl>
 
@@ -496,8 +522,16 @@ of this function.</p>
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../quickstart.html#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload_1_0.task.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.do_task" title="Link to this definition"></a></dt>
 <dd><p>Periodically called task execution function.</p>
 <p>This function is responsible for updating <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.data</span></code> with new data, i.e.
-performing the measurement. It should also update the values of all
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Attrs</span></code>, so that the component status is consistent with the cached data.</p>
+performing the measurement. It should also update the value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.last_data</span></code>,
+so that the component status is consistent with the cached data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.do_measure">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">do_measure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.do_measure" title="Link to this definition"></a></dt>
+<dd><p>One shot execution worker function.</p>
+<p>This function is performs a measurement using the current configuration of
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">self.attrs</span></code>, and stores the result in <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.last_data</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -508,7 +542,7 @@ performing the measurement. It should also update the values of all
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.set_attr">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.set_attr" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.set_attr" title="Link to this definition"></a></dt>
 <dd><p>Sets the specified <a class="reference internal" href="#tomato.driverinterface_2_0.Attr" title="tomato.driverinterface_2_0.Attr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Attr</span></code></a> to <cite>val</cite>.</p>
 </dd></dl>
 
@@ -520,14 +554,15 @@ performing the measurement. It should also update the values of all
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.get_data">
-<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.get_data" title="Link to this definition"></a></dt>
-<dd><p>Returns the cached <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.data</span></code> before clearing the cache.</p>
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.1.3.dev0)"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.get_data" title="Link to this definition"></a></dt>
+<dd><p>Returns the cached <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.data</span></code> as a <code class="xref py py-class docutils literal notranslate"><span class="pre">xr.Dataset</span></code> before
+clearing the cache.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelDevice.get_last_data">
-<span class="sig-name descname"><span class="pre">get_last_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.get_last_data" title="Link to this definition"></a></dt>
-<dd><p>Returns the <a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.last_data" title="tomato.driverinterface_2_0.ModelDevice.last_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_data</span></code></a> object as a dict.</p>
+<span class="sig-name descname"><span class="pre">get_last_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.1.3.dev0)"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelDevice.get_last_data" title="Link to this definition"></a></dt>
+<dd><p>Returns the <a class="reference internal" href="#tomato.driverinterface_2_0.ModelDevice.last_data" title="tomato.driverinterface_2_0.ModelDevice.last_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_data</span></code></a> object as a <code class="xref py py-class docutils literal notranslate"><span class="pre">xr.Dataset</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -585,7 +620,7 @@ performing the measurement. It should also update the values of all
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0.post8
+      v: 1.0.post9
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
