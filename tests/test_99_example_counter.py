@@ -5,10 +5,13 @@ import time
 import json
 import yaml
 import xarray as xr
+import tomato
+import zmq
 
 from . import utils
 
 PORT = 12345
+CTXT = zmq.Context()
 
 
 @pytest.mark.parametrize(
@@ -127,3 +130,33 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     for group, points in npoints.items():
         print(f"{dt[group]=}")
         assert dt[group]["uts"].size == points
+
+
+def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):
+    os.chdir(datadir)
+    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    kwargs = dict(port=PORT, timeout=1000, context=CTXT)
+    ret = tomato.passata.measure(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    assert ret.success
+
+    utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
+    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
+    status = utils.job_status(1)
+    ret = tomato.passata.measure(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    assert not ret.success
+    assert "measurement already running" in ret.msg
+
+    utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
+    status = utils.job_status(1)
+    ret = tomato.passata.measure(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    assert ret.success
+
