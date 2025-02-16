@@ -54,15 +54,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     version: str = "2.0"
 
-    @abstractmethod
-    def CreateDeviceManager(self, key, **kwargs):
-        """
-        A factory function which is used to pass this instance of the :class:`ModelInterface`
-        to the new :class:`DeviceManager` instance.
-        """
-        pass
-
-    devmap: dict[tuple, "ModelInterface"]
+    devmap: dict[tuple, "ModelDevice"]
     """Map of registered devices, the tuple keys are `component = (address, channel)`"""
 
     settings: dict[str, Any]
@@ -76,6 +68,14 @@ class ModelInterface(metaclass=ABCMeta):
         self.constants = {}
         self.settings = settings if settings is not None else {}
 
+    @abstractmethod
+    def DeviceFactory(self, key, **kwargs):
+        """
+        A factory function which is used to pass this instance of the :class:`ModelInterface`
+        to the new :class:`ModelDevice` instance.
+        """
+        pass
+
     def dev_register(self, address: str, channel: str, **kwargs: dict) -> Reply:
         """
         Register a new device component in this driver.
@@ -87,7 +87,7 @@ class ModelInterface(metaclass=ABCMeta):
         component in the ``data`` slot.
         """
         key = (address, channel)
-        self.devmap[key] = self.CreateDeviceManager(key, **kwargs)
+        self.devmap[key] = self.DeviceFactory(key, **kwargs)
         capabs = self.devmap[key].capabilities()
         return Reply(
             success=True,
@@ -224,7 +224,7 @@ class ModelInterface(metaclass=ABCMeta):
     @in_devmap
     def dev_last_data(self, key: tuple, **kwargs: dict) -> Reply:
         """
-        Fetch the last stored data
+        Fetch the last stored data on the component.
         """
         ret = self.devmap[key].get_last_data(**kwargs)
         if ret is None:
@@ -240,6 +240,16 @@ class ModelInterface(metaclass=ABCMeta):
 
     @in_devmap
     def dev_measure(self, key: tuple, **kwargs: dict) -> Reply:
+        """
+        Do a single measurement on the component according to its current
+        configuration.
+
+        """
+        if self.devmap[key].running:
+            return Reply(
+                success=False,
+                msg=f"measurement already running on component {key!r}",
+            )
         self.devmap[key].measure()
         return Reply(
             success=True,
@@ -372,7 +382,7 @@ class ModelDevice(metaclass=ABCMeta):
     returning of task data.
     """
 
-    driver: "ModelInterface"
+    driver: ModelInterface
     """The parent :class:`DriverInterface` instance."""
 
     constants: dict[str, Any]
@@ -414,18 +424,16 @@ class ModelDevice(metaclass=ABCMeta):
         """Helper function for starting the :obj:`self.thread` as a task."""
         self.thread.do_run = True
         self.thread.start()
-        self.running = True
 
     def measure(self):
         """Helper function for starting the :obj:`self.thread` as a measurement."""
         self.thread = Thread(target=self.meas_runner, daemon=True)
         self.thread.do_run = True
         self.thread.start()
-        self.running = True
 
     def task_runner(self):
         """
-        Target function for the :obj:`self.thread`.
+        Target function for the :obj:`self.thread` when handling :class:`Tasks`.
 
         This function waits for a :class:`Task` passed using :obj:`self.task_list`,
         then handles setting all :class:`Attrs` using the :func:`prepare_task`
@@ -436,6 +444,7 @@ class ModelDevice(metaclass=ABCMeta):
         The :obj:`self.thread` is re-primed for future :class:`Tasks` at the end
         of this function.
         """
+        self.running = True
         thread = current_thread()
         task: Task = self.task_list.get()
         self.prepare_task(task)
@@ -458,6 +467,13 @@ class ModelDevice(metaclass=ABCMeta):
         logger.info("task '%s' on component %s is done", task.technique_name, self.key)
 
     def meas_runner(self):
+        """
+        Target function for the :obj:`self.thread` when performing one shot measurements.
+
+        Performs the measurement using :func:`self.do_measure()`. Resets :obj:`self.thread`
+        for future :class:`Tasks`.
+        """
+        self.running = True
         self.do_measure()
         self.running = False
         self.thread = Thread(target=self.task_runner, daemon=True)
@@ -465,7 +481,7 @@ class ModelDevice(metaclass=ABCMeta):
 
     def prepare_task(self, task: Task, **kwargs: dict):
         """
-        Given a :class:`Task`, prepare this component for execution by settin all
+        Given a :class:`Task`, prepare this component for execution by setting all
         :class:`Attrs` as specified in the `task.technique_params` dictionary.
         """
         if task.technique_params is not None:
@@ -508,15 +524,18 @@ class ModelDevice(metaclass=ABCMeta):
         """Reads the value of the specified :class:`Attr`."""
         pass
 
-    def get_data(self, **kwargs: dict) -> dict[str, list]:
-        """Returns the cached :obj:`self.data` before clearing the cache."""
+    def get_data(self, **kwargs: dict) -> Dataset:
+        """
+        Returns the cached :obj:`self.data` as a :class:`xr.Dataset` before
+        clearing the cache.
+        """
         with self.datalock:
             ret = self.data
             self.data = None
         return ret
 
-    def get_last_data(self, **kwargs: dict) -> dict[str, list]:
-        """Returns the :obj:`last_data` object as a dict."""
+    def get_last_data(self, **kwargs: dict) -> Dataset:
+        """Returns the :obj:`last_data` object as a :class:`xr.Dataset`."""
         return self.last_data
 
     @abstractmethod
