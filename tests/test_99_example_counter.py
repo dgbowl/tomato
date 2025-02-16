@@ -159,4 +159,3 @@ def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_
         **kwargs,
     )
     assert ret.success
-
