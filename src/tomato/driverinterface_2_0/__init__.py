@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Any, Union
+from typing import TypeVar, Any, Union, TypeAlias
 from pydantic import BaseModel
 from threading import Thread, current_thread, RLock
 from queue import Queue
@@ -10,8 +10,14 @@ from functools import wraps
 from xarray import Dataset
 import time
 import atexit
+import pint
 
 logger = logging.getLogger(__name__)
+
+
+Type: TypeAlias = type
+Val = TypeVar("Val", str, pint.Quantity)
+Key: TypeAlias = tuple[str, str]
 
 
 def in_devmap(func):
@@ -31,13 +37,25 @@ def in_devmap(func):
     return wrapper
 
 
-T = TypeVar("T")
+def to_quantity(func):
+    @wraps(func)
+    def wrapper(self, **kwargs):
+        if "val" in kwargs:
+            v = kwargs.pop("val")
+            try:
+                val = pint.Quantity(v)
+            except pint.errors.UndefinedUnitError:
+                val = v
+            kwargs["val"] = val
+        return func(self, **kwargs)
+
+    return wrapper
 
 
 class Attr(BaseModel):
     """A Pydantic :class:`BaseModel` used to describe device attributes."""
 
-    type: T
+    type: Type
     rw: bool = False
     status: bool = False
     units: str = None
@@ -69,7 +87,7 @@ class ModelInterface(metaclass=ABCMeta):
         self.settings = settings if settings is not None else {}
 
     @abstractmethod
-    def DeviceFactory(self, key, **kwargs):
+    def DeviceFactory(self, key: Key, **kwargs):
         """
         A factory function which is used to pass this instance of the :class:`ModelInterface`
         to the new :class:`ModelDevice` instance.
@@ -96,7 +114,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_teardown(self, key: tuple, **kwargs: dict) -> Reply:
+    def dev_teardown(self, key: Key, **kwargs: dict) -> Reply:
         """
         Emergency stop function.
 
@@ -117,7 +135,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_reset(self, key: tuple, **kwargs: dict) -> Reply:
+    def dev_reset(self, key: Key, **kwargs: dict) -> Reply:
         """
         Component reset function.
 
@@ -131,7 +149,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_set_attr(self, attr: str, val: Any, key: tuple, **kwargs: dict) -> Reply:
+    def dev_set_attr(self, attr: str, val: Val, key: Key, **kwargs: dict) -> Reply:
         """
         Set value of the :class:`Attr` of the specified device component.
 
@@ -146,7 +164,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_get_attr(self, attr: str, key: tuple, **kwargs: dict) -> Reply:
+    def dev_get_attr(self, attr: str, key: Key, **kwargs: dict) -> Reply:
         """
         Get value of the :class:`Attr` from the specified device component.
 
@@ -162,7 +180,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_status(self, key: tuple, **kwargs: dict) -> Reply:
+    def dev_status(self, key: Key, **kwargs: dict) -> Reply:
         """
         Get the status report from the specified device component.
 
@@ -182,7 +200,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_capabilities(self, key: tuple, **kwargs) -> Reply:
+    def dev_capabilities(self, key: Key, **kwargs) -> Reply:
         """
         Returns the capabilities of the device component.
 
@@ -196,7 +214,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_attrs(self, key: tuple, **kwargs: dict) -> Reply:
+    def dev_attrs(self, key: Key, **kwargs: dict) -> Reply:
         """
         Query available :class:`Attrs` on the specified device component.
 
@@ -210,7 +228,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_constants(self, key: tuple, **kwargs: dict) -> Reply:
+    def dev_constants(self, key: Key, **kwargs: dict) -> Reply:
         """
         Query constants on the specified device component and this driver.
         """
@@ -222,7 +240,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_last_data(self, key: tuple, **kwargs: dict) -> Reply:
+    def dev_last_data(self, key: Key, **kwargs: dict) -> Reply:
         """
         Fetch the last stored data on the component.
         """
@@ -239,7 +257,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def dev_measure(self, key: tuple, **kwargs: dict) -> Reply:
+    def dev_measure(self, key: Key, **kwargs: dict) -> Reply:
         """
         Do a single measurement on the component according to its current
         configuration.
@@ -257,7 +275,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def task_start(self, key: tuple, task: Task, **kwargs) -> Reply:
+    def task_start(self, key: Key, task: Task, **kwargs) -> Reply:
         """
         Submit a :class:`Task` onto the specified device component.
 
@@ -283,7 +301,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
 
     @in_devmap
-    def task_status(self, key: tuple, **kwargs: dict) -> Reply:
+    def task_status(self, key: Key, **kwargs: dict) -> Reply:
         """
         Returns the task readiness status of the specified device component.
 
@@ -299,7 +317,7 @@ class ModelInterface(metaclass=ABCMeta):
             return Reply(success=True, msg="ready", data=data)
 
     @in_devmap
-    def task_stop(self, key: tuple, **kwargs) -> Reply:
+    def task_stop(self, key: Key, **kwargs) -> Reply:
         """
         Stops a running task and returns any collected data.
 
@@ -316,7 +334,7 @@ class ModelInterface(metaclass=ABCMeta):
             return Reply(success=True, msg=f"task stopped, {ret.msg}")
 
     @in_devmap
-    def task_data(self, key: tuple, **kwargs) -> Reply:
+    def task_data(self, key: Key, **kwargs) -> Reply:
         """
         Return cached task data on the device component and clean the cache.
 
@@ -397,7 +415,7 @@ class ModelDevice(metaclass=ABCMeta):
     datalock: RLock
     """Lock object for thread-safe data manipulation."""
 
-    key: tuple
+    key: Key
     """The key in :obj:`self.driver.devmap` referring to this object."""
 
     thread: Thread
@@ -515,12 +533,12 @@ class ModelDevice(metaclass=ABCMeta):
         setattr(self.thread, "do_run", False)
 
     @abstractmethod
-    def set_attr(self, attr: str, val: Any, **kwargs: dict) -> Any:
+    def set_attr(self, attr: str, val: Val, **kwargs: dict) -> Val:
         """Sets the specified :class:`Attr` to `val`."""
         pass
 
     @abstractmethod
-    def get_attr(self, attr: str, **kwargs: dict) -> Any:
+    def get_attr(self, attr: str, **kwargs: dict) -> Val:
         """Reads the value of the specified :class:`Attr`."""
         pass
 
