@@ -74,7 +74,7 @@ class Attr(BaseModel):
 
     status: bool = False
     """Should the attribute be included in component status?"""
-    
+
     units: str = None
     """Default units for the attribute, optional."""
 
@@ -120,7 +120,7 @@ class ModelInterface(metaclass=ABCMeta):
         self.settings = settings if settings is not None else {}
 
     @abstractmethod
-    def DeviceFactory(self, key: Key, **kwargs) -> ModelInterface:
+    def DeviceFactory(self, key: Key, **kwargs) -> "ModelDevice":
         """
         A factory function which is used to pass this instance of the :class:`ModelInterface`
         to the new :class:`ModelDevice` instance.
