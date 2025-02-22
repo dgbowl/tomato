@@ -210,4 +210,6 @@ def test_ketchup_validation(pl, jn, datadir, start_tomato_daemon, stop_tomato_da
     assert ret.success
     assert ret.data.id == 1
     with pytest.raises(AssertionError):
-        assert wait_until_ketchup_status(jobid=1, status="qw", port=PORT, timeout=1000)
+        assert utils.wait_until_ketchup_status(
+            jobid=1, status="qw", port=PORT, timeout=1000
+        )
