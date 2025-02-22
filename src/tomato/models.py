@@ -91,8 +91,6 @@ class Job(BaseModel):
             v = pickle.loads(v)
         if isinstance(v, dict):
             v = to_payload(**v)
-        # while hasattr(v, "update"):
-        #    v = v.update()
         return v
 
 

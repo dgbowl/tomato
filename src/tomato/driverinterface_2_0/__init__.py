@@ -304,15 +304,15 @@ class ModelInterface(metaclass=ABCMeta):
         then starts the worker thread. Checks that the :class:`Task` is among the
         capabilities of this component.
         """
+        ret = self.task_validate(key=key, task=task, **kwargs)
+        if not ret.success:
+            return ret
+
         logger.info("starting task '%s' on component %s", task.technique_name, key)
-        if task.technique_name not in self.devmap[key].capabilities(**kwargs):
-            msg = f"unknown task {task.technique_name!r} requested"
-            return (False, msg, self.dev_capabilities(key=key))
-        else:
-            self.devmap[key].task_list.put(task)
-            self.devmap[key].run()
-            logger.info("task '%s' on component %s started", task.technique_name, key)
-            return (True, f"task {task!r} started successfully", task)
+        self.devmap[key].task_list.put(task)
+        self.devmap[key].run()
+        logger.info("task '%s' on component %s started", task.technique_name, key)
+        return (True, f"task {task!r} started successfully", task)
 
     @to_reply
     @in_devmap
@@ -375,6 +375,47 @@ class ModelInterface(metaclass=ABCMeta):
             return (False, "found no new datapoints", None)
         else:
             return (True, f"found {len(data)} new datapoints", data)
+
+    @to_reply
+    @in_devmap
+    def task_validate(self, key: Key, task: Task, **kwargs) -> tuple[bool, str, None]:
+        """
+        Validate the provided :class:`Task` for submission on the component
+        identified by :obj:`key`.
+
+        """
+        logger.info("validating task '%s' on component %s", task.technique_name, key)
+        if task.technique_name not in self.devmap[key].capabilities(**kwargs):
+            msg = f"unknown task {task.technique_name!r} requested"
+            return (False, msg, None)
+        attrs = self.devmap[key].attrs(**kwargs)
+        for par, val in task.technique_params.items():
+            if par not in attrs:
+                msg = f"unknown attribute {par!r} cannot be set"
+                return (False, msg, None)
+            props = attrs[par]
+            if not props.rw:
+                msg = f"attribute {par!r} is read-only"
+                return (False, msg, None)
+            if not isinstance(val, props.type):
+                try:
+                    val = props.type(val)
+                except (ValueError, pint.errors.UndefinedUnitError):
+                    msg = f"could not coerce {par!r} to type {props.type}"
+                    return (False, msg, None)
+            if isinstance(val, pint.Quantity):
+                if val.dimensionless and props.units is not None:
+                    val = pint.Quantity(val.m, props.units)
+                if val.dimensionality != getattr(self, par).dimensionality:
+                    msg = f"attribute {par!r} has the wrong dimensionality {str(val.dimensionality)}"
+                    return (False, msg, None)
+            if props.minimum is not None and val < props.minimum:
+                msg = f"attr {par!r} is smaller than {props.minimum}"
+                return (False, msg, None)
+            if props.maximum is not None and val > props.maximum:
+                msg = f"attr {par!r} is greater than {props.maximum}"
+                return (False, msg, None)
+        return (True, "task validated successfully", None)
 
     def status(self) -> Reply:
         """

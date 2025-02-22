@@ -34,8 +34,43 @@ from dgbowl_schemas.tomato.payload import Task
 logger = logging.getLogger(__name__)
 
 
+def method_validate(
+    method: list[Task],
+    pip: Pipeline,
+    drvs: dict[str, Driver],
+    cmps: dict[str, Component],
+    context: zmq.Context,
+):
+    for task in method:
+        for cmp in pip.components:
+            if task.technique_name in cmps[cmp].capabilities:
+                drv = drvs[cmps[cmp].driver]
+                if drv.version == "1.0":
+                    logger.info("cannot validate task using DriverInterface-1.0")
+                    break
+                req = context.socket(zmq.REQ)
+                req.connect(f"tcp://127.0.0.1:{drv.port}")
+                params = dict(
+                    task=task,
+                    address=cmps[cmp].address,
+                    channel=cmps[cmp].channel,
+                )
+                req.send_pyobj(dict(cmd="task_validate", params=params))
+                ret = req.recv_pyobj()
+                req.close()
+                if ret.success:
+                    break
+        else:
+            return False
+    return True
+
+
 def find_matching_pipelines(
-    pips: dict[str, Pipeline], cmps: dict[str, Component], method: list[Task]
+    pips: dict[str, Pipeline],
+    cmps: dict[str, Component],
+    drvs: dict[str, Driver],
+    method: list[Task],
+    context: zmq.Context,
 ) -> list[Pipeline]:
     req_tags = set([item.component_tag for item in method])
     req_capabs = set([item.technique_name for item in method])
@@ -50,7 +85,8 @@ def find_matching_pipelines(
             capabs.update(c.capabilities)
         if req_tags.intersection(roles) == req_tags:
             if req_capabs.intersection(capabs) == req_capabs:
-                candidates.append(pip)
+                if method_validate(method, pip, drvs, cmps, context):
+                    candidates.append(pip)
     return candidates
 
 
@@ -142,7 +178,13 @@ def manage_running_pips(pips: dict, dbpath: str, req):
                 continue
 
 
-def check_queued_jobs(pips: dict, cmps: dict, dbpath: str) -> dict[int, list[Pipeline]]:
+def check_queued_jobs(
+    pips: dict,
+    cmps: dict,
+    drvs: dict,
+    dbpath: str,
+    context: zmq.Context,
+) -> dict[int, list[Pipeline]]:
     """
     Function to check whether the queued jobs can be submitted onto any pipeline.
 
@@ -153,7 +195,9 @@ def check_queued_jobs(pips: dict, cmps: dict, dbpath: str) -> dict[int, list[Pip
     matched = {}
     queue = jobdb.get_jobs_where("status IN ('q', 'qw')", dbpath)
     for job in queue:
-        matched[job.id] = find_matching_pipelines(pips, cmps, job.payload.method)
+        matched[job.id] = find_matching_pipelines(
+            pips, cmps, drvs, job.payload.method, context
+        )
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
                 "job %d can queue on pips: {%s}",
@@ -253,7 +297,9 @@ def manager(port: int, timeout: int = 500):
         daemon = req.recv_pyobj().data
         dbpath = daemon.settings["jobs"]["dbpath"]
         manage_running_pips(daemon.pips, dbpath, req)
-        matched_pips = check_queued_jobs(daemon.pips, daemon.cmps, dbpath)
+        matched_pips = check_queued_jobs(
+            daemon.pips, daemon.cmps, daemon.drvs, dbpath, context
+        )
         action_queued_jobs(daemon, matched_pips, req)
         time.sleep(timeout / 1e3)
     logger.info("instructed to quit")

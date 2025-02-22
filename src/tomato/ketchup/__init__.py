@@ -36,7 +36,7 @@ from tomato.models import Reply
 
 log = logging.getLogger(__name__)
 
-__latest_payload__ = "1.0"
+__latest_payload__ = "2.0"
 
 
 def submit(
