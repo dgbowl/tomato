@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato package &mdash; tomato 1.0.post10 documentation</title>
+  <title>tomato package &mdash; tomato 2.0rc1.post1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=96cfd9f1"></script>
+        <script src="../_static/documentation_options.js?v=c285f8a4"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.post10
+                2.0rc1.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -245,6 +245,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.merge_netcdfs"><code class="docutils literal notranslate"><span class="pre">merge_netcdfs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.io.data_to_pickle"><code class="docutils literal notranslate"><span class="pre">data_to_pickle()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-job-the-job-manager-of-tomato-daemon"><strong>tomato.daemon.job</strong>: the job manager of tomato daemon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.method_validate"><code class="docutils literal notranslate"><span class="pre">method_validate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.find_matching_pipelines"><code class="docutils literal notranslate"><span class="pre">find_matching_pipelines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.kill_tomato_job"><code class="docutils literal notranslate"><span class="pre">kill_tomato_job()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.job.manage_running_pips"><code class="docutils literal notranslate"><span class="pre">manage_running_pips()</span></code></a></li>
@@ -354,6 +355,7 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_status"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_status()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_stop"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_stop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_data"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_validate"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_validate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.status"><code class="docutils literal notranslate"><span class="pre">ModelInterface.status()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.reset"><code class="docutils literal notranslate"><span class="pre">ModelInterface.reset()</span></code></a></li>
 </ul>
@@ -1024,7 +1026,7 @@
 <span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">               </span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Version&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">            </span><span class="p">},</span>
@@ -1160,7 +1162,7 @@
 <span class="w">            </span><span class="nt">&quot;polling_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                  </span><span class="p">{</span>
-<span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
 <span class="w">                  </span><span class="p">},</span>
 <span class="w">                  </span><span class="p">{</span>
 <span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
@@ -1182,7 +1184,6 @@
 <span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
 <span class="w">                  </span><span class="p">}</span>
 <span class="w">               </span><span class="p">],</span>
-<span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique Params&quot;</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">},</span>
@@ -1216,7 +1217,7 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Job.payload">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../quickstart.html#dgbowl_schemas.tomato.payload.Payload" title="dgbowl_schemas.tomato.payload_1_0.Payload"><span class="pre">Payload</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Job.payload" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../quickstart.html#dgbowl_schemas.tomato.payload.Payload" title="dgbowl_schemas.tomato.payload_2_0.Payload"><span class="pre">Payload</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Job.payload" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1712,7 +1713,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 1.0.post10
+      v: 2.0rc1.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
