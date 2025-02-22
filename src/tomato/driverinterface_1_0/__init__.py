@@ -1,3 +1,18 @@
+"""
+**DriverInterface-1.0**
+-----------------------
+.. codeauthor::
+    Peter Kraus
+
+... warning:
+
+    This version of DriverInterface is deprecated and will not be supported from ``tomato-3.0`` onwards.
+
+
+First prototype of the DriverInterface.
+
+"""
+
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar, Any
 from pydantic import BaseModel

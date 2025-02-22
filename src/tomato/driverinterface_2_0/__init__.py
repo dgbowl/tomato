@@ -1,3 +1,12 @@
+"""
+**DriverInterface-2.0**
+-----------------------
+.. codeauthor::
+    Peter Kraus
+
+
+"""
+
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar, Any, Union, TypeAlias
 from pydantic import BaseModel
@@ -7,7 +16,7 @@ from tomato.models import Reply
 from dgbowl_schemas.tomato.payload import Task
 import logging
 from functools import wraps
-from xarray import Dataset
+import xarray as xr
 import time
 import atexit
 import pint
@@ -16,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 Type: TypeAlias = type
-Val = TypeVar("Val", str, pint.Quantity)
+Val = TypeVar("Val", str, int, float, pint.Quantity)
 Key: TypeAlias = tuple[str, str]
 
 
@@ -37,17 +46,19 @@ def in_devmap(func):
     return wrapper
 
 
-def to_quantity(func):
+def to_reply(func):
+    """
+    Helper decorator for coercing tuples into :class:`Reply`.
+    """
+
     @wraps(func)
     def wrapper(self, **kwargs):
-        if "val" in kwargs:
-            v = kwargs.pop("val")
-            try:
-                val = pint.Quantity(v)
-            except pint.errors.UndefinedUnitError:
-                val = v
-            kwargs["val"] = val
-        return func(self, **kwargs)
+        ret = func(self, **kwargs)
+        if isinstance(ret, Reply):
+            return ret
+        else:
+            success, msg, data = ret
+            return Reply(success=success, msg=msg, data=data)
 
     return wrapper
 
@@ -56,18 +67,40 @@ class Attr(BaseModel):
     """A Pydantic :class:`BaseModel` used to describe device attributes."""
 
     type: Type
+    """Data type of the attribute"""
+
     rw: bool = False
+    """Is the attribute read-write?"""
+
     status: bool = False
+    """Should the attribute be included in component status?"""
+    
     units: str = None
+    """Default units for the attribute, optional."""
+
+    maximum: Union[pint.Quantity, float] = None
+    """Maximum value for the attribute, optional."""
+
+    minimum: Union[pint.Quantity, float] = None
+    """Minimum value for the attribute, optional."""
 
 
 class ModelInterface(metaclass=ABCMeta):
     """
     An abstract base class specifying the driver interface.
 
-    Individual driver modules should expose a :class:`DriverInterface` which inherits
-    from this abstract class. Only the methods of this class should be used to interact
-    with drivers and their devices.
+    Individual driver modules should expose a :class:`DriverInterface` as a top-level
+    import, which inherits from this abstract class. Only the methods of this class
+    are used to interact with *drivers* and their *components*.
+
+    This class contains one abstract method, :func:`~ModelInterface.DeviceFactory`,
+    that has to be re-implemented by the driver modules.
+
+    All methods of this class should return :class:`Reply` objects (except the
+    :func:`DeviceFactory` function). However, for better readability, a decorator function
+    :func:`to_reply` is provided, so that the types of the return values can be
+    explicitly defined here.
+
     """
 
     version: str = "2.0"
@@ -87,34 +120,34 @@ class ModelInterface(metaclass=ABCMeta):
         self.settings = settings if settings is not None else {}
 
     @abstractmethod
-    def DeviceFactory(self, key: Key, **kwargs):
+    def DeviceFactory(self, key: Key, **kwargs) -> ModelInterface:
         """
         A factory function which is used to pass this instance of the :class:`ModelInterface`
         to the new :class:`ModelDevice` instance.
         """
         pass
 
-    def dev_register(self, address: str, channel: str, **kwargs: dict) -> Reply:
+    @to_reply
+    def dev_register(
+        self, address: str, channel: str, **kwargs: dict
+    ) -> tuple[bool, str, set]:
         """
         Register a new device component in this driver.
 
-        Creates a :class:`DeviceManager` representing a device component, storing it in
+        Creates a :class:`ModelDevice` representing a device component, storing it in
         the :obj:`self.devmap` using the provided `address` and `channel`.
 
-        The returned :class:`Reply` should contain the capabilities of the registered
-        component in the ``data`` slot.
+        Returns the :class:`set` of capabilities of the registered component as the
+        :obj:`Reply.data`.
         """
         key = (address, channel)
         self.devmap[key] = self.DeviceFactory(key, **kwargs)
         capabs = self.devmap[key].capabilities()
-        return Reply(
-            success=True,
-            msg=f"device {key!r} registered",
-            data=capabs,
-        )
+        return (True, f"device {key!r} registered", capabs)
 
+    @to_reply
     @in_devmap
-    def dev_teardown(self, key: Key, **kwargs: dict) -> Reply:
+    def dev_teardown(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
         """
         Emergency stop function.
 
@@ -129,13 +162,11 @@ class ModelInterface(metaclass=ABCMeta):
             self.task_stop(key=key, **kwargs)
         self.dev_reset(key=key, **kwargs)
         del self.devmap[key]
-        return Reply(
-            success=True,
-            msg=f"device {key!r} torn down",
-        )
+        return (True, f"device {key!r} torn down", None)
 
+    @to_reply
     @in_devmap
-    def dev_reset(self, key: Key, **kwargs: dict) -> Reply:
+    def dev_reset(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
         """
         Component reset function.
 
@@ -143,44 +174,40 @@ class ModelInterface(metaclass=ABCMeta):
         is executed at the end of every job.
         """
         self.devmap[key].reset()
-        return Reply(
-            success=True,
-            msg=f"component {key!r} reset successfully",
-        )
+        return (True, f"component {key!r} reset successfully", None)
 
+    @to_reply
     @in_devmap
-    def dev_set_attr(self, attr: str, val: Val, key: Key, **kwargs: dict) -> Reply:
+    def dev_set_attr(
+        self, attr: str, val: Val, key: Key, **kwargs: dict
+    ) -> tuple[bool, str, Val]:
         """
         Set value of the :class:`Attr` of the specified device component.
 
-        Pass-through to the :func:`DeviceManager.set_attr` function. No type or
-        read-write validation performed here!
+        Pass-through to the :func:`ModelDevice.set_attr` function. No type or
+        read-write validation performed here! Returns the validated or coerced
+        value as the :obj:`Reply.data`.
         """
-        self.devmap[key].set_attr(attr=attr, val=val, **kwargs)
-        return Reply(
-            success=True,
-            msg=f"attr {attr!r} of component {key} set to {val}",
-            data=val,
-        )
+        ret = self.devmap[key].set_attr(attr=attr, val=val, **kwargs)
+        return (True, f"attr {attr!r} of component {key} set to {ret}", ret)
 
     @in_devmap
-    def dev_get_attr(self, attr: str, key: Key, **kwargs: dict) -> Reply:
+    def dev_get_attr(
+        self, attr: str, key: Key, **kwargs: dict
+    ) -> tuple[bool, str, Val]:
         """
         Get value of the :class:`Attr` from the specified device component.
 
-        Pass-through to the :func:`DeviceManager.get_attr` function. Units are not
-        returned; those can be queried for all :class:`Attrs` using :func:`self.attrs`.
+        Pass-through to the :func:`ModelDevice.get_attr` function. No type
+        coercion is done here. Returns the value as the :obj:`Reply.data`.
 
         """
         ret = self.devmap[key].get_attr(attr=attr, **kwargs)
-        return Reply(
-            success=True,
-            msg=f"attr {attr!r} of component {key} is: {ret}",
-            data=ret,
-        )
+        return (True, f"attr {attr!r} of component {key} is: {ret}", ret)
 
+    @to_reply
     @in_devmap
-    def dev_status(self, key: Key, **kwargs: dict) -> Reply:
+    def dev_status(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
         """
         Get the status report from the specified device component.
 
@@ -193,89 +220,82 @@ class ModelInterface(metaclass=ABCMeta):
                 ret[k] = self.devmap[key].get_attr(attr=k, **kwargs)
 
         ret["running"] = self.devmap[key].running
-        return Reply(
-            success=True,
-            msg=f"component {key} is{' ' if ret['running'] else ' not '}running",
-            data=ret,
-        )
+        msg = f"component {key} is{' ' if ret['running'] else ' not '}running"
+        return (True, msg, ret)
 
+    @to_reply
     @in_devmap
-    def dev_capabilities(self, key: Key, **kwargs) -> Reply:
+    def dev_capabilities(self, key: Key, **kwargs) -> tuple[bool, str, set]:
         """
         Returns the capabilities of the device component.
 
-        Pass-through to :func:`DriverManager.capabilities`.
+        Pass-through to :func:`ModelDevice.capabilities`. Returns the :class:`set`
+        of capabilities in :obj:`Reply.data`.
         """
         ret = self.devmap[key].capabilities(**kwargs)
-        return Reply(
-            success=True,
-            msg=f"capabilities supported by component {key!r} are: {ret}",
-            data=ret,
-        )
+        return (True, f"capabilities supported by component {key!r} are: {ret}", ret)
 
+    @to_reply
     @in_devmap
-    def dev_attrs(self, key: Key, **kwargs: dict) -> Reply:
+    def dev_attrs(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
         """
         Query available :class:`Attrs` on the specified device component.
 
-        Pass-through to the :func:`DeviceManager.attrs` function.
+        Pass-through to the :func:`ModelDevice.attrs` function. Returns the
+        :class:`dict` of attributes as the :obj:`Reply.data`.
         """
         ret = self.devmap[key].attrs(**kwargs)
-        return Reply(
-            success=True,
-            msg=f"attrs of component {key!r} are: {ret}",
-            data=ret,
-        )
+        return (True, f"attrs of component {key!r} are: {ret}", ret)
 
+    @to_reply
     @in_devmap
-    def dev_constants(self, key: Key, **kwargs: dict) -> Reply:
+    def dev_constants(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
         """
         Query constants on the specified device component and this driver.
+
+        Returns the :class:`dict` of constants as the :obj:`Reply.data`.
         """
         ret = self.constants | self.devmap[key].constants
-        return Reply(
-            success=True,
-            msg=f"constants of component {key!r} are: {ret}",
-            data=ret,
-        )
+        return (True, f"constants of component {key!r} are: {ret}", ret)
 
+    @to_reply
     @in_devmap
-    def dev_last_data(self, key: Key, **kwargs: dict) -> Reply:
+    def dev_last_data(
+        self, key: Key, **kwargs: dict
+    ) -> tuple[bool, str, Union[None, xr.Dataset]]:
         """
         Fetch the last stored data on the component.
+
+        Passthrough to :func:`ModelDevice.get_last_data`. The data in the form of
+        a :class:`xarray.Dataset` is returned as the :obj:`Reply.data`.
         """
         ret = self.devmap[key].get_last_data(**kwargs)
         if ret is None:
-            return Reply(
-                success=False,
-                msg=f"no data present on component {key!r}",
-            )
-        return Reply(
-            success=True,
-            msg=f"last datapoint on component {key!r} at {ret.uts}",
-            data=ret,
-        )
+            return (False, f"no data present on component {key!r}", None)
+        else:
+            return (True, f"last datapoint on component {key!r} at {ret.uts}", ret)
 
+    @to_reply
     @in_devmap
-    def dev_measure(self, key: Key, **kwargs: dict) -> Reply:
+    def dev_measure(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
         """
         Do a single measurement on the component according to its current
         configuration.
 
+        Fails if the component already has a running task / measurement.
+
         """
         if self.devmap[key].running:
-            return Reply(
-                success=False,
-                msg=f"measurement already running on component {key!r}",
-            )
-        self.devmap[key].measure()
-        return Reply(
-            success=True,
-            msg=f"measurement started on component {key!r}",
-        )
+            return (False, f"measurement already running on component {key!r}", None)
+        else:
+            self.devmap[key].measure()
+            return (True, f"measurement started on component {key!r}", None)
 
+    @to_reply
     @in_devmap
-    def task_start(self, key: Key, task: Task, **kwargs) -> Reply:
+    def task_start(
+        self, key: Key, task: Task, **kwargs
+    ) -> tuple[bool, str, Union[set, Task]]:
         """
         Submit a :class:`Task` onto the specified device component.
 
@@ -285,23 +305,17 @@ class ModelInterface(metaclass=ABCMeta):
         """
         logger.info("starting task '%s' on component %s", task.technique_name, key)
         if task.technique_name not in self.devmap[key].capabilities(**kwargs):
-            return Reply(
-                success=False,
-                msg=f"unknown task {task.technique_name!r} requested",
-                data=self.capabilities(key=key),
-            )
+            msg = f"unknown task {task.technique_name!r} requested"
+            return (False, msg, self.capabilities(key=key))
+        else:
+            self.devmap[key].task_list.put(task)
+            self.devmap[key].run()
+            logger.info("task '%s' on component %s started", task.technique_name, key)
+            return (True, f"task {task!r} started successfully", task)
 
-        self.devmap[key].task_list.put(task)
-        self.devmap[key].run()
-        logger.info("task '%s' on component %s started", task.technique_name, key)
-        return Reply(
-            success=True,
-            msg=f"task {task!r} started successfully",
-            data=task,
-        )
-
+    @to_reply
     @in_devmap
-    def task_status(self, key: Key, **kwargs: dict) -> Reply:
+    def task_status(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
         """
         Returns the task readiness status of the specified device component.
 
@@ -312,35 +326,43 @@ class ModelInterface(metaclass=ABCMeta):
         running = self.devmap[key].running
         data = dict(running=running, can_submit=not running)
         if running:
-            return Reply(success=True, msg="running", data=data)
+            return (True, "running", data)
         else:
-            return Reply(success=True, msg="ready", data=data)
+            return (True, "ready", data)
 
+    @to_reply
     @in_devmap
-    def task_stop(self, key: Key, **kwargs) -> Reply:
+    def task_stop(
+        self, key: Key, **kwargs
+    ) -> tuple[bool, str, Union[xr.Dataset, None]]:
         """
         Stops a running task and returns any collected data.
 
-        Pass-through to :func:`DriverManager.stop_task` and :func:`task_data`.
+        Pass-through to :func:`ModelDevice.stop_task` and :func:`ModelInterface.task_data`.
+
+        If there is any cached data, it is returned as a :class:`xarray.Dataset` in the
+        :obj:`Reply.data` and the cache is cleared.
         """
         ret = self.devmap[key].stop_task(**kwargs)
         if ret is not None:
-            return Reply(success=False, msg="failed to stop task", data=ret)
-
-        ret = self.task_data(self, key=key)
-        if ret.success:
-            return Reply(success=True, msg=f"task stopped, {ret.msg}", data=ret.data)
+            return (False, "failed to stop task", ret)
         else:
-            return Reply(success=True, msg=f"task stopped, {ret.msg}")
+            ret = self.task_data(self, key=key)
+            if ret.success:
+                return (True, f"task stopped, {ret.msg}", ret.data)
+            else:
+                return (True, f"task stopped, {ret.msg}", None)
 
+    @to_reply
     @in_devmap
-    def task_data(self, key: Key, **kwargs) -> Reply:
+    def task_data(
+        self, key: Key, **kwargs
+    ) -> tuple[bool, str, Union[xr.Dataset, None]]:
         """
         Return cached task data on the device component and clean the cache.
 
-        Pass-through for :func:`DeviceManager.get_data`, with the caveat that the
-        :class:`dict[list]` which is returned from the component is here converted to a
-        :class:`Dataset` and annotated using units from :func:`attrs`.
+        Pass-through for :func:`ModelDevice.get_data`, which should return a
+        :class:`xarray.Dataset` that is fully annotated.
 
         This function gets called by the job thread every `device.pollrate`, it therefore
         incurs some IPC cost.
@@ -349,8 +371,9 @@ class ModelInterface(metaclass=ABCMeta):
         data = self.devmap[key].get_data(**kwargs)
 
         if data is None:
-            return Reply(success=False, msg="found no new datapoints")
-        return Reply(success=True, msg=f"found {len(data)} new datapoints", data=data)
+            return (False, "found no new datapoints", None)
+        else:
+            return (True, f"found {len(data)} new datapoints", data)
 
     def status(self) -> Reply:
         """
@@ -406,10 +429,10 @@ class ModelDevice(metaclass=ABCMeta):
     constants: dict[str, Any]
     """Constant metadata of this component."""
 
-    data: Union[Dataset, None]
+    data: Union[xr.Dataset, None]
     """Container for cached data on this component."""
 
-    last_data: Union[Dataset, None]
+    last_data: Union[xr.Dataset, None]
     """Container for last datapoint on this component."""
 
     datalock: RLock
@@ -506,7 +529,6 @@ class ModelDevice(metaclass=ABCMeta):
             for k, v in task.technique_params.items():
                 self.set_attr(attr=k, val=v)
 
-    @abstractmethod
     def do_task(self, task: Task, **kwargs: dict):
         """
         Periodically called task execution function.
@@ -515,7 +537,13 @@ class ModelDevice(metaclass=ABCMeta):
         performing the measurement. It should also update the value of :obj:`self.last_data`,
         so that the component status is consistent with the cached data.
         """
-        pass
+        self.do_measure(**kwargs)
+        if self.data is None:
+            self.data = self.last_data
+        else:
+            self.data = xr.concat(
+                [self.data, self.last_data], dim="uts", data_vars="minimal"
+            )
 
     @abstractmethod
     def do_measure(self, **kwargs: dict) -> None:
@@ -534,7 +562,14 @@ class ModelDevice(metaclass=ABCMeta):
 
     @abstractmethod
     def set_attr(self, attr: str, val: Val, **kwargs: dict) -> Val:
-        """Sets the specified :class:`Attr` to `val`."""
+        """
+        Sets the specified :class:`Attr` to :obj:`val`.
+
+        This function should handle any data type coercion and validation
+        using e.g. :obj:`Attr.maximum` and :obj:`Attr.minimum`.
+
+        Returns the coerced value coresponding to :obj:`val`.
+        """
         pass
 
     @abstractmethod
@@ -542,9 +577,9 @@ class ModelDevice(metaclass=ABCMeta):
         """Reads the value of the specified :class:`Attr`."""
         pass
 
-    def get_data(self, **kwargs: dict) -> Dataset:
+    def get_data(self, **kwargs: dict) -> xr.Dataset:
         """
-        Returns the cached :obj:`self.data` as a :class:`xr.Dataset` before
+        Returns the cached :obj:`self.data` as a :class:`xarray.Dataset` before
         clearing the cache.
         """
         with self.datalock:
@@ -552,8 +587,8 @@ class ModelDevice(metaclass=ABCMeta):
             self.data = None
         return ret
 
-    def get_last_data(self, **kwargs: dict) -> Dataset:
-        """Returns the :obj:`last_data` object as a :class:`xr.Dataset`."""
+    def get_last_data(self, **kwargs: dict) -> xr.Dataset:
+        """Returns the :obj:`last_data` object as a :class:`xarray.Dataset`."""
         return self.last_data
 
     @abstractmethod
@@ -566,7 +601,7 @@ class ModelDevice(metaclass=ABCMeta):
         """Returns a :class:`set` of all supported techniques."""
         pass
 
-    def status(self, **kwargs) -> dict:
+    def status(self, **kwargs) -> dict[str, Val]:
         """Compiles a status report from :class:`Attrs` marked as `status=True`."""
         status = {}
         for attr, props in self.attrs().items():
