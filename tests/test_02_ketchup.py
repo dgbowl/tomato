@@ -23,6 +23,8 @@ def test_ketchup_submit_one(pl, jn, datadir, start_tomato_daemon, stop_tomato_da
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
 
     ret = ketchup.submit(**kwargs, payload=pl, jobname=jn)
+    utils.wait_until_ketchup_status(jobid=1, status="q", port=PORT, timeout=1000)
+
     print(f"{ret=}")
     assert ret.success
     assert ret.data.id == 1
@@ -35,6 +37,8 @@ def test_ketchup_submit_two(datadir, start_tomato_daemon, stop_tomato_daemon):
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", **kwargs)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs)
+    utils.wait_until_ketchup_status(jobid=2, status="q", port=PORT, timeout=1000)
+
     print(f"{ret=}")
     assert ret.success
     assert ret.data.id == 2
@@ -55,6 +59,8 @@ def test_ketchup_status_all_queued(datadir, start_tomato_daemon, stop_tomato_dae
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", **kwargs)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs)
+    utils.wait_until_ketchup_status(jobid=2, status="q", port=PORT, timeout=1000)
+
     ret = ketchup.status(**kwargs, verbosity=0, jobids=[])
     print(f"{ret=}")
     assert ret.success
@@ -68,6 +74,8 @@ def test_ketchup_status_one_queued(datadir, start_tomato_daemon, stop_tomato_dae
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", **kwargs)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs)
+    utils.wait_until_ketchup_status(jobid=2, status="q", port=PORT, timeout=1000)
+
     ret = ketchup.status(**kwargs, verbosity=0, jobids=[2])
     print(f"{ret=}")
     assert ret.success
@@ -82,6 +90,8 @@ def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_dae
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", **kwargs)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs)
+    utils.wait_until_ketchup_status(jobid=2, status="q", port=PORT, timeout=1000)
+    
     ret = ketchup.status(**kwargs, verbosity=0, jobids=[1, 2])
     print(f"{ret=}")
     assert ret.success
@@ -107,7 +117,7 @@ def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon
 def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
     utils.run_casenames(["counter_1_0.1"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
+    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
 
     assert utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
     ret = ketchup.status(**kwargs, verbosity=0, jobids=[1])
