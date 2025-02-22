@@ -5,6 +5,7 @@ import zmq
 from tomato import ketchup, tomato
 from .utils import (
     wait_until_tomato_running,
+    wait_until_tomato_drivers,
     wait_until_ketchup_status,
     wait_until_pickle,
 )
@@ -206,3 +207,24 @@ def test_ketchup_search(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = ketchup.search(jobname="wrong", port=PORT, context=CTXT)
     print(f"{ret=}")
     assert ret.success is False
+
+
+@pytest.mark.parametrize(
+    "pl, jn",
+    [
+        ("counter_invalid_1.yml", None),
+        ("counter_invalid_2.yml", None),
+        ("counter_invalid_3.yml", None),
+        ("counter_invalid_4.yml", None),
+    ],
+)
+def test_ketchup_validation(pl, jn, datadir, start_tomato_daemon, stop_tomato_daemon):
+    wait_until_tomato_running(port=PORT, timeout=1000)
+    wait_until_tomato_drivers(port=PORT, timeout=3000)
+    os.chdir(datadir)
+    ret = ketchup.submit(**kwargs, payload=pl, jobname=jn)
+    print(f"{ret=}")
+    assert ret.success
+    assert ret.data.id == 1
+    with pytest.raises(AssertionError):
+        assert wait_until_ketchup_status(jobid=1, status="qw", port=PORT, timeout=1000)
