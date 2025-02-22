@@ -307,7 +307,7 @@ class ModelInterface(metaclass=ABCMeta):
         logger.info("starting task '%s' on component %s", task.technique_name, key)
         if task.technique_name not in self.devmap[key].capabilities(**kwargs):
             msg = f"unknown task {task.technique_name!r} requested"
-            return (False, msg, self.capabilities(key=key))
+            return (False, msg, self.dev_capabilities(key=key))
         else:
             self.devmap[key].task_list.put(task)
             self.devmap[key].run()
