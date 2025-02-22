@@ -4,7 +4,7 @@
 .. codeauthor::
     Peter Kraus
 
-... warning:
+.. warning::
 
     This version of DriverInterface is deprecated and will not be supported from ``tomato-3.0`` onwards.
 
