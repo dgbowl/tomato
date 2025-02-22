@@ -91,7 +91,7 @@ def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_dae
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", **kwargs)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs)
     utils.wait_until_ketchup_status(jobid=2, status="q", port=PORT, timeout=1000)
-    
+
     ret = ketchup.status(**kwargs, verbosity=0, jobids=[1, 2])
     print(f"{ret=}")
     assert ret.success
