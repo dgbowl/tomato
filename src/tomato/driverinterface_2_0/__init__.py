@@ -191,6 +191,7 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[key].set_attr(attr=attr, val=val, **kwargs)
         return (True, f"attr {attr!r} of component {key} set to {ret}", ret)
 
+    @to_reply
     @in_devmap
     def dev_get_attr(
         self, attr: str, key: Key, **kwargs: dict
