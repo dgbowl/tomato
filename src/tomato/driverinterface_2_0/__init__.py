@@ -409,10 +409,10 @@ class ModelInterface(metaclass=ABCMeta):
                 if val.dimensionality != getattr(self, par).dimensionality:
                     msg = f"attribute {par!r} has the wrong dimensionality {str(val.dimensionality)}"
                     return (False, msg, None)
-            if props.minimum is None or val > props.minimum:
+            if props.minimum is not None and val < props.minimum:
                 msg = f"attr {par!r} is smaller than {props.minimum}"
                 return (False, msg, None)
-            if props.maximum is None or val < props.maximum:
+            if props.maximum is not None and val > props.maximum:
                 msg = f"attr {par!r} is greater than {props.maximum}"
                 return (False, msg, None)
         return (True, "task validated successfully", None)
