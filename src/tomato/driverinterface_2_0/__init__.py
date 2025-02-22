@@ -8,8 +8,8 @@
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Any, Union, TypeAlias
-from pydantic import BaseModel
+from typing import TypeVar, Any, Union, TypeAlias, Optional
+from pydantic import BaseModel, Field
 from threading import Thread, current_thread, RLock
 from queue import Queue
 from tomato.models import Reply
@@ -63,7 +63,7 @@ def to_reply(func):
     return wrapper
 
 
-class Attr(BaseModel):
+class Attr(BaseModel, arbitrary_types_allowed=True):
     """A Pydantic :class:`BaseModel` used to describe device attributes."""
 
     type: Type
@@ -78,10 +78,10 @@ class Attr(BaseModel):
     units: str = None
     """Default units for the attribute, optional."""
 
-    maximum: Union[pint.Quantity, float] = None
+    maximum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
     """Maximum value for the attribute, optional."""
 
-    minimum: Union[pint.Quantity, float] = None
+    minimum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
     """Minimum value for the attribute, optional."""
 
 
