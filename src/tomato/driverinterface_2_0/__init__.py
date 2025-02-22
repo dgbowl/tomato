@@ -400,20 +400,20 @@ class ModelInterface(metaclass=ABCMeta):
             if not isinstance(val, props.type):
                 try:
                     val = props.type(val)
-                except:
+                except (ValueError, pint.errors.UndefinedUnitError):
                     msg = f"could not coerce {par!r} to type {props.type}"
                     return (False, msg, None)
             if isinstance(val, pint.Quantity):
                 if val.dimensionless and props.units is not None:
                     val = pint.Quantity(val.m, props.units)
-                if val.dimensionality != getattr(self, attr).dimensionality:
-                    msg = f"attribute {attr!r} has the wrong dimensionality {str(val.dimensionality)}"
+                if val.dimensionality != getattr(self, par).dimensionality:
+                    msg = f"attribute {par!r} has the wrong dimensionality {str(val.dimensionality)}"
                     return (False, msg, None)
             if props.minimum is None or val > props.minimum:
-                msg = f"attr {attr!r} is smaller than {props.minimum}"
+                msg = f"attr {par!r} is smaller than {props.minimum}"
                 return (False, msg, None)
             if props.maximum is None or val < props.maximum:
-                msg = f"attr {attr!r} is greater than {props.maximum}"
+                msg = f"attr {par!r} is greater than {props.maximum}"
                 return (False, msg, None)
         return (True, "task validated successfully", None)
 
