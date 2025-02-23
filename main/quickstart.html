@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 2.0rc1.post1 documentation</title>
+  <title>Quick start guide &mdash; tomato 2.0rc1.post2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=c285f8a4"></script>
+        <script src="_static/documentation_options.js?v=f57d72ce"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -41,7 +41,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0rc1.post1
+                2.0rc1.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -80,7 +80,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.sampling_interval"><code class="docutils literal notranslate"><span class="pre">Task.sampling_interval</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.polling_interval"><code class="docutils literal notranslate"><span class="pre">Task.polling_interval</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.technique_name"><code class="docutils literal notranslate"><span class="pre">Task.technique_name</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.technique_params"><code class="docutils literal notranslate"><span class="pre">Task.technique_params</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.task_params"><code class="docutils literal notranslate"><span class="pre">Task.task_params</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -535,7 +535,7 @@
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;Task&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The :class:`Task` is a driver/device-independent abstraction describing the\nmeasurement steps. The driver-specific information for the :class:`Task` can be\nprovided via the ``technique`` parameter.&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The :class:`Task` is a driver/device-independent abstraction describing the\nmeasurement steps. The driver-specific information for the :class:`Task` can be\nprovided via the :obj:`technique_name` and :obj:`task_params` parameters.&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">            </span><span class="nt">&quot;component_tag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Component Tag&quot;</span><span class="p">,</span>
@@ -565,7 +565,7 @@
 <span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique Name&quot;</span><span class="p">,</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="nt">&quot;technique_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;task_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                  </span><span class="p">{</span>
 <span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
@@ -574,7 +574,7 @@
 <span class="w">                     </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
 <span class="w">                  </span><span class="p">}</span>
 <span class="w">               </span><span class="p">],</span>
-<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique Params&quot;</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Task Params&quot;</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">},</span>
 <span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -687,11 +687,11 @@
 <em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task" title="Link to this definition"></a></dt>
 <dd><p>The <a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> is a driver/device-independent abstraction describing the
 measurement steps. The driver-specific information for the <a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code></a> can be
-provided via the <code class="docutils literal notranslate"><span class="pre">technique</span></code> parameter.</p>
+provided via the <a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.technique_name" title="dgbowl_schemas.tomato.payload.Task.technique_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">technique_name</span></code></a> and <a class="reference internal" href="#dgbowl_schemas.tomato.payload.Task.task_params" title="dgbowl_schemas.tomato.payload.Task.task_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_params</span></code></a> parameters.</p>
 <p><details  class="autodoc_pydantic_collapsable_json">
 <summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The :class:`Task` is a driver/device-independent abstraction describing the\nmeasurement steps. The driver-specific information for the :class:`Task` can be\nprovided via the ``technique`` parameter.&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The :class:`Task` is a driver/device-independent abstraction describing the\nmeasurement steps. The driver-specific information for the :class:`Task` can be\nprovided via the :obj:`technique_name` and :obj:`task_params` parameters.&quot;</span><span class="p">,</span>
 <span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
 <span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;component_tag&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -722,7 +722,7 @@ provided via the <code class="docutils literal notranslate"><span class="pre">te
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique Name&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;technique_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;task_params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
@@ -731,7 +731,7 @@ provided via the <code class="docutils literal notranslate"><span class="pre">te
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">],</span>
-<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Technique Params&quot;</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Task Params&quot;</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">},</span>
 <span class="w">   </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
@@ -781,8 +781,8 @@ provided via the <code class="docutils literal notranslate"><span class="pre">te
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.technique_params">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">technique_params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.technique_params" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="dgbowl_schemas.tomato.payload.Task.task_params">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">task_params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#dgbowl_schemas.tomato.payload.Task.task_params" title="Link to this definition"></a></dt>
 <dd><p>a <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> of additional parameters required to specify the experimental technique</p>
 </dd></dl>
 
@@ -823,7 +823,7 @@ provided via the <code class="docutils literal notranslate"><span class="pre">te
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0rc1.post1
+      v: 2.0rc1.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
