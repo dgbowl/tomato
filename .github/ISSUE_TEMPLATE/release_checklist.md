@@ -16,6 +16,8 @@ assignees: ''
 - [ ] `docs/version.rst` updated 
 
 ### Preparing a full release
+- [ ] `tomato-example-counter` released with `tomato >= X.YrcZ`
+- [ ] `tomato-psutil` released with `tomato >= X.YrcZ`
 - [ ] `docs/version.rst` release date updated
 
 ### After release
