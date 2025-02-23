@@ -389,7 +389,7 @@ class ModelInterface(metaclass=ABCMeta):
             msg = f"unknown task {task.technique_name!r} requested"
             return (False, msg, None)
         attrs = self.devmap[key].attrs(**kwargs)
-        for par, val in task.technique_params.items():
+        for par, val in task.task_params.items():
             if par not in attrs:
                 msg = f"unknown attribute {par!r} cannot be set"
                 return (False, msg, None)
@@ -565,10 +565,10 @@ class ModelDevice(metaclass=ABCMeta):
     def prepare_task(self, task: Task, **kwargs: dict):
         """
         Given a :class:`Task`, prepare this component for execution by setting all
-        :class:`Attrs` as specified in the `task.technique_params` dictionary.
+        :class:`Attrs` as specified in the `task.task_params` dictionary.
         """
-        if task.technique_params is not None:
-            for k, v in task.technique_params.items():
+        if task.task_params is not None:
+            for k, v in task.task_params.items():
                 self.set_attr(attr=k, val=v)
 
     def do_task(self, task: Task, **kwargs: dict):
