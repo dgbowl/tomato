@@ -303,12 +303,12 @@ The *payload* file contains all information required to enter a *job* into the q
 
 .. note::
 
-    Of particular importance here is the specification of the individual :class:`Tasks`. Some general :class:`Task` parameters are abstracted by **tomato**, such as the ``max_duration``, ``sampling_interval`` and ``polling_interval``. The other are *driver* or *component* specific, and can be specified using the ``technique_params`` :class:`dict`.
+    Of particular importance here is the specification of the individual :class:`Tasks`. Some general :class:`Task` parameters are abstracted by **tomato**, such as the ``max_duration``, ``sampling_interval`` and ``polling_interval``. The other are *driver* or *component* specific, and can be specified using the ``task_params`` :class:`dict`.
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
 
 .. warning::
 
-    Currently, **tomato** performs no validation of any ``technique_params`` at *job* submission. It also does not check whether the ``sampling_interval`` is realistic. This means your *jobs* may crash when the ``technique_params`` are out of bounds when the :class:`Task` is being executed.
+    Currently, **tomato** performs no validation of any ``task_params`` at *job* submission. It also does not check whether the ``sampling_interval`` is realistic. This means your *jobs* may crash when the ``task_params`` are out of bounds when the :class:`Task` is being executed.
 
     However, such validation is planned for ``tomato-2.0``, see https://github.com/dgbowl/tomato/issues/99.
