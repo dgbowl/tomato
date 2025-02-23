@@ -154,10 +154,10 @@ class ModelInterface(metaclass=ABCMeta):
         def prepare_task(self, task: Task, **kwargs: dict):
             """
             Given a :class:`Task`, prepare this component for execution by settin all
-            :class:`Attrs` as specified in the `task.technique_params` dictionary.
+            :class:`Attrs` as specified in the `task.task_params` dictionary.
             """
-            if task.technique_params is not None:
-                for k, v in task.technique_params.items():
+            if task.task_params is not None:
+                for k, v in task.task_params.items():
                     self.set_attr(attr=k, val=v)
 
         @abstractmethod
