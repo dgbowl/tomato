@@ -15,10 +15,11 @@ Changes from ``tomato-1.0`` include:
 - The ``tomato status`` command now supports further arguments: ``pipelines``, ``drivers``, ``devices``, and ``components`` can be used to query status of subsets of the running **tomato**.
 - A new ``passata`` command and :mod:`tomato.passata` module for interacting with *components* over CLI and API.
 - A new ``DriverInterface-2.0``, with the following changes:
-  - :func:`dev_constants`: an accessor for :obj:`ModelDevice.constants` and :obj:`ModelInterface.constants`, which are containers for the *driver* and *component*-specific metadata,
-  - :func:`dev_last_data`: an accessor for :obj:`ModelDevice.last_data`, which should contain the last timestamped datapoint,
-  - :func:`dev_measure`: a passthrough function to launch :func:`ModelDevice.measure`, which will trigger a one-shot measurement to populate :obj:`ModelDevice.last_data`
+  - :func:`cmp_constants`: an accessor for :obj:`ModelDevice.constants` and :obj:`ModelInterface.constants`, which are containers for the *driver* and *component*-specific metadata,
+  - :func:`cmp_last_data`: an accessor for :obj:`ModelDevice.last_data`, which should contain the last timestamped datapoint,
+  - :func:`cmp_measure`: a passthrough function to launch :func:`ModelDevice.measure`, which will trigger a one-shot measurement to populate :obj:`ModelDevice.last_data`
   - :func:`DeviceFactory`: a factory function that creates an appropriate :obj:`ModelDevice` instance.
+  - Deprecation of :func:`dev_*` in favour of :func:`cmp_*`.
 
 .. codeauthor::
     Peter Kraus

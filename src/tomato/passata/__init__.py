@@ -42,7 +42,10 @@ def status(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_status", params={**kwargs}))
+    if drv.version == "1.0":
+        req.send_pyobj(dict(cmd="dev_status", params={**kwargs}))
+    else:
+        req.send_pyobj(dict(cmd="cmp_status", params={**kwargs}))
     ret = req.recv_pyobj()
     req.close()
     return ret
@@ -67,7 +70,7 @@ def attrs(
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="attrs", params={**kwargs}))
     else:
-        req.send_pyobj(dict(cmd="dev_attrs", params={**kwargs}))
+        req.send_pyobj(dict(cmd="cmp_attrs", params={**kwargs}))
     ret = req.recv_pyobj()
     return ret
 
@@ -91,7 +94,7 @@ def capabilities(
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="capabilities", params={**kwargs}))
     else:
-        req.send_pyobj(dict(cmd="dev_capabilities", params={**kwargs}))
+        req.send_pyobj(dict(cmd="cmp_capabilities", params={**kwargs}))
     ret = req.recv_pyobj()
     return ret
 
@@ -119,7 +122,7 @@ def constants(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_constants", params={**kwargs}))
+    req.send_pyobj(dict(cmd="cmp_constants", params={**kwargs}))
     ret = req.recv_pyobj()
     return ret
 
@@ -144,7 +147,10 @@ def get_attrs(
     data = dict()
     msg = ""
     for attr in attrs:
-        req.send_pyobj(dict(cmd="dev_get_attr", params={"attr": attr, **kwargs}))
+        if drv.version == "1.0":
+            req.send_pyobj(dict(cmd="dev_get_attr", params={"attr": attr, **kwargs}))
+        else:
+            req.send_pyobj(dict(cmd="cmp_get_attr", params={"attr": attr, **kwargs}))
         ret = req.recv_pyobj()
         if not ret.success:
             return ret
@@ -178,9 +184,14 @@ def set_attr(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(
-        dict(cmd="dev_set_attr", params={"attr": attr, "val": val, **kwargs})
-    )
+    if drv.version == "1.0":
+        req.send_pyobj(
+            dict(cmd="dev_set_attr", params={"attr": attr, "val": val, **kwargs})
+        )
+    else:
+        req.send_pyobj(
+            dict(cmd="cmp_set_attr", params={"attr": attr, "val": val, **kwargs})
+        )
     ret = req.recv_pyobj()
     return ret
 
@@ -201,7 +212,10 @@ def reset(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_reset", params=kwargs))
+    if drv.version == "1.0":
+        req.send_pyobj(dict(cmd="dev_reset", params=kwargs))
+    else:
+        req.send_pyobj(dict(cmd="cmp_reset", params=kwargs))
     ret = req.recv_pyobj()
     return ret
 
@@ -229,7 +243,7 @@ def get_last_data(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_last_data", params=kwargs))
+    req.send_pyobj(dict(cmd="cmp_last_data", params=kwargs))
     ret = req.recv_pyobj()
     return ret
 
@@ -257,6 +271,6 @@ def measure(
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="dev_measure", params=kwargs))
+    req.send_pyobj(dict(cmd="cmp_measure", params=kwargs))
     ret = req.recv_pyobj()
     return ret

@@ -127,8 +127,64 @@ class ModelInterface(metaclass=ABCMeta):
         """
         pass
 
+    def dev_register(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_register' is deprecated in favour of 'cmp_register' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_register(**kwargs)
+
+    def dev_teardown(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_teardown' is deprecated in favour of 'cmp_teardown' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_teardown(**kwargs)
+
+    def dev_reset(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_reset' is deprecated in favour of 'cmp_reset' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_reset(**kwargs)
+
+    def dev_set_attr(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_set_attr' is deprecated in favour of 'cmp_set_attr' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_set_attr(**kwargs)
+
+    def dev_get_attr(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_get_attr' is deprecated in favour of 'cmp_get_attr' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_get_attr(**kwargs)
+
+    def dev_status(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_status' is deprecated in favour of 'cmp_status' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_status(**kwargs)
+
+    def dev_capabilities(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_capabilities' is deprecated in favour of 'cmp_capabilities' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_capabilities(**kwargs)
+
+    def dev_attrs(self, **kwargs):
+        logger.warning(
+            "Use of 'dev_attrs' is deprecated in favour of 'cmp_attrs' "
+            "and will stop working in tomato-3.0"
+        )
+        return self.cmp_attrs(**kwargs)
+
     @to_reply
-    def dev_register(
+    def cmp_register(
         self, address: str, channel: str, **kwargs: dict
     ) -> tuple[bool, str, set]:
         """
@@ -147,7 +203,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_teardown(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
+    def cmp_teardown(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
         """
         Emergency stop function.
 
@@ -166,7 +222,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_reset(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
+    def cmp_reset(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
         """
         Component reset function.
 
@@ -178,7 +234,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_set_attr(
+    def cmp_set_attr(
         self, attr: str, val: Val, key: Key, **kwargs: dict
     ) -> tuple[bool, str, Val]:
         """
@@ -193,7 +249,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_get_attr(
+    def cmp_get_attr(
         self, attr: str, key: Key, **kwargs: dict
     ) -> tuple[bool, str, Val]:
         """
@@ -208,7 +264,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_status(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
+    def cmp_status(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
         """
         Get the status report from the specified device component.
 
@@ -226,7 +282,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_capabilities(self, key: Key, **kwargs) -> tuple[bool, str, set]:
+    def cmp_capabilities(self, key: Key, **kwargs) -> tuple[bool, str, set]:
         """
         Returns the capabilities of the device component.
 
@@ -238,7 +294,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_attrs(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
+    def cmp_attrs(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
         """
         Query available :class:`Attrs` on the specified device component.
 
@@ -250,7 +306,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_constants(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
+    def cmp_constants(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
         """
         Query constants on the specified device component and this driver.
 
@@ -261,7 +317,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_last_data(
+    def cmp_last_data(
         self, key: Key, **kwargs: dict
     ) -> tuple[bool, str, Union[None, xr.Dataset]]:
         """
@@ -278,7 +334,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     @to_reply
     @in_devmap
-    def dev_measure(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
+    def cmp_measure(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
         """
         Do a single measurement on the component according to its current
         configuration.

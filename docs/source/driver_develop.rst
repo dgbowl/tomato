@@ -10,7 +10,7 @@ As of ``tomato-1.0``, all device *drivers* are developed as separate Python pack
 
 Bootstrapping a *driver* process
 ````````````````````````````````
-When the *driver* process is launched (as a ``tomato-driver``), it's given information about how to connect to the ``tomato-daemon`` process and which device *driver* to spawn. Once a connection to the ``tomato-daemon`` is established, the *driver* settings are fetched, and the :class:`DriverManager` is instantiated passing any settings to the constructor. Then, all *components* on all *devices* of this *driver* type that are known to ``tomato-daemon`` are registered using the :func:`dev_register` function.
+When the *driver* process is launched (as a ``tomato-driver``), it's given information about how to connect to the ``tomato-daemon`` process and which device *driver* to spawn. Once a connection to the ``tomato-daemon`` is established, the *driver* settings are fetched, and the :class:`DriverManager` is instantiated passing any settings to the constructor. Then, all *components* on all *devices* of this *driver* type that are known to ``tomato-daemon`` are registered using the :func:`cmp_register` function.
 
 .. note::
 
