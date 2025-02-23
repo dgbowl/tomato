@@ -24,4 +24,4 @@ To run the test-suite, you need to first install **tomato** using the above comm
     cd tomato
     pytest -vv
 
-As the test suite only uses the :mod:`tomato.drivers.example_counter` driver, the tests should work on all platforms.
+As the test suite only uses the :mod:`tomato_example_counter` and :mod:`tomato_psutil` drivers, the tests should work on all platforms.

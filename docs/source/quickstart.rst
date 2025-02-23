@@ -307,8 +307,10 @@ The *payload* file contains all information required to enter a *job* into the q
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
 
+As of ``tomato-2.0``, the ``task_params`` specified in the *payload* are validated by the device *driver*. In particular, the setpoints of any entries within ``task_params`` are checked for compatibility with the type of the matching :class:`~tomato.driverinterface_2_0.Attr`. Similarly, their parsed values are compared against the optional :obj:`Attr.maximum` and :obj:`Attr.minimum`.  
+
 .. warning::
+  
+  Currently, **tomato** does not check whether the ``sampling_interval`` is realistic. This means your *jobs* may crash when the ``task_params`` are out of bounds when the :class:`Task` is being executed.
 
-    Currently, **tomato** performs no validation of any ``task_params`` at *job* submission. It also does not check whether the ``sampling_interval`` is realistic. This means your *jobs* may crash when the ``task_params`` are out of bounds when the :class:`Task` is being executed.
-
-    However, such validation is planned for ``tomato-2.0``, see https://github.com/dgbowl/tomato/issues/99.
+  However, such validation is planned for a future release, see https://github.com/dgbowl/tomato/issues/127.

@@ -16,6 +16,7 @@
 - a daemon for pipeline and device management, as well as job scheduling, :mod:`tomato.daemon`;
 - the daemon and pipeline configuration utility, :mod:`tomato.tomato`;
 - the job and job queue configuration utility, :mod:`tomato.ketchup`;
+- the component status utility and API, :mod:`tomato.passata`;
 - a set of device drivers, see the :ref:`driver library`.
 
 This project has received funding from:

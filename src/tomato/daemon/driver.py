@@ -42,7 +42,9 @@ def tomato_driver_bootstrap(
     for comp in daemon.cmps.values():
         if comp.driver == driver:
             logger.info("registering component %s", (comp.address, comp.channel))
+            logger.critical(f"{interface=}")
             ret = interface.dev_register(address=comp.address, channel=comp.channel)
+            logger.critical(f"{ret=}")
             params = dict(name=comp.name, capabilities=ret.data)
             req.send_pyobj(dict(cmd="component", params=params))
             ret = req.recv_pyobj()
