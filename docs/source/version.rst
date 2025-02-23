@@ -8,7 +8,6 @@ Version history
     :target: https://pypi.org/project/tomato/2.0/
 .. image:: https://img.shields.io/static/v1?label=release%20date&message=2025-02-23&color=red&logo=pypi
 
-
 .. sectionauthor::
      Peter Kraus
 
