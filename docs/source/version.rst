@@ -20,6 +20,7 @@ Changes from ``tomato-1.0`` include:
   - :func:`cmp_measure`: a passthrough function to launch :func:`ModelDevice.measure`, which will trigger a one-shot measurement to populate :obj:`ModelDevice.last_data`
   - :func:`DeviceFactory`: a factory function that creates an appropriate :obj:`ModelDevice` instance.
   - Deprecation of :func:`dev_*` in favour of :func:`cmp_*`.
+  - :func:`task_validate`: a validation function which verifies the provided :class:`Task` contains ``task_params`` that are compatible with the :obj:`Attrs` specified on the component.
 
 .. codeauthor::
     Peter Kraus

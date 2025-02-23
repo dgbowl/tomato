@@ -73,6 +73,7 @@ def test_reload_devs(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
+    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
 
     # Let's add psutil driver / device
     with open("devices_psutil.json", "r") as inf:
@@ -87,6 +88,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devs) == 2
     assert len(ret.data.pips) == 1
     assert len(ret.data.cmps) == 2
+    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
     utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
 
     # Let's remove psutil driver / device and modify channels
@@ -102,6 +104,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devs) == 1
     assert len(ret.data.pips) == 4
     assert len(ret.data.cmps) == 4
+    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
 
 
 def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
