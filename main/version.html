@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Version history &mdash; tomato 2.0rc1.post3 documentation</title>
+  <title>Version history &mdash; tomato 2.0rc1.post4 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5105f6d7"></script>
+        <script src="_static/documentation_options.js?v=9a8c661a"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0rc1.post3
+                2.0rc1.post4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -111,10 +111,12 @@
 <li><p>The <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">status</span></code> command now supports further arguments: <code class="docutils literal notranslate"><span class="pre">pipelines</span></code>, <code class="docutils literal notranslate"><span class="pre">drivers</span></code>, <code class="docutils literal notranslate"><span class="pre">devices</span></code>, and <code class="docutils literal notranslate"><span class="pre">components</span></code> can be used to query status of subsets of the running <strong>tomato</strong>.</p></li>
 <li><p>A new <code class="docutils literal notranslate"><span class="pre">passata</span></code> command and <a class="reference internal" href="apidoc/tomato.passata.html#module-tomato.passata" title="tomato.passata"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.passata</span></code></a> module for interacting with <em>components</em> over CLI and API.</p></li>
 <li><p>A new <code class="docutils literal notranslate"><span class="pre">DriverInterface-2.0</span></code>, with the following changes:
-- <code class="xref py py-func docutils literal notranslate"><span class="pre">dev_constants()</span></code>: an accessor for <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice.constants</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelInterface.constants</span></code>, which are containers for the <em>driver</em> and <em>component</em>-specific metadata,
-- <code class="xref py py-func docutils literal notranslate"><span class="pre">dev_last_data()</span></code>: an accessor for <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice.last_data</span></code>, which should contain the last timestamped datapoint,
-- <code class="xref py py-func docutils literal notranslate"><span class="pre">dev_measure()</span></code>: a passthrough function to launch <code class="xref py py-func docutils literal notranslate"><span class="pre">ModelDevice.measure()</span></code>, which will trigger a one-shot measurement to populate <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice.last_data</span></code>
-- <code class="xref py py-func docutils literal notranslate"><span class="pre">DeviceFactory()</span></code>: a factory function that creates an appropriate <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice</span></code> instance.</p></li>
+- <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_constants()</span></code>: an accessor for <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice.constants</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelInterface.constants</span></code>, which are containers for the <em>driver</em> and <em>component</em>-specific metadata,
+- <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_last_data()</span></code>: an accessor for <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice.last_data</span></code>, which should contain the last timestamped datapoint,
+- <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_measure()</span></code>: a passthrough function to launch <code class="xref py py-func docutils literal notranslate"><span class="pre">ModelDevice.measure()</span></code>, which will trigger a one-shot measurement to populate <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice.last_data</span></code>
+- <code class="xref py py-func docutils literal notranslate"><span class="pre">DeviceFactory()</span></code>: a factory function that creates an appropriate <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelDevice</span></code> instance.
+- Deprecation of <code class="xref py py-func docutils literal notranslate"><span class="pre">dev_*()</span></code> in favour of <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_*()</span></code>.
+- <code class="xref py py-func docutils literal notranslate"><span class="pre">task_validate()</span></code>: a validation function which verifies the provided <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> contains <code class="docutils literal notranslate"><span class="pre">task_params</span></code> that are compatible with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Attrs</span></code> specified on the component.</p></li>
 </ul>
 <p><em>Code author: Peter Kraus</em></p>
 </section>
@@ -176,7 +178,7 @@ Loris Ercole.</em></p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0rc1.post3
+      v: 2.0rc1.post4
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
