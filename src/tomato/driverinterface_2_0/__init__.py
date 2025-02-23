@@ -462,7 +462,7 @@ class ModelInterface(metaclass=ABCMeta):
             if isinstance(val, pint.Quantity):
                 if val.dimensionless and props.units is not None:
                     val = pint.Quantity(val.m, props.units)
-                if val.dimensionality != getattr(self, par).dimensionality:
+                if val.dimensionality != pint.Quantity(props.units).dimensionality:
                     msg = f"attribute {par!r} has the wrong dimensionality {str(val.dimensionality)}"
                     return (False, msg, None)
             if props.minimum is not None and val < props.minimum:
