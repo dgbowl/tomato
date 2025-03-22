@@ -67,6 +67,10 @@ def to_reply(func):
 def log_errors(func):
     """
     Helper decorator for logging all kinds of errors.
+
+    This decorator should be only used on functions in the API of the
+    :class:`ModelInterface`, as the caught exceptions will cause the
+    driver process to exit.
     """
 
     @wraps(func)
@@ -604,7 +608,6 @@ class ModelDevice(metaclass=ABCMeta):
         self.thread.do_run = True
         self.thread.start()
 
-    @log_errors
     def task_runner(self):
         """
         Target function for the :obj:`self.thread` when handling :class:`Tasks`.
@@ -618,10 +621,16 @@ class ModelDevice(metaclass=ABCMeta):
         The :obj:`self.thread` is re-primed for future :class:`Tasks` at the end
         of this function.
         """
+        e = None
         self.running = True
         thread = current_thread()
-        task: Task = self.task_list.get()
-        self.prepare_task(task=task)
+        try:
+            task: Task = self.task_list.get()
+            self.prepare_task(task=task)
+        except Exception as e:
+            logger.critical(e, exc_info=True)
+            thread.do_run = False
+
         t_start = time.perf_counter()
         t_prev = t_start
         self.data = None
@@ -629,7 +638,11 @@ class ModelDevice(metaclass=ABCMeta):
             t_now = time.perf_counter()
             if t_now - t_prev > task.sampling_interval:
                 with self.datalock:
-                    self.do_task(task, t_start=t_start, t_now=t_now, t_prev=t_prev)
+                    try:
+                        self.do_task(task, t_start=t_start, t_now=t_now, t_prev=t_prev)
+                    except Exception as e:
+                        logger.critical(e, exc_info=True)
+                        thread.do_run = False
                 t_prev += task.sampling_interval
             if t_now - t_start > task.max_duration:
                 break
@@ -638,9 +651,11 @@ class ModelDevice(metaclass=ABCMeta):
         self.task_list.task_done()
         self.running = False
         self.thread = Thread(target=self.task_runner, daemon=True)
-        logger.info("task '%s' on component %s is done", task.technique_name, self.key)
+        if e is None:
+            logger.info(
+                "task '%s' on component %s is done", task.technique_name, self.key
+            )
 
-    @log_errors
     def meas_runner(self):
         """
         Target function for the :obj:`self.thread` when performing one shot measurements.
@@ -648,11 +663,14 @@ class ModelDevice(metaclass=ABCMeta):
         Performs the measurement using :func:`self.do_measure()`. Resets :obj:`self.thread`
         for future :class:`Tasks`.
         """
-        self.running = True
-        self.do_measure()
-        self.running = False
-        self.thread = Thread(target=self.task_runner, daemon=True)
-        logger.info("measurement on component %s is done", self.key)
+        try:
+            self.running = True
+            self.do_measure()
+            self.running = False
+            self.thread = Thread(target=self.task_runner, daemon=True)
+            logger.info("measurement on component %s is done", self.key)
+        except Exception as e:
+            logger.critical(e, exc_info=True)
 
     def prepare_task(self, task: Task, **kwargs: dict):
         """
