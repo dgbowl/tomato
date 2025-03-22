@@ -20,6 +20,7 @@ import xarray as xr
 import time
 import atexit
 import pint
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,7 @@ def log_errors(func):
             return func(self, **kwargs)
         except Exception as e:
             logger.critical(e, exc_info=True)
+            sys.exit(e)
 
     return wrapper
 
@@ -652,7 +654,6 @@ class ModelDevice(metaclass=ABCMeta):
         self.thread = Thread(target=self.task_runner, daemon=True)
         logger.info("measurement on component %s is done", self.key)
 
-    @log_errors
     def prepare_task(self, task: Task, **kwargs: dict):
         """
         Given a :class:`Task`, prepare this component for execution by setting all
