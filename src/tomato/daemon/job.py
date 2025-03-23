@@ -490,9 +490,6 @@ def job_thread(
                     ds = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
                     data_to_pickle(ds, datapath, role=component.role)
-                else:
-                    logger.critical(f"{ret=}")
-                    break
                 t0 += device.pollrate
 
             logger.debug("polling component '%s' for task completion", component.role)
