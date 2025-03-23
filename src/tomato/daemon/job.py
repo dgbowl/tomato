@@ -24,6 +24,7 @@ from pathlib import Path
 from threading import current_thread, Thread
 import zmq
 import psutil
+import sys
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.daemon import jobdb
@@ -406,12 +407,17 @@ def tomato_job() -> None:
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
-    job_main_loop(context, args.port, job, pip, logpath)
+    ret = job_main_loop(context, args.port, job, pip, logpath)
     logger.info("==============================")
 
-    logger.info("job finished successfully, setting job status to 'c'")
-    job.completed_at = str(datetime.now(timezone.utc))
-    job.status = "c"
+    if ret is None:
+        logger.info("job finished successfully, setting job status to 'c'")
+        job.completed_at = str(datetime.now(timezone.utc))
+        job.status = "c"
+    else:
+        logger.info("job crashed, setting job status to 'ce'")
+        job.completed_at = str(datetime.now(timezone.utc))
+        job.status = "ce"
     params = dict(status=job.status, completed_at=job.completed_at)
     job = jobdb.update_job_id(job.id, params, args.dbpath)
 
@@ -438,12 +444,14 @@ def job_thread(
 
     Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
     """
-    sender = f"{__name__}.job_thread({current_thread().ident})"
+    thread = current_thread()
+    sender = f"{__name__}.job_thread({thread.ident})"
     logger = logging.getLogger(sender)
     logger.debug(f"in job thread of {component.role!r}")
 
     context = zmq.Context()
     req = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{driver.port}")
     logger.debug(f"job thread of {component.role!r} connected to tomato-daemon")
 
@@ -470,8 +478,13 @@ def job_thread(
             tN = time.perf_counter()
             if tN - t0 > device.pollrate:
                 logger.debug("polling component '%s' for data", component.role)
-                req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
-                ret = req.recv_pyobj()
+                try:
+                    req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
+                    ret = req.recv_pyobj()
+                except zmq.ZMQError as e:
+                    logger.critical(e, exc_info=True)
+                    thread.crashed = True
+                    sys.exit(e)
                 if ret.success:
                     logger.debug("pickling received data")
                     ds = ret.data
@@ -480,10 +493,18 @@ def job_thread(
                 t0 += device.pollrate
 
             logger.debug("polling component '%s' for task completion", component.role)
-            req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
-            ret = req.recv_pyobj()
+            try:
+                req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
+                ret = req.recv_pyobj()
+            except zmq.ZMQError as e:
+                logger.critical(e, exc_info=True)
+                thread.crashed = True
+                sys.exit(e)
             if ret.success and not ret.data["running"]:
                 logger.debug("task no longer running, break")
+                break
+            elif ret.success is False:
+                logger.critical(f"{ret=}")
                 break
             time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
 
@@ -558,6 +579,7 @@ def job_main_loop(
             args=(tasks, component, device, driver, job.jobpath, logpath),
             name="job-thread",
         )
+        threads[component.role].crashed = False
         threads[component.role].start()
 
     # wait until threads join or we're killed
@@ -570,9 +592,13 @@ def job_main_loop(
             logger.debug("creating snapshot")
             merge_netcdfs(job, snapshot=True)
             t0 += snapshot.frequency
-        joined = [proc.is_alive() is False for proc in threads.values()]
+        crashed = [t.crashed for t in threads.values()]
+        joined = [t.is_alive() is False or t.crashed for t in threads.values()]
         if all(joined):
-            break
+            if any(crashed):
+                return 1
+            else:
+                return None
         else:
             # We'd like to execute this loop exactly once every second
             time.sleep(1.0 - tN % 1)

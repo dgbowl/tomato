@@ -20,6 +20,7 @@ import xarray as xr
 import time
 import atexit
 import pint
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,26 @@ def to_reply(func):
         else:
             success, msg, data = ret
             return Reply(success=success, msg=msg, data=data)
+
+    return wrapper
+
+
+def log_errors(func):
+    """
+    Helper decorator for logging all kinds of errors.
+
+    This decorator should be only used on functions in the API of the
+    :class:`ModelInterface`, as the caught exceptions will cause the
+    driver process to exit.
+    """
+
+    @wraps(func)
+    def wrapper(self, **kwargs):
+        try:
+            return func(self, **kwargs)
+        except Exception as e:
+            logger.critical(e, exc_info=True)
+            sys.exit(e)
 
     return wrapper
 
@@ -183,6 +204,7 @@ class ModelInterface(metaclass=ABCMeta):
         )
         return self.cmp_attrs(**kwargs)
 
+    @log_errors
     @to_reply
     def cmp_register(
         self, address: str, channel: str, **kwargs: dict
@@ -201,6 +223,7 @@ class ModelInterface(metaclass=ABCMeta):
         capabs = self.devmap[key].capabilities()
         return (True, f"device {key!r} registered", capabs)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_teardown(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
@@ -220,6 +243,7 @@ class ModelInterface(metaclass=ABCMeta):
         del self.devmap[key]
         return (True, f"device {key!r} torn down", None)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_reset(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
@@ -232,6 +256,7 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap[key].reset()
         return (True, f"component {key!r} reset successfully", None)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_set_attr(
@@ -247,6 +272,7 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[key].set_attr(attr=attr, val=val, **kwargs)
         return (True, f"attr {attr!r} of component {key} set to {ret}", ret)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_get_attr(
@@ -262,6 +288,7 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[key].get_attr(attr=attr, **kwargs)
         return (True, f"attr {attr!r} of component {key} is: {ret}", ret)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_status(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
@@ -280,6 +307,7 @@ class ModelInterface(metaclass=ABCMeta):
         msg = f"component {key} is{' ' if ret['running'] else ' not '}running"
         return (True, msg, ret)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_capabilities(self, key: Key, **kwargs) -> tuple[bool, str, set]:
@@ -292,6 +320,7 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[key].capabilities(**kwargs)
         return (True, f"capabilities supported by component {key!r} are: {ret}", ret)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_attrs(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
@@ -304,6 +333,7 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[key].attrs(**kwargs)
         return (True, f"attrs of component {key!r} are: {ret}", ret)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_constants(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
@@ -315,6 +345,7 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.constants | self.devmap[key].constants
         return (True, f"constants of component {key!r} are: {ret}", ret)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_last_data(
@@ -332,6 +363,7 @@ class ModelInterface(metaclass=ABCMeta):
         else:
             return (True, f"last datapoint on component {key!r} at {ret.uts}", ret)
 
+    @log_errors
     @to_reply
     @in_devmap
     def cmp_measure(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
@@ -348,6 +380,7 @@ class ModelInterface(metaclass=ABCMeta):
             self.devmap[key].measure()
             return (True, f"measurement started on component {key!r}", None)
 
+    @log_errors
     @to_reply
     @in_devmap
     def task_start(
@@ -370,6 +403,7 @@ class ModelInterface(metaclass=ABCMeta):
         logger.info("task '%s' on component %s started", task.technique_name, key)
         return (True, f"task {task!r} started successfully", task)
 
+    @log_errors
     @to_reply
     @in_devmap
     def task_status(self, key: Key, **kwargs: dict) -> tuple[bool, str, dict]:
@@ -387,6 +421,7 @@ class ModelInterface(metaclass=ABCMeta):
         else:
             return (True, "ready", data)
 
+    @log_errors
     @to_reply
     @in_devmap
     def task_stop(
@@ -410,6 +445,7 @@ class ModelInterface(metaclass=ABCMeta):
             else:
                 return (True, f"task stopped, {ret.msg}", None)
 
+    @log_errors
     @to_reply
     @in_devmap
     def task_data(
@@ -426,12 +462,12 @@ class ModelInterface(metaclass=ABCMeta):
 
         """
         data = self.devmap[key].get_data(**kwargs)
-
         if data is None:
             return (False, "found no new datapoints", None)
         else:
             return (True, f"found {len(data)} new datapoints", data)
 
+    @log_errors
     @to_reply
     @in_devmap
     def task_validate(self, key: Key, task: Task, **kwargs) -> tuple[bool, str, None]:
@@ -473,6 +509,7 @@ class ModelInterface(metaclass=ABCMeta):
                 return (False, msg, None)
         return (True, "task validated successfully", None)
 
+    @log_errors
     def status(self) -> Reply:
         """
         Returns the driver status. Currently that is the names of the components in
@@ -486,6 +523,7 @@ class ModelInterface(metaclass=ABCMeta):
             data=dict(devkeys=devkeys),
         )
 
+    @log_errors
     def reset(self) -> Reply:
         """
         Resets the driver.
@@ -583,10 +621,16 @@ class ModelDevice(metaclass=ABCMeta):
         The :obj:`self.thread` is re-primed for future :class:`Tasks` at the end
         of this function.
         """
+        e = None
         self.running = True
         thread = current_thread()
-        task: Task = self.task_list.get()
-        self.prepare_task(task)
+        try:
+            task: Task = self.task_list.get()
+            self.prepare_task(task=task)
+        except Exception as e:
+            logger.critical(e, exc_info=True)
+            thread.do_run = False
+
         t_start = time.perf_counter()
         t_prev = t_start
         self.data = None
@@ -594,7 +638,11 @@ class ModelDevice(metaclass=ABCMeta):
             t_now = time.perf_counter()
             if t_now - t_prev > task.sampling_interval:
                 with self.datalock:
-                    self.do_task(task, t_start=t_start, t_now=t_now, t_prev=t_prev)
+                    try:
+                        self.do_task(task, t_start=t_start, t_now=t_now, t_prev=t_prev)
+                    except Exception as e:
+                        logger.critical(e, exc_info=True)
+                        thread.do_run = False
                 t_prev += task.sampling_interval
             if t_now - t_start > task.max_duration:
                 break
@@ -603,7 +651,10 @@ class ModelDevice(metaclass=ABCMeta):
         self.task_list.task_done()
         self.running = False
         self.thread = Thread(target=self.task_runner, daemon=True)
-        logger.info("task '%s' on component %s is done", task.technique_name, self.key)
+        if e is None:
+            logger.info(
+                "task '%s' on component %s is done", task.technique_name, self.key
+            )
 
     def meas_runner(self):
         """
@@ -612,11 +663,14 @@ class ModelDevice(metaclass=ABCMeta):
         Performs the measurement using :func:`self.do_measure()`. Resets :obj:`self.thread`
         for future :class:`Tasks`.
         """
-        self.running = True
-        self.do_measure()
-        self.running = False
-        self.thread = Thread(target=self.task_runner, daemon=True)
-        logger.info("measurement on component %s is done", self.key)
+        try:
+            self.running = True
+            self.do_measure()
+            self.running = False
+            self.thread = Thread(target=self.task_runner, daemon=True)
+            logger.info("measurement on component %s is done", self.key)
+        except Exception as e:
+            logger.critical(e, exc_info=True)
 
     def prepare_task(self, task: Task, **kwargs: dict):
         """

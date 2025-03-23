@@ -290,7 +290,10 @@ def manager(port: int, timeout: int = 1000):
                 spawned_drivers[driver] = 1
             elif driver not in spawned_drivers or spawned_drivers[driver] > 5:
                 drv = daemon.drvs[driver]
-                if drv.pid is not None and not psutil.pid_exists(drv.pid):
+                if drv.pid is not None and (
+                    not psutil.pid_exists(drv.pid)
+                    or psutil.Process(drv.pid).status() in psutil.STATUS_ZOMBIE
+                ):
                     logger.warning("respawning crashed driver '%s'", driver)
                     spawn_tomato_driver(*args)
                     spawned_drivers[driver] = 1
