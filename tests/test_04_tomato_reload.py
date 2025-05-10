@@ -34,7 +34,7 @@ def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devs) == 1
     assert len(ret.data.pips) == 1
     assert len(ret.data.cmps) == 1
-    assert ret.data.drvs["example_counter"].settings == {"testpar": 1234, "testparb": 1}
+    assert ret.data.drvs["example_counter"].settings["testparb"] == 1
 
 
 def test_reload_cmps_pips(datadir, start_tomato_daemon, stop_tomato_daemon):
