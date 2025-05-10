@@ -61,8 +61,8 @@ def perform_idle_measurements(
 ) -> Union[float, None]:
     if "idle_measurement_interval" in interface.settings:
         imi = interface.settings["idle_measurement_interval"]
-    elif hasattr(inteface, "IDLE_MEASUREMENT_INTERVAL"):
-        imi = inteface.IDLE_MEASUREMENT_INTERVAL
+    elif hasattr(interface, "idle_measurement_interval"):
+        imi = interface.idle_measurement_interval
     else:
         imi = IDLE_MEASUREMENT_INTERVAL
     t_now = time.perf_counter()
