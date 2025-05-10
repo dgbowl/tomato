@@ -31,6 +31,11 @@ Key: TypeAlias = tuple[str, str]
 
 
 def in_devmap(func):
+    """
+    Helper decorator for coercing ``(address, channel)`` into ``key`` 
+    and checking that it is in :obj:`self.devmap`.
+    """
+
     @wraps(func)
     def wrapper(self, **kwargs):
         if "key" in kwargs:
