@@ -20,7 +20,7 @@ When the *driver* process is launched (as a ``tomato-driver``), it's given infor
 ``````````````````````````
 The following keywords in the driver-specific settings in the :ref:`*settings file* <setfile>` are reserved for use by **tomato**:
 
-- ``idle_measurement_interval``: Specifies the interval (in seconds) after which the :func:`do_measure` function of all *components* registered on the *driver* should be called. The :func:`do_measure` is only called for *components* that are idle, i.e. without a running :class:`Task`. Overrides any :obj:`DriverInterface.idle_measurement_interval`.
+- ``idle_measurement_interval``: Specifies the interval (in seconds) after which the :func:`cmp_measure` function of all *components* registered on the *driver* should be called. The :func:`cmp_measure` checks that *components* are idle, i.e. without a running :class:`Task`. Overrides any :obj:`DriverInterface.idle_measurement_interval`.
 
 
 Communication between *jobs* and *drivers*
