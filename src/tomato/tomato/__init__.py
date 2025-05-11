@@ -468,7 +468,7 @@ def init(
         config = '{appdir / "devices.yml"}'
 
         [drivers]
-        example_counter.testpar = 1234
+        example_counter.idle_measurement_interval = 1
         """
     )
     if not appdir.exists():

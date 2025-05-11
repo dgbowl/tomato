@@ -107,26 +107,9 @@ def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
     assert ret.data["example_meta"] == "example string"
 
 
-def test_passata_api_last_data_none(start_tomato_daemon, stop_tomato_daemon):
+def test_passata_api_last_data(start_tomato_daemon, stop_tomato_daemon):
     utils.wait_until_tomato_running(port=PORT, timeout=1000)
     utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    ret = tomato.passata.get_last_data(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
-    print(f"{ret=}")
-    assert not ret.success
-
-
-def test_passata_api_measure_last_data(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    ret = tomato.passata.measure(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
-    assert ret.success
-
     ret = tomato.passata.get_last_data(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -134,6 +117,16 @@ def test_passata_api_measure_last_data(start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert "uts" in ret.data.coords
+
+
+def test_passata_api_measure(start_tomato_daemon, stop_tomato_daemon):
+    utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    ret = tomato.passata.measure(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    assert ret.success
 
 
 def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):

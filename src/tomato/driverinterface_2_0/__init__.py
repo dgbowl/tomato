@@ -31,6 +31,11 @@ Key: TypeAlias = tuple[str, str]
 
 
 def in_devmap(func):
+    """
+    Helper decorator for coercing ``(address, channel)`` into ``key``
+    and checking that it is in :obj:`self.devmap`.
+    """
+
     @wraps(func)
     def wrapper(self, **kwargs):
         if "key" in kwargs:
@@ -124,13 +129,18 @@ class ModelInterface(metaclass=ABCMeta):
 
     """
 
+    # Class attributes
     version: str = "2.0"
 
+    idle_measurement_interval: Union[int, None] = None
+    """The interval (in seconds) after which :func:`self.do_measure` will be executed, when idle."""
+
+    # Instance attributes
     devmap: dict[tuple, "ModelDevice"]
     """Map of registered devices, the tuple keys are `component = (address, channel)`"""
 
     settings: dict[str, Any]
-    """A settings map to contain driver-specific settings such as `dllpath` for BioLogic"""
+    """A settings map to contain driver-specific settings such as ``dllpath`` for BioLogic"""
 
     constants: dict[str, Any]
     """A map that should be populated with driver-specific run-time constants."""

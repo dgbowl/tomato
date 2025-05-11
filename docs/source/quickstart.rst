@@ -162,7 +162,7 @@ The *settings file* contains the basic information required to start the ``tomat
     config = '/home/kraus/.config/tomato/1.0a1/devices.yml'
 
     [drivers]
-    example_counter.testpar = 1234
+    example_counter.idle_measurement_interval = 1
 
 
 In addition to the *appdir*, a second path, *datadir*, is used to specify the location of the data created by **tomato**. The default *datadir* is:
@@ -181,7 +181,7 @@ In the default *settings file* shown above, the following entries are specified:
 - ``jobs.dbpath`` which is the location of the ``sqlite3`` database used to track *jobs*, 
 - ``devices.config`` which points to a ``yaml``-formatted :ref:`devices file <devfile>`, defining the hardware configuration of the devices managed by **tomato**.
 
-Additional, *driver*-specific settings may be provided in the ``[drivers]`` section, following the example of the ``drivers.example_counter.testpar`` entry. These *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.
+Additional, *driver*-specific settings may be provided in the ``[drivers]`` section, following the example of the ``drivers.example_counter.idle_measurement_interval`` entry. These *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.
 
 .. _devfile:
 

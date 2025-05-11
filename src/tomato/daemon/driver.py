@@ -23,10 +23,11 @@ import psutil
 from tomato.driverinterface_1_0 import ModelInterface as MI_1_0
 from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
 from tomato.drivers import driver_to_interface
-from tomato.models import Reply
+from tomato.models import Reply, Daemon
 
 logger = logging.getLogger(__name__)
 ModelInterface = Union[MI_1_0, MI_2_0]
+IDLE_MEASUREMENT_INTERVAL = None
 
 
 def tomato_driver_bootstrap(
@@ -34,21 +35,46 @@ def tomato_driver_bootstrap(
 ):
     logger.debug("getting daemon status")
     req.send_pyobj(dict(cmd="status"))
-    daemon = req.recv_pyobj().data
+    daemon: Daemon = req.recv_pyobj().data
     drv = daemon.drvs[driver]
     interface.settings = drv.settings
 
     logger.info("registering components for driver '%s'", driver)
     for comp in daemon.cmps.values():
         if comp.driver == driver:
-            logger.info("registering component %s", (comp.address, comp.channel))
-            logger.critical(f"{interface=}")
+            logger.info("registering component %s", comp.name)
             ret = interface.dev_register(address=comp.address, channel=comp.channel)
-            logger.critical(f"{ret=}")
+            if ret.success:
+                logger.debug("registered component %s: %s", comp.name, ret.msg)
+            else:
+                logger.critical(
+                    "failed to register component %s: %s", comp.name, ret.msg
+                )
             params = dict(name=comp.name, capabilities=ret.data)
             req.send_pyobj(dict(cmd="component", params=params))
             ret = req.recv_pyobj()
     logger.info("driver '%s' bootstrapped successfully", driver)
+
+
+def perform_idle_measurements(
+    interface: ModelInterface, t_last: Union[float, None]
+) -> Union[float, None]:
+    if "idle_measurement_interval" in interface.settings:
+        imi = interface.settings["idle_measurement_interval"]
+    elif hasattr(interface, "idle_measurement_interval"):
+        imi = interface.idle_measurement_interval
+    else:
+        imi = IDLE_MEASUREMENT_INTERVAL
+    t_now = time.perf_counter()
+    if imi is None:
+        return None
+    if t_last is not None and t_now - t_last < imi:
+        return t_last
+    for cname, cmp in interface.devmap.items():
+        if cmp.running is False and hasattr(cmp, "do_measure"):
+            logger.debug("running measurement on component %s", cname)
+            cmp.do_measure()
+    return t_now
 
 
 def tomato_driver() -> None:
@@ -153,6 +179,7 @@ def tomato_driver() -> None:
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
     status = "running"
+    t_last = None
     while True:
         socks = dict(poller.poll(100))
         if rep in socks:
@@ -197,6 +224,8 @@ def tomato_driver() -> None:
             rep.send_pyobj(ret)
         if status == "stop":
             break
+        elif status == "running":
+            t_last = perform_idle_measurements(interface, t_last)
 
     logger.info("driver '%s' is beginning reset", args.driver)
     interface.reset()
