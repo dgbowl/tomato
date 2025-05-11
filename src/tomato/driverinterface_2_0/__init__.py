@@ -131,9 +131,10 @@ class ModelInterface(metaclass=ABCMeta):
 
     # Class attributes
     version: str = "2.0"
+    """Version of the :obj:`DriverInterface`."""
 
     idle_measurement_interval: Union[int, None] = None
-    """The interval (in seconds) after which :func:`self.do_measure` will be executed, when idle."""
+    """The interval (in seconds) after which :func:`self.cmp_measure` will be executed, when idle."""
 
     # Instance attributes
     devmap: dict[tuple, "ModelDevice"]

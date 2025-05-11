@@ -70,7 +70,7 @@ def perform_idle_measurements(
         imi = IDLE_MEASUREMENT_INTERVAL
     if imi is None:
         return None
-    
+
     t_now = time.perf_counter()
     if t_last is not None and t_now - t_last < imi:
         return t_last
