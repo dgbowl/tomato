@@ -59,21 +59,23 @@ def tomato_driver_bootstrap(
 def perform_idle_measurements(
     interface: ModelInterface, t_last: Union[float, None]
 ) -> Union[float, None]:
+    if not hasattr(interface, "cmp_measure"):
+        return t_last
+
     if "idle_measurement_interval" in interface.settings:
         imi = interface.settings["idle_measurement_interval"]
     elif hasattr(interface, "idle_measurement_interval"):
         imi = interface.idle_measurement_interval
     else:
         imi = IDLE_MEASUREMENT_INTERVAL
-    t_now = time.perf_counter()
     if imi is None:
         return None
+
+    t_now = time.perf_counter()
     if t_last is not None and t_now - t_last < imi:
         return t_last
-    for cname, cmp in interface.devmap.items():
-        if cmp.running is False and hasattr(cmp, "do_measure"):
-            logger.debug("running measurement on component %s", cname)
-            cmp.do_measure()
+    for key in interface.devmap.keys():
+        interface.cmp_measure(key=key)
     return t_now
 
 
