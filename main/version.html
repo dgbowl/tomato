@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Version history &mdash; tomato 2.0.post1 documentation</title>
+  <title>Version history &mdash; tomato 2.0.post2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=ce9f7aad"></script>
+        <script src="_static/documentation_options.js?v=f967f0c7"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0.post1
+                2.0.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Version history</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-next"><strong>tomato</strong>-next</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tomato-v2-0"><strong>tomato</strong>-v2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tomato-v1-0"><strong>tomato</strong>-v1.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tomato-v0-2"><strong>tomato</strong>-v0.2</a></li>
@@ -100,6 +101,17 @@
              
   <section id="version-history">
 <h1>Version history<a class="headerlink" href="#version-history" title="Link to this heading"></a></h1>
+<section id="tomato-next">
+<h2><strong>tomato</strong>-next<a class="headerlink" href="#tomato-next" title="Link to this heading"></a></h2>
+<p><em>Section author: Peter Kraus</em></p>
+<p>Developed at the ConCat lab at TU Berlin.</p>
+<p>Changes from <code class="docutils literal notranslate"><span class="pre">tomato-2.0</span></code> include:</p>
+<ul class="simple">
+<li><p><em>Driver</em> processess are now better at logging errors. All <code class="docutils literal notranslate"><span class="pre">Exceptions</span></code> raised by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface</span></code> should should now be caught and logged; as functionality of the <em>components</em> should only be accessed via the <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface</span></code>, this should catch all cases.</p></li>
+<li><p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">do_measure()</span></code> of each <em>component</em> can now be periodically called by the <em>driver</em> process, if a task is not running. The interval (in seconds) can be configured by the user in the <em>driver</em> section of the <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">*settings file*</span></a> (under <code class="docutils literal notranslate"><span class="pre">driver.&lt;driver_name&gt;.idle_measurement_interval</span></code>) or provided by the driver developer (under <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface.idle_measurement_interval</span></code>); it falls back to <code class="docutils literal notranslate"><span class="pre">None</span></code> which means no periodic measurement will be done.</p></li>
+</ul>
+<p><em>Code author: Peter Kraus</em></p>
+</section>
 <section id="tomato-v2-0">
 <h2><strong>tomato</strong>-v2.0<a class="headerlink" href="#tomato-v2-0" title="Link to this heading"></a></h2>
 <a class="reference external image-reference" href="https://github.com/dgbowl/tomato/tree/2.0"><img alt="https://img.shields.io/static/v1?label=tomato&amp;message=v2.0&amp;color=blue&amp;logo=github" src="https://img.shields.io/static/v1?label=tomato&amp;message=v2.0&amp;color=blue&amp;logo=github" /></a>
@@ -181,7 +193,7 @@ Loris Ercole.</em></p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0.post1
+      v: 2.0.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

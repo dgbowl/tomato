@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 2.0.post1 documentation</title>
+  <title>Quick start guide &mdash; tomato 2.0.post2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=ce9f7aad"></script>
+        <script src="_static/documentation_options.js?v=f967f0c7"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -41,7 +41,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0.post1
+                2.0.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -270,7 +270,7 @@
 <span class="linenos"> 9</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.config/tomato/1.0a1/devices.yml&#39;</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span><span class="w"> </span><span class="k">[drivers]</span>
-<span class="linenos">12</span><span class="w"> </span><span class="n">example_counter</span><span class="p">.</span><span class="n">testpar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1234</span>
+<span class="linenos">12</span><span class="w"> </span><span class="n">example_counter</span><span class="p">.</span><span class="n">idle_measurement_interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
 </pre></div>
 </div>
 <p>In addition to the <em>appdir</em>, a second path, <em>datadir</em>, is used to specify the location of the data created by <strong>tomato</strong>. The default <em>datadir</em> is:</p>
@@ -289,7 +289,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">jobs.dbpath</span></code> which is the location of the <code class="docutils literal notranslate"><span class="pre">sqlite3</span></code> database used to track <em>jobs</em>,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">devices.config</span></code> which points to a <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted <a class="reference internal" href="#devfile"><span class="std std-ref">devices file</span></a>, defining the hardware configuration of the devices managed by <strong>tomato</strong>.</p></li>
 </ul>
-<p>Additional, <em>driver</em>-specific settings may be provided in the <code class="docutils literal notranslate"><span class="pre">[drivers]</span></code> section, following the example of the <code class="docutils literal notranslate"><span class="pre">drivers.example_counter.testpar</span></code> entry. These <em>driver</em>-specific settings are passed to each <em>driver</em> when its process is launched and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DriverInterface</span></code> is initialised, and can therefore contain paths to various libraries or other files necessary for the <em>driver</em> to function.</p>
+<p>Additional, <em>driver</em>-specific settings may be provided in the <code class="docutils literal notranslate"><span class="pre">[drivers]</span></code> section, following the example of the <code class="docutils literal notranslate"><span class="pre">drivers.example_counter.idle_measurement_interval</span></code> entry. These <em>driver</em>-specific settings are passed to each <em>driver</em> when its process is launched and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DriverInterface</span></code> is initialised, and can therefore contain paths to various libraries or other files necessary for the <em>driver</em> to function.</p>
 </section>
 <section id="devices-file">
 <span id="devfile"></span><h2>Devices file<a class="headerlink" href="#devices-file" title="Link to this heading"></a></h2>
@@ -826,7 +826,7 @@ provided via the <a class="reference internal" href="#dgbowl_schemas.tomato.payl
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0.post1
+      v: 2.0.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

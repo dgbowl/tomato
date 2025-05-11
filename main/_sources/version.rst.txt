@@ -1,5 +1,21 @@
 Version history
 ===============
+**tomato**-next
+---------------
+
+.. sectionauthor::
+     Peter Kraus
+
+Developed at the ConCat lab at TU Berlin.
+
+Changes from ``tomato-2.0`` include:
+
+- *Driver* processess are now better at logging errors. All ``Exceptions`` raised by the :obj:`DriverInterface` should should now be caught and logged; as functionality of the *components* should only be accessed via the :obj:`DriverInterface`, this should catch all cases. 
+- The :func:`do_measure` of each *component* can now be periodically called by the *driver* process, if a task is not running. The interval (in seconds) can be configured by the user in the *driver* section of the :ref:`*settings file* <setfile>` (under ``driver.<driver_name>.idle_measurement_interval``) or provided by the driver developer (under :obj:`DriverInterface.idle_measurement_interval`); it falls back to ``None`` which means no periodic measurement will be done.
+
+.. codeauthor::
+    Peter Kraus
+
 **tomato**-v2.0
 ---------------
 .. image:: https://img.shields.io/static/v1?label=tomato&message=v2.0&color=blue&logo=github

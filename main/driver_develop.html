@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developing tomato drivers &mdash; tomato 2.0.post1 documentation</title>
+  <title>Developing tomato drivers &mdash; tomato 2.0.post2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=ce9f7aad"></script>
+        <script src="_static/documentation_options.js?v=f967f0c7"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0.post1
+                2.0.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -56,6 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Developing <strong>tomato</strong> drivers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#bootstrapping-a-driver-process">Bootstrapping a <em>driver</em> process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#driver-specific-settings"><em>Driver</em>-specific settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#communication-between-jobs-and-drivers">Communication between <em>jobs</em> and <em>drivers</em></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#best-practices-when-developing-a-driver">Best Practices when developing a <em>driver</em></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#driverinterface-ver-2-0">DriverInterface ver. 2.0</a></li>
@@ -109,11 +110,18 @@
 </div>
 <section id="bootstrapping-a-driver-process">
 <h2>Bootstrapping a <em>driver</em> process<a class="headerlink" href="#bootstrapping-a-driver-process" title="Link to this heading"></a></h2>
-<p>When the <em>driver</em> process is launched (as a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code>), it’s given information about how to connect to the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process and which device <em>driver</em> to spawn. Once a connection to the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> is established, the <em>driver</em> settings are fetched, and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DriverInterface</span></code> is instantiated passing any settings to the constructor. Then, all <em>components</em> on all <em>devices</em> of this <em>driver</em> type that are known to <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> are registered using the <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_register()</span></code> function.</p>
+<p>When the <em>driver</em> process is launched (as a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code>), it’s given information about how to connect to the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process and which device <em>driver</em> to spawn. Once a connection to the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> is established, the <em>driver</em> settings (from the <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">*settings file*</span></a>) are fetched, and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DriverInterface</span></code> is instantiated passing any settings to the constructor. By default, these settings are stored under <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface.settings</span></code>. Finally, all <em>components</em> on all <em>devices</em> of this <em>driver</em> type that are known to <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> are registered using the <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_register()</span></code> function.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Each <em>driver</em> creates a separate log file for each port <strong>tomato</strong> has been executed with. The logfile is stored in the same location as the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> logs, i.e. as configured under the <code class="docutils literal notranslate"><span class="pre">logdir</span></code> option in the <em>settings file</em>. The verbosity of the <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process is inherited from the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process.</p>
 </div>
+</section>
+<section id="driver-specific-settings">
+<h2><em>Driver</em>-specific settings<a class="headerlink" href="#driver-specific-settings" title="Link to this heading"></a></h2>
+<p>The following keywords in the driver-specific settings in the <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">*settings file*</span></a> are reserved for use by <strong>tomato</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">idle_measurement_interval</span></code>: Specifies the interval (in seconds) after which the <code class="xref py py-func docutils literal notranslate"><span class="pre">do_measure()</span></code> function of all <em>components</em> registered on the <em>driver</em> should be called. The <code class="xref py py-func docutils literal notranslate"><span class="pre">do_measure()</span></code> is only called for <em>components</em> that are idle, i.e. without a running <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>. Overrides any <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface.idle_measurement_interval</span></code>.</p></li>
+</ul>
 </section>
 <section id="communication-between-jobs-and-drivers">
 <h2>Communication between <em>jobs</em> and <em>drivers</em><a class="headerlink" href="#communication-between-jobs-and-drivers" title="Link to this heading"></a></h2>
@@ -161,6 +169,12 @@ that has to be re-implemented by the driver modules.</p>
 explicitly defined here.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">idle_measurement_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd><p>The interval (in seconds) after which <code class="xref py py-func docutils literal notranslate"><span class="pre">self.do_measure()</span></code> will be executed, when idle.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">devmap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice" title="tomato.driverinterface_2_0.ModelDevice"><span class="pre">ModelDevice</span></a><span class="p"><span class="pre">]</span></span></em></dt>
 <dd><p>Map of registered devices, the tuple keys are <cite>component = (address, channel)</cite></p>
 </dd></dl>
@@ -174,7 +188,7 @@ explicitly defined here.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em></dt>
-<dd><p>A settings map to contain driver-specific settings such as <cite>dllpath</cite> for BioLogic</p>
+<dd><p>A settings map to contain driver-specific settings such as <code class="docutils literal notranslate"><span class="pre">dllpath</span></code> for BioLogic</p>
 </dd></dl>
 
 <dl class="py method">
@@ -262,10 +276,10 @@ of capabilities in <code class="xref py py-obj docutils literal notranslate"><sp
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">cmp_last_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><span class="pre">Dataset</span></a><span class="p"><span class="pre">]</span></span></span></span></dt>
+<span class="sig-name descname"><span class="pre">cmp_last_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a><span class="p"><span class="pre">]</span></span></span></span></dt>
 <dd><p>Fetch the last stored data on the component.</p>
 <p>Passthrough to <a class="reference internal" href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.get_last_data" title="tomato.driverinterface_2_0.ModelDevice.get_last_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelDevice.get_last_data()</span></code></a>. The data in the form of
-a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> is returned as the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Reply.data</span></code>.</p>
+a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> is returned as the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Reply.data</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -296,19 +310,19 @@ a <code class="xref py py-class docutils literal notranslate"><span class="pre">
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">task_stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<span class="sig-name descname"><span class="pre">task_stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span></dt>
 <dd><p>Stops a running task and returns any collected data.</p>
 <p>Pass-through to <a class="reference internal" href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.stop_task" title="tomato.driverinterface_2_0.ModelDevice.stop_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelDevice.stop_task()</span></code></a> and <a class="reference internal" href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface.task_data" title="tomato.driverinterface_2_0.ModelInterface.task_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelInterface.task_data()</span></code></a>.</p>
-<p>If there is any cached data, it is returned as a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> in the
+<p>If there is any cached data, it is returned as a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> in the
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">Reply.data</span></code> and the cache is cleared.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">task_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<span class="sig-name descname"><span class="pre">task_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span></dt>
 <dd><p>Return cached task data on the device component and clean the cache.</p>
 <p>Pass-through for <a class="reference internal" href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.get_data" title="tomato.driverinterface_2_0.ModelDevice.get_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelDevice.get_data()</span></code></a>, which should return a
-<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> that is fully annotated.</p>
+<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> that is fully annotated.</p>
 <p>This function gets called by the job thread every <cite>device.pollrate</cite>, it therefore
 incurs some IPC cost.</p>
 </dd></dl>
@@ -371,13 +385,13 @@ returning of task data.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
 <dd><p>Container for cached data on this component.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">last_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<span class="sig-name descname"><span class="pre">last_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
 <dd><p>Container for last datapoint on this component.</p>
 </dd></dl>
 
@@ -473,15 +487,15 @@ using e.g. <a class="reference internal" href="apidoc/tomato.driverinterface_2_0
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><span class="pre">Dataset</span></a></span></span></dt>
-<dd><p>Returns the cached <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.data</span></code> as a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> before
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a></span></span></dt>
+<dd><p>Returns the cached <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.data</span></code> as a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> before
 clearing the cache.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">get_last_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><span class="pre">Dataset</span></a></span></span></dt>
-<dd><p>Returns the <a class="reference internal" href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.last_data" title="tomato.driverinterface_2_0.ModelDevice.last_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_data</span></code></a> object as a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.3.2.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>.</p>
+<span class="sig-name descname"><span class="pre">get_last_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a></span></span></dt>
+<dd><p>Returns the <a class="reference internal" href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelDevice.last_data" title="tomato.driverinterface_2_0.ModelDevice.last_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_data</span></code></a> object as a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -817,7 +831,7 @@ not a pass-through to <a class="reference internal" href="apidoc/tomato.driverin
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0.post1
+      v: 2.0.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
