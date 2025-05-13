@@ -2,11 +2,11 @@
 
 Developing **tomato** drivers
 -----------------------------
-Since ``tomato-1.0``, all device *drivers* are developed as separate Python packages with their own documentation and versioning. To ensure compatibility of the Manager between the ``tomato-driver`` process and the implementation of the *driver*, an abstract class :class:`~tomato.driverinterface_2_0.ModelInterface` is provided. A class inheriting from this abstract class, with the name :class:`DriverInterface`, **has** to be available when the selected *driver* module is imported.
+Since ``tomato-1.0``, all device *drivers* are developed as separate Python packages with their own documentation and versioning. To ensure compatibility of the Manager between the ``tomato-driver`` process and the implementation of the *driver*, an abstract class :class:`~tomato.driverinterface_2_1.ModelInterface` is provided. A class inheriting from this abstract class, with the name :class:`DriverInterface`, **has** to be available when the selected *driver* module is imported.
 
 .. note::
 
-    The :class:`~tomato.driverinterface_2_0.ModelInterface` is versioned. Your driver should target a single version of this :class:`ModelInterface` by inheriting from only one such abstract class. **Any deprecation notices will be provided well in advance directly to driver maintainers.** Support for :mod:`~tomato.driverinterface_1_0` introduced in ``tomato-1.0`` is guaranteed until at least ``tomato-3.0``.
+    The :class:`~tomato.driverinterface_2_1.ModelInterface` is versioned. Your driver should target a single version of this :class:`ModelInterface` by inheriting from only one such abstract class. **Any deprecation notices will be provided well in advance directly to driver maintainers.** Support for :mod:`~tomato.driverinterface_1_0` introduced in ``tomato-1.0`` is guaranteed until at least ``tomato-3.0``.
 
 Bootstrapping a *driver* process
 ````````````````````````````````
@@ -31,7 +31,7 @@ In general, methods of the :class:`DriverInterface` that are prefixed with ``cmp
 
 .. note::
 
-    The :mod:`~tomato.driverinterface_2_0` contains another abstract class :class:`~tomato.driverinterface_2_0.ModelDevice`. In general, the :class:`DriverInterface` that you have to implement acts as a pass-through to the (abstract) methods of the :class:`ModelDevice`; e.g. :func:`ModelInterface.cmp_get_attr` is a passthrough function to the appropriate :func:`ModelDevice.get_attr`.
+    The :mod:`~tomato.driverinterface_2_1` contains another abstract class :class:`~tomato.driverinterface_2_1.ModelDevice`. In general, the :class:`DriverInterface` that you have to implement acts as a pass-through to the (abstract) methods of the :class:`ModelDevice`; e.g. :func:`ModelInterface.cmp_get_attr` is a passthrough function to the appropriate :func:`ModelDevice.get_attr`.
 
     We expect most of the work in implementing a new *driver* will actually take place in implementing the :class:`ModelDevice` class.
 
@@ -54,6 +54,22 @@ Best Practices when developing a *driver*
 - The :func:`ModelDevice.attrs` defines the variable attributes of the *component* that should be accessible, using :class:`Attr`. All entries in :func:`attrs` should also be present in :obj:`ModelDevice.data`, as the data likely depends on the settings of these :class:`Attrs`.
 - Each :class:`ModelDevice` contains a link to its parent :class:`ModelInterface` in the :obj:`ModelDevice.driver` object.
 - Internal functions of the :class:`ModelDevice` and :class:`ModelInterface` should be re-used wherever possible. E.g., reading *component* attributes should always be carried out using :func:`ModelDevice.get_attr`.
+
+DriverInterface ver. 2.1
+````````````````````````
+
+.. autoclass:: tomato.driverinterface_2_1.ModelInterface
+    :no-index:
+    :members:
+
+.. autoclass:: tomato.driverinterface_2_1.ModelDevice
+    :no-index:
+    :members:
+
+.. autoclass:: tomato.driverinterface_2_1.Attr
+    :no-index:
+    :members:
+
 
 DriverInterface ver. 2.0
 ````````````````````````

@@ -10,8 +10,12 @@ Developed at the ConCat lab at TU Berlin.
 
 Changes from ``tomato-2.0`` include:
 
-- *Driver* processess are now better at logging errors. All ``Exceptions`` raised by the :obj:`DriverInterface` should should now be caught and logged; as functionality of the *components* should only be accessed via the :obj:`DriverInterface`, this should catch all cases. 
+- *Driver* processess are now better at logging errors. All ``Exceptions`` raised by the :obj:`DriverInterface` should should now be caught and logged; as functionality of the *components* should only be accessed via the :obj:`DriverInterface`, this should catch all cases.
 - The :func:`do_measure` of each *component* can now be periodically called by the *driver* process, if a task is not running. The interval (in seconds) can be configured by the user in the *driver* section of the :ref:`*settings file* <setfile>` (under ``driver.<driver_name>.idle_measurement_interval``) or provided by the driver developer (under :obj:`DriverInterface.idle_measurement_interval`); it falls back to ``None`` which means no periodic measurement will be done.
+- A new ``DriverInterface-2.1``, with the following changes:
+  - :class:`~tomato.driverinterface_2_1.Attr` now accepts ``options``, which is the :class:`set` of values this attribute can be set to.
+  - The decorators are now in :mod:`tomato.driverinterface_2_1.decorators`
+  - A new decorator, :func:`~tomato.driverinterface_2_1.decorators.coerce_val`, is provided to allow simpler type conversion and boundary checking.
 
 .. codeauthor::
     Peter Kraus
@@ -45,7 +49,7 @@ Changes from ``tomato-1.0`` include:
 
 .. codeauthor::
     Peter Kraus
-    
+
 
 **tomato**-v1.0
 ---------------

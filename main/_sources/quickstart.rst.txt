@@ -178,7 +178,7 @@ Finally, another path, *logdir*, is used to specify where logs for **tomato** ar
 In the default *settings file* shown above, the following entries are specified:
 
 - ``jobs.storage`` which is the directory where the data of **tomato** *jobs* will be stored,
-- ``jobs.dbpath`` which is the location of the ``sqlite3`` database used to track *jobs*, 
+- ``jobs.dbpath`` which is the location of the ``sqlite3`` database used to track *jobs*,
 - ``devices.config`` which points to a ``yaml``-formatted :ref:`devices file <devfile>`, defining the hardware configuration of the devices managed by **tomato**.
 
 Additional, *driver*-specific settings may be provided in the ``[drivers]`` section, following the example of the ``drivers.example_counter.idle_measurement_interval`` entry. These *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.
@@ -307,10 +307,10 @@ The *payload* file contains all information required to enter a *job* into the q
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
 
-As of ``tomato-2.0``, the ``task_params`` specified in the *payload* are validated by the device *driver*. In particular, the setpoints of any entries within ``task_params`` are checked for compatibility with the type of the matching :class:`~tomato.driverinterface_2_0.Attr`. Similarly, their parsed values are compared against the optional :obj:`Attr.maximum` and :obj:`Attr.minimum`.  
+As of ``tomato-2.0``, the ``task_params`` specified in the *payload* are validated by the device *driver*. In particular, the setpoints of any entries within ``task_params`` are checked for compatibility with the type of the matching :class:`~tomato.driverinterface_2_1.Attr`. Similarly, their parsed values are compared against the optional :obj:`Attr.maximum` and :obj:`Attr.minimum`.
 
 .. warning::
-  
+
   Currently, **tomato** does not check whether the ``sampling_interval`` is realistic. This means your *jobs* may crash when the ``task_params`` are out of bounds when the :class:`Task` is being executed.
 
   However, such validation is planned for a future release, see https://github.com/dgbowl/tomato/issues/127.
