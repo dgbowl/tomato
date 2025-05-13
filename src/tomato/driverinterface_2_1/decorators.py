@@ -56,6 +56,12 @@ def log_errors(func):
     def wrapper(self, **kwargs):
         try:
             return func(self, **kwargs)
+        # We want to preserve ValueErrors and AssertionErrors for testing.
+        # These should be then caught in the tomato-driver process.
+        except (ValueError, AssertionError) as e:
+            logger.critical(e, exc_info=True)
+            raise e
+        # Other kinds of errors we abort the driver process
         except Exception as e:
             logger.critical(e, exc_info=True)
             sys.exit(e)
@@ -66,17 +72,25 @@ def log_errors(func):
 def coerce_val(func):
     """
     Decorator for coercing :obj:`val` into the correct format based on :class:`Attr` data.
+
+    This decorator should be applied to the :func:`ModelDriver.set_attr` function, in
+    order to check whether the supplied value is allowed (not ``None``, in ``options``,
+    between ``minimum`` and ``maximum``) as well as coercing it to the right type and
+    unit.
     """
 
     @wraps(func)
     def wrapper(self, attr: str, val: Val, **kwargs: dict) -> Val:
-        assert val is not None, "'val' cannot be None"
+        assert val is not None, f"val of attr {attr!r} cannot be None"
         assert attr in self.attrs(), f"unknown attr: {attr!r}"
         props = self.attrs()[attr]
         assert props.rw
 
         if not isinstance(val, props.type):
             val = props.type(val)
+        assert props.options is None or val in props.options, (
+            f"val {val!r} is not in allowed options {props.options}"
+        )
         if isinstance(val, pint.Quantity):
             if val.dimensionless and props.units is not None:
                 val = pint.Quantity(val.m, props.units)

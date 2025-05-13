@@ -47,6 +47,9 @@ class Attr(BaseModel, arbitrary_types_allowed=True):
     minimum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
     """Minimum value for the attribute, optional."""
 
+    options: Optional[set] = None
+    """Allowed set of values for the attribute, optional."""
+
 
 class ModelInterface(metaclass=ABCMeta):
     """
