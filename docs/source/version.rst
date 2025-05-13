@@ -11,7 +11,7 @@ Developed at the ConCat lab at TU Berlin.
 Changes from ``tomato-2.0`` include:
 
 - *Driver* processess are now better at logging errors. All ``Exceptions`` raised by the :obj:`DriverInterface` should should now be caught and logged; as functionality of the *components* should only be accessed via the :obj:`DriverInterface`, this should catch all cases.
-- The :func:`do_measure` of each *component* can now be periodically called by the *driver* process, if a task is not running. The interval (in seconds) can be configured by the user in the *driver* section of the :ref:`*settings file* <setfile>` (under ``driver.<driver_name>.idle_measurement_interval``) or provided by the driver developer (under :obj:`DriverInterface.idle_measurement_interval`); it falls back to ``None`` which means no periodic measurement will be done.
+- The :func:`cmp_measure` of each *component* can now be periodically called by the *driver* process, if a task is not running. The interval (in seconds) can be configured by the user in the *driver* section of the |setfile|_ (under ``driver.<driver_name>.idle_measurement_interval``) or provided by the driver developer (under :obj:`DriverInterface.idle_measurement_interval`); it falls back to ``None`` which means no periodic measurement will be done.
 - A new ``DriverInterface-2.1``, with the following changes:
   - :class:`~tomato.driverinterface_2_1.Attr` now accepts ``options``, which is the :class:`set` of values this attribute can be set to.
   - The decorators are now in :mod:`tomato.driverinterface_2_1.decorators`
@@ -36,7 +36,7 @@ Developed at the ConCat lab at TU Berlin.
 Changes from ``tomato-1.0`` include:
 
 - *Jobs* are now tracked in a queue stored in a ``sqlite3`` database instead of on the ``tomato.daemon``.
-- The ``logdir`` can now be set in *settings file*, with the default value configurable using ``tomato init``.
+- The ``logdir`` can now be set in |setfile|_, with the default value configurable using ``tomato init``.
 - The ``tomato status`` command now supports further arguments: ``pipelines``, ``drivers``, ``devices``, and ``components`` can be used to query status of subsets of the running **tomato**.
 - A new ``passata`` command and :mod:`tomato.passata` module for interacting with *components* over CLI and API.
 - A new ``DriverInterface-2.0``, with the following changes:
@@ -97,3 +97,7 @@ This project has received funding from the European Union’s Horizon 2020 resea
 .. codeauthor::
     Peter Kraus,
     Loris Ercole.
+
+.. |setfile| replace:: *settings file*
+
+.. _setfile: quickstart.html#settings-file

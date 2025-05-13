@@ -671,7 +671,7 @@ class ModelDevice(metaclass=ABCMeta):
         """
         Target function for the :obj:`self.thread` when performing one shot measurements.
 
-        Performs the measurement using :func:`self.do_measure()`. Resets :obj:`self.thread`
+        Performs the measurement using :func:`self.do_measure`. Resets :obj:`self.thread`
         for future :class:`Tasks`.
         """
         try:

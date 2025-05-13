@@ -10,15 +10,15 @@ Since ``tomato-1.0``, all device *drivers* are developed as separate Python pack
 
 Bootstrapping a *driver* process
 ````````````````````````````````
-When the *driver* process is launched (as a ``tomato-driver``), it's given information about how to connect to the ``tomato-daemon`` process and which device *driver* to spawn. Once a connection to the ``tomato-daemon`` is established, the *driver* settings (from the :ref:`*settings file* <setfile>`) are fetched, and the :class:`DriverInterface` is instantiated passing any settings to the constructor. By default, these settings are stored under :obj:`DriverInterface.settings`. Finally, all *components* on all *devices* of this *driver* type that are known to ``tomato-daemon`` are registered using the :func:`cmp_register` function.
+When the *driver* process is launched (as a ``tomato-driver``), it's given information about how to connect to the ``tomato-daemon`` process and which device *driver* to spawn. Once a connection to the ``tomato-daemon`` is established, the *driver* settings (from the |setfile|_) are fetched, and the :class:`DriverInterface` is instantiated passing any settings to the constructor. By default, these settings are stored under :obj:`DriverInterface.settings`. Finally, all *components* on all *devices* of this *driver* type that are known to ``tomato-daemon`` are registered using the :func:`cmp_register` function.
 
 .. note::
 
-    Each *driver* creates a separate log file for each port **tomato** has been executed with. The logfile is stored in the same location as the ``tomato-daemon`` logs, i.e. as configured under the ``logdir`` option in the *settings file*. The verbosity of the ``tomato-driver`` process is inherited from the ``tomato-daemon`` process.
+    Each *driver* creates a separate log file for each port **tomato** has been executed with. The logfile is stored in the same location as the ``tomato-daemon`` logs, i.e. as configured under the ``logdir`` option in the |setfile|_. The verbosity of the ``tomato-driver`` process is inherited from the ``tomato-daemon`` process.
 
 *Driver*-specific settings
 ``````````````````````````
-The following keywords in the driver-specific settings in the :ref:`*settings file* <setfile>` are reserved for use by **tomato**:
+The following keywords in the driver-specific settings in the |setfile|_ are reserved for use by **tomato**:
 
 - ``idle_measurement_interval``: Specifies the interval (in seconds) after which the :func:`cmp_measure` function of all *components* registered on the *driver* should be called. The :func:`cmp_measure` checks that *components* are idle, i.e. without a running :class:`Task`. Overrides any :obj:`DriverInterface.idle_measurement_interval`.
 
@@ -88,3 +88,7 @@ DriverInterface ver. 1.0
 .. autoclass:: tomato.driverinterface_1_0.ModelInterface
     :no-index:
     :members:
+
+.. |setfile| replace:: *settings file*
+
+.. _setfile: quickstart.html#settings-file

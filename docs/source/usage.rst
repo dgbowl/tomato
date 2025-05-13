@@ -13,13 +13,13 @@ Starting :mod:`tomato.daemon`
 
     For instructions on how to set **tomato** up for a first run, see the :ref:`quickstart`.
 
-Provided a :ref:`settings file <setfile>` exists, the daemon process ``tomato-daemon`` can be started on the default *port* using:
+Provided a |setfile|_ exists, the daemon process ``tomato-daemon`` can be started on the default *port* using:
 
 .. code:: bash
 
     tomato start
 
-The daemon keeps track of *pipelines* configured in the :ref:`device file <devfile>`, and schedules *jobs* from the queue onto them. See the :ref:`concepts flowchart <concepts>` for a more detailed overview.
+The daemon keeps track of *pipelines* configured in the |devfile|_, and schedules *jobs* from the queue onto them. See the :ref:`concepts flowchart <concepts>` for a more detailed overview.
 
 .. note::
 
@@ -29,7 +29,7 @@ Using :mod:`~tomato.tomato`
 ```````````````````````````
 The :mod:`tomato.tomato` executable is used to configure, start, and manage the **tomato** daemon, as well as load / eject samples to / from *pipelines* and mark them ready.
 
-    #. **To configure** the **tomato** daemon by creating a default :ref:`settings file <setfile>`, run:
+    #. **To configure** the **tomato** daemon by creating a default |setfile|_, run:
 
         .. code-block:: bash
 
@@ -41,7 +41,7 @@ The :mod:`tomato.tomato` executable is used to configure, start, and manage the 
 
             >>> tomato start
 
-        This will read the :ref:`settings file <setfile>`, and parse the :ref:`device file <devfile>` listed within. To start the **daemon on an alternative port**, run:
+        This will read the |setfile|_, and parse the |devfile|_ listed within. To start the **daemon on an alternative port**, run:
 
         .. code-block:: bash
 
@@ -67,7 +67,7 @@ The :mod:`tomato.tomato` executable is used to configure, start, and manage the 
 
             >>> tomato reload
 
-        Currently, reloading *driver* settings from the :ref:`settings file <setfile>` and managing *pipelines* and/or *devices* from the :ref:`device file <devfile>` is supported. Any *component* not present in a *pipeline* is automatically removed.
+        Currently, reloading *driver* settings from the |setfile|_ and managing *pipelines* and/or *devices* from the |devfile|_ is supported. Any *component* not present in a *pipeline* is automatically removed.
 
         .. note::
 
@@ -172,7 +172,7 @@ As of ``tomato-1.0``, the outputs of :mod:`~tomato.tomato` and :mod:`~tomato.ket
 
 Accessing output data
 `````````````````````
-Each *job* stores its data and logs in its own *job* folder, which is a subfolder of the ``jobs.storage`` folder specified in the :ref:`settings file <setfile>`.
+Each *job* stores its data and logs in its own *job* folder, which is a subfolder of the ``jobs.storage`` folder specified in the |setfile|_.
 
 .. warning::
 
@@ -216,3 +216,11 @@ While the *job* is running, access to an up-to-date snapshot of the data is prov
     >>> ketchup snapshot <jobid>
 
 This will create an up-to-date ``snapshot.<jobid>.nc`` file in the current working dir. The files are overwritten on subsequent invocations of ``ketchup snapshot``. An automated, periodic snapshotting stored in a custom location can be further configured within the *payload* of the *job*.
+
+.. |setfile| replace:: *settings file*
+
+.. _setfile: quickstart.html#settings-file
+
+.. |devfile| replace:: *devices file*
+
+.. _devfile: quickstart.html#devices-file
