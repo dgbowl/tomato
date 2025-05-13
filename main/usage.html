@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; tomato 2.0.post4 documentation</title>
+  <title>Usage &mdash; tomato 2.0.post5 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=9696e413"></script>
+        <script src="_static/documentation_options.js?v=32ee600a"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0.post4
+                2.0.post5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -119,11 +119,11 @@
 <p class="admonition-title">Note</p>
 <p>For instructions on how to set <strong>tomato</strong> up for a first run, see the <a class="reference internal" href="quickstart.html#quickstart"><span class="std std-ref">Quick start guide</span></a>.</p>
 </div>
-<p>Provided a <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">settings file</span></a> exists, the daemon process <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> can be started on the default <em>port</em> using:</p>
+<p>Provided a <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a> exists, the daemon process <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> can be started on the default <em>port</em> using:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>start
 </pre></div>
 </div>
-<p>The daemon keeps track of <em>pipelines</em> configured in the <a class="reference internal" href="quickstart.html#devfile"><span class="std std-ref">device file</span></a>, and schedules <em>jobs</em> from the queue onto them. See the <a class="reference internal" href="quickstart.html#concepts"><span class="std std-ref">concepts flowchart</span></a> for a more detailed overview.</p>
+<p>The daemon keeps track of <em>pipelines</em> configured in the <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a>, and schedules <em>jobs</em> from the queue onto them. See the <a class="reference internal" href="quickstart.html#concepts"><span class="std std-ref">concepts flowchart</span></a> for a more detailed overview.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Multiple instances of the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> can be running at a single PC, provided a different <em>port</em> is specified using <code class="docutils literal notranslate"><span class="pre">--port</span></code> argument to <code class="docutils literal notranslate"><span class="pre">tomato</span></code> and <code class="docutils literal notranslate"><span class="pre">ketchup</span></code>.</p>
@@ -134,7 +134,7 @@
 <p>The <a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.tomato</span></code></a> executable is used to configure, start, and manage the <strong>tomato</strong> daemon, as well as load / eject samples to / from <em>pipelines</em> and mark them ready.</p>
 <blockquote>
 <div><ol class="arabic">
-<li><p><strong>To configure</strong> the <strong>tomato</strong> daemon by creating a default <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">settings file</span></a>, run:</p>
+<li><p><strong>To configure</strong> the <strong>tomato</strong> daemon by creating a default <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a>, run:</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>tomato<span class="w"> </span>init
 </pre></div>
@@ -146,7 +146,7 @@
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>tomato<span class="w"> </span>start
 </pre></div>
 </div>
-<p>This will read the <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">settings file</span></a>, and parse the <a class="reference internal" href="quickstart.html#devfile"><span class="std std-ref">device file</span></a> listed within. To start the <strong>daemon on an alternative port</strong>, run:</p>
+<p>This will read the <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a>, and parse the <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a> listed within. To start the <strong>daemon on an alternative port</strong>, run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>tomato<span class="w"> </span>start<span class="w"> </span>--port<span class="w"> </span>&lt;int&gt;
 </pre></div>
 </div>
@@ -172,7 +172,7 @@
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;<span class="w"> </span>tomato<span class="w"> </span>reload
 </pre></div>
 </div>
-<p>Currently, reloading <em>driver</em> settings from the <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">settings file</span></a> and managing <em>pipelines</em> and/or <em>devices</em> from the <a class="reference internal" href="quickstart.html#devfile"><span class="std std-ref">device file</span></a> is supported. Any <em>component</em> not present in a <em>pipeline</em> is automatically removed.</p>
+<p>Currently, reloading <em>driver</em> settings from the <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a> and managing <em>pipelines</em> and/or <em>devices</em> from the <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a> is supported. Any <em>component</em> not present in a <em>pipeline</em> is automatically removed.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The daemon will only remove <em>pipelines</em>, <em>devices</em> and <em>components</em> if they are not used by any running <em>job</em>.</p>
@@ -301,7 +301,7 @@
 </section>
 <section id="accessing-output-data">
 <h2>Accessing output data<a class="headerlink" href="#accessing-output-data" title="Link to this heading"></a></h2>
-<p>Each <em>job</em> stores its data and logs in its own <em>job</em> folder, which is a subfolder of the <code class="docutils literal notranslate"><span class="pre">jobs.storage</span></code> folder specified in the <a class="reference internal" href="quickstart.html#setfile"><span class="std std-ref">settings file</span></a>.</p>
+<p>Each <em>job</em> stores its data and logs in its own <em>job</em> folder, which is a subfolder of the <code class="docutils literal notranslate"><span class="pre">jobs.storage</span></code> folder specified in the <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>While “live” <em>job</em> data is available in the <em>job</em> folder in pickled form, accessing those files directly is not supported and may lead to race conditions and crashes. If you need an up-to-date data archive, request a <a class="reference internal" href="#snapshotting"><span class="std std-ref">snapshot</span></a>. If you need the current status of a <em>device</em>, probe the responsible driver process.</p>
@@ -368,7 +368,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0.post4
+      v: 2.0.post5
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
