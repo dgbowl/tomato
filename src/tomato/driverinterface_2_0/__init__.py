@@ -596,7 +596,7 @@ class ModelDevice(metaclass=ABCMeta):
 
     running: bool
 
-    def __init__(self, driver, key, **kwargs):
+    def __init__(self, driver, key, **kwargs) -> None:
         self.driver = driver
         self.key = key
         self.task_list = Queue()
@@ -608,18 +608,18 @@ class ModelDevice(metaclass=ABCMeta):
         self.constants = dict()
         atexit.register(self.reset)
 
-    def run(self):
+    def run(self) -> None:
         """Helper function for starting the :obj:`self.thread` as a task."""
         self.thread.do_run = True
         self.thread.start()
 
-    def measure(self):
+    def measure(self) -> None:
         """Helper function for starting the :obj:`self.thread` as a measurement."""
         self.thread = Thread(target=self.meas_runner, daemon=True)
         self.thread.do_run = True
         self.thread.start()
 
-    def task_runner(self):
+    def task_runner(self) -> None:
         """
         Target function for the :obj:`self.thread` when handling :class:`Tasks`.
 
@@ -667,7 +667,7 @@ class ModelDevice(metaclass=ABCMeta):
                 "task '%s' on component %s is done", task.technique_name, self.key
             )
 
-    def meas_runner(self):
+    def meas_runner(self) -> None:
         """
         Target function for the :obj:`self.thread` when performing one shot measurements.
 
@@ -683,7 +683,7 @@ class ModelDevice(metaclass=ABCMeta):
         except Exception as e:
             logger.critical(e, exc_info=True)
 
-    def prepare_task(self, task: Task, **kwargs: dict):
+    def prepare_task(self, task: Task, **kwargs: dict) -> None:
         """
         Given a :class:`Task`, prepare this component for execution by setting all
         :class:`Attrs` as specified in the `task.task_params` dictionary.
@@ -692,7 +692,7 @@ class ModelDevice(metaclass=ABCMeta):
             for k, v in task.task_params.items():
                 self.set_attr(attr=k, val=v)
 
-    def do_task(self, task: Task, **kwargs: dict):
+    def do_task(self, task: Task, **kwargs: dict) -> None:
         """
         Periodically called task execution function.
 
@@ -718,7 +718,7 @@ class ModelDevice(metaclass=ABCMeta):
         """
         pass
 
-    def stop_task(self, **kwargs: dict):
+    def stop_task(self, **kwargs: dict) -> None:
         """Stops the currently running task."""
         logger.info("stopping running task on component %s", self.key)
         setattr(self.thread, "do_run", False)
@@ -731,7 +731,7 @@ class ModelDevice(metaclass=ABCMeta):
         This function should handle any data type coercion and validation
         using e.g. :obj:`Attr.maximum` and :obj:`Attr.minimum`.
 
-        Returns the coerced value coresponding to :obj:`val`.
+        Returns the coerced value corresponding to :obj:`val`.
         """
         pass
 
