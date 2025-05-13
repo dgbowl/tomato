@@ -70,7 +70,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     """
 
-    version: str = "2.0"
+    version: str = "2.1"
 
     devmap: dict[tuple, "ModelDevice"]
     """Map of registered devices, the tuple keys are `component = (address, channel)`"""

@@ -15,18 +15,19 @@ from importlib import metadata
 from datetime import datetime, timezone
 from threading import current_thread
 from pathlib import Path
-from typing import Union
+from typing import Union, TypeVar
 
 import zmq
 import psutil
 
 from tomato.driverinterface_1_0 import ModelInterface as MI_1_0
 from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
+from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
 from tomato.drivers import driver_to_interface
 from tomato.models import Reply, Daemon
 
 logger = logging.getLogger(__name__)
-ModelInterface = Union[MI_1_0, MI_2_0]
+ModelInterface = TypeVar("ModelInterface", MI_1_0, MI_2_0, MI_2_1)
 IDLE_MEASUREMENT_INTERVAL = None
 
 
