@@ -40,7 +40,8 @@ dependencies = [
 [project.optional-dependencies]
 testing = [
     "pytest",
-    "tomato-example-counter >= 2.0.0",
+    # "tomato-example-counter >= 2.0.0",
+    "tomato-example-counter @ git+https://github.com/dgbowl/tomato-example-counter.git@driverinterface_2_1",
     "tomato-psutil >= 1.0.0",
 ]
 docs = [
