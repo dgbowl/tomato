@@ -8,12 +8,13 @@
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Any, Union, TypeAlias, Optional
+from typing import Any, Union, Optional
 from pydantic import BaseModel, Field
 from threading import Thread, current_thread, RLock
 from queue import Queue
 from tomato.models import Reply
 from tomato.driverinterface_2_1.decorators import in_devmap, to_reply, log_errors
+from tomato.driverinterface_2_1.types import Type, Val, Key
 from dgbowl_schemas.tomato.payload import Task
 import logging
 
@@ -23,11 +24,6 @@ import atexit
 import pint
 
 logger = logging.getLogger(__name__)
-
-
-Type: TypeAlias = type
-Val = TypeVar("Val", str, int, float, pint.Quantity)
-Key: TypeAlias = tuple[str, str]
 
 
 class Attr(BaseModel, arbitrary_types_allowed=True):

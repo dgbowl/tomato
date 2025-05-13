@@ -1,5 +1,5 @@
 from tomato.models import Reply
-from tomato.driverinterface_2_1 import Val
+from tomato.driverinterface_2_1.types import Val
 
 from functools import wraps
 import logging
