@@ -73,7 +73,7 @@ def find_matching_pipelines(
     method: list[Task],
     context: zmq.Context,
 ) -> list[Pipeline]:
-    req_tags = set([item.component_tag for item in method])
+    req_roles = set([item.component_role for item in method])
     req_capabs = set([item.technique_name for item in method])
 
     candidates = []
@@ -84,7 +84,7 @@ def find_matching_pipelines(
             c = cmps[comp]
             roles.add(c.role)
             capabs.update(c.capabilities)
-        if req_tags.intersection(roles) == req_tags:
+        if req_roles.intersection(roles) == req_roles:
             if req_capabs.intersection(capabs) == req_capabs:
                 if method_validate(method, pip, drvs, cmps, context):
                     candidates.append(pip)
@@ -556,9 +556,9 @@ def job_main_loop(
     # collate steps by role
     plan = {}
     for step in job.payload.method:
-        if step.component_tag not in plan:
-            plan[step.component_tag] = []
-        plan[step.component_tag].append(step)
+        if step.component_role not in plan:
+            plan[step.component_role] = []
+        plan[step.component_role].append(step)
     logger.debug(f"{plan=}")
 
     # distribute plan into threads
