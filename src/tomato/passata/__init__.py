@@ -27,11 +27,11 @@ def _name_to_cmp(
 
 
 def _running_or_force(
-        name: str,
-        port: int,
-        timeout: int,
-        context: zmq.Context,
-        force: bool,
+    name: str,
+    port: int,
+    timeout: int,
+    context: zmq.Context,
+    force: bool,
 ) -> Reply:
     if not force:
         ret = status(port=port, timeout=timeout, context=context, name=name).data
@@ -39,7 +39,7 @@ def _running_or_force(
             return Reply(
                 success=False,
                 msg=f"will not 'set_attr' on a running component {name!r}",
-                data=None
+                data=None,
             )
     return Reply(success=True)
 
