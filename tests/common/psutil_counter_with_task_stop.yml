@@ -1,0 +1,23 @@
+version: "2.1"
+sample:
+    name: psutil_counter_with_task_stop
+method:
+  - component_role: "psutil"
+    technique_name: "all_info"
+    max_duration: 3.0
+    sampling_interval: 0.5
+  - component_role: "psutil"
+    technique_name: "all_info"
+    max_duration: 2.0
+    sampling_interval: 0.5
+    task_name: "trigger"
+  - component_role: "counter"
+    technique_name: "random"
+    max_duration: 20.0
+    sampling_interval: 1.0
+    task_params:
+        min: 50.0
+        max: 100.0
+    stop_with_task_name: "trigger"
+settings:
+    verbosity: "DEBUG"

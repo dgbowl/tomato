@@ -459,17 +459,25 @@ def job_thread(
 
     datapath = Path(jobpath) / f"{component.role}.pkl"
     logger.debug("distributing tasks:")
-    for task in tasks:
-        logger.debug(f"{task=}")
+    for ti, task in enumerate(tasks):
+        thread.current_task = task
+        logger.debug("processing task idx %d", ti)
         while True:
+            time.sleep(1e-1)
+            if task.start_with_task_name is None:
+                pass
+            elif task.start_with_task_name in thread.started_task_names:
+                pass
+            else:
+                logger.debug("waiting for task_name '%s'", task.start_with_task_name)
+                continue
             logger.debug("polling component '%s' for task readiness", component.role)
             req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
             ret = req.recv_pyobj()
             if ret.success and ret.data["can_submit"]:
                 break
             logger.warning("cannot submit onto component '%s', waiting", component.role)
-            time.sleep(1e-1)
-        logger.debug("sending task to component '%s'", component.role)
+        logger.debug("sending task idx %d to component '%s'", ti, component.role)
         req.send_pyobj(dict(cmd="task_start", params={"task": task, **kwargs}))
         ret = req.recv_pyobj()
 
@@ -506,13 +514,25 @@ def job_thread(
             elif ret.success is False:
                 logger.critical(f"{ret=}")
                 break
-            time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
 
+            if (
+                task.stop_with_task_name is not None
+                and task.stop_with_task_name in thread.started_task_names
+            ):
+                logger.warning("stopping task idx %d as stop trigger met", ti)
+                req.send_pyobj(dict(cmd="task_stop", params={**kwargs}))
+                ret = req.recv_pyobj()
+                logger.debug(f"{ret=}")
+                break
+
+            time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
         logger.debug("fetching final data for task")
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
         if ret.success:
             data_to_pickle(ret.data, datapath, role=component.role)
+        thread.completed_tasks.append(task)
+        thread.current_task = None
     logger.debug("all tasks done on component '%s', resetting", component.role)
     if driver.version == "1.0":
         req.send_pyobj(dict(cmd="dev_reset", params={**kwargs}))
@@ -580,18 +600,29 @@ def job_main_loop(
             name="job-thread",
         )
         threads[component.role].crashed = False
+        threads[component.role].completed_tasks = []
+        threads[component.role].current_task = None
+        threads[component.role].started_task_names = set()
         threads[component.role].start()
 
     # wait until threads join or we're killed
     snapshot = job.payload.settings.snapshot
     t0 = time.perf_counter()
+    started_task_names = set()
     while True:
-        logger.debug("tick")
         tN = time.perf_counter()
         if snapshot is not None and tN - t0 > snapshot.frequency:
             logger.debug("creating snapshot")
             merge_netcdfs(job, snapshot=True)
             t0 += snapshot.frequency
+
+        # Collect and push task names
+        for t in threads.values():
+            if t.current_task is not None and t.current_task.task_name is not None:
+                started_task_names.add(t.current_task.task_name)
+        logger.debug("started task names are: %s", started_task_names)
+        for t in threads.values():
+            t.started_task_names.update(started_task_names)
         crashed = [t.crashed for t in threads.values()]
         joined = [t.is_alive() is False or t.crashed for t in threads.values()]
         if all(joined):
