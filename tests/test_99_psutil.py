@@ -19,6 +19,8 @@ CTXT = zmq.Context()
     [
         ("psutil_1_0.1", {"psutil": 10}),
         ("psutil_counter", {"psutil": 12, "counter": 10}),
+        ("psutil_counter_with_task_start", {"psutil": 12, "counter": 10}),
+        ("psutil_counter_with_task_stop", {"psutil": 10, "counter": 2}),
     ],
 )
 def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
@@ -33,7 +35,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
     utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=2000)
-    utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=2000)
+    utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
 
     status = utils.job_status(1)
     assert status == "c"

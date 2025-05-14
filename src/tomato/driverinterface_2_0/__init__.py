@@ -450,7 +450,7 @@ class ModelInterface(metaclass=ABCMeta):
         if ret is not None:
             return (False, "failed to stop task", ret)
         else:
-            ret = self.task_data(self, key=key)
+            ret = self.task_data(key=key)
             if ret.success:
                 return (True, f"task stopped, {ret.msg}", ret.data)
             else:
