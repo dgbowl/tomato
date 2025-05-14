@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developing tomato drivers &mdash; tomato 2.0.post5 documentation</title>
+  <title>Developing tomato drivers &mdash; tomato 2.1rc1.post1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=32ee600a"></script>
+        <script src="_static/documentation_options.js?v=489d4a1a"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0.post5
+                2.1rc1.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -170,6 +170,18 @@ that has to be re-implemented by the driver modules.</p>
 explicitly defined here.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'2.1'</span></em></dt>
+<dd><p>Version of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">idle_measurement_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd><p>The interval (in seconds) after which <code class="xref py py-func docutils literal notranslate"><span class="pre">self.cmp_measure()</span></code> will be executed, when idle.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">devmap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="apidoc/tomato.driverinterface_2_1.html#tomato.driverinterface_2_1.ModelDevice" title="tomato.driverinterface_2_1.ModelDevice"><span class="pre">ModelDevice</span></a><span class="p"><span class="pre">]</span></span></em></dt>
 <dd><p>Map of registered devices, the tuple keys are <cite>component = (address, channel)</cite></p>
 </dd></dl>
@@ -183,7 +195,7 @@ explicitly defined here.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em></dt>
-<dd><p>A settings map to contain driver-specific settings such as <cite>dllpath</cite> for BioLogic</p>
+<dd><p>A settings map to contain driver-specific settings such as <code class="docutils literal notranslate"><span class="pre">dllpath</span></code> for BioLogic</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1273,7 +1285,7 @@ not a pass-through to <a class="reference internal" href="apidoc/tomato.driverin
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0.post5
+      v: 2.1rc1.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

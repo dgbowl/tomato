@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Version history &mdash; tomato 2.0.post5 documentation</title>
+  <title>Version history &mdash; tomato 2.1rc1.post1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=32ee600a"></script>
+        <script src="_static/documentation_options.js?v=489d4a1a"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.0.post5
+                2.1rc1.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -109,9 +109,10 @@
 <ul class="simple">
 <li><p><em>Driver</em> processess are now better at logging errors. All <code class="docutils literal notranslate"><span class="pre">Exceptions</span></code> raised by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface</span></code> should should now be caught and logged; as functionality of the <em>components</em> should only be accessed via the <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface</span></code>, this should catch all cases.</p></li>
 <li><p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_measure()</span></code> of each <em>component</em> can now be periodically called by the <em>driver</em> process, if a task is not running. The interval (in seconds) can be configured by the user in the <em>driver</em> section of the <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a> (under <code class="docutils literal notranslate"><span class="pre">driver.&lt;driver_name&gt;.idle_measurement_interval</span></code>) or provided by the driver developer (under <code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverInterface.idle_measurement_interval</span></code>); it falls back to <code class="docutils literal notranslate"><span class="pre">None</span></code> which means no periodic measurement will be done.</p></li>
+<li><p>Functions in the <a class="reference internal" href="apidoc/tomato.passata.html#module-tomato.passata" title="tomato.passata"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.passata</span></code></a> module that change the <em>component</em> state now check whether the <em>component</em> has a running task. If a <em>component</em> is running, a change of state (via <a class="reference internal" href="apidoc/tomato.passata.html#tomato.passata.reset" title="tomato.passata.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a> or <a class="reference internal" href="apidoc/tomato.passata.html#tomato.passata.set_attr" title="tomato.passata.set_attr"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_attr()</span></code></a>) can be forced by setting <code class="docutils literal notranslate"><span class="pre">force=True</span></code>.</p></li>
 <li><p>A new <code class="docutils literal notranslate"><span class="pre">DriverInterface-2.1</span></code>, with the following changes:
 - <a class="reference internal" href="apidoc/tomato.driverinterface_2_1.html#tomato.driverinterface_2_1.Attr" title="tomato.driverinterface_2_1.Attr"><code class="xref py py-class docutils literal notranslate"><span class="pre">Attr</span></code></a> now accepts <code class="docutils literal notranslate"><span class="pre">options</span></code>, which is the <code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code> of values this attribute can be set to.
-- The decorators are now in <a class="reference internal" href="apidoc/tomato.driverinterface_2_1.html#module-tomato.driverinterface_2_1.decorators" title="tomato.driverinterface_2_1.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.driverinterface_2_1.decorators</span></code></a>
+- The decorators are now in <a class="reference internal" href="apidoc/tomato.driverinterface_2_1.html#module-tomato.driverinterface_2_1.decorators" title="tomato.driverinterface_2_1.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.driverinterface_2_1.decorators</span></code></a>.
 - A new decorator, <a class="reference internal" href="apidoc/tomato.driverinterface_2_1.html#tomato.driverinterface_2_1.decorators.coerce_val" title="tomato.driverinterface_2_1.decorators.coerce_val"><code class="xref py py-func docutils literal notranslate"><span class="pre">coerce_val()</span></code></a>, is provided to allow simpler type conversion and boundary checking.</p></li>
 </ul>
 <p><em>Code author: Peter Kraus</em></p>
@@ -197,7 +198,7 @@ Loris Ercole.</em></p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.0.post5
+      v: 2.1rc1.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
