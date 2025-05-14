@@ -17,6 +17,12 @@ Changes from ``tomato-2.0`` include:
   - :class:`~tomato.driverinterface_2_1.Attr` now accepts ``options``, which is the :class:`set` of values this attribute can be set to.
   - The decorators are now in :mod:`tomato.driverinterface_2_1.decorators`.
   - A new decorator, :func:`~tomato.driverinterface_2_1.decorators.coerce_val`, is provided to allow simpler type conversion and boundary checking.
+- A new ``Payload-2.1``, with the following changes:
+  - ``Task`` specification in ``Payload.method``:
+    - ``component_tag`` is renamed to ``component_role``
+    - ``task_name`` entry added, can be used to name *tasks* across a *payload* to trigger the below actions
+    - ``start_with_task_name`` entry added; when specified, the parent *task* will wait until the *task* with a matching ``task_name`` is started
+    - ``stop_with_task_name`` entry added; when specified, the parent *task* will stop execution once a *task* with a matching ``task_name`` is started
 
 .. codeauthor::
     Peter Kraus

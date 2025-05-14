@@ -446,6 +446,9 @@ class ModelInterface(metaclass=ABCMeta):
                 except (ValueError, pint.errors.UndefinedUnitError):
                     msg = f"could not coerce {par!r} to type {props.type}"
                     return (False, msg, None)
+            if props.options is not None and val not in props.options:
+                msg = f"{par!r} value {val!r} not among allowed options={props.options}"
+                return (False, msg, None)
             if isinstance(val, pint.Quantity):
                 if val.dimensionless and props.units is not None:
                     val = pint.Quantity(val.m, props.units)
