@@ -69,13 +69,19 @@ class ModelInterface(metaclass=ABCMeta):
 
     """
 
+    # Class attributes
     version: str = "2.1"
+    """Version of the :obj:`DriverInterface`."""
 
+    idle_measurement_interval: Union[int, None] = None
+    """The interval (in seconds) after which :func:`self.cmp_measure` will be executed, when idle."""
+
+    # Instance attributes
     devmap: dict[tuple, "ModelDevice"]
     """Map of registered devices, the tuple keys are `component = (address, channel)`"""
 
     settings: dict[str, Any]
-    """A settings map to contain driver-specific settings such as `dllpath` for BioLogic"""
+    """A settings map to contain driver-specific settings such as ``dllpath`` for BioLogic"""
 
     constants: dict[str, Any]
     """A map that should be populated with driver-specific run-time constants."""

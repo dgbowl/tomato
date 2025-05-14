@@ -129,6 +129,33 @@ def test_passata_api_measure(start_tomato_daemon, stop_tomato_daemon):
     assert ret.success
 
 
+def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
+    utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
+    assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
+
+    ret = tomato.passata.set_attr(
+        name="example_counter:(example-addr,1)",
+        attr="max",
+        val=15,
+        force=False,
+        **kwargs,
+    )
+    assert ret.success is False
+    assert "running component" in ret.msg
+
+    ret = tomato.passata.set_attr(
+        name="example_counter:(example-addr,1)",
+        attr="max",
+        val=15,
+        force=True,
+        **kwargs,
+    )
+    assert ret.success
+    assert "set to 15.0" in ret.msg
+
+
 def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
     utils.wait_until_tomato_running(port=PORT, timeout=1000)
     utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
