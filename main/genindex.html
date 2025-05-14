@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; tomato 2.1rc1.post1 documentation</title>
+  <title>Index &mdash; tomato 2.1rc1.post2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=489d4a1a"></script>
+        <script src="_static/documentation_options.js?v=7f65c070"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -38,7 +38,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.1rc1.post1
+                2.1rc1.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -253,7 +253,7 @@
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.component">component() (in module tomato.daemon.cmd)</a>
 </li>
-      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Task.component_tag">component_tag (dgbowl_schemas.tomato.payload.Task attribute)</a>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Task.component_role">component_role (dgbowl_schemas.tomato.payload.Task attribute)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.models.Pipeline.components">components (tomato.models.Pipeline attribute)</a>
 </li>
@@ -872,6 +872,8 @@
 </li>
       <li><a href="apidoc/tomato.tomato.html#tomato.tomato.start">start() (in module tomato.tomato)</a>
 </li>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Task.start_with_task_name">start_with_task_name (dgbowl_schemas.tomato.payload.Task attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.Attr.status">status (tomato.driverinterface_1_0.Attr attribute)</a>
@@ -924,6 +926,8 @@
       </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.stop_tomato_driver">stop_tomato_driver() (in module tomato.daemon.driver)</a>
 </li>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Task.stop_with_task_name">stop_with_task_name (dgbowl_schemas.tomato.payload.Task attribute)</a>
+</li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.io.store">store() (in module tomato.daemon.io)</a>
 </li>
       <li><a href="apidoc/tomato.ketchup.html#tomato.ketchup.submit">submit() (in module tomato.ketchup)</a>
@@ -954,6 +958,10 @@
         <li><a href="apidoc/tomato.driverinterface_2_1.html#tomato.driverinterface_2_1.ModelDevice.task_list">(tomato.driverinterface_2_1.ModelDevice attribute)</a>
 </li>
       </ul></li>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Task.task_name">task_name (dgbowl_schemas.tomato.payload.Task attribute)</a>
+</li>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Task.task_names_cannot_be_same">task_names_cannot_be_same() (dgbowl_schemas.tomato.payload.Task class method)</a>
+</li>
       <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Task.task_params">task_params (dgbowl_schemas.tomato.payload.Task attribute)</a>
 </li>
       <li><a href="apidoc/tomato.driverinterface_1_0.html#tomato.driverinterface_1_0.ModelInterface.DeviceManager.task_runner">task_runner() (tomato.driverinterface_1_0.ModelInterface.DeviceManager method)</a>
@@ -1031,6 +1039,8 @@
         <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.cmd">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     tomato.daemon.driver
 
@@ -1038,8 +1048,6 @@
         <li><a href="apidoc/tomato.daemon.html#module-tomato.daemon.driver">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     tomato.daemon.io
 
@@ -1171,6 +1179,8 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Payload.validate_task_names">validate_task_names() (dgbowl_schemas.tomato.payload.Payload class method)</a>
+</li>
       <li><a href="apidoc/tomato.html#tomato.models.Daemon.verbosity">verbosity (tomato.models.Daemon attribute)</a>
 </li>
       <li><a href="quickstart.html#dgbowl_schemas.tomato.payload.Payload.version">version (dgbowl_schemas.tomato.payload.Payload attribute)</a>
@@ -1213,7 +1223,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.1rc1.post1
+      v: 2.1rc1.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

@@ -292,24 +292,22 @@ Finally, a definition for the pipelines shown in the :ref:`concepts flowchart <c
 
 Payload file
 ````````````
-The *payload* file contains all information required to enter a *job* into the queue and allow its assignment onto a *pipeline*. The overall schema of the *payload* is defined in the :mod:`dgbowl_schemas.tomato` module, and is parsed using :func:`dgbowl_schemas.tomato.to_payload`:
+The *payload* file contains all information required to enter a *job* into the queue and allow its assignment onto a *pipeline*. The overall schema of the *payload* is defined in the :mod:`dgbowl_schemas.tomato` module, and is parsed using :func:`dgbowl_schemas.tomato.to_payload`.
 
-.. autopydantic_model:: dgbowl_schemas.tomato.payload.Payload
-
-
-.. note::
-
-    Of particular importance here is the specification of the individual :class:`Tasks`. Some general :class:`Task` parameters are abstracted by **tomato**, such as the ``max_duration``, ``sampling_interval`` and ``polling_interval``. The other are *driver* or *component* specific, and can be specified using the ``task_params`` :class:`dict`.
-
-.. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
-
-As of ``tomato-2.0``, the ``task_params`` specified in the *payload* are validated by the device *driver*. In particular, the setpoints of any entries within ``task_params`` are checked for compatibility with the type of the matching :class:`~tomato.driverinterface_2_1.Attr`. Similarly, their parsed values are compared against the optional :obj:`Attr.maximum` and :obj:`Attr.minimum`.
+Of particular importance here is the specification of the individual :class:`Tasks` within the :obj:`Payload.method` field. The :class:`Tasks` are distributed onto individual *components* of the *pipeline* (as matched by the :obj:`component_role` field), and then executed in sequence. Some general :class:`Task` parameters are abstracted by **tomato**, such as the ``max_duration``, ``sampling_interval`` and ``polling_interval``. The other are *driver* or *component* specific, and can be specified using the :obj:`task_params` field.
 
 .. warning::
 
-  Currently, **tomato** does not check whether the ``sampling_interval`` is realistic. This means your *jobs* may crash when the ``task_params`` are out of bounds when the :class:`Task` is being executed.
+  Currently, **tomato** does not check whether the ``sampling_interval`` is realistic. However, such validation is planned for a future release, see https://github.com/dgbowl/tomato/issues/127.
 
-  However, such validation is planned for a future release, see https://github.com/dgbowl/tomato/issues/127.
+
+As of ``tomato-2.1``, execution of a certain :class:`Task` can be postponed and triggered to coincide with the start of a different :class:`Task`; for this, the :obj:`start_with_task_name` attribute of the triggered :class:`Task` needs to match the :obj:`task_name` of the triggering :class:`Task`. Similarly, the execution of a :class:`Task` can be stopped once a different :class:`Task` starts, by setting :obj:`stop_with_task_name` accordingly.
+
+As of ``tomato-2.0``, the :obj:`task_params` specified in the *payload* are validated by the device *driver*. In particular, the values of all entries within :obj:`task_params` are checked for compatibility with the :obj:`Attr.type` and :obj:`Attr.options` (if supplied), as well as against the provided :obj:`Attr.minimum` and :obj:`Attr.maximum`, as specified in the matching :class:`~tomato.driverinterface_2_1.Attr`.
+
+.. autopydantic_model:: dgbowl_schemas.tomato.payload.Payload
+
+.. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
 
 .. |devfile| replace:: *devices file*
 
