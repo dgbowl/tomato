@@ -26,6 +26,24 @@ def _name_to_cmp(
     return cmp, drv
 
 
+def _running_or_force(
+        name: str,
+        port: int,
+        timeout: int,
+        context: zmq.Context,
+        force: bool,
+) -> Reply:
+    if not force:
+        ret = status(port=port, timeout=timeout, context=context, name=name).data
+        if ret["running"]:
+            return Reply(
+                success=False,
+                msg=f"will not 'set_attr' on a running component {name!r}",
+                data=None
+            )
+    return Reply(success=True)
+
+
 def status(
     *,
     port: int,
@@ -174,12 +192,16 @@ def set_attr(
     name: str,
     attr: str,
     val: Any,
+    force: bool = False,
     **_: dict,
 ) -> Reply:
     ret = _name_to_cmp(name, port, timeout, context)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    ret = _running_or_force(name, port, timeout, context, force)
+    if not ret.success:
+        return ret
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
@@ -202,12 +224,16 @@ def reset(
     timeout: int,
     context: zmq.Context,
     name: str,
+    force: bool = False,
     **_: dict,
 ) -> Reply:
     ret = _name_to_cmp(name, port, timeout, context)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    ret = _running_or_force(name, port, timeout, context, force)
+    if not ret.success:
+        return ret
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
