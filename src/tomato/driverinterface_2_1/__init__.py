@@ -259,6 +259,7 @@ class ModelInterface(metaclass=ABCMeta):
         Iterates over all :class:`Attrs` on the component that have ``status=True`` and
         returns their values in the :obj:`Reply.data` as a :class:`dict`.
         """
+        logger.critical(f"we made it here: {self.devmap=}")
         ret = {}
         for k, attr in self.devmap[key].attrs(key=key, **kwargs).items():
             if attr.status:

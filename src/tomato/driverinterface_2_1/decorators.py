@@ -19,8 +19,8 @@ def in_devmap(func):
             channel = kwargs.get("channel")
             key = (address, channel)
         if key not in self.devmap:
-            msg = f"dev with address {address!r} and channel {channel} is unknown"
-            return Reply(success=False, msg=msg, data=self.devmap.keys())
+            msg = f"component with key {key!r} is unknown"
+            return Reply(success=False, msg=msg, data=None)
         return func(self, **kwargs, key=key)
 
     return wrapper
