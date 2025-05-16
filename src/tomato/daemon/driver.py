@@ -220,9 +220,22 @@ def tomato_driver() -> None:
                     data=msg.get("params"),
                 )
             elif hasattr(interface, msg["cmd"]):
-                ret = getattr(interface, msg["cmd"])(**msg["params"])
+                try:
+                    ret = getattr(interface, msg["cmd"])(**msg["params"])
+                except (ValueError, AttributeError) as e:
+                    logger.info("above error caught by driver process")
+                    ret = Reply(
+                        success=False,
+                        msg=f"{type(e)}: {str(e)}",
+                        data=None,
+                    )
             else:
                 logger.critical("unknown command: '%s'", msg["cmd"])
+                ret = Reply(
+                    success=False,
+                    msg=f"unknown command: {msg['cmd']}",
+                    data=None,
+                )
             logger.debug("replying %s", ret)
             rep.send_pyobj(ret)
         if status == "stop":
