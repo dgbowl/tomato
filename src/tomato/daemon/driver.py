@@ -12,6 +12,7 @@ import logging
 import time
 import argparse
 from importlib import metadata
+from collections import defaultdict
 from datetime import datetime, timezone
 from threading import current_thread
 from pathlib import Path
@@ -43,12 +44,12 @@ def tomato_driver_bootstrap(
 
     logger.info("registering components for driver '%s'", driver)
     for comp in daemon.cmps.values():
-        key = (comp.address, comp.channel)
         if comp.driver == driver:
-            if interface.retries[key] == MAX_REGISTER_RETRIES:
+            key = (comp.address, comp.channel)
+            if interface.retries.get(key, 0) == MAX_REGISTER_RETRIES:
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
-                    comp.name
+                    comp.name,
                 )
                 continue
             logger.info("registering component %s", comp.name)
@@ -207,11 +208,18 @@ def tomato_driver() -> None:
                 )
             elif msg["cmd"] == "register":
                 tomato_driver_bootstrap(req, logger, interface, args.driver)
-                ret = Reply(
-                    success=True,
-                    msg="components re-registered successfully",
-                    data=interface.devmap.keys(),
-                )
+                if any([retry for retry in interface.retries.values()]):
+                    ret = Reply(
+                        success=False,
+                        msg="some components not registered successfully",
+                        data=interface.retries,
+                    )
+                else:
+                    ret = Reply(
+                        success=True,
+                        msg="all components re-registered successfully",
+                        data=interface.retries,
+                    )
             elif msg["cmd"] == "stop":
                 status = "stop"
                 ret = Reply(
@@ -317,6 +325,7 @@ def manager(port: int, timeout: int = 1000):
     to = timeout
 
     spawned_drivers = dict()
+    retries = defaultdict(int)
 
     while getattr(thread, "do_run"):
         req.send_pyobj(dict(cmd="status", sender=sender))
@@ -364,17 +373,19 @@ def manager(port: int, timeout: int = 1000):
             contact_drivers = set()
             for comp in daemon.cmps.values():
                 if comp.capabilities is None:
-                    contact_drivers.add(comp.driver)
+                    key = (comp.address, comp.channel)
+                    if retries[key] < MAX_REGISTER_RETRIES:
+                        contact_drivers.add(comp.driver)
             for driver in contact_drivers:
                 drv = daemon.drvs[driver]
                 if drv.port is None:
                     continue
-                logger.debug("contacting driver '%s' to re-register components", driver)
+                logger.info("contacting driver '%s' to re-register components", driver)
                 dreq = context.socket(zmq.REQ)
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 dreq.send_pyobj(dict(cmd="register", params=None, sender=sender))
                 ret = dreq.recv_pyobj()
-                logger.debug(f"{ret=}")
+                retries = ret.data
                 dreq.close()
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
 
