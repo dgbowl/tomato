@@ -29,6 +29,7 @@ from tomato.models import Reply, Daemon
 logger = logging.getLogger(__name__)
 ModelInterface = TypeVar("ModelInterface", MI_1_0, MI_2_0, MI_2_1)
 IDLE_MEASUREMENT_INTERVAL = None
+MAX_REGISTER_RETRIES = 3
 
 
 def tomato_driver_bootstrap(
@@ -42,7 +43,14 @@ def tomato_driver_bootstrap(
 
     logger.info("registering components for driver '%s'", driver)
     for comp in daemon.cmps.values():
+        key = (comp.address, comp.channel)
         if comp.driver == driver:
+            if interface.retries[key] == MAX_REGISTER_RETRIES:
+                logger.warning(
+                    "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
+                    comp.name
+                )
+                continue
             logger.info("registering component %s", comp.name)
             ret = interface.dev_register(address=comp.address, channel=comp.channel)
             if ret.success:
