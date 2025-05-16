@@ -19,7 +19,7 @@ def in_devmap(func):
             channel = kwargs.get("channel")
             key = (address, channel)
         if key not in self.devmap:
-            msg = f"component with key {key!r} is unknown"
+            msg = f"component with key {key!r} is not registered"
             return Reply(success=False, msg=msg, data=None)
         return func(self, **kwargs, key=key)
 
