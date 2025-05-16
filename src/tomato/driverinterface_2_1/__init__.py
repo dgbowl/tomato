@@ -11,6 +11,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Union, Optional
 from pydantic import BaseModel, Field
 from threading import Thread, current_thread, RLock
+from collections import defaultdict
 from queue import Queue
 from tomato.models import Reply
 from tomato.driverinterface_2_1.decorators import in_devmap, to_reply, log_errors
@@ -93,6 +94,7 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap = {}
         self.constants = {}
         self.settings = settings if settings is not None else {}
+        self.retries = defaultdict(int)
 
     @abstractmethod
     def DeviceFactory(self, key: Key, **kwargs) -> "ModelDevice":
@@ -176,14 +178,11 @@ class ModelInterface(metaclass=ABCMeta):
         try:
             self.devmap[key] = self.DeviceFactory(key, **kwargs)
             capabs = self.devmap[key].capabilities()
+            self.retries[key] = 0
             return (True, f"device {key!r} registered", capabs)
         except RuntimeError as e:
-            if key not in self.retries:
-                self.retries[key] = 1
-            else:
-                self.retries[key] += 1
+            self.retries[key] += 1
             return (False, f"failed to register {key!r}: {str(e)}", None)
-
 
     @log_errors
     @to_reply
