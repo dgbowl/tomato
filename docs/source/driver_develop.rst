@@ -54,6 +54,12 @@ Best Practices when developing a *driver*
 - The :func:`ModelDevice.attrs` defines the variable attributes of the *component* that should be accessible, using :class:`Attr`. All entries in :func:`attrs` should also be present in :obj:`ModelDevice.data`, as the data likely depends on the settings of these :class:`Attrs`.
 - Each :class:`ModelDevice` contains a link to its parent :class:`ModelInterface` in the :obj:`ModelDevice.driver` object.
 - Internal functions of the :class:`ModelDevice` and :class:`ModelInterface` should be re-used wherever possible. E.g., reading *component* attributes should always be carried out using :func:`ModelDevice.get_attr`.
+- Only certain types of Exceptions are caught and logged by the ``tomato-driver`` process:
+
+  - The :func:`__init__` of each :class:`ModelDevice` should raise :class:`RuntimeError` if connection to the *component*/*device* was not possible. The instantiation of the *component* (via :func:`ModelInterface.cmp_register`) will be carried out automatically 3x, then it has to be done manually via ``passata register``.
+  - The :func:`set_attr` and :func:`get_attr` (and others) should raise :class:`ValueError` or :class:`AttributeError` if the val/attr supplied by the user is invalid. The expectation is that when one of these Exceptions is raised, there is no change to the state of the *component*.
+
+  Other types of Exceptions are not caught and **will** cause the ``tomato-driver`` process to crash.
 
 DriverInterface ver. 2.1
 ````````````````````````

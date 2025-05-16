@@ -209,7 +209,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
         else:
             ii = []
             for i in daemon.cmps.values():
-                line = f"name:{i.name}\tdriver:{i.driver}\tdevice:{i.device}\trole:{i.role}"
+                line = f"name:{i.name}\tdriver:{i.driver}\tdevice:{i.device}\trole:{i.role}\tcapabs:{i.capabilities}"
                 ii.append(line)
             if len(ii) == 0:
                 msg = f"tomato running on port {daemon.port} with no components"

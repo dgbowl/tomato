@@ -19,8 +19,8 @@ def in_devmap(func):
             channel = kwargs.get("channel")
             key = (address, channel)
         if key not in self.devmap:
-            msg = f"dev with address {address!r} and channel {channel} is unknown"
-            return Reply(success=False, msg=msg, data=self.devmap.keys())
+            msg = f"component with key {key!r} is not registered"
+            return Reply(success=False, msg=msg, data=None)
         return func(self, **kwargs, key=key)
 
     return wrapper
@@ -56,9 +56,9 @@ def log_errors(func):
     def wrapper(self, **kwargs):
         try:
             return func(self, **kwargs)
-        # We want to preserve ValueErrors and AssertionErrors for testing.
+        # We want to preserve TypeErrors, ValueErrors and AttributeErrors for testing.
         # These should be then caught in the tomato-driver process.
-        except (ValueError, AssertionError) as e:
+        except (ValueError, AttributeError) as e:
             logger.critical(e, exc_info=True)
             raise e
         # Other kinds of errors we abort the driver process
@@ -81,28 +81,29 @@ def coerce_val(func):
 
     @wraps(func)
     def wrapper(self, attr: str, val: Val, **kwargs: dict) -> Val:
-        assert val is not None, f"val of attr {attr!r} cannot be None"
-        assert attr in self.attrs(), f"unknown attr: {attr!r}"
+        if val is None:
+            raise ValueError(f"attr {attr!r} cannot be None")
+        if attr not in self.attrs():
+            raise AttributeError(f"unknown attr: {attr!r}")
         props = self.attrs()[attr]
-        assert props.rw
+        if not props.rw:
+            raise AttributeError(f"attr {attr!r} is read-only")
 
         if not isinstance(val, props.type):
+            # This may raise ValueError
             val = props.type(val)
-        assert props.options is None or val in props.options, (
-            f"val {val!r} is not in allowed options {props.options}"
-        )
+        if props.options is not None and val not in props.options:
+            raise ValueError(f"val {val!r} is not in allowed options {props.options}")
+
         if isinstance(val, pint.Quantity):
             if val.dimensionless and props.units is not None:
                 val = pint.Quantity(val.m, props.units)
-            assert val.dimensionality == pint.Quantity(props.units).dimensionality, (
-                f"attr {attr!r} has the wrong dimensionality {str(val.dimensionality)}"
-            )
-        assert props.minimum is None or val >= props.minimum, (
-            f"attr {attr!r} is smaller than {props.minimum}"
-        )
-        assert props.maximum is None or val <= props.maximum, (
-            f"attr {attr!r} is greater than {props.maximum}"
-        )
+            if val.dimensionality != pint.Quantity(props.units).dimensionality:
+                raise ValueError(f"val {val!r} has the wrong dimensionality")
+        if props.minimum is not None and val < props.minimum:
+            raise ValueError(f"val {val!r} is smaller than {props.minimum}")
+        if props.maximum is not None and val > props.maximum:
+            raise ValueError(f"val {val!r} is greater than {props.maximum}")
 
         return func(self, attr=attr, val=val, **kwargs)
 

@@ -11,6 +11,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Union, Optional
 from pydantic import BaseModel, Field
 from threading import Thread, current_thread, RLock
+from collections import defaultdict
 from queue import Queue
 from tomato.models import Reply
 from tomato.driverinterface_2_1.decorators import in_devmap, to_reply, log_errors
@@ -78,7 +79,10 @@ class ModelInterface(metaclass=ABCMeta):
 
     # Instance attributes
     devmap: dict[tuple, "ModelDevice"]
-    """Map of registered devices, the tuple keys are `component = (address, channel)`"""
+    """Map of registered device components, the tuple keys are `component = (address, channel)`"""
+
+    retries: dict[tuple, int]
+    """Map of components which failed to register, with number of retries as values."""
 
     settings: dict[str, Any]
     """A settings map to contain driver-specific settings such as ``dllpath`` for BioLogic"""
@@ -90,6 +94,7 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap = {}
         self.constants = {}
         self.settings = settings if settings is not None else {}
+        self.retries = defaultdict(int)
 
     @abstractmethod
     def DeviceFactory(self, key: Key, **kwargs) -> "ModelDevice":
@@ -170,9 +175,14 @@ class ModelInterface(metaclass=ABCMeta):
         :obj:`Reply.data`.
         """
         key = (address, channel)
-        self.devmap[key] = self.DeviceFactory(key, **kwargs)
-        capabs = self.devmap[key].capabilities()
-        return (True, f"device {key!r} registered", capabs)
+        try:
+            self.devmap[key] = self.DeviceFactory(key, **kwargs)
+            capabs = self.devmap[key].capabilities()
+            self.retries[key] = 0
+            return (True, f"device {key!r} registered", capabs)
+        except RuntimeError as e:
+            self.retries[key] += 1
+            return (False, f"failed to register {key!r}: {str(e)}", None)
 
     @log_errors
     @to_reply
@@ -249,6 +259,7 @@ class ModelInterface(metaclass=ABCMeta):
         Iterates over all :class:`Attrs` on the component that have ``status=True`` and
         returns their values in the :obj:`Reply.data` as a :class:`dict`.
         """
+        logger.critical(f"we made it here: {self.devmap=}")
         ret = {}
         for k, attr in self.devmap[key].attrs(key=key, **kwargs).items():
             if attr.status:
@@ -432,34 +443,39 @@ class ModelInterface(metaclass=ABCMeta):
             msg = f"unknown task {task.technique_name!r} requested"
             return (False, msg, None)
         attrs = self.devmap[key].attrs(**kwargs)
-        for par, val in task.task_params.items():
-            if par not in attrs:
-                msg = f"unknown attribute {par!r} cannot be set"
+        for attr, val in task.task_params.items():
+            if val is None:
+                msg = f"val of attr {attr!r} cannot be None"
                 return (False, msg, None)
-            props = attrs[par]
+            if attr not in attrs:
+                msg = f"unknown attr: {attr!r}"
+                return (False, msg, None)
+            props = attrs[attr]
             if not props.rw:
-                msg = f"attribute {par!r} is read-only"
+                msg = f"attribute {attr!r} is read-only"
                 return (False, msg, None)
+
             if not isinstance(val, props.type):
                 try:
                     val = props.type(val)
                 except (ValueError, pint.errors.UndefinedUnitError):
-                    msg = f"could not coerce {par!r} to type {props.type}"
+                    msg = f"could not coerce {attr!r} to type {props.type}"
                     return (False, msg, None)
             if props.options is not None and val not in props.options:
-                msg = f"{par!r} value {val!r} not among allowed options={props.options}"
+                msg = f"val {val!r} is not among allowed options {props.options}"
                 return (False, msg, None)
+
             if isinstance(val, pint.Quantity):
                 if val.dimensionless and props.units is not None:
                     val = pint.Quantity(val.m, props.units)
                 if val.dimensionality != pint.Quantity(props.units).dimensionality:
-                    msg = f"attribute {par!r} has the wrong dimensionality {str(val.dimensionality)}"
+                    msg = f"val {val!r} has the wrong dimensionality"
                     return (False, msg, None)
             if props.minimum is not None and val < props.minimum:
-                msg = f"attr {par!r} is smaller than {props.minimum}"
+                msg = f"val {val!r} is smaller than {props.minimum}"
                 return (False, msg, None)
             if props.maximum is not None and val > props.maximum:
-                msg = f"attr {par!r} is greater than {props.maximum}"
+                msg = f"val {val!r} is greater than {props.maximum}"
                 return (False, msg, None)
         return (True, "task validated successfully", None)
 
