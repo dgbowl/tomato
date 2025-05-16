@@ -230,11 +230,14 @@ class ModelInterface(metaclass=ABCMeta):
     devmap: dict[tuple, DeviceManager]
     """Map of registered devices, the tuple keys are `component = (address, channel)`"""
 
+    retries: dict
+
     settings: dict[str, Any]
     """A settings map to contain driver-specific settings such as `dllpath` for BioLogic"""
 
     def __init__(self, settings=None):
         self.devmap = {}
+        self.retries = defaultdict(int)
         self.settings = settings if settings is not None else {}
 
     def dev_register(self, address: str, channel: str, **kwargs: dict) -> Reply:
