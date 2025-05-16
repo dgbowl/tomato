@@ -313,11 +313,12 @@ def run_passata():
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
     stats = subparsers.add_parser("status")
     attrs = subparsers.add_parser("attrs")
+    regis = subparsers.add_parser("register")
     capbs = subparsers.add_parser("capabilities")
     const = subparsers.add_parser("constants")
     gattr = subparsers.add_parser("get")
 
-    for p in [stats, attrs, capbs, gattr, const]:
+    for p in [stats, attrs, regis, capbs, gattr, const]:
         p.add_argument(
             "name",
             help=(
@@ -355,6 +356,7 @@ def run_passata():
 
     stats.set_defaults(func=passata.status)
     attrs.set_defaults(func=passata.attrs)
+    regis.set_defaults(func=passata.register)
     capbs.set_defaults(func=passata.capabilities)
     const.set_defaults(func=passata.constants)
     gattr.set_defaults(func=passata.get_attrs)
