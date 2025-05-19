@@ -679,7 +679,7 @@ class ModelDevice(metaclass=ABCMeta):
             self.do_measure()
             self.running = False
             self.thread = Thread(target=self.task_runner, daemon=True)
-            logger.info("measurement on component %s is done", self.key)
+            logger.debug("measurement on component %s is done", self.key)
         except Exception as e:
             logger.critical(e, exc_info=True)
 
