@@ -192,72 +192,76 @@ def tomato_driver() -> None:
     poller.register(rep, zmq.POLLIN)
     status = "running"
     t_last = None
-    while True:
-        socks = dict(poller.poll(100))
-        if rep in socks:
-            msg = rep.recv_pyobj()
-            logger.debug("received msg=%s", msg)
-            if "cmd" not in msg:
-                logger.error(f"received msg without cmd: {msg=}")
-                ret = Reply(success=False, msg="received msg without cmd", data=msg)
-            elif msg["cmd"] == "status":
-                ret = Reply(
-                    success=True,
-                    msg=f"status of driver {params['name']!r} is {status!r}",
-                    data=dict(**params, status=status),
-                )
-            elif msg["cmd"] == "register":
-                tomato_driver_bootstrap(req, logger, interface, args.driver)
-                if any([retry for retry in interface.retries.values()]):
-                    ret = Reply(
-                        success=False,
-                        msg="some components not registered successfully",
-                        data=interface.retries,
-                    )
-                else:
+    try:
+        while True:
+            socks = dict(poller.poll(100))
+            if rep in socks:
+                msg = rep.recv_pyobj()
+                logger.debug("received msg=%s", msg)
+                if "cmd" not in msg:
+                    logger.error(f"received msg without cmd: {msg=}")
+                    ret = Reply(success=False, msg="received msg without cmd", data=msg)
+                elif msg["cmd"] == "status":
                     ret = Reply(
                         success=True,
-                        msg="all components re-registered successfully",
-                        data=interface.retries,
+                        msg=f"status of driver {params['name']!r} is {status!r}",
+                        data=dict(**params, status=status),
                     )
-            elif msg["cmd"] == "stop":
-                status = "stop"
-                ret = Reply(
-                    success=True,
-                    msg=f"stopping driver {args.driver!r}",
-                    data=dict(status=status, driver=args.driver),
-                )
-            elif msg["cmd"] == "settings":
-                interface.settings = msg["params"]
-                params["settings"] = interface.settings
-                ret = Reply(
-                    success=True,
-                    msg="settings received",
-                    data=msg.get("params"),
-                )
-            elif hasattr(interface, msg["cmd"]):
-                try:
-                    ret = getattr(interface, msg["cmd"])(**msg["params"])
-                except (ValueError, AttributeError) as e:
-                    logger.info("above error caught by driver process")
+                elif msg["cmd"] == "register":
+                    tomato_driver_bootstrap(req, logger, interface, args.driver)
+                    if any([retry for retry in interface.retries.values()]):
+                        ret = Reply(
+                            success=False,
+                            msg="some components not registered successfully",
+                            data=interface.retries,
+                        )
+                    else:
+                        ret = Reply(
+                            success=True,
+                            msg="all components re-registered successfully",
+                            data=interface.retries,
+                        )
+                elif msg["cmd"] == "stop":
+                    status = "stop"
+                    ret = Reply(
+                        success=True,
+                        msg=f"stopping driver {args.driver!r}",
+                        data=dict(status=status, driver=args.driver),
+                    )
+                elif msg["cmd"] == "settings":
+                    interface.settings = msg["params"]
+                    params["settings"] = interface.settings
+                    ret = Reply(
+                        success=True,
+                        msg="settings received",
+                        data=msg.get("params"),
+                    )
+                elif hasattr(interface, msg["cmd"]):
+                    try:
+                        ret = getattr(interface, msg["cmd"])(**msg["params"])
+                    except (ValueError, AttributeError) as e:
+                        logger.info("above error caught by driver process")
+                        ret = Reply(
+                            success=False,
+                            msg=f"{type(e)}: {str(e)}",
+                            data=None,
+                        )
+                else:
+                    logger.critical("unknown command: '%s'", msg["cmd"])
                     ret = Reply(
                         success=False,
-                        msg=f"{type(e)}: {str(e)}",
+                        msg=f"unknown command: {msg['cmd']}",
                         data=None,
                     )
-            else:
-                logger.critical("unknown command: '%s'", msg["cmd"])
-                ret = Reply(
-                    success=False,
-                    msg=f"unknown command: {msg['cmd']}",
-                    data=None,
-                )
-            logger.debug("replying %s", ret)
-            rep.send_pyobj(ret)
-        if status == "stop":
-            break
-        elif status == "running":
-            t_last = perform_idle_measurements(interface, t_last)
+                logger.debug("replying %s", ret)
+                rep.send_pyobj(ret)
+            if status == "stop":
+                break
+            elif status == "running":
+                t_last = perform_idle_measurements(interface, t_last)
+    except Exception as e:
+        logger.critical("uncaught exception %s", type(e), exc_info=True)
+        raise e
 
     logger.info("driver '%s' is beginning reset", args.driver)
     interface.reset()
