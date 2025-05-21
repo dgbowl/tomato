@@ -146,7 +146,7 @@ def manage_running_pips(pips: dict, dbpath: str, req):
         reset = False
         # running jobs scheduled for killing (status == 'rd') should be killed
         if pidexists and job.status == "rd":
-            logger.debug(f"job {job.id} with pid {job.pid} will be terminated")
+            logger.info(f"job {job.id} with pid {job.pid} will be terminated")
             proc = psutil.Process(pid=job.pid)
             kill_tomato_job(proc)
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
@@ -155,12 +155,12 @@ def manage_running_pips(pips: dict, dbpath: str, req):
             params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
-            logging.warning(f"the pid {job.pid} of job {job.id} has not been found")
+            logger.warning(f"the pid {job.pid} of job {job.id} has not been found")
             reset = True
             params = dict(status="ce")
         # pipelines of completed jobs should be reset
         elif (not pidexists) and job.status == "c":
-            logger.debug(f"the pid {job.pid} of job {job.id} has not been found")
+            logger.info(f"the pid {job.pid} of job {job.id} has not been found")
             ready = job.payload.settings.unlock_when_done
             params = dict(jobid=None, ready=ready, name=pip.name)
             req.send_pyobj(dict(cmd="pipeline", params=params))
@@ -385,7 +385,7 @@ def tomato_job() -> None:
     elif psutil.POSIX:
         pid = os.getpid()
 
-    logger.debug(f"assigning job {jobid} with pid {pid} into pipeline {pip!r}")
+    logger.info(f"assigning job {jobid} with pid {pid} into pipeline {pip!r}")
     context = zmq.Context()
 
     params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
@@ -393,7 +393,7 @@ def tomato_job() -> None:
 
     output = payload.settings.output
     outpath = Path(output.path)
-    logger.debug(f"output folder is {outpath}")
+    logger.info(f"output folder is {outpath}")
     if outpath.exists():
         assert outpath.is_dir()
     else:
@@ -453,7 +453,7 @@ def job_thread(
     req = context.socket(zmq.REQ)
     req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{driver.port}")
-    logger.debug(f"job thread of {component.role!r} connected to tomato-daemon")
+    logger.info(f"job thread of {component.role!r} connected to tomato-daemon")
 
     kwargs = dict(address=component.address, channel=component.channel)
 
@@ -461,7 +461,7 @@ def job_thread(
     logger.debug("distributing tasks:")
     for ti, task in enumerate(tasks):
         thread.current_task = task
-        logger.debug("processing task idx %d", ti)
+        logger.info("processing task %s:%d", component.role, ti)
         while True:
             time.sleep(1e-1)
             if task.start_with_task_name is None:
@@ -477,7 +477,7 @@ def job_thread(
             if ret.success and ret.data["can_submit"]:
                 break
             logger.warning("cannot submit onto component '%s', waiting", component.role)
-        logger.debug("sending task idx %d to component '%s'", ti, component.role)
+        logger.info("sending task %s:%d to component", component.role, ti)
         req.send_pyobj(dict(cmd="task_start", params={"task": task, **kwargs}))
         ret = req.recv_pyobj()
 
@@ -485,7 +485,7 @@ def job_thread(
         while True:
             tN = time.perf_counter()
             if tN - t0 > device.pollrate:
-                logger.debug("polling component '%s' for data", component.role)
+                logger.debug("polling task %s:%d for data", component.role, ti)
                 try:
                     req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
                     ret = req.recv_pyobj()
@@ -500,7 +500,7 @@ def job_thread(
                     data_to_pickle(ds, datapath, role=component.role)
                 t0 += device.pollrate
 
-            logger.debug("polling component '%s' for task completion", component.role)
+            logger.debug("polling task %s:%d for completion", component.role, ti)
             try:
                 req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
                 ret = req.recv_pyobj()
@@ -509,7 +509,7 @@ def job_thread(
                 thread.crashed = True
                 sys.exit(e)
             if ret.success and not ret.data["running"]:
-                logger.debug("task no longer running, break")
+                logger.info("task %s:%d no longer running, break", component.role, ti)
                 break
             elif ret.success is False:
                 logger.critical(f"{ret=}")
@@ -519,21 +519,21 @@ def job_thread(
                 task.stop_with_task_name is not None
                 and task.stop_with_task_name in thread.started_task_names
             ):
-                logger.warning("stopping task idx %d as stop trigger met", ti)
+                logger.info("task %s:%d stop trigger met", component.role, ti)
                 req.send_pyobj(dict(cmd="task_stop", params={**kwargs}))
                 ret = req.recv_pyobj()
                 logger.debug(f"{ret=}")
                 break
 
             time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
-        logger.debug("fetching final data for task")
+        logger.info("task %s:%d fetching final data", component.role, ti)
         req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
         ret = req.recv_pyobj()
         if ret.success:
             data_to_pickle(ret.data, datapath, role=component.role)
         thread.completed_tasks.append(task)
         thread.current_task = None
-    logger.debug("all tasks done on component '%s', resetting", component.role)
+    logger.info("all tasks done on component '%s', resetting", component.role)
     if driver.version == "1.0":
         req.send_pyobj(dict(cmd="dev_reset", params={**kwargs}))
     else:

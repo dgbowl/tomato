@@ -259,7 +259,6 @@ class ModelInterface(metaclass=ABCMeta):
         Iterates over all :class:`Attrs` on the component that have ``status=True`` and
         returns their values in the :obj:`Reply.data` as a :class:`dict`.
         """
-        logger.critical(f"we made it here: {self.devmap=}")
         ret = {}
         for k, attr in self.devmap[key].attrs(key=key, **kwargs).items():
             if attr.status:
@@ -638,7 +637,7 @@ class ModelDevice(metaclass=ABCMeta):
             self.do_measure()
             self.running = False
             self.thread = Thread(target=self.task_runner, daemon=True)
-            logger.info("measurement on component %s is done", self.key)
+            logger.debug("measurement on component %s is done", self.key)
         except Exception as e:
             logger.critical(e, exc_info=True)
 
