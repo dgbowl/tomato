@@ -583,10 +583,9 @@ class ModelDevice(metaclass=ABCMeta):
         thread = current_thread()
         while getattr(thread, "do_run"):
             try:
-                task: Task = self.task_list.get_nowait()
+                task: Task = self.task_list.get(timeout=1)
                 thread.do_run_task = True
             except queue.Empty:
-                time.sleep(1e-3)
                 continue
             except Exception as e:
                 logger.critical(e, exc_info=True)
@@ -604,13 +603,7 @@ class ModelDevice(metaclass=ABCMeta):
                         t_n = time.perf_counter()
                         if t_n - t_p > task.sampling_interval:
                             with self.datalock:
-                                try:
-                                    self.do_task(
-                                        task, t_start=t_0, t_now=t_n, t_prev=t_p
-                                    )
-                                except Exception as e:
-                                    logger.critical(e, exc_info=True)
-                                    thread.do_run = False
+                                self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)
                             t_p += task.sampling_interval
                         if t_n - t_0 > task.max_duration:
                             thread.do_run_task = False
@@ -634,10 +627,16 @@ class ModelDevice(metaclass=ABCMeta):
                     thread.do_run = False
                     break
             else:
-                logger.critical(f"Unknown task received: {task!r}")
+                logger.critical("Unknown task received: '%s'", task)
                 thread.do_run = False
                 break
-            self.task_list.task_done()
+            
+            try:
+                self.task_list.task_done()
+            except ValueError as e:
+                logger.critical(e, exc_info=True)
+                logger.critical("above error raised on task '%s'", task)
+
             self.running = False
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
