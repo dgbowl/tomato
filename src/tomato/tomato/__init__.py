@@ -27,6 +27,7 @@ import json
 from pathlib import Path
 from datetime import datetime, timezone
 from importlib import metadata
+from collections import defaultdict
 
 import logging
 import psutil
@@ -153,10 +154,10 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 data=daemon.pips,
             )
         else:
-            ii = []
-            for i in daemon.pips.values():
-                line = f"name:{i.name}\tready:{i.ready}\tsampleid:{i.sampleid}\tjobid:{i.jobid}"
-                ii.append(line)
+            ii = make_padded_lines(
+                daemon.pips.values(),
+                ["name", "ready", "sampleid", "jobid"],
+            )
             if len(ii) == 0:
                 msg = f"tomato running on port {daemon.port} with no pipelines"
             else:
@@ -171,10 +172,10 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 data=daemon.drvs,
             )
         else:
-            ii = []
-            for i in daemon.drvs.values():
-                line = f"name:{i.name}\tport:{i.port}\tpid:{i.pid}\tversion:{i.version}"
-                ii.append(line)
+            ii = make_padded_lines(
+                daemon.drvs.values(),
+                ["name", "port", "pid", "version"],
+            )
             if len(ii) == 0:
                 msg = f"tomato running on port {daemon.port} with no drivers"
             else:
@@ -189,10 +190,10 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 data=daemon.devs,
             )
         else:
-            ii = []
-            for i in daemon.devs.values():
-                line = f"name:{i.name}\tdriver:{i.driver}\taddress:{i.address}\tchannels:{i.channels}"
-                ii.append(line)
+            ii = make_padded_lines(
+                daemon.devs.values(),
+                ["name", "driver", "address", "channels"],
+            )
             if len(ii) == 0:
                 msg = f"tomato running on port {daemon.port} with no devices"
             else:
@@ -207,10 +208,10 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 data=daemon.cmps,
             )
         else:
-            ii = []
-            for i in daemon.cmps.values():
-                line = f"name:{i.name}\tdriver:{i.driver}\tdevice:{i.device}\trole:{i.role}\tcapabs:{i.capabilities}"
-                ii.append(line)
+            ii = make_padded_lines(
+                daemon.cmps.values(),
+                ["name", "driver", "device", "role", "capabilities"],
+            )
             if len(ii) == 0:
                 msg = f"tomato running on port {daemon.port} with no components"
             else:
@@ -218,6 +219,23 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
     return rep
+
+
+def make_padded_lines(data, keys):
+    temp = defaultdict(list)
+    maxlen = dict()
+    lines = list()
+    for obj in data:
+        for key in keys:
+            temp[key].append(len(str(getattr(obj, key))))
+    for key in keys:
+        maxlen[key] = max(temp[key])
+    for obj in data:
+        line = ""
+        for key in keys:
+            line += f"{key}:{str(getattr(obj, key)):<{maxlen[key] + 2}}"
+        lines.append(line)
+    return lines
 
 
 def status(
