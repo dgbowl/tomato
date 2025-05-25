@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato package &mdash; tomato 2.1rc3.post1 documentation</title>
+  <title>tomato package &mdash; tomato 2.1rc4.post1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=68173b86"></script>
+        <script src="../_static/documentation_options.js?v=19cc91ec"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.1rc3.post1
+                2.1rc4.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -114,6 +114,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.role"><code class="docutils literal notranslate"><span class="pre">Component.role</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.capabilities"><code class="docutils literal notranslate"><span class="pre">Component.capabilities</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.coerce_channel"><code class="docutils literal notranslate"><span class="pre">Component.coerce_channel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Component.check_role"><code class="docutils literal notranslate"><span class="pre">Component.check_role</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tomato.models.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a><ul>
@@ -515,6 +516,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.set_loglevel"><code class="docutils literal notranslate"><span class="pre">set_loglevel()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.load_device_file"><code class="docutils literal notranslate"><span class="pre">load_device_file()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.get_pipelines"><code class="docutils literal notranslate"><span class="pre">get_pipelines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.make_padded_lines"><code class="docutils literal notranslate"><span class="pre">make_padded_lines()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.start"><code class="docutils literal notranslate"><span class="pre">start()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.stop"><code class="docutils literal notranslate"><span class="pre">stop()</span></code></a></li>
@@ -818,6 +820,7 @@
 </details></p><dl class="field-list simple">
 <dt class="field-odd">Validators<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tomato.models.Component.check_role" title="tomato.models.Component.check_role"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_role</span></code></a> » <a class="reference internal" href="#tomato.models.Component.role" title="tomato.models.Component.role"><code class="xref py py-obj docutils literal notranslate"><span class="pre">role</span></code></a></p></li>
 <li><p><a class="reference internal" href="#tomato.models.Component.coerce_channel" title="tomato.models.Component.coerce_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coerce_channel</span></code></a> » <a class="reference internal" href="#tomato.models.Component.channel" title="tomato.models.Component.channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channel</span></code></a></p></li>
 </ul>
 </dd>
@@ -857,7 +860,14 @@
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Component.role">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Component.role" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Validated by<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#tomato.models.Component.check_role" title="tomato.models.Component.check_role"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_role</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Component.capabilities">
@@ -867,6 +877,11 @@
 <dl class="py method pydantic_validator">
 <dt class="sig sig-object py" id="tomato.models.Component.coerce_channel">
 <em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coerce_channel</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#tomato.models.Component.channel" title="tomato.models.Component.channel"><em class="xref py py-obj"><span class="pre">channel</span></em></a><a class="headerlink" href="#tomato.models.Component.coerce_channel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="tomato.models.Component.check_role">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_role</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference internal" href="#tomato.models.Component.role" title="tomato.models.Component.role"><em class="xref py py-obj"><span class="pre">role</span></em></a><a class="headerlink" href="#tomato.models.Component.check_role" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1852,7 +1867,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.1rc3.post1
+      v: 2.1rc4.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
