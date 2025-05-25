@@ -360,6 +360,9 @@ def start(
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
+    settings = toml.load(Path(appdir) / "settings.toml")
+    jobdb_setup(settings["jobs"]["dbpath"])
+
     logger.debug("starting tomato on port %d", port)
     cmd = [
         "tomato-daemon",
