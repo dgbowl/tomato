@@ -744,7 +744,6 @@ class ModelDevice(metaclass=ABCMeta):
             time.sleep(1e-3)
         self.data = None
         self.datalock = RLock()
-        self.task_list.shutdown(immediate=True)
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = do_run
