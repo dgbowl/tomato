@@ -340,7 +340,7 @@ class ModelInterface(metaclass=ABCMeta):
         if self.devmap[key].running:
             return (False, f"measurement already running on component {key!r}", None)
         else:
-            self.devmap[key].measure()
+            self.devmap[key].task_list.put("measure")
             return (True, f"measurement started on component {key!r}", None)
 
     @log_errors
@@ -625,7 +625,7 @@ class ModelDevice(metaclass=ABCMeta):
                     logger.critical(e, exc_info=True)
                     thread.do_run = False
                     break
-            else:
+            elif task == "measure":
                 try:
                     self.do_measure()
                     logger.debug("measurement on component %s is done", self.key)
@@ -633,6 +633,10 @@ class ModelDevice(metaclass=ABCMeta):
                     logger.critical(e, exc_info=True)
                     thread.do_run = False
                     break
+            else:
+                logger.critical(f"Unknown task received: {task!r}")
+                thread.do_run = False
+                break
             self.task_list.task_done()
             self.running = False
 
