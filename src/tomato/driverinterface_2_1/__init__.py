@@ -351,8 +351,8 @@ class ModelInterface(metaclass=ABCMeta):
         Submit a :class:`Task` onto the specified device component.
 
         Pushes the supplied :class:`Task` into the :class:`Queue` of the component,
-        then starts the worker thread. Checks that the :class:`Task` is among the
-        capabilities of this component.
+        then starts the worker thread (if not already started). Checks that the
+        :class:`Task` is among the capabilities of this component.
         """
         ret = self.task_validate(key=key, task=task, **kwargs)
         if not ret.success:
@@ -360,9 +360,13 @@ class ModelInterface(metaclass=ABCMeta):
 
         logger.info("starting task '%s' on component %s", task.technique_name, key)
         self.devmap[key].task_list.put(task)
-        self.devmap[key].run()
-        logger.info("task '%s' on component %s started", task.technique_name, key)
-        return (True, f"task {task!r} started successfully", task)
+        if self.devmap[key].running:
+            logger.critical(f"Race condition, component {key!r} is running.")
+            return (False, f"task {task!r} start failed as component is running", task)
+        else:
+            self.devmap[key].run()
+            logger.info("task '%s' on component %s started", task.technique_name, key)
+            return (True, f"task {task!r} started successfully", task)
 
     @log_errors
     @to_reply
@@ -558,7 +562,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.driver = driver
         self.key = key
         self.task_list = Queue()
-        self.thread = Thread(target=self.task_runner, daemon=True)
+        self.thread = None
         self.data = None
         self.last_data = None
         self.running = False
@@ -568,6 +572,7 @@ class ModelDevice(metaclass=ABCMeta):
 
     def run(self) -> None:
         """Helper function for starting the :obj:`self.thread` as a task."""
+        self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = True
         self.thread.start()
 
@@ -587,8 +592,7 @@ class ModelDevice(metaclass=ABCMeta):
         the :func:`do_task` function (using `task.sampling_interval`) until the
         maximum task duration (i.e. `task.max_duration`) is exceeded.
 
-        The :obj:`self.thread` is re-primed for future :class:`Tasks` at the end
-        of this function.
+        The :obj:`self.thread` is reset to None.
         """
         e = None
         self.running = True
@@ -618,28 +622,30 @@ class ModelDevice(metaclass=ABCMeta):
             time.sleep(max(1e-2, task.sampling_interval / 20))
 
         self.task_list.task_done()
-        self.running = False
-        self.thread = Thread(target=self.task_runner, daemon=True)
+        self.thread = None
         if e is None:
             logger.info(
                 "task '%s' on component %s is done", task.technique_name, self.key
             )
+        self.running = False
 
     def meas_runner(self) -> None:
         """
         Target function for the :obj:`self.thread` when performing one shot measurements.
 
         Performs the measurement using :func:`self.do_measure()`. Resets :obj:`self.thread`
-        for future :class:`Tasks`.
+        to None.
         """
+        e = None
+        self.running = True
         try:
-            self.running = True
             self.do_measure()
-            self.running = False
-            self.thread = Thread(target=self.task_runner, daemon=True)
-            logger.debug("measurement on component %s is done", self.key)
         except Exception as e:
             logger.critical(e, exc_info=True)
+        self.thread = None
+        if e is None:
+            logger.debug("measurement on component %s is done", self.key)
+        self.running = False
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
         """
