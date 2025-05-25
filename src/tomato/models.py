@@ -58,10 +58,19 @@ class Component(BaseModel):
         if isinstance(v, int):
             logger.warning(
                 "Supplying 'channel' as an int is deprecated "
-                "and will stop working in tomato-2.0."
+                "and will stop working in tomato-3.0."
             )
             return str(v)
         return v
+
+    @field_validator("role", mode="after")
+    def check_role(cls, value):
+        if "/" in value:
+            raise ValueError(
+                f"Cannot have '/' as part of component.role: {value!r}, "
+                "please fix your devices.yml file accordingly and run 'tomato reload'."
+            )
+        return value
 
 
 class Pipeline(BaseModel):
