@@ -581,10 +581,9 @@ class ModelDevice(metaclass=ABCMeta):
         The :obj:`self.thread` is reset to None.
         """
         thread = current_thread()
-        while getattr(thread, "do_run"):
+        while thread.do_run:
             try:
                 task: Task = self.task_list.get(timeout=1)
-                thread.do_run_task = True
             except queue.Empty:
                 continue
             except Exception as e:
@@ -595,6 +594,7 @@ class ModelDevice(metaclass=ABCMeta):
             self.running = True
             if isinstance(task, Task):
                 try:
+                    thread.do_run_task = True
                     self.prepare_task(task=task)
                     t_0 = time.perf_counter()
                     t_p = t_0
@@ -609,11 +609,11 @@ class ModelDevice(metaclass=ABCMeta):
                             thread.do_run_task = False
                             break
                         time.sleep(max(1e-2, task.sampling_interval / 20))
-                        logger.info(
-                            "task '%s' on component %s is done",
-                            task.technique_name,
-                            self.key,
-                        )
+                    logger.info(
+                        "task '%s' on component %s is done",
+                        task.technique_name,
+                        self.key,
+                    )
                 except Exception as e:
                     logger.critical(e, exc_info=True)
                     thread.do_run = False
@@ -630,13 +630,13 @@ class ModelDevice(metaclass=ABCMeta):
                 logger.critical("Unknown task received: '%s'", task)
                 thread.do_run = False
                 break
-            
+
             try:
                 self.task_list.task_done()
             except ValueError as e:
                 logger.critical(e, exc_info=True)
                 logger.critical("above error raised on task '%s'", task)
-
+                raise e
             self.running = False
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
@@ -729,12 +729,22 @@ class ModelDevice(metaclass=ABCMeta):
         return status
 
     def reset(self, do_run: bool = True, **kwargs) -> None:
-        """Resets the component to an initial status."""
+        """
+        Resets the component to an initial status.
+
+        Stops any running :class:`Tasks` or measurements. Clears the
+        :obj:`task_list` queue. Resets :obj:`data` and creates a new
+        :obj:`datalock`. Restarts the task processing :class:`Thread`.
+
+        """
         logger.info("resetting component %s", self.key)
+        if hasattr(self.thread, do_run):
+            self.thread.do_run = False
+        while self.running:
+            time.sleep(1e-3)
+        self.data = None
+        self.datalock = RLock()
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = do_run
         self.thread.start()
-        self.data = None
-        self.running = False
-        self.datalock = RLock()
