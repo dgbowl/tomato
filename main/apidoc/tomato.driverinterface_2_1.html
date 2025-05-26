@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.driverinterface_2_1 package &mdash; tomato 2.1rc4.post1 documentation</title>
+  <title>tomato.driverinterface_2_1 package &mdash; tomato 2.1rc4.post2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=19cc91ec"></script>
+        <script src="../_static/documentation_options.js?v=2e341b86"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.1rc4.post1
+                2.1rc4.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -134,10 +134,7 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.running"><code class="docutils literal notranslate"><span class="pre">ModelDevice.running</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.datalock"><code class="docutils literal notranslate"><span class="pre">ModelDevice.datalock</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.constants"><code class="docutils literal notranslate"><span class="pre">ModelDevice.constants</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.run"><code class="docutils literal notranslate"><span class="pre">ModelDevice.run()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.measure"><code class="docutils literal notranslate"><span class="pre">ModelDevice.measure()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.task_runner"><code class="docutils literal notranslate"><span class="pre">ModelDevice.task_runner()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.meas_runner"><code class="docutils literal notranslate"><span class="pre">ModelDevice.meas_runner()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.prepare_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.prepare_task()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.do_task"><code class="docutils literal notranslate"><span class="pre">ModelDevice.do_task()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.do_measure"><code class="docutils literal notranslate"><span class="pre">ModelDevice.do_measure()</span></code></a></li>
@@ -457,7 +454,7 @@ after task completion).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_1.ModelInterface.cmp_reset">
-<span class="sig-name descname"><span class="pre">cmp_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelInterface.cmp_reset" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cmp_reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelInterface.cmp_reset" title="Link to this definition"></a></dt>
 <dd><p>Component reset function.</p>
 <p>Should set the device component into a documented, safe state. This function
 is executed at the end of every job.</p>
@@ -532,8 +529,8 @@ configuration.</p>
 <span class="sig-name descname"><span class="pre">task_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../quickstart.html#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload_2_1.task.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../quickstart.html#dgbowl_schemas.tomato.payload.Task" title="dgbowl_schemas.tomato.payload_2_1.task.Task"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelInterface.task_start" title="Link to this definition"></a></dt>
 <dd><p>Submit a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> onto the specified device component.</p>
 <p>Pushes the supplied <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> into the <code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code> of the component,
-then starts the worker thread. Checks that the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> is among the
-capabilities of this component.</p>
+then starts the worker thread (if not already started). Checks that the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> is among the capabilities of this component.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -651,18 +648,6 @@ returning of task data.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="tomato.driverinterface_2_1.ModelDevice.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelDevice.run" title="Link to this definition"></a></dt>
-<dd><p>Helper function for starting the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> as a task.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tomato.driverinterface_2_1.ModelDevice.measure">
-<span class="sig-name descname"><span class="pre">measure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelDevice.measure" title="Link to this definition"></a></dt>
-<dd><p>Helper function for starting the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> as a measurement.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_1.ModelDevice.task_runner">
 <span class="sig-name descname"><span class="pre">task_runner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelDevice.task_runner" title="Link to this definition"></a></dt>
 <dd><p>Target function for the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> when handling <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>.</p>
@@ -671,16 +656,7 @@ then handles setting all <code class="xref py py-class docutils literal notransl
 function, and finally handles the main loop of the task, periodically running
 the <a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.do_task" title="tomato.driverinterface_2_1.ModelDevice.do_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">do_task()</span></code></a> function (using <cite>task.sampling_interval</cite>) until the
 maximum task duration (i.e. <cite>task.max_duration</cite>) is exceeded.</p>
-<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> is re-primed for future <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> at the end
-of this function.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tomato.driverinterface_2_1.ModelDevice.meas_runner">
-<span class="sig-name descname"><span class="pre">meas_runner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelDevice.meas_runner" title="Link to this definition"></a></dt>
-<dd><p>Target function for the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> when performing one shot measurements.</p>
-<p>Performs the measurement using <code class="xref py py-func docutils literal notranslate"><span class="pre">self.do_measure()</span></code>. Resets <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code>
-for future <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code>.</p>
+<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.thread</span></code> is reset to None.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -761,8 +737,11 @@ clearing the cache.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_1.ModelDevice.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelDevice.reset" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">do_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_1.ModelDevice.reset" title="Link to this definition"></a></dt>
 <dd><p>Resets the component to an initial status.</p>
+<p>Stops any running <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> or measurements. Clears the
+<a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.task_list" title="tomato.driverinterface_2_1.ModelDevice.task_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_list</span></code></a> queue. Resets <a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.data" title="tomato.driverinterface_2_1.ModelDevice.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> and creates a new
+<a class="reference internal" href="#tomato.driverinterface_2_1.ModelDevice.datalock" title="tomato.driverinterface_2_1.ModelDevice.datalock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datalock</span></code></a>. Restarts the task processing <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -829,7 +808,7 @@ unit.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.1rc4.post1
+      v: 2.1rc4.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
