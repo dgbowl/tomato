@@ -119,6 +119,7 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     utils.run_casenames([casename], [None], ["pip-multidev"])
     utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=10000)
     utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=10000)
+    time.sleep(2)
 
     status = utils.job_status(1)
     assert status == "c"

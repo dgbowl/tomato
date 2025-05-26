@@ -12,7 +12,7 @@ from typing import Any, Union, Optional
 from pydantic import BaseModel, Field
 from threading import Thread, current_thread, RLock
 from collections import defaultdict
-from queue import Queue
+import queue
 from tomato.models import Reply
 from tomato.driverinterface_2_1.decorators import in_devmap, to_reply, log_errors
 from tomato.driverinterface_2_1.types import Type, Val, Key
@@ -200,21 +200,23 @@ class ModelInterface(metaclass=ABCMeta):
         if status.data:
             logger.warning("tearing down component %s with a running task!", key)
             self.task_stop(key=key, **kwargs)
-        self.dev_reset(key=key, **kwargs)
+        self.dev_reset(key=key, do_run=False, **kwargs)
         del self.devmap[key]
         return (True, f"device {key!r} torn down", None)
 
     @log_errors
     @to_reply
     @in_devmap
-    def cmp_reset(self, key: Key, **kwargs: dict) -> tuple[bool, str, None]:
+    def cmp_reset(
+        self, key: Key, do_run: bool = True, **kwargs: dict
+    ) -> tuple[bool, str, None]:
         """
         Component reset function.
 
         Should set the device component into a documented, safe state. This function
         is executed at the end of every job.
         """
-        self.devmap[key].reset()
+        self.devmap[key].reset(do_run=do_run)
         return (True, f"component {key!r} reset successfully", None)
 
     @log_errors
@@ -338,7 +340,7 @@ class ModelInterface(metaclass=ABCMeta):
         if self.devmap[key].running:
             return (False, f"measurement already running on component {key!r}", None)
         else:
-            self.devmap[key].measure()
+            self.devmap[key].task_list.put("measure")
             return (True, f"measurement started on component {key!r}", None)
 
     @log_errors
@@ -350,18 +352,16 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Submit a :class:`Task` onto the specified device component.
 
-        Pushes the supplied :class:`Task` into the :class:`Queue` of the component,
-        then starts the worker thread. Checks that the :class:`Task` is among the
-        capabilities of this component.
+        Pushes the supplied :class:`Task` into the :class:`~queue.Queue` of the component,
+        then starts the worker thread (if not already started). Checks that the
+        :class:`Task` is among the capabilities of this component.
         """
         ret = self.task_validate(key=key, task=task, **kwargs)
         if not ret.success:
             return ret
 
-        logger.info("starting task '%s' on component %s", task.technique_name, key)
+        logger.info("pushing task '%s' onto component %s", task.technique_name, key)
         self.devmap[key].task_list.put(task)
-        self.devmap[key].run()
-        logger.info("task '%s' on component %s started", task.technique_name, key)
         return (True, f"task {task!r} started successfully", task)
 
     @log_errors
@@ -549,33 +549,24 @@ class ModelDevice(metaclass=ABCMeta):
     thread: Thread
     """The worker :class:`Thread`."""
 
-    task_list: Queue
-    """A :class:`Queue` used to pass :class:`Tasks` to the worker :class:`Thread`."""
+    task_list: queue.Queue
+    """A :class:`~queue.Queue` used to pass :class:`Tasks` to the worker :class:`Thread`."""
 
     running: bool
 
     def __init__(self, driver, key, **kwargs) -> None:
         self.driver = driver
         self.key = key
-        self.task_list = Queue()
+        self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
+        self.thread.do_run = True
+        self.thread.start()
         self.data = None
         self.last_data = None
         self.running = False
         self.datalock = RLock()
         self.constants = dict()
         atexit.register(self.reset)
-
-    def run(self) -> None:
-        """Helper function for starting the :obj:`self.thread` as a task."""
-        self.thread.do_run = True
-        self.thread.start()
-
-    def measure(self) -> None:
-        """Helper function for starting the :obj:`self.thread` as a measurement."""
-        self.thread = Thread(target=self.meas_runner, daemon=True)
-        self.thread.do_run = True
-        self.thread.start()
 
     def task_runner(self) -> None:
         """
@@ -587,59 +578,65 @@ class ModelDevice(metaclass=ABCMeta):
         the :func:`do_task` function (using `task.sampling_interval`) until the
         maximum task duration (i.e. `task.max_duration`) is exceeded.
 
-        The :obj:`self.thread` is re-primed for future :class:`Tasks` at the end
-        of this function.
+        The :obj:`self.thread` is reset to None.
         """
-        e = None
-        self.running = True
         thread = current_thread()
-        try:
-            task: Task = self.task_list.get()
-            self.prepare_task(task=task)
-        except Exception as e:
-            logger.critical(e, exc_info=True)
-            thread.do_run = False
-
-        t_start = time.perf_counter()
-        t_prev = t_start
-        self.data = None
-        while getattr(thread, "do_run"):
-            t_now = time.perf_counter()
-            if t_now - t_prev > task.sampling_interval:
-                with self.datalock:
-                    try:
-                        self.do_task(task, t_start=t_start, t_now=t_now, t_prev=t_prev)
-                    except Exception as e:
-                        logger.critical(e, exc_info=True)
-                        thread.do_run = False
-                t_prev += task.sampling_interval
-            if t_now - t_start > task.max_duration:
+        while thread.do_run:
+            try:
+                task: Task = self.task_list.get(timeout=1)
+            except queue.Empty:
+                continue
+            except Exception as e:
+                logger.critical(e, exc_info=True)
+                thread.do_run = False
                 break
-            time.sleep(max(1e-2, task.sampling_interval / 20))
 
-        self.task_list.task_done()
-        self.running = False
-        self.thread = Thread(target=self.task_runner, daemon=True)
-        if e is None:
-            logger.info(
-                "task '%s' on component %s is done", task.technique_name, self.key
-            )
-
-    def meas_runner(self) -> None:
-        """
-        Target function for the :obj:`self.thread` when performing one shot measurements.
-
-        Performs the measurement using :func:`self.do_measure()`. Resets :obj:`self.thread`
-        for future :class:`Tasks`.
-        """
-        try:
             self.running = True
-            self.do_measure()
+            if isinstance(task, Task):
+                try:
+                    thread.do_run_task = True
+                    self.prepare_task(task=task)
+                    t_0 = time.perf_counter()
+                    t_p = t_0
+                    self.data = None
+                    while thread.do_run_task and thread.do_run:
+                        t_n = time.perf_counter()
+                        if t_n - t_p > task.sampling_interval:
+                            with self.datalock:
+                                self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)
+                            t_p += task.sampling_interval
+                        if t_n - t_0 > task.max_duration:
+                            thread.do_run_task = False
+                            break
+                        time.sleep(max(1e-2, task.sampling_interval / 20))
+                    logger.info(
+                        "task '%s' on component %s is done",
+                        task.technique_name,
+                        self.key,
+                    )
+                except Exception as e:
+                    logger.critical(e, exc_info=True)
+                    thread.do_run = False
+                    break
+            elif task == "measure":
+                try:
+                    self.do_measure()
+                    logger.debug("measurement on component %s is done", self.key)
+                except Exception as e:
+                    logger.critical(e, exc_info=True)
+                    thread.do_run = False
+                    break
+            else:
+                logger.critical("Unknown task received: '%s'", task)
+                thread.do_run = False
+                break
+
+            try:
+                self.task_list.task_done()
+            except ValueError as e:
+                logger.critical(e, exc_info=True)
+                logger.critical("above error raised on task '%s'", task)
             self.running = False
-            self.thread = Thread(target=self.task_runner, daemon=True)
-            logger.debug("measurement on component %s is done", self.key)
-        except Exception as e:
-            logger.critical(e, exc_info=True)
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
         """
@@ -679,7 +676,7 @@ class ModelDevice(metaclass=ABCMeta):
     def stop_task(self, **kwargs: dict) -> None:
         """Stops the currently running task."""
         logger.info("stopping running task on component %s", self.key)
-        setattr(self.thread, "do_run", False)
+        setattr(self.thread, "do_run_task", False)
 
     @abstractmethod
     def set_attr(self, attr: str, val: Val, **kwargs: dict) -> Val:
@@ -730,11 +727,23 @@ class ModelDevice(metaclass=ABCMeta):
                 status[attr] = self.get_attr(attr)
         return status
 
-    def reset(self, **kwargs) -> None:
-        """Resets the component to an initial status."""
+    def reset(self, do_run: bool = True, **kwargs) -> None:
+        """
+        Resets the component to an initial status.
+
+        Stops any running :class:`Tasks` or measurements. Clears the
+        :obj:`task_list` queue. Resets :obj:`data` and creates a new
+        :obj:`datalock`. Restarts the task processing :class:`Thread`.
+
+        """
         logger.info("resetting component %s", self.key)
-        self.task_list = Queue()
-        self.thread = Thread(target=self.task_runner, daemon=True)
+        if hasattr(self.thread, "do_run"):
+            self.thread.do_run = False
+        while self.running:
+            time.sleep(1e-3)
         self.data = None
-        self.running = False
         self.datalock = RLock()
+        self.task_list = queue.Queue()
+        self.thread = Thread(target=self.task_runner, daemon=True)
+        self.thread.do_run = do_run
+        self.thread.start()
