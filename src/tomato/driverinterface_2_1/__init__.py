@@ -636,7 +636,6 @@ class ModelDevice(metaclass=ABCMeta):
             except ValueError as e:
                 logger.critical(e, exc_info=True)
                 logger.critical("above error raised on task '%s'", task)
-                raise e
             self.running = False
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
