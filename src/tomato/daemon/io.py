@@ -37,6 +37,8 @@ def load(daemon: Daemon):
     daemon.pips = loaded.pips
     daemon.devs = loaded.devs
     daemon.drvs = loaded.drvs
+    for cmp in loaded.cmps:
+        loaded.cmps[cmp].capabilities = None
     daemon.cmps = loaded.cmps
     daemon.status = "running"
 
