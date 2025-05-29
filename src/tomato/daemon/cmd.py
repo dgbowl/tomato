@@ -276,7 +276,6 @@ def _api(otype: str, msg: dict, ddict: dict[str, Any], Cls: BaseModel) -> Reply:
     if obj["name"] is None:
         logger.error("no %s name supplied", otype)
         return Reply(success=False, msg=f"no {otype} name supplied", data=msg)
-
     if obj["name"] not in ddict:
         ddict[obj["name"]] = Cls(**obj)
         return Reply(

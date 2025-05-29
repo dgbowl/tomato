@@ -246,7 +246,7 @@ def tomato_driver() -> None:
                     )
                 elif msg["cmd"] == "cmp_register":
                     ret = interface.cmp_register(**msg["params"])
-                    cname = f"{args.driver}:({msg['params']['address']}:{msg['params']['channel']})"
+                    cname = f"{args.driver}:({msg['params']['address']},{msg['params']['channel']})"
                     if ret.success:
                         params = dict(name=cname, capabilities=ret.data)
                         req.send_pyobj(dict(cmd="component", params=params))
