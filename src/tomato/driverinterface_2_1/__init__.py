@@ -739,11 +739,14 @@ class ModelDevice(metaclass=ABCMeta):
         logger.info("resetting component %s", self.key)
         if hasattr(self.thread, "do_run"):
             self.thread.do_run = False
-        while self.running:
-            time.sleep(1e-3)
+        logger.info("component %s is waiting for task thread", self.key)
+        self.thread.join()
+        logger.info("component %s is continuing with reset", self.key)
+        self.running = False
         self.data = None
         self.datalock = RLock()
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = do_run
         self.thread.start()
+        logger.info("reset of component %s done", self.key)
