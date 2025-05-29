@@ -273,7 +273,10 @@ def tomato_driver() -> None:
             if status == "stop":
                 break
             elif status == "running":
-                t_last = perform_idle_measurements(interface, t_last)
+                try:
+                    t_last = perform_idle_measurements(interface, t_last)
+                except (RuntimeError, ValueError, AttributeError):
+                    logger.info("above error caught by driver process")
     except Exception as e:
         logger.critical("uncaught exception %s", type(e), exc_info=True)
         raise e
