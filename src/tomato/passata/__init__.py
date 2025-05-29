@@ -56,6 +56,8 @@ def status(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
@@ -106,6 +108,8 @@ def attrs(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
@@ -130,6 +134,8 @@ def capabilities(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
@@ -154,6 +160,8 @@ def constants(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     if drv.version == "1.0":
         return Reply(
@@ -183,6 +191,8 @@ def get_attrs(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req = context.socket(zmq.REQ)
@@ -224,6 +234,9 @@ def set_attr(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
+
     ret = _running_or_force(name, port, timeout, context, force)
     if not ret.success:
         return ret
@@ -256,6 +269,9 @@ def reset(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
+
     ret = _running_or_force(name, port, timeout, context, force)
     if not ret.success:
         return ret
@@ -283,6 +299,8 @@ def get_last_data(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     if drv.version == "1.0":
         return Reply(
@@ -311,6 +329,8 @@ def measure(
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
+    if drv.port is None:
+        return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     if drv.version == "1.0":
         return Reply(
