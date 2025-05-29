@@ -3,6 +3,20 @@ from tomato import tomato
 from tomato.models import Reply, Component, Driver
 from typing import Any
 
+poller = zmq.Poller()
+RECV_TIMEOUT = 1000
+
+
+def recv_pyobj_to(s: zmq.Socket, timeout=RECV_TIMEOUT):
+    poller.register(s, zmq.POLLIN)
+    events = dict(poller.poll(timeout))
+    if s in events:
+        poller.unregister(s)
+        return s.recv_pyobj()
+    else:
+        poller.unregister(s)
+        return Reply(success=False, msg="ZMQ timeout reached")
+
 
 def _name_to_cmp(
     name: str,
@@ -34,8 +48,14 @@ def _running_or_force(
     force: bool,
 ) -> Reply:
     if not force:
-        ret = status(port=port, timeout=timeout, context=context, name=name).data
-        if ret["running"]:
+        ret = status(port=port, timeout=timeout, context=context, name=name)
+        if not ret.success:
+            return Reply(
+                success=False,
+                msg="will not 'set_attr' on a component with invalid status",
+                data=None,
+            )
+        if ret.data["running"]:
             return Reply(
                 success=False,
                 msg=f"will not 'set_attr' on a running component {name!r}",
@@ -66,7 +86,8 @@ def status(
         req.send_pyobj(dict(cmd="dev_status", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_status", params={**kwargs}))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
     req.close()
     return ret
 
@@ -91,7 +112,8 @@ def register(
         req.send_pyobj(dict(cmd="dev_register", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_register", params={**kwargs}))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
     req.close()
     return ret
 
@@ -118,7 +140,9 @@ def attrs(
         req.send_pyobj(dict(cmd="attrs", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_attrs", params={**kwargs}))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
+    req.close()
     return ret
 
 
@@ -144,7 +168,9 @@ def capabilities(
         req.send_pyobj(dict(cmd="capabilities", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_capabilities", params={**kwargs}))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
+    req.close()
     return ret
 
 
@@ -174,7 +200,9 @@ def constants(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_constants", params={**kwargs}))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
+    req.close()
     return ret
 
 
@@ -204,8 +232,8 @@ def get_attrs(
             req.send_pyobj(dict(cmd="dev_get_attr", params={"attr": attr, **kwargs}))
         else:
             req.send_pyobj(dict(cmd="cmp_get_attr", params={"attr": attr, **kwargs}))
-        ret = req.recv_pyobj()
-        if not ret.success:
+        ret = recv_pyobj_to(req)
+        if ret is None or not ret.success:
             return ret
         data[attr] = ret.data
         msg += f"attr {attr!r} of component {name!r} is: {ret.data}\n         "
@@ -252,7 +280,9 @@ def set_attr(
         req.send_pyobj(
             dict(cmd="cmp_set_attr", params={"attr": attr, "val": val, **kwargs})
         )
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
+    req.close()
     return ret
 
 
@@ -283,7 +313,9 @@ def reset(
         req.send_pyobj(dict(cmd="dev_reset", params=kwargs))
     else:
         req.send_pyobj(dict(cmd="cmp_reset", params=kwargs))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
+    req.close()
     return ret
 
 
@@ -313,7 +345,9 @@ def get_last_data(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_last_data", params=kwargs))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
+    req.close()
     return ret
 
 
@@ -343,5 +377,7 @@ def measure(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_measure", params=kwargs))
-    ret = req.recv_pyobj()
+
+    ret = recv_pyobj_to(req)
+    req.close()
     return ret
