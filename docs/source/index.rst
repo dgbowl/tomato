@@ -52,8 +52,10 @@ The project is part of BATTERY 2030+, the large-scale European research initiati
 
    tomato-example-counter <https://github.com/dgbowl/tomato-example-counter>
    tomato-psutil <https://github.com/dgbowl/tomato-psutil>
-   tomato-bronkhorst <https://github.com/dgbowl/tomato-bronkhorst/>
+   tomato-bronkhorst <https://github.com/dgbowl/tomato-bronkhorst>
    tomato-jumo <https://github.com/dgbowl/tomato-jumo>
+   tomato-mcc <https://github.com/dgbowl/tomato-mcc>
+   tomato-picovna <https://github.com/dgbowl/tomato-picovna>
 
 .. toctree::
    :maxdepth: 1

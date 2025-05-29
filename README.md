@@ -11,6 +11,8 @@
 - [`tomato-psutil`](https://github.com/dgbowl/tomato-psutil): an interface to the `psutil` library for CPU and memory usage statistics
 - [`tomato-bronkhorst`](https://github.com/dgbowl/tomato-bronkhorst): an interface to the `bronkhorst-propar` library for control of Bronkhorst MFCs and PCs
 - [`tomato-jumo`](https://github.com/dgbowl/tomato-jumo): a driver for control of Jumo Quantrol heater controllers using `minimalmodbus`
+- [`tomato-picovna`](https://github.com/dgbowl/tomato-picovna): a driver for control of Pico Technology PicoVNA network analysers using the `vna` library
+- [`tomato-mcc`](https://github.com/dgbowl/tomato-mcc): a driver for reading temperatures from MCC DAQ boards using `mcculw` on Windows
 
 See the [Documentation](https://dgbowl.github.io/tomato) for more detailed info.
 
