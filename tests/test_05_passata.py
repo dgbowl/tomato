@@ -1,7 +1,7 @@
 import zmq
 import random
 import subprocess
-
+import os
 from . import utils
 import tomato
 
@@ -93,6 +93,35 @@ def test_passata_api_reset(start_tomato_daemon, stop_tomato_daemon):
     )
     print(f"{ret=}")
     assert ret.success
+
+
+def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemon):
+    os.chdir(datadir)
+    utils.run_casenames(["counter_60_0.1"], [None], ["pip-counter"])
+    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=10000)
+    ret = tomato.passata.status(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    print(f"{ret=}")
+    assert ret.success
+    assert ret.data["running"] is True
+
+    ret = tomato.passata.reset(
+        name="example_counter:(example-addr,1)",
+        force=True,
+        **kwargs,
+    )
+    print(f"{ret=}")
+    assert ret.success
+
+    ret = tomato.passata.status(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    print(f"{ret=}")
+    assert ret.success
+    assert ret.data["running"] is False
 
 
 def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
