@@ -39,8 +39,6 @@ def tomato_driver_bootstrap(
     logger.debug("getting daemon status")
     req.send_pyobj(dict(cmd="status"))
     daemon: Daemon = req.recv_pyobj().data
-    drv = daemon.drvs[driver]
-    interface.settings = drv.settings
 
     logger.info("registering components for driver '%s'", driver)
     for comp in daemon.cmps.values():
@@ -166,9 +164,19 @@ def tomato_driver() -> None:
         logger.critical("class DriverInterface driver '%s' not found", args.driver)
         return
 
-    interface: ModelInterface = Interface()
-    tomato_driver_bootstrap(req, logger, interface, args.driver)
+    logger.debug("getting daemon status")
+    req.send_pyobj(dict(cmd="status"))
+    daemon: Daemon = req.recv_pyobj().data
+    drv = daemon.drvs[args.driver]
+    try:
+        interface: ModelInterface = Interface(settings=drv.settings)
+    except Exception as e:
+        logger.critical(
+            "could not instantiate driver '%s': %s", args.driver, e, exc_info=True
+        )
+        raise RuntimeError("could not instantiate driver '%s'") from e
 
+    tomato_driver_bootstrap(req, logger, interface, args.driver)
     params = dict(
         name=args.driver,
         port=port,
@@ -238,7 +246,7 @@ def tomato_driver() -> None:
                     )
                 elif msg["cmd"] == "cmp_register":
                     ret = interface.cmp_register(**msg["params"])
-                    cname = f"{args.driver}:({msg['params']['address']}:{msg['params']['channel']})"
+                    cname = f"{args.driver}:({msg['params']['address']},{msg['params']['channel']})"
                     if ret.success:
                         params = dict(name=cname, capabilities=ret.data)
                         req.send_pyobj(dict(cmd="component", params=params))
@@ -265,7 +273,10 @@ def tomato_driver() -> None:
             if status == "stop":
                 break
             elif status == "running":
-                t_last = perform_idle_measurements(interface, t_last)
+                try:
+                    t_last = perform_idle_measurements(interface, t_last)
+                except (RuntimeError, ValueError, AttributeError):
+                    logger.info("above error caught by driver process")
     except Exception as e:
         logger.critical("uncaught exception %s", type(e), exc_info=True)
         raise e
@@ -336,7 +347,8 @@ def manager(port: int, timeout: int = 1000):
     to = timeout
 
     spawned_drivers = dict()
-    retries = defaultdict(int)
+    driver_retries = defaultdict(int)
+    component_retries = defaultdict(int)
 
     while getattr(thread, "do_run"):
         req.send_pyobj(dict(cmd="status", sender=sender))
@@ -367,15 +379,42 @@ def manager(port: int, timeout: int = 1000):
                     not psutil.pid_exists(drv.pid)
                     or psutil.Process(drv.pid).status() in psutil.STATUS_ZOMBIE
                 ):
+                    # this happens when a fully-registered driver has crashed
                     logger.warning("respawning crashed driver '%s'", driver)
                     spawn_tomato_driver(*args)
                     spawned_drivers[driver] = 1
                 elif drv.pid is None and drv.spawned_at is None:
-                    logger.debug("spawning driver '%s'", driver)
-                    spawn_tomato_driver(*args)
+                    # this happens when spawn_tomato_driver crashed for some reason
+                    # as drv.spawned_at is set in spawn_tomato_driver
+                    retry = driver_retries[driver]
+                    if retry < MAX_REGISTER_RETRIES:
+                        logger.info("spawning driver '%s' (retry %d)", driver, retry)
+                        spawn_tomato_driver(*args)
+                        driver_retries[driver] += 1
+                    elif retry == MAX_REGISTER_RETRIES:
+                        logger.warning(
+                            "driver '%s' reached maximum spawn retries, check config",
+                            driver,
+                        )
+                        driver_retries[driver] += 1
+                    spawned_drivers[driver] = 1
+                elif drv.pid is None and drv.connected_at is None:
+                    # this happens when tomato-driver was launched but did not
+                    # report to tomato-daemon for some reason
+                    retry = driver_retries[driver]
+                    if retry < MAX_REGISTER_RETRIES:
+                        logger.info("spawning driver '%s' (retry %d)", driver, retry)
+                        spawn_tomato_driver(*args)
+                        driver_retries[driver] += 1
+                    elif retry == MAX_REGISTER_RETRIES:
+                        logger.warning(
+                            "driver '%s' reached maximum spawn retries, see driver log",
+                            driver,
+                        )
+                        driver_retries[driver] += 1
                     spawned_drivers[driver] = 1
                 elif driver in spawned_drivers:
-                    logger.info("driver '%s' spawned at pid %d", driver, drv.pid)
+                    logger.info("driver '%s' spawned with pid %d", driver, drv.pid)
                     spawned_drivers.pop(driver)
             elif driver in spawned_drivers:
                 spawned_drivers[driver] += 1
@@ -385,7 +424,7 @@ def manager(port: int, timeout: int = 1000):
             for comp in daemon.cmps.values():
                 if comp.capabilities is None:
                     key = (comp.address, comp.channel)
-                    if retries[key] < MAX_REGISTER_RETRIES:
+                    if component_retries[key] < MAX_REGISTER_RETRIES:
                         contact_drivers.add(comp.driver)
             for driver in contact_drivers:
                 drv = daemon.drvs[driver]
@@ -396,7 +435,7 @@ def manager(port: int, timeout: int = 1000):
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 dreq.send_pyobj(dict(cmd="register", params=None, sender=sender))
                 ret = dreq.recv_pyobj()
-                retries = ret.data
+                component_retries = ret.data
                 dreq.close()
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
 
@@ -404,7 +443,25 @@ def manager(port: int, timeout: int = 1000):
     req.send_pyobj(dict(cmd="status", sender=sender))
     daemon = req.recv_pyobj().data
     for driver in daemon.drvs.values():
-        logger.debug("stopping driver '%s' on port %d", driver.name, driver.port)
+        if driver.pid is None:
+            logger.info(
+                "stopping driver '%s' - no action (no pid)",
+                driver.name,
+            )
+            continue
+        elif driver.port is None:
+            logger.info(
+                "stopping driver '%s' - killing pid %d",
+                driver.name,
+                driver.pid,
+            )
+            continue
+        logger.info(
+            "stopping driver '%s' with pid %d on port %s",
+            driver.name,
+            driver.pid,
+            driver.port,
+        )
         ret = stop_tomato_driver(driver.port, context)
         if ret.success:
             logger.info("stopped driver '%s'", driver.name)

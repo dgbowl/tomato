@@ -38,6 +38,7 @@ def parse_args(parser, verbose, is_tomato=False):
                 print(yaml.dump(status.dict()))
             else:
                 print(f"Failure: {status.msg}")
+            return
 
     if "func" in args:
         ret = args.func(**vars(args), verbosity=verbosity, context=context)
@@ -314,11 +315,12 @@ def run_passata():
     stats = subparsers.add_parser("status")
     attrs = subparsers.add_parser("attrs")
     regis = subparsers.add_parser("register")
+    reset = subparsers.add_parser("reset")
     capbs = subparsers.add_parser("capabilities")
     const = subparsers.add_parser("constants")
     gattr = subparsers.add_parser("get")
 
-    for p in [stats, attrs, regis, capbs, gattr, const]:
+    for p in [stats, attrs, regis, reset, capbs, gattr, const]:
         p.add_argument(
             "name",
             help=(
@@ -353,10 +355,17 @@ def run_passata():
         help="The attribute name(s) to be queried.",
         nargs="+",
     )
+    reset.add_argument(
+        "--force",
+        "-f",
+        action="store_true",
+        default=False,
+    )
 
     stats.set_defaults(func=passata.status)
     attrs.set_defaults(func=passata.attrs)
     regis.set_defaults(func=passata.register)
+    reset.set_defaults(func=passata.reset)
     capbs.set_defaults(func=passata.capabilities)
     const.set_defaults(func=passata.constants)
     gattr.set_defaults(func=passata.get_attrs)
