@@ -448,7 +448,6 @@ def job_thread(
 
     context = zmq.Context()
     req = context.socket(zmq.REQ)
-    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{driver.port}")
     logger.info(f"job thread of {component.role!r} connected to tomato-daemon")
 
