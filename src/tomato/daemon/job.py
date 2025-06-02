@@ -28,7 +28,7 @@ import sys
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.daemon import jobdb
-from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job
+from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job, Reply
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Task
 
@@ -49,7 +49,7 @@ def method_validate(
                 if drv.version == "1.0":
                     logger.info("cannot validate task using DriverInterface-1.0")
                     break
-                req = context.socket(zmq.REQ)
+                req: zmq.Socket = context.socket(zmq.REQ)
                 req.connect(f"tcp://127.0.0.1:{drv.port}")
                 params = dict(
                     task=task,
@@ -281,22 +281,23 @@ def manager(port: int, timeout: int = 500):
     logger = logging.getLogger(f"{__name__}.manager")
     thread = current_thread()
     logger.info("launched successfully")
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{port}")
     poller = zmq.Poller()
     poller.register(req, zmq.POLLIN)
-    to = timeout
     while getattr(thread, "do_run"):
         logger.debug("tick")
-        req.send_pyobj(dict(cmd="status", sender=f"{__name__}.manager"))
-        events = dict(poller.poll(to))
-        if req not in events:
-            logger.warning(f"could not contact tomato-daemon in {to} ms")
-            to = to * 2
-            continue
-        elif to > timeout:
-            to = timeout
-        daemon = req.recv_pyobj().data
+        try:
+            req.send_pyobj(dict(cmd="status", sender=f"{__name__}.manager"))
+            ret: Reply = req.recv_pyobj()
+        except zmq.ZMQError:
+            logger.critical("could not contact tomato-daemon in 1 s", exc_info=True)
+            break
+        if ret.success is False:
+            logger.critical("tomato-daemon is not running: %s", ret.msg)
+            break
+        daemon: Daemon = ret.data
         dbpath = daemon.settings["jobs"]["dbpath"]
         manage_running_pips(daemon.pips, dbpath, req)
         matched_pips = check_queued_jobs(
@@ -304,6 +305,7 @@ def manager(port: int, timeout: int = 500):
         )
         action_queued_jobs(daemon, matched_pips, req)
         time.sleep(timeout / 1e3)
+    req.close()
     logger.info("instructed to quit")
 
 
