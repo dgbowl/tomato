@@ -311,7 +311,7 @@ def tomato_job() -> None:
     """
     The function called when `tomato-job` is executed.
 
-    This function is resposible for managing all activities of a single job, including
+    This function is responsible for managing all activities of a single job, including
     contacting the daemon about job pid, spawning of sub-processes to run tasks on each
     Component of the Pipeline, merging data at the end of the job, and reporting back
     to the daemon once the job is successfully finished.
@@ -449,6 +449,7 @@ def job_thread(
 
     context = zmq.Context()
     req = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{driver.port}")
     logger.info(f"job thread of {component.role!r} connected to tomato-daemon")
 
@@ -469,14 +470,25 @@ def job_thread(
                 logger.debug("waiting for task_name '%s'", task.start_with_task_name)
                 continue
             logger.debug("polling component '%s' for task readiness", component.role)
-            req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
-            ret = req.recv_pyobj()
+            try:
+                req.send_pyobj(dict(cmd="task_status", params={**kwargs}))
+                ret = req.recv_pyobj()
+            except zmq.ZMQError as e:
+                logger.critical(e, exc_info=True)
+                thread.crashed = True
+                sys.exit(e)
             if ret.success and ret.data["can_submit"]:
                 break
             logger.warning("cannot submit onto component '%s', waiting", component.role)
+
         logger.info("sending task %s:%d to component", component.role, ti)
-        req.send_pyobj(dict(cmd="task_start", params={"task": task, **kwargs}))
-        ret = req.recv_pyobj()
+        try:
+            req.send_pyobj(dict(cmd="task_start", params={"task": task, **kwargs}))
+            ret = req.recv_pyobj()
+        except zmq.ZMQError as e:
+            logger.critical(e, exc_info=True)
+            thread.crashed = True
+            sys.exit(e)
 
         t0 = time.perf_counter()
         while True:
@@ -505,6 +517,7 @@ def job_thread(
                 logger.critical(e, exc_info=True)
                 thread.crashed = True
                 sys.exit(e)
+
             if ret.success and not ret.data["running"]:
                 logger.info("task %s:%d no longer running, break", component.role, ti)
                 break
@@ -517,27 +530,43 @@ def job_thread(
                 and task.stop_with_task_name in thread.started_task_names
             ):
                 logger.info("task %s:%d stop trigger met", component.role, ti)
-                req.send_pyobj(dict(cmd="task_stop", params={**kwargs}))
-                ret = req.recv_pyobj()
-                logger.debug(f"{ret=}")
+                try:
+                    req.send_pyobj(dict(cmd="task_stop", params={**kwargs}))
+                    ret = req.recv_pyobj()
+                except zmq.ZMQError as e:
+                    logger.critical(e, exc_info=True)
+                    thread.crashed = True
+                    sys.exit(e)
                 break
 
             time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
         logger.info("task %s:%d fetching final data", component.role, ti)
-        req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
-        ret = req.recv_pyobj()
+        try:
+            req.send_pyobj(dict(cmd="task_data", params={**kwargs}))
+            ret = req.recv_pyobj()
+        except zmq.ZMQError as e:
+            logger.critical(e, exc_info=True)
+            thread.crashed = True
+            sys.exit(e)
         if ret.success:
             data_to_pickle(ret.data, datapath, role=component.role)
         thread.completed_tasks.append(task)
         thread.current_task = None
+
     logger.info("all tasks done on component '%s', resetting", component.role)
-    if driver.version == "1.0":
-        req.send_pyobj(dict(cmd="dev_reset", params={**kwargs}))
-    else:
-        req.send_pyobj(dict(cmd="cmp_reset", params={**kwargs}))
-    ret = req.recv_pyobj()
+    try:
+        if driver.version == "1.0":
+            req.send_pyobj(dict(cmd="dev_reset", params={**kwargs}))
+        else:
+            req.send_pyobj(dict(cmd="cmp_reset", params={**kwargs}))
+        ret = req.recv_pyobj()
+    except zmq.ZMQError as e:
+        logger.critical(e, exc_info=True)
+        thread.crashed = True
+        sys.exit(e)
     if not ret.success:
         logger.warning("could not reset component '%s': %s", component.role, ret.msg)
+    req.close()
 
 
 def job_main_loop(
@@ -556,15 +585,21 @@ def job_main_loop(
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
+    req.RCVTIMEO = 1000
 
     while True:
         req.send_pyobj(dict(cmd="status", sender=sender))
-        daemon: Daemon = req.recv_pyobj().data
+        try:
+            daemon: Daemon = req.recv_pyobj().data
+        except zmq.ZMQError as e:
+            logger.critical(e, exc_info=True)
+            sys.exit(e)
         if all([drv.port is not None for drv in daemon.drvs.values()]):
             break
         else:
             logger.debug("not all tomato-drivers have a port, waiting")
             time.sleep(1)
+    req.close()
 
     pipeline = daemon.pips[pipname]
     logger.debug(f"{pipeline=}")

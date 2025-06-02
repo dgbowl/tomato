@@ -3,20 +3,6 @@ from tomato import tomato
 from tomato.models import Reply, Component, Driver
 from typing import Any
 
-poller = zmq.Poller()
-RECV_TIMEOUT = 1000
-
-
-def recv_pyobj_to(s: zmq.Socket, timeout=RECV_TIMEOUT):
-    poller.register(s, zmq.POLLIN)
-    events = dict(poller.poll(timeout))
-    if s in events:
-        poller.unregister(s)
-        return s.recv_pyobj()
-    else:
-        poller.unregister(s)
-        return Reply(success=False, msg="ZMQ timeout reached")
-
 
 def _name_to_cmp(
     name: str,
@@ -80,14 +66,17 @@ def status(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="dev_status", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_status", params={**kwargs}))
-
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -106,14 +95,18 @@ def register(
     cmp, drv = ret
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="dev_register", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_register", params={**kwargs}))
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -134,14 +127,18 @@ def attrs(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="attrs", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_attrs", params={**kwargs}))
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -162,14 +159,18 @@ def capabilities(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="capabilities", params={**kwargs}))
     else:
         req.send_pyobj(dict(cmd="cmp_capabilities", params={**kwargs}))
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -197,11 +198,15 @@ def constants(
         )
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_constants", params={**kwargs}))
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -223,7 +228,7 @@ def get_attrs(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     data = dict()
     msg = ""
@@ -232,7 +237,10 @@ def get_attrs(
             req.send_pyobj(dict(cmd="dev_get_attr", params={"attr": attr, **kwargs}))
         else:
             req.send_pyobj(dict(cmd="cmp_get_attr", params={"attr": attr, **kwargs}))
-        ret = recv_pyobj_to(req)
+        try:
+            ret = req.recv_pyobj()
+        except zmq.ZMQError:
+            return Reply(success=False, msg="ZMQ timeout reached")
         if ret is None or not ret.success:
             return ret
         data[attr] = ret.data
@@ -270,7 +278,7 @@ def set_attr(
         return ret
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(
@@ -281,7 +289,10 @@ def set_attr(
             dict(cmd="cmp_set_attr", params={"attr": attr, "val": val, **kwargs})
         )
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -307,14 +318,17 @@ def reset(
         return ret
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="dev_reset", params=kwargs))
     else:
         req.send_pyobj(dict(cmd="cmp_reset", params=kwargs))
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -342,11 +356,14 @@ def get_last_data(
         )
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_last_data", params=kwargs))
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
 
@@ -374,10 +391,13 @@ def measure(
         )
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
-    req = context.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_measure", params=kwargs))
 
-    ret = recv_pyobj_to(req)
+    try:
+        ret = req.recv_pyobj()
+    except zmq.ZMQError:
+        return Reply(success=False, msg="ZMQ timeout reached")
     req.close()
     return ret
