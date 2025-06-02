@@ -82,8 +82,9 @@ def find_matching_pipelines(
         capabs = set()
         for comp in pip.components:
             c = cmps[comp]
-            roles.add(c.role)
-            capabs.update(c.capabilities)
+            if c.capabilities is not None:
+                roles.add(c.role)
+                capabs.update(c.capabilities)
         if req_roles.intersection(roles) == req_roles:
             if req_capabs.intersection(capabs) == req_capabs:
                 if method_validate(method, pip, drvs, cmps, context):
