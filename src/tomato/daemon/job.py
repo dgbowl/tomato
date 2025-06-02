@@ -121,7 +121,7 @@ def kill_tomato_job(process: psutil.Process):
     logger.debug(f"{alive=}")
 
 
-def manage_running_pips(pips: dict, dbpath: str, req):
+def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
     """
     Function that manages jobs and `tomato-daemon` pipelines.
 
@@ -134,7 +134,7 @@ def manage_running_pips(pips: dict, dbpath: str, req):
 
     """
     logger = logging.getLogger(f"{__name__}.manage_running_pips")
-    running = [pip for pip in pips.values() if pip.jobid is not None]
+    running: list[Pipeline] = [pip for pip in pips.values() if pip.jobid is not None]
     logger.debug(f"{running=}")
     for pip in running:
         job = jobdb.get_job_id(pip.jobid, dbpath)
