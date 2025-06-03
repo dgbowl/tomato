@@ -5,6 +5,7 @@ import json
 import yaml
 import xarray as xr
 import zmq
+import time
 from tomato import tomato
 
 
@@ -43,6 +44,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
+    time.sleep(1)
     dt = xr.open_datatree("results.1.nc")
     for group, points in npoints.items():
         print(f"{dt[group]=}")
