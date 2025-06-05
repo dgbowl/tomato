@@ -12,9 +12,9 @@ kwargs = dict(port=PORT, timeout=TIME, context=CTXT)
 
 
 def test_passata_api_status(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.status(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -25,9 +25,9 @@ def test_passata_api_status(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_attrs(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.attrs(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -38,9 +38,9 @@ def test_passata_api_attrs(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_capabs(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.capabilities(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -51,9 +51,9 @@ def test_passata_api_capabs(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_get_attrs(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.get_attrs(
         name="example_counter:(example-addr,1)",
         attrs=["max", "min"],
@@ -66,9 +66,9 @@ def test_passata_api_get_attrs(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     val = random.random() * 100
     ret = tomato.passata.set_attr(
         name="example_counter:(example-addr,1)",
@@ -90,9 +90,9 @@ def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_reset(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.reset(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -103,6 +103,7 @@ def test_passata_api_reset(start_tomato_daemon, stop_tomato_daemon):
 
 def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     utils.run_casenames(["counter_60_0.1"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=1e4)
     ret = tomato.passata.status(
@@ -131,9 +132,9 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
 
 
 def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.constants(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -144,9 +145,9 @@ def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_last_data(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.get_last_data(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -157,9 +158,9 @@ def test_passata_api_last_data(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_measure(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = tomato.passata.measure(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -168,9 +169,9 @@ def test_passata_api_measure(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
 
@@ -196,9 +197,9 @@ def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
-    utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ret = subprocess.run(
         [
             "passata",
