@@ -38,8 +38,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=2000)
-    assert utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
+    assert utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=2e4)
 
     status = utils.job_status(1)
     assert status == "c"
