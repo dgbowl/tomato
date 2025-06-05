@@ -103,7 +103,10 @@ def test_passata_api_reset(start_tomato_daemon, stop_tomato_daemon):
 
 def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+
     utils.run_casenames(["counter_60_0.1"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=1e4)
     ret = tomato.passata.status(
@@ -135,6 +138,7 @@ def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+
     ret = tomato.passata.constants(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -144,10 +148,17 @@ def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
     assert ret.data["example_meta"] == "example string"
 
 
-def test_passata_api_last_data(start_tomato_daemon, stop_tomato_daemon):
+def test_passata_api_measure_last_data(start_tomato_daemon, stop_tomato_daemon):
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+
+    ret = tomato.passata.measure(
+        name="example_counter:(example-addr,1)",
+        **kwargs,
+    )
+    assert ret.success
+
     ret = tomato.passata.get_last_data(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -157,21 +168,11 @@ def test_passata_api_last_data(start_tomato_daemon, stop_tomato_daemon):
     assert "uts" in ret.data.coords
 
 
-def test_passata_api_measure(start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
-    ret = tomato.passata.measure(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
-    assert ret.success
-
-
 def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
 
