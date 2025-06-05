@@ -63,6 +63,24 @@ def wait_until_tomato_drivers(port: int, timeout: int):
     return False
 
 
+def wait_until_tomato_components(port: int, timeout: int):
+    t0 = time.perf_counter()
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        ret = subprocess.run(
+            ["tomato", "status", "components", "-y", "-p", f"{port}"],
+            capture_output=True,
+            text=True,
+        )
+        yml = yaml.safe_load(ret.stdout)
+        for name, cmp in yml["data"].items():
+            if cmp["capabilities"] is None:
+                break
+        else:
+            return True
+        time.sleep(0.1)
+    return False
+
+
 def wait_until_tomato_stopped(port: int, timeout: int):
     t0 = time.perf_counter()
     while (time.perf_counter() - t0) < (timeout / 1000):
