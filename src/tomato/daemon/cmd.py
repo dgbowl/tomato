@@ -63,8 +63,9 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
     logger.debug("%s", msg)
     io.store(daemon)
     if any([pip.jobid is not None for pip in daemon.pips.values()]):
-        logger.error("cannot stop tomato-daemon as jobs are running")
-        return Reply(success=False, msg="jobs are running")
+        running = {pip.jobid for pip in daemon.pips.values() if pip.jobid is not None}
+        logger.error("cannot stop tomato-daemon as jobs are running: %s", running)
+        return Reply(success=False, msg=f"jobs are running: {running}")
     else:
         daemon.status = "stop"
         logger.critical("stopping tomato-daemon")

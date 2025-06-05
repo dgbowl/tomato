@@ -176,7 +176,6 @@ def tomato_driver() -> None:
         )
         raise RuntimeError("could not instantiate driver '%s'") from e
 
-    tomato_driver_bootstrap(req, logger, interface, args.driver)
     params = dict(
         name=args.driver,
         port=port,

@@ -138,7 +138,12 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
     logger.debug(f"{running=}")
     for pip in running:
         job = jobdb.get_job_id(pip.jobid, dbpath)
-        if job.pid is None:
+        if job.pid is None and job.status in {"qw"}:
+            continue
+        elif job.pid is None:
+            logger.error("we shouldn't be here:")
+            logger.error(f"{pip=}")
+            logger.error(f"{job=}")
             continue
         pidexists = psutil.pid_exists(job.pid)
         if pidexists:
@@ -156,12 +161,12 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
             params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
-            logger.warning(f"the pid {job.pid} of job {job.id} has not been found")
+            logger.warning(f"the pid {job.pid} of running job {job.id} was not found")
             reset = True
             params = dict(status="ce")
         # pipelines of completed jobs should be reset
         elif (not pidexists) and job.status == "c":
-            logger.info(f"the pid {job.pid} of job {job.id} has not been found")
+            logger.info(f"the pid {job.pid} of completed job {job.id} was not found")
             ready = job.payload.settings.unlock_when_done
             params = dict(jobid=None, ready=ready, name=pip.name)
             req.send_pyobj(dict(cmd="pipeline", params=params))
@@ -384,7 +389,14 @@ def tomato_job() -> None:
     logger.setLevel(loglevel)
 
     if psutil.WINDOWS:
-        pid = os.getppid()
+        pid = os.getpid()
+        thispid = os.getpid()
+        thisproc = psutil.Process(thispid)
+        for p in thisproc.parents():
+            if p.name() == "tomato-job.exe":
+                pid = p.pid
+                break
+
     elif psutil.POSIX:
         pid = os.getpid()
 
