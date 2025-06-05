@@ -32,11 +32,14 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
         yaml.dump(jsdata, ouf)
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
-    utils.wait_until_tomato_running(port=PORT, timeout=3000)
+
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=2000)
-    utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
+    assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=2000)
+    assert utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
 
     status = utils.job_status(1)
     assert status == "c"
@@ -59,8 +62,8 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         yaml.dump(jsdata, ouf)
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
-    utils.wait_until_tomato_running(port=PORT, timeout=3000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
 
     ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
     assert ret.success

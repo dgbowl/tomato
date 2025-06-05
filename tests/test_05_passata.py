@@ -169,6 +169,7 @@ def test_passata_api_measure_last_data(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
+    os.chdir(datadir)
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
