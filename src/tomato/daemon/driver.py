@@ -44,7 +44,13 @@ def tomato_driver_bootstrap(
     for comp in daemon.cmps.values():
         if comp.driver == driver:
             key = (comp.address, comp.channel)
-            if interface.retries.get(key, 0) == MAX_REGISTER_RETRIES:
+            if key in interface.devmap:
+                logger.debug(
+                    "component %s already registered, skipping",
+                    comp.name,
+                )
+                continue
+            elif interface.retries.get(key, 0) == MAX_REGISTER_RETRIES:
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
                     comp.name,
@@ -300,8 +306,8 @@ def spawn_tomato_driver(
         driver,
     ]
     if psutil.WINDOWS:
-        cfs = subprocess.CREATE_NO_WINDOW
-        cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
+        #cfs = subprocess.CREATE_NO_WINDOW
+        cfs = subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(cmd, creationflags=cfs)
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
