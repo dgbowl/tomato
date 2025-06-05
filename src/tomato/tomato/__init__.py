@@ -392,7 +392,8 @@ def start(
         f"{verbosity}",
     ]
     if psutil.WINDOWS:
-        cfs = subprocess.CREATE_NEW_PROCESS_GROUP
+        cfs = subprocess.CREATE_NO_WINDOW
+        cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(cmd, creationflags=cfs)
     elif psutil.POSIX:
         subprocess.Popen(cmd, start_new_session=True)
