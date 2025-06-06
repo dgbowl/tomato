@@ -229,6 +229,7 @@ def get_attrs(
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     data = dict()
     msg = ""
@@ -279,6 +280,7 @@ def set_attr(
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(
@@ -319,6 +321,7 @@ def reset(
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     if drv.version == "1.0":
         req.send_pyobj(dict(cmd="dev_reset", params=kwargs))
@@ -357,6 +360,7 @@ def get_last_data(
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_last_data", params=kwargs))
 
@@ -392,6 +396,7 @@ def measure(
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(dict(cmd="cmp_measure", params=kwargs))
 
