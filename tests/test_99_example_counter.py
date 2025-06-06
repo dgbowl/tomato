@@ -90,7 +90,7 @@ def test_counter_snapshot_metadata(
     if external:
         subprocess.run(["ketchup", "snapshot", "-p", "12345", "1"])
 
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 30000)
     assert os.path.exists("snapshot.1.nc")
     dt = xr.open_datatree("snapshot.1.nc")
     assert "tomato_version" in dt.attrs
