@@ -150,6 +150,8 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
             pidexists = psutil.Process(job.pid).status() is not psutil.STATUS_ZOMBIE
         logger.debug(f"{pidexists=}")
         reset = False
+        update = False
+        ready = False
         # running jobs scheduled for killing (status == 'rd') should be killed
         if pidexists and job.status == "rd":
             logger.info(f"job {job.id} with pid {job.pid} will be terminated")
@@ -158,26 +160,32 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
             logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
             merge_netcdfs(job)
             reset = True
+            update = True
             params = dict(status="cd")
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
             logger.warning(f"the pid {job.pid} of running job {job.id} was not found")
             reset = True
+            update = True
             params = dict(status="ce")
+        # crashed jobs marked as such (status == 'ce') should also be cleared
+        elif (not pidexists) and job.status == "ce":
+            logger.info(f"the pid {job.pid} of crashed job {job.id} was not found")
+            reset = True
         # pipelines of completed jobs should be reset
         elif (not pidexists) and job.status == "c":
             logger.info(f"the pid {job.pid} of completed job {job.id} was not found")
             ready = job.payload.settings.unlock_when_done
-            params = dict(jobid=None, ready=ready, name=pip.name)
-            req.send_pyobj(dict(cmd="pipeline", params=params))
-            ret = req.recv_pyobj()
-            logger.debug(f"{ret=}")
-        if reset:
+            reset = True
+
+        if update:
+            logger.debug(f"job {job.id} will be updated to status {params['status']!r}")
             params["pid"] = None
             params["completed_at"] = str(datetime.now(timezone.utc))
             jobdb.update_job_id(job.id, params, dbpath)
+        if reset:
             logger.debug(f"pipeline {pip.name!r} will be reset")
-            params = dict(jobid=None, ready=False, name=pip.name)
+            params = dict(jobid=None, ready=ready, name=pip.name)
             req.send_pyobj(dict(cmd="pipeline", params=params))
             ret = req.recv_pyobj()
             if not ret.success:
