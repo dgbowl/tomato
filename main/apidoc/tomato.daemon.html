@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.daemon package &mdash; tomato 2.1rc5.post2 documentation</title>
+  <title>tomato.daemon package &mdash; tomato 2.1rc6.post1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=3e712348"></script>
+        <script src="../_static/documentation_options.js?v=3946e070"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.1rc5.post2
+                2.1rc6.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -360,7 +360,7 @@ avoid killing.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.job.manage_running_pips">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">manage_running_pips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pips</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.manage_running_pips" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">manage_running_pips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pips</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dbpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">req</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Socket</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.job.manage_running_pips" title="Link to this definition"></a></dt>
 <dd><p>Function that manages jobs and <cite>tomato-daemon</cite> pipelines.</p>
 <p>The function only affects pipelines marked as running, i.e. with a set <code class="docutils literal notranslate"><span class="pre">jobid</span></code>.
 Jobs scheduled for killing (i.e. <code class="docutils literal notranslate"><span class="pre">status</span> <span class="pre">==</span> <span class="pre">&quot;rd&quot;</span></code>) are terminated. Jobs that
@@ -397,7 +397,7 @@ loop.</p>
 <dt class="sig sig-object py" id="tomato.daemon.job.tomato_job">
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.job.</span></span><span class="sig-name descname"><span class="pre">tomato_job</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.daemon.job.tomato_job" title="Link to this definition"></a></dt>
 <dd><p>The function called when <cite>tomato-job</cite> is executed.</p>
-<p>This function is resposible for managing all activities of a single job, including
+<p>This function is responsible for managing all activities of a single job, including
 contacting the daemon about job pid, spawning of sub-processes to run tasks on each
 Component of the Pipeline, merging data at the end of the job, and reporting back
 to the daemon once the job is successfully finished.</p>
@@ -482,7 +482,7 @@ for data, and moves on to the next task as instructed in the payload.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.1rc5.post2
+      v: 2.1rc6.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
