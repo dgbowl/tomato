@@ -573,6 +573,7 @@ def job_thread(
             req.send_pyobj(dict(cmd="dev_reset", params={**kwargs}))
         else:
             req.send_pyobj(dict(cmd="cmp_reset", params={**kwargs}))
+        req.RCVTIMEO = 10000
         ret = req.recv_pyobj()
     except zmq.ZMQError as e:
         logger.critical(e, exc_info=True)
@@ -580,6 +581,8 @@ def job_thread(
         sys.exit(e)
     if not ret.success:
         logger.warning("could not reset component '%s': %s", component.role, ret.msg)
+    else:
+        logger.info("reset of component '%s' complete", component.role)
     req.close()
 
 
