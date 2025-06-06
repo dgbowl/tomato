@@ -5,6 +5,7 @@ from typing import Any
 
 RCVTIMEO = 1000
 
+
 def _name_to_cmp(
     name: str,
     port: int,
