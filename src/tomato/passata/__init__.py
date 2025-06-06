@@ -3,7 +3,7 @@ from tomato import tomato
 from tomato.models import Reply, Component, Driver
 from typing import Any
 
-RCVTIMEO = 1000
+RCVTIMEO = 3000
 
 
 def _name_to_cmp(
