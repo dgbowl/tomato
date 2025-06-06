@@ -10,7 +10,7 @@ from . import utils
 
 PORT = 12345
 CTXT = zmq.Context()
-WAIT = 5000
+WAIT = 10000
 
 kwargs = dict(port=PORT, timeout=1000, context=CTXT)
 

@@ -39,6 +39,7 @@ def test_counter_npoints_metadata(
     assert "job-1.log" in files
     if prefix is not None:
         assert os.path.exists(f"{prefix}.nc")
+        time.sleep(1)
         dt = xr.open_datatree(f"{prefix}.nc")
         assert "tomato_version" in dt.attrs
         assert "tomato_Job" in dt.attrs
@@ -92,6 +93,7 @@ def test_counter_snapshot_metadata(
         status = utils.job_status(1)
     assert status == "c"
     assert os.path.exists("snapshot.1.nc")
+    time.sleep(1)
     dt = xr.open_datatree("snapshot.1.nc")
     assert "tomato_version" in dt.attrs
     assert "tomato_Job" in dt.attrs
@@ -127,6 +129,7 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
+    time.sleep(1)
     dt = xr.open_datatree("results.1.nc")
     for group, points in npoints.items():
         print(f"{dt[group]=}")
@@ -135,7 +138,10 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
 
 def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+
     kwargs = dict(port=PORT, timeout=1000, context=CTXT)
     ret = tomato.passata.measure(
         name="example_counter:(example-addr,1)",
@@ -144,7 +150,7 @@ def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_
     assert ret.success
 
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
-    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
+    assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
     ret = tomato.passata.measure(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -152,7 +158,7 @@ def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_
     assert not ret.success
     assert "measurement already running" in ret.msg
 
-    utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
+    assert utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=1e4)
     time.sleep(1)
     ret = tomato.passata.measure(
         name="example_counter:(example-addr,1)",

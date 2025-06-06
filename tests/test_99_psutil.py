@@ -5,6 +5,7 @@ import json
 import yaml
 import xarray as xr
 import zmq
+import time
 from tomato import tomato
 
 
@@ -31,11 +32,13 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
         yaml.dump(jsdata, ouf)
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
-    utils.wait_until_tomato_running(port=PORT, timeout=3000)
+
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=2000)
-    utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=5000)
+    assert utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=2e4)
 
     status = utils.job_status(1)
     assert status == "c"
@@ -43,6 +46,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
+    time.sleep(1)
     dt = xr.open_datatree("results.1.nc")
     for group, points in npoints.items():
         print(f"{dt[group]=}")
@@ -57,8 +61,8 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         yaml.dump(jsdata, ouf)
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
-    utils.wait_until_tomato_running(port=PORT, timeout=3000)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
 
     ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
     assert ret.success

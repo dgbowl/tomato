@@ -44,7 +44,13 @@ def tomato_driver_bootstrap(
     for comp in daemon.cmps.values():
         if comp.driver == driver:
             key = (comp.address, comp.channel)
-            if interface.retries.get(key, 0) == MAX_REGISTER_RETRIES:
+            if key in interface.devmap:
+                logger.debug(
+                    "component %s already registered, skipping",
+                    comp.name,
+                )
+                continue
+            elif interface.retries.get(key, 0) == MAX_REGISTER_RETRIES:
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
                     comp.name,
@@ -176,7 +182,6 @@ def tomato_driver() -> None:
         )
         raise RuntimeError("could not instantiate driver '%s'") from e
 
-    tomato_driver_bootstrap(req, logger, interface, args.driver)
     params = dict(
         name=args.driver,
         port=port,

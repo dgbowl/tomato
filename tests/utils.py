@@ -41,7 +41,7 @@ def wait_until_tomato_running(port: int, timeout: int):
         )
         if "Success" in ret.stdout:
             return True
-        time.sleep(0.5)
+        time.sleep(0.1)
     return False
 
 
@@ -59,7 +59,25 @@ def wait_until_tomato_drivers(port: int, timeout: int):
                 break
         else:
             return True
-        time.sleep(0.5)
+        time.sleep(0.1)
+    return False
+
+
+def wait_until_tomato_components(port: int, timeout: int):
+    t0 = time.perf_counter()
+    while (time.perf_counter() - t0) < (timeout / 1000):
+        ret = subprocess.run(
+            ["tomato", "status", "components", "-y", "-p", f"{port}"],
+            capture_output=True,
+            text=True,
+        )
+        yml = yaml.safe_load(ret.stdout)
+        for name, cmp in yml["data"].items():
+            if cmp["capabilities"] is None:
+                break
+        else:
+            return True
+        time.sleep(0.1)
     return False
 
 
@@ -73,7 +91,7 @@ def wait_until_tomato_stopped(port: int, timeout: int):
         )
         if "Failure" in ret.stdout:
             return True
-        time.sleep(0.5)
+        time.sleep(0.1)
     return False
 
 
@@ -88,7 +106,7 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
         print(f"{ret.stdout=}")
         if f"[{status!r}]" in ret.stdout:
             return True
-        time.sleep(0.5)
+        time.sleep(0.1)
     return False
 
 
@@ -105,14 +123,18 @@ def wait_until_pickle(jobid: int, timeout: int):
 
 def kill_tomato_daemon(port: int = 12345):
     procs = []
-    for p in psutil.process_iter(["name", "cmdline"]):
-        if "tomato-daemon" in p.info["name"] and f"{port}" in p.info["cmdline"]:
-            for pc in p.children():
-                if psutil.WINDOWS:
-                    pc.terminate()
-                    procs.append(p)
-            p.terminate()
-            procs.append(p)
-    gone, alive = psutil.wait_procs(procs, timeout=3)
+    if psutil.WINDOWS:
+        for p in psutil.process_iter(["name", "cmdline"]):
+            if "tomato-daemon" in p.info["name"] and f"{port}" in p.info["cmdline"]:
+                for pc in p.children():
+                    procs.append(pc)
+                p.terminate()
+                procs.append(p)
+    elif psutil.POSIX:
+        for p in psutil.process_iter(["name", "cmdline"]):
+            if "tomato-daemon" in p.info["name"] and f"{port}" in p.info["cmdline"]:
+                p.terminate()
+                procs.append(p)
+    gone, alive = psutil.wait_procs(procs, timeout=1)
     print(f"{gone=}")
     print(f"{alive=}")
