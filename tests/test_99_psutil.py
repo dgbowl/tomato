@@ -6,7 +6,6 @@ import yaml
 import xarray as xr
 import zmq
 from tomato import tomato
-import time
 
 
 from . import utils
@@ -40,15 +39,14 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     utils.run_casenames([casename], [None], ["pip-multidev"])
     assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
 
-    time.sleep(5)
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
-    dt = xr.open_datatree("results.1.nc")
-    for group, points in npoints.items():
-        print(f"{dt[group]=}")
-        assert dt[group]["uts"].size == points
+    with xr.open_datatree("results.1.nc") as dt:
+        for group, points in npoints.items():
+            print(f"{dt[group]=}")
+            assert dt[group]["uts"].size == points
 
 
 def test_psutil_passata(datadir, stop_tomato_daemon):

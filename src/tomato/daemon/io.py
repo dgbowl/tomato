@@ -68,6 +68,7 @@ def merge_netcdfs(job: Job, snapshot=False):
     outpath = job.snappath if snapshot else job.respath
     logger.debug("saving DataTree into '%s'", outpath)
     dt.to_netcdf(outpath)
+    dt.close()
     logger.debug(f"{dt=}")
 
 
