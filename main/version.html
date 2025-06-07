@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Version history &mdash; tomato 2.1rc7.post3 documentation</title>
+  <title>Version history &mdash; tomato 2.1rc7.post4 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=ba83d6cd"></script>
+        <script src="_static/documentation_options.js?v=710a4600"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.1rc7.post3
+                2.1rc7.post4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -56,7 +56,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Version history</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#tomato-next"><strong>tomato</strong>-next</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-v2-1"><strong>tomato</strong>-v2.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tomato-v2-0"><strong>tomato</strong>-v2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tomato-v1-0"><strong>tomato</strong>-v1.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tomato-v0-2"><strong>tomato</strong>-v0.2</a></li>
@@ -103,8 +103,11 @@
              
   <section id="version-history">
 <h1>Version history<a class="headerlink" href="#version-history" title="Link to this heading"></a></h1>
-<section id="tomato-next">
-<h2><strong>tomato</strong>-next<a class="headerlink" href="#tomato-next" title="Link to this heading"></a></h2>
+<section id="tomato-v2-1">
+<h2><strong>tomato</strong>-v2.1<a class="headerlink" href="#tomato-v2-1" title="Link to this heading"></a></h2>
+<a class="reference external image-reference" href="https://github.com/dgbowl/tomato/tree/2.1"><img alt="https://img.shields.io/static/v1?label=tomato&amp;message=v2.1&amp;color=blue&amp;logo=github" src="https://img.shields.io/static/v1?label=tomato&amp;message=v2.1&amp;color=blue&amp;logo=github" /></a>
+<a class="reference external image-reference" href="https://pypi.org/project/tomato/2.1/"><img alt="https://img.shields.io/static/v1?label=tomato&amp;message=v2.1&amp;color=blue&amp;logo=pypi" src="https://img.shields.io/static/v1?label=tomato&amp;message=v2.1&amp;color=blue&amp;logo=pypi" /></a>
+<img alt="https://img.shields.io/static/v1?label=release%20date&amp;message=2025-06-07&amp;color=red&amp;logo=pypi" src="https://img.shields.io/static/v1?label=release%20date&amp;message=2025-06-07&amp;color=red&amp;logo=pypi" />
 <p><em>Section author: Peter Kraus</em></p>
 <p>Developed at the ConCat lab at TU Berlin.</p>
 <p>Changes from <code class="docutils literal notranslate"><span class="pre">tomato-2.0</span></code> include:</p>
@@ -132,6 +135,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">task_name</span></code> entry added, can be used to name <em>tasks</em> across a <em>payload</em> to trigger the below actions</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">start_with_task_name</span></code> entry added; when specified, the parent <em>task</em> will wait until the <em>task</em> with a matching <code class="docutils literal notranslate"><span class="pre">task_name</span></code> is started</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">stop_with_task_name</span></code> entry added; when specified, the parent <em>task</em> will stop execution once a <em>task</em> with a matching <code class="docutils literal notranslate"><span class="pre">task_name</span></code> is started</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_duration</span></code> and <code class="docutils literal notranslate"><span class="pre">sample_interval</span></code> can be provided as <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, which will be converted to the number of seconds using <code class="xref py py-mod docutils literal notranslate"><span class="pre">pint</span></code></p></li>
 </ul>
 </li>
 </ul>
@@ -218,7 +222,7 @@ Loris Ercole.</em></p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.1rc7.post3
+      v: 2.1rc7.post4
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
