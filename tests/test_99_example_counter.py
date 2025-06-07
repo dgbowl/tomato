@@ -7,6 +7,7 @@ import yaml
 import xarray as xr
 import tomato
 import zmq
+import psutil
 
 from . import utils
 
@@ -36,6 +37,8 @@ def test_counter_npoints_metadata(
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
     assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
 
+    if psutil.POSIX:
+        os.sync()
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
@@ -91,6 +94,9 @@ def test_counter_snapshot_metadata(
         subprocess.run(["ketchup", "snapshot", "-p", "12345", "1"])
 
     assert utils.wait_until_ketchup_status(1, "c", PORT, 30000)
+
+    if psutil.POSIX:
+        os.sync()
     assert os.path.exists("snapshot.1.nc")
     dt = xr.open_datatree("snapshot.1.nc")
     assert "tomato_version" in dt.attrs
@@ -122,6 +128,8 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
     assert utils.wait_until_ketchup_status(1, "c", PORT, 10000)
 
+    if psutil.POSIX:
+        os.sync()
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
