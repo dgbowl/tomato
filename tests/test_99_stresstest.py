@@ -5,7 +5,6 @@ import xarray as xr
 from datetime import datetime
 from tomato.models import Job
 from . import utils
-import time
 
 PORT = 12345
 
@@ -30,13 +29,12 @@ def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
 
     utils.wait_until_ketchup_status(jobid=nreps, status="c", port=PORT, timeout=40000)
 
-    time.sleep(5)
     prev = None
     for i in range(nreps):
         i += 1
         assert os.path.exists(f"results.{i}.nc")
-        dt = xr.open_datatree(f"results.{i}.nc")
-        completed_at = Job.model_validate_json(dt.attrs["tomato_Job"]).completed_at
+        with xr.open_datatree(f"results.{i}.nc") as dt:
+            completed_at = Job.model_validate_json(dt.attrs["tomato_Job"]).completed_at
         ti = datetime.fromisoformat(completed_at)
         if prev is not None:
             assert ti > prev
