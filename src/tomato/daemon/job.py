@@ -559,6 +559,8 @@ def job_thread(
                     logger.critical(e, exc_info=True)
                     thread.crashed = True
                     sys.exit(e)
+                if ret.success:
+                    data_to_pickle(ret.data, datapath, role=component.role)    
                 break
 
             time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
