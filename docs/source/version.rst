@@ -1,7 +1,12 @@
 Version history
 ===============
-**tomato**-next
+**tomato**-v2.1
 ---------------
+.. image:: https://img.shields.io/static/v1?label=tomato&message=v2.1&color=blue&logo=github
+    :target: https://github.com/dgbowl/tomato/tree/2.1
+.. image:: https://img.shields.io/static/v1?label=tomato&message=v2.1&color=blue&logo=pypi
+    :target: https://pypi.org/project/tomato/2.1/
+.. image:: https://img.shields.io/static/v1?label=release%20date&message=2025-06-07&color=red&logo=pypi
 
 .. sectionauthor::
      Peter Kraus
@@ -30,6 +35,7 @@ Changes from ``tomato-2.0`` include:
   - ``task_name`` entry added, can be used to name *tasks* across a *payload* to trigger the below actions
   - ``start_with_task_name`` entry added; when specified, the parent *task* will wait until the *task* with a matching ``task_name`` is started
   - ``stop_with_task_name`` entry added; when specified, the parent *task* will stop execution once a *task* with a matching ``task_name`` is started
+  - ``max_duration`` and ``sample_interval`` can be provided as :class:`str`, which will be converted to the number of seconds using :mod:`pint`
 
 .. codeauthor::
     Peter Kraus
