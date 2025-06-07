@@ -531,7 +531,7 @@ class ModelInterface(metaclass=ABCMeta):
         return Reply(
             success=True,
             msg=f"driver running with {len(devkeys)} devices",
-            data=dict(devkeys=devkeys),
+            data=devkeys,
         )
 
     @log_errors

@@ -4,7 +4,7 @@ import zmq
 import subprocess
 
 from tomato import tomato
-from .utils import wait_until_tomato_running, wait_until_tomato_stopped
+from . import utils
 
 PORT = 12345
 CTXT = zmq.Context()
@@ -45,7 +45,7 @@ def test_tomato_start_with_init(datadir, stop_tomato_daemon):
 
 def test_tomato_start_double(datadir, stop_tomato_daemon):
     test_tomato_start_with_init(datadir, stop_tomato_daemon)
-    assert wait_until_tomato_running(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert ret.success is False
@@ -119,7 +119,7 @@ def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
 
 
 def test_tomato_log_verbosity_testing(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert wait_until_tomato_running(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     assert Path("daemon_12345.log").exists()
     assert Path("daemon_12345.log").stat().st_size > 0
 
@@ -128,13 +128,13 @@ def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
     os.chdir(datadir)
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", "."])
-    assert wait_until_tomato_running(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     assert Path("daemon_12345.log").exists()
     assert Path("daemon_12345.log").stat().st_size > 0
 
 
 def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
-    assert wait_until_tomato_running(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     req = CTXT.socket(zmq.REQ)
     req.connect("tcp://127.0.0.1:12345")
     req.send_pyobj(dict(cdm="typo"))
@@ -145,13 +145,48 @@ def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_tomato_stop(start_tomato_daemon, stop_tomato_daemon):
-    assert wait_until_tomato_running(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     ret = tomato.stop(**kwargs)
     assert ret.success
-    assert wait_until_tomato_stopped(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_stopped(port=PORT, timeout=5000)
 
     assert Path("daemon_12345.log").exists()
     with Path("daemon_12345.log").open() as logf:
         text = logf.read()
     assert "driver manager thread joined" in text
     assert "job manager thread joined" in text
+
+
+def test_tomato_component(start_tomato_daemon, stop_tomato_daemon):
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+
+    ret = tomato.status(**kwargs, stgrp="tomato", yaml=True)
+    assert ret.success
+    daemon = ret.data
+    print(f"{daemon=}")
+
+    drv = daemon.drvs["example_counter"]
+    req: zmq.Socket = CTXT.socket(zmq.REQ)
+    req.RCVTIMEO = 1000
+    req.connect(f"tcp://127.0.0.1:{drv.port}")
+
+    req.send_pyobj(dict(cmd="status", params={}))
+    ret = req.recv_pyobj()
+    print(f"{ret=}")
+    assert ret.success
+    assert len(ret.data) == 1
+
+    params = {"channel": "1", "address": "example-addr"}
+    req.send_pyobj(dict(cmd="cmp_status", params=params))
+    ret = req.recv_pyobj()
+    print(f"{ret=}")
+    assert ret.success
+
+    params = {"channel": "2", "address": "example-addr"}
+    req.send_pyobj(dict(cmd="cmp_status", params=params))
+    ret = req.recv_pyobj()
+    print(f"{ret=}")
+    assert ret.success is False
+    req.close()
