@@ -560,7 +560,7 @@ def job_thread(
                     thread.crashed = True
                     sys.exit(e)
                 if ret.success:
-                    data_to_pickle(ret.data, datapath, role=component.role)    
+                    data_to_pickle(ret.data, datapath, role=component.role)
                 break
 
             time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
