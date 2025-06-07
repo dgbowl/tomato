@@ -214,12 +214,6 @@ def tomato_driver() -> None:
                 if "cmd" not in msg:
                     logger.error(f"received msg without cmd: {msg=}")
                     ret = Reply(success=False, msg="received msg without cmd", data=msg)
-                elif msg["cmd"] == "status":
-                    ret = Reply(
-                        success=True,
-                        msg=f"status of driver {params['name']!r} is {status!r}",
-                        data=dict(**params, status=status),
-                    )
                 elif msg["cmd"] == "register":
                     tomato_driver_bootstrap(req, logger, interface, args.driver)
                     if any([retry for retry in interface.retries.values()]):

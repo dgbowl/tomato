@@ -41,7 +41,7 @@ def in_devmap(func):
             key = (address, channel)
         if key not in self.devmap:
             msg = f"dev with address {address!r} and channel {channel} is unknown"
-            return Reply(success=False, msg=msg, data=self.devmap.keys())
+            return Reply(success=False, msg=msg, data=list(self.devmap.keys()))
         return func(self, **kwargs, key=key)
 
     return wrapper
@@ -437,11 +437,11 @@ class ModelInterface(metaclass=ABCMeta):
         the `devmap`.
 
         """
-        devkeys = self.devmap.keys()
+        devkeys = list(self.devmap.keys())
         return Reply(
             success=True,
             msg=f"driver running with {len(devkeys)} devices",
-            data=dict(devkeys=devkeys),
+            data=devkeys,
         )
 
     def reset(self) -> Reply:

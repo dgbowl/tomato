@@ -485,11 +485,11 @@ class ModelInterface(metaclass=ABCMeta):
         the `devmap`.
 
         """
-        devkeys = self.devmap.keys()
+        devkeys = list(self.devmap.keys())
         return Reply(
             success=True,
             msg=f"driver running with {len(devkeys)} devices",
-            data=dict(devkeys=devkeys),
+            data=devkeys,
         )
 
     @log_errors
