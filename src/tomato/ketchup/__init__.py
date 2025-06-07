@@ -274,10 +274,10 @@ def cancel(
             data.append(ret.data)
         else:
             return Reply(success=False, msg="unknown error", data=ret.data)
-
     req.close()
-
-    if len(data) == 1:
+    if len(data) == 0:
+        msg = "all jobs were already cancelled"
+    elif len(data) == 1:
         msg = f"job {[j.id for j in data]} cancelled successfully"
     else:
         msg = f"jobs {[j.id for j in data]} cancelled successfully"

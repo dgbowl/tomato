@@ -5,8 +5,8 @@ import json
 import yaml
 import xarray as xr
 import zmq
-import time
 from tomato import tomato
+import time
 
 
 from . import utils
@@ -38,15 +38,13 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    assert utils.wait_until_ketchup_status(jobid=1, status="c", port=PORT, timeout=2e4)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
 
-    status = utils.job_status(1)
-    assert status == "c"
+    time.sleep(5)
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
-    time.sleep(1)
     dt = xr.open_datatree("results.1.nc")
     for group, points in npoints.items():
         print(f"{dt[group]=}")
@@ -63,6 +61,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
     ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
     assert ret.success
