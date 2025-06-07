@@ -5,7 +5,7 @@ import xarray as xr
 from datetime import datetime
 from tomato.models import Job
 from . import utils
-import psutil
+import time
 
 PORT = 12345
 
@@ -30,8 +30,7 @@ def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
 
     utils.wait_until_ketchup_status(jobid=nreps, status="c", port=PORT, timeout=40000)
 
-    if psutil.POSIX:
-        os.sync()
+    time.sleep(5)
     prev = None
     for i in range(nreps):
         i += 1

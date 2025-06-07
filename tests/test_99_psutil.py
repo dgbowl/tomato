@@ -6,7 +6,7 @@ import yaml
 import xarray as xr
 import zmq
 from tomato import tomato
-import psutil
+import time
 
 
 from . import utils
@@ -40,8 +40,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     utils.run_casenames([casename], [None], ["pip-multidev"])
     assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
 
-    if psutil.POSIX:
-        os.sync()
+    time.sleep(5)
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
