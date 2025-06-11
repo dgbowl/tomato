@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.daemon package &mdash; tomato 2.1rc7.post4 documentation</title>
+  <title>tomato.daemon package &mdash; tomato 2.1.post1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=710a4600"></script>
+        <script src="../_static/documentation_options.js?v=deda4263"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.1rc7.post4
+                2.1.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -94,6 +94,7 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato-daemon-driver-the-driver-manager-of-tomato-daemon"><strong>tomato.daemon.driver</strong>: the driver manager of tomato daemon</a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.tomato_driver_bootstrap"><code class="docutils literal notranslate"><span class="pre">tomato_driver_bootstrap()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.perform_idle_measurements"><code class="docutils literal notranslate"><span class="pre">perform_idle_measurements()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.kill_tomato_driver"><code class="docutils literal notranslate"><span class="pre">kill_tomato_driver()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.tomato_driver"><code class="docutils literal notranslate"><span class="pre">tomato_driver()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.spawn_tomato_driver"><code class="docutils literal notranslate"><span class="pre">spawn_tomato_driver()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.daemon.driver.stop_tomato_driver"><code class="docutils literal notranslate"><span class="pre">stop_tomato_driver()</span></code></a></li>
@@ -263,6 +264,18 @@ current <code class="xref py py-class docutils literal notranslate"><span class=
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="tomato.daemon.driver.kill_tomato_driver">
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.driver.</span></span><span class="sig-name descname"><span class="pre">kill_tomato_driver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.driver.kill_tomato_driver" title="Link to this definition"></a></dt>
+<dd><p>Wrapper around <code class="xref py py-func docutils literal notranslate"><span class="pre">psutil.terminate()</span></code>.</p>
+<p>Here we kill the (grand)children of the process with the name of <cite>tomato-job</cite>,
+i.e. the individual task functions. This allows the <cite>tomato-job</cite> process to exit
+gracefully once the task functions join.</p>
+<p>Note that on Windows, the <cite>tomato-job.exe</cite> process has two children: a <cite>python.exe</cite>
+which is the actual process running the job, and <cite>conhost.exe</cite>, which we want to
+avoid killing.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.driver.tomato_driver">
 <span class="sig-prename descclassname"><span class="pre">tomato.daemon.driver.</span></span><span class="sig-name descname"><span class="pre">tomato_driver</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.daemon.driver.tomato_driver" title="Link to this definition"></a></dt>
 <dd><p>The function called when <cite>tomato-driver</cite> is executed.</p>
@@ -321,7 +334,7 @@ using the Component <cite>role</cite> as the group label.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.daemon.io.data_to_pickle">
-<span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">data_to_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.4.1.dev0)"><span class="pre">Dataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.data_to_pickle" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.daemon.io.</span></span><span class="sig-name descname"><span class="pre">data_to_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.6.1)"><span class="pre">Dataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.daemon.io.data_to_pickle" title="Link to this definition"></a></dt>
 <dd><p>Dumps the data provided as <code class="xref py py-class docutils literal notranslate"><span class="pre">xr.Dataset</span></code> into a <code class="docutils literal notranslate"><span class="pre">pickle</span></code>. Concatenates with
 any existing data stored in the <code class="docutils literal notranslate"><span class="pre">pickle</span></code>.</p>
 </dd></dl>
@@ -482,7 +495,7 @@ for data, and moves on to the next task as instructed in the payload.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.1rc7.post4
+      v: 2.1.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
