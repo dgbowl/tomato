@@ -160,7 +160,13 @@ def tomato_driver() -> None:
 
     logger.debug("getting pid")
     if psutil.WINDOWS:
-        pid = os.getppid()
+        pid = os.getpid()
+        thispid = os.getpid()
+        thisproc = psutil.Process(thispid)
+        for p in thisproc.parents():
+            if p.name() == "tomato-driver.exe":
+                pid = p.pid
+                break
     elif psutil.POSIX:
         pid = os.getpid()
 

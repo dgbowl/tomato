@@ -404,7 +404,6 @@ def tomato_job() -> None:
             if p.name() == "tomato-job.exe":
                 pid = p.pid
                 break
-
     elif psutil.POSIX:
         pid = os.getpid()
 
