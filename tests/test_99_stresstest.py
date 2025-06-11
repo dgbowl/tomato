@@ -19,7 +19,9 @@ def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
     os.chdir(datadir)
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", "."])
-    utils.wait_until_tomato_running(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
     subprocess.run(["tomato", "pipeline", "load", "-p", f"{PORT}", "pip-counter", case])
     for i in range(nreps):

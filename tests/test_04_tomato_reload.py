@@ -99,7 +99,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
     utils.run_casenames(["counter_20_5"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
 
     # Try modifying settings of a driver in use
     with open("settings.toml", "a") as inf:
