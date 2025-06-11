@@ -13,7 +13,6 @@ kwargs = dict(port=PORT, context=CTXT, timeout=timeout)
 
 
 def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
     ret = tomato.reload(**kwargs, appdir=Path())
     assert ret.success
     assert len(ret.data.drvs) == 1
@@ -23,8 +22,6 @@ def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
-
     with open("settings.toml", "a") as inf:
         inf.write("example_counter.testparb = 1")
     ret = tomato.reload(**kwargs, appdir=Path())
@@ -38,8 +35,6 @@ def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_reload_cmps_pips(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
-
     with open("devices_counter.json", "r") as inf:
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
@@ -55,8 +50,6 @@ def test_reload_cmps_pips(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_reload_devs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
-
     with open("devices_multidev.json", "r") as inf:
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
@@ -72,9 +65,6 @@ def test_reload_devs(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-
     # Let's add psutil driver / device
     with open("devices_psutil.json", "r") as inf:
         jsdata = json.load(inf)
@@ -89,7 +79,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.pips) == 1
     assert len(ret.data.cmps) == 2
     assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
-    utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
 
     # Let's remove psutil driver / device and modify channels
     with open("devices_counter.json", "r") as inf:
@@ -108,8 +98,6 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
-
     utils.run_casenames(["counter_20_5"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=5000)
 
