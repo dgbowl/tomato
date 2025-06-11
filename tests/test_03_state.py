@@ -138,15 +138,13 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
     print(f"{alive=}")
     time.sleep(5)
 
-    ret = tomato.status(PORT, 1000, CTXT, "drivers")
+    ret = tomato.status(**kwargs, stgrp="drivers")
     assert ret.success
     print(f"{ret.data=}")
     assert pid != ret.data["example_counter"].pid
 
 
-def test_crashed_driver_with_running_jobs(
-    datadir, start_tomato_daemon, stop_tomato_daemon
-):
+def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs)
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
