@@ -4,6 +4,8 @@ import subprocess
 import psutil
 import shutil
 
+from . import utils
+
 
 @pytest.fixture
 def datadir(tmpdir, request):
@@ -31,6 +33,9 @@ def start_tomato_daemon(tmpdir: str, port: int = 12345):
     os.chdir(tmpdir)
     subprocess.run(["tomato", "init", "-p", f"{port}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{port}", "-A", ".", "-vv"])
+    assert utils.wait_until_tomato_running(port=port, timeout=1000)
+    assert utils.wait_until_tomato_drivers(port=port, timeout=3000)
+    assert utils.wait_until_tomato_components(port=port, timeout=5000)
     yield
     # teardown_stuff
 

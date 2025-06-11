@@ -93,6 +93,30 @@ def perform_idle_measurements(
     return t_now
 
 
+def kill_tomato_driver(pid: int):
+    """
+    Wrapper around :func:`psutil.terminate`.
+
+    Here we kill the (grand)children of the process with the name of `tomato-job`,
+    i.e. the individual task functions. This allows the `tomato-job` process to exit
+    gracefully once the task functions join.
+
+    Note that on Windows, the `tomato-job.exe` process has two children: a `python.exe`
+    which is the actual process running the job, and `conhost.exe`, which we want to
+    avoid killing.
+
+    """
+    proc = psutil.Process(pid)
+    to_kill = proc.children()
+    to_kill.append(proc)
+    logger.warning(f"killing process {proc.name()!r} with pid {proc.pid}")
+    proc.terminate()
+    gone, alive = psutil.wait_procs([to_kill], timeout=1)
+    logger.debug(f"{gone=}")
+    logger.debug(f"{alive=}")
+    return gone
+
+
 def tomato_driver() -> None:
     """
     The function called when `tomato-driver` is executed.
@@ -160,7 +184,13 @@ def tomato_driver() -> None:
 
     logger.debug("getting pid")
     if psutil.WINDOWS:
-        pid = os.getppid()
+        pid = os.getpid()
+        thispid = os.getpid()
+        thisproc = psutil.Process(thispid)
+        for p in thisproc.parents():
+            if p.name() == "tomato-driver.exe":
+                pid = p.pid
+                break
     elif psutil.POSIX:
         pid = os.getpid()
 
@@ -454,14 +484,21 @@ def manager(port: int, timeout: int = 1000):
                 driver.name,
                 driver.pid,
             )
-            continue
-        logger.info(
-            "stopping driver '%s' with pid %d on port %s",
-            driver.name,
-            driver.pid,
-            driver.port,
-        )
-        ret = stop_tomato_driver(driver.port, context)
+            gone = kill_tomato_driver(driver.pid)
+            if driver.pid in gone:
+                ret = Reply(success=True)
+        else:
+            logger.info(
+                "stopping driver '%s' - sending 'stop' command on port %s",
+                driver.name,
+                driver.port,
+            )
+            ret = stop_tomato_driver(driver.port, context)
+            if ret.success:
+                params = dict(name=driver.name, port=None)
+                req.send_pyobj(dict(cmd="driver", params=params))
+                ret = req.recv_pyobj()
+
         if ret.success:
             logger.info("stopped driver '%s'", driver.name)
         else:

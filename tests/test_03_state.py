@@ -16,10 +16,10 @@ kwargs = dict(port=PORT, timeout=1000, context=CTXT)
 
 
 def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
     os.chdir(datadir)
     ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", **kwargs)
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs)
+
     time.sleep(1)
     tomato.stop(**kwargs)
     assert utils.wait_until_tomato_stopped(port=PORT, timeout=5000)
@@ -34,12 +34,12 @@ def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon)
 
 
 def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
     os.chdir(datadir)
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs)
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
-    utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
+
     ret = tomato.stop(**kwargs)
     print(f"{ret=}")
     assert ret.success is False
@@ -47,12 +47,11 @@ def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon
 
 
 def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
     os.chdir(datadir)
     ketchup.submit(payload="counter_20_5.yml", jobname="job-1", **kwargs)
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_20_5")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
-    assert utils.wait_until_ketchup_status(jobid=1, status="r", port=PORT, timeout=WAIT)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
 
     ret = tomato.stop(**kwargs)
     utils.kill_tomato_daemon(port=PORT)
@@ -67,9 +66,7 @@ def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_dae
     assert len(ret.data) == 1
     assert ret.data[0].status == "r"
 
-    assert utils.wait_until_ketchup_status(
-        jobid=1, status="c", port=PORT, timeout=25000
-    )
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 25000)
     ret = ketchup.status(**kwargs, jobids=[1], verbosity=logging.DEBUG)
     print(f"{ret=}")
     assert ret.success
@@ -79,9 +76,6 @@ def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_dae
 
 def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs)
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
@@ -104,9 +98,6 @@ def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_da
 
 def test_restart_with_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ketchup.submit(payload="counter_20_5.yml", jobname="job-1", **kwargs)
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_20_5")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
@@ -134,13 +125,11 @@ def test_restart_with_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_dae
 
 
 def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     os.chdir(datadir)
-
     ret = tomato.status(**kwargs, stgrp="drivers")
     assert ret.success
     print(f"{ret.data=}")
+
     pid = ret.data["example_counter"].pid
     p = psutil.Process(pid)
     p.terminate()
@@ -149,19 +138,14 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
     print(f"{alive=}")
     time.sleep(5)
 
-    ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
+    ret = tomato.status(**kwargs, stgrp="drivers")
     assert ret.success
     print(f"{ret.data=}")
     assert pid != ret.data["example_counter"].pid
 
 
-def test_crashed_driver_with_running_jobs(
-    datadir, start_tomato_daemon, stop_tomato_daemon
-):
+def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs)
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")

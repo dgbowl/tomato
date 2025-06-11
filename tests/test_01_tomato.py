@@ -43,9 +43,7 @@ def test_tomato_start_with_init(datadir, stop_tomato_daemon):
     assert ret.success
 
 
-def test_tomato_start_double(datadir, stop_tomato_daemon):
-    test_tomato_start_with_init(datadir, stop_tomato_daemon)
-    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
+def test_tomato_start_double(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert ret.success is False
@@ -55,8 +53,7 @@ def test_tomato_start_double(datadir, stop_tomato_daemon):
     )
 
 
-def test_tomato_pipeline(datadir, stop_tomato_daemon):
-    test_tomato_start_with_init(datadir, stop_tomato_daemon)
+def test_tomato_pipeline(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="test")
     print(f"{ret=}")
     assert ret.success
@@ -94,8 +91,7 @@ def test_tomato_pipeline(datadir, stop_tomato_daemon):
     assert ret.data.ready is False
 
 
-def test_tomato_pipeline_invalid(datadir, stop_tomato_daemon):
-    test_tomato_start_with_init(datadir, stop_tomato_daemon)
+def test_tomato_pipeline_invalid(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.pipeline_load(**kwargs, pipeline="bogus", sampleid="test")
     print(f"{ret=}")
     assert ret.success is False
@@ -113,7 +109,9 @@ def test_tomato_pipeline_invalid(datadir, stop_tomato_daemon):
 
 
 def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
-    test_tomato_start_with_init(datadir, stop_tomato_daemon)
+    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
+    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "--quiet"])
+    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     assert Path("daemon_12345.log").exists()
     assert Path("daemon_12345.log").stat().st_size > 0
 
@@ -134,7 +132,6 @@ def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
 
 
 def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     req = CTXT.socket(zmq.REQ)
     req.connect("tcp://127.0.0.1:12345")
     req.send_pyobj(dict(cdm="typo"))
@@ -145,7 +142,6 @@ def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_tomato_stop(start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     ret = tomato.stop(**kwargs)
     assert ret.success
     assert utils.wait_until_tomato_stopped(port=PORT, timeout=5000)
@@ -158,10 +154,6 @@ def test_tomato_stop(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_tomato_component(start_tomato_daemon, stop_tomato_daemon):
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
-
     ret = tomato.status(**kwargs, stgrp="tomato", yaml=True)
     assert ret.success
     daemon = ret.data

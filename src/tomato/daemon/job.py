@@ -404,7 +404,6 @@ def tomato_job() -> None:
             if p.name() == "tomato-job.exe":
                 pid = p.pid
                 break
-
     elif psutil.POSIX:
         pid = os.getpid()
 
@@ -553,13 +552,15 @@ def job_thread(
             ):
                 logger.info("task %s:%d stop trigger met", component.role, ti)
                 try:
+                    req.RCVTIMEO = 10000
                     req.send_pyobj(dict(cmd="task_stop", params={**kwargs}))
                     ret = req.recv_pyobj()
+                    req.RCVTIMEO = 1000
                 except zmq.ZMQError as e:
                     logger.critical(e, exc_info=True)
                     thread.crashed = True
                     sys.exit(e)
-                if ret.success:
+                if ret.success and ret.data is not None:
                     data_to_pickle(ret.data, datapath, role=component.role)
                 break
 
