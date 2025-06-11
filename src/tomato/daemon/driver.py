@@ -495,7 +495,7 @@ def manager(port: int, timeout: int = 1000):
             )
             ret = stop_tomato_driver(driver.port, context)
             if ret.success:
-                params = dict(driver=driver.name, port=None)
+                params = dict(name=driver.name, port=None)
                 req.send_pyobj(dict(cmd="driver", params=params))
                 ret = req.recv_pyobj()
 
