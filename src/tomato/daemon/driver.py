@@ -92,6 +92,7 @@ def perform_idle_measurements(
         interface.cmp_measure(key=key)
     return t_now
 
+
 def kill_tomato_driver(pid: int):
     """
     Wrapper around :func:`psutil.terminate`.
@@ -114,6 +115,7 @@ def kill_tomato_driver(pid: int):
     logger.debug(f"{gone=}")
     logger.debug(f"{alive=}")
     return gone
+
 
 def tomato_driver() -> None:
     """
