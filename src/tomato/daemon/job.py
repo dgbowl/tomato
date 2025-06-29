@@ -472,7 +472,9 @@ def job_thread(
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
-    lppargs = dict(endpoint=f"tcp://127.0.0.1:{driver.port}", context=context)
+    lppargs = dict(
+        endpoint=f"tcp://127.0.0.1:{driver.port}", context=context, sender=sender
+    )
 
     logger.info(f"job thread of {component.role!r} connected to tomato-daemon")
 

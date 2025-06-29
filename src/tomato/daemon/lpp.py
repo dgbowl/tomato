@@ -8,8 +8,18 @@ REQ_RETRIES = 3
 
 
 def comm(
-    req: zmq.Socket, data: Any, endpoint: str, context: zmq.Context, retries: int = 0
+    req: zmq.Socket,
+    data: Any,
+    endpoint: str,
+    context: zmq.Context,
+    retries: int = 0,
+    sender: str = None,
 ) -> tuple[Reply, zmq.Socket]:
+    if sender is None:
+        logger = logging.getLogger(__name__)
+    else:
+        logger = logging.getLogger(f"{sender}.lpp")
+
     req.send_pyobj(data)
 
     while True:
@@ -21,15 +31,15 @@ def comm(
         req.setsockopt(zmq.LINGER, 0)
         req.close()
         if retries >= REQ_RETRIES:
-            logging.error("Server '%s' offline, abandoning", endpoint)
+            logger.error("Server '%s' offline, abandoning", endpoint)
             ret = Reply(
                 success=False,
                 msg=f"Server {endpoint!r} offline, abandoning",
             )
             break
         else:
-            logging.warning("Server '%s' unavailable, retry %d", endpoint, retries)
+            logger.warning("Server '%s' unavailable, retry %d", endpoint, retries)
             req = context.socket(zmq.REQ)
             req.connect(endpoint)
-            req.send(data)
+            req.send_pyobj(data)
     return ret, req
