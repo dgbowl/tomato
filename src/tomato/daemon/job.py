@@ -28,7 +28,7 @@ import sys
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.daemon import jobdb, lpp
-from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job, Reply
+from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Task
 
@@ -498,7 +498,9 @@ def job_thread(
                 logger.debug("waiting for task_name '%s'", task.start_with_task_name)
                 continue
             logger.debug("polling component '%s' for task readiness", component.role)
-            ret, req = lpp.comm(req, dict(cmd="task_status", params={**kwargs}), **lppargs)
+            ret, req = lpp.comm(
+                req, dict(cmd="task_status", params={**kwargs}), **lppargs
+            )
             if ret.success and ret.data["can_submit"]:
                 break
             elif req.closed:
