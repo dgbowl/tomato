@@ -138,3 +138,10 @@ def kill_tomato_daemon(port: int = 12345):
     gone, alive = psutil.wait_procs(procs, timeout=1)
     print(f"{gone=}")
     print(f"{alive=}")
+
+
+def sync_files():
+    if psutil.WINDOWS:
+        time.sleep(1)
+    elif psutil.POSIX:
+        subprocess.run(["sync"])

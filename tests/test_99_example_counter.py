@@ -35,6 +35,7 @@ def test_counter_npoints_metadata(
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
+    utils.sync_files()
     if prefix is not None:
         assert os.path.exists(f"{prefix}.nc")
         with xr.open_datatree(f"{prefix}.nc") as dt:
@@ -80,6 +81,7 @@ def test_counter_snapshot_metadata(
     assert utils.wait_until_ketchup_status(1, "c", PORT, 30000)
 
     assert os.path.exists("snapshot.1.nc")
+    utils.sync_files()
     with xr.open_datatree("snapshot.1.nc") as dt:
         assert "tomato_version" in dt.attrs
         assert "tomato_Job" in dt.attrs
@@ -114,6 +116,7 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
+    utils.sync_files()
     with xr.open_datatree("results.1.nc") as dt:
         for group, points in npoints.items():
             print(f"{dt[group]=}")

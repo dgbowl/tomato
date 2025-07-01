@@ -42,6 +42,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
+    utils.sync_files()
     with xr.open_datatree("results.1.nc") as dt:
         for group, points in npoints.items():
             print(f"{dt[group]=}")
