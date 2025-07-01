@@ -376,11 +376,12 @@ class ModelInterface(metaclass=ABCMeta):
         :class:`Task` can be queued onto the device component already.
         """
         running = self.devmap[key].running
-        data = dict(running=running, can_submit=not running)
+        can_submit = not self.devmap[key].task_list.full()
+        data = dict(running=running, can_submit=can_submit)
         if running:
-            return (True, "running", data)
+            return (True, "component has a running task", data)
         else:
-            return (True, "ready", data)
+            return (True, "component is idle", data)
 
     @log_errors
     @to_reply
@@ -560,6 +561,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = True
+        self.thread.do_run_task = False
         self.thread.start()
         self.data = None
         self.last_data = None
@@ -608,7 +610,9 @@ class ModelDevice(metaclass=ABCMeta):
                         if t_n - t_0 > task.max_duration:
                             thread.do_run_task = False
                             break
-                        time.sleep(max(1e-2, task.sampling_interval / 20))
+                        # We want the inner task loop to run every 10 - 200 ms,
+                        # so that cancelled tasks can be processed quickly
+                        time.sleep(min(0.2, max(0.01, task.sampling_interval / 20)))
                     logger.info(
                         "task '%s' on component %s is done",
                         task.technique_name,
@@ -637,6 +641,8 @@ class ModelDevice(metaclass=ABCMeta):
                 logger.critical(e, exc_info=True)
                 logger.critical("above error raised on task '%s'", task)
             self.running = False
+        logger.warning("task runner is quitting")
+        self.running = False
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
         """
@@ -676,7 +682,10 @@ class ModelDevice(metaclass=ABCMeta):
     def stop_task(self, **kwargs: dict) -> None:
         """Stops the currently running task."""
         logger.info("stopping running task on component %s", self.key)
-        setattr(self.thread, "do_run_task", False)
+        if hasattr(self.thread, "do_run_task"):
+            self.thread.do_run_task = False
+        else:
+            logger.warning("attempted to stop a task without 'thread.do_run_task'")
 
     @abstractmethod
     def set_attr(self, attr: str, val: Val, **kwargs: dict) -> Val:
@@ -748,5 +757,6 @@ class ModelDevice(metaclass=ABCMeta):
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = do_run
+        self.thread.do_run_task = False
         self.thread.start()
         logger.info("reset of component %s done", self.key)
