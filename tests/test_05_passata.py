@@ -4,6 +4,7 @@ import subprocess
 import os
 from . import utils
 import tomato
+import time
 
 PORT = 12345
 TIME = 1000
@@ -87,6 +88,8 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
     os.chdir(datadir)
     utils.run_casenames(["counter_60_0.1"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
+    time.sleep(1)  # Delay to make sure the job task on the driver is running
+
     ret = tomato.passata.status(
         name="example_counter:(example-addr,1)",
         **kwargs,
@@ -142,6 +145,7 @@ def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    time.sleep(1)  # Delay to make sure the job task on the driver is running
 
     ret = tomato.passata.set_attr(
         name="example_counter:(example-addr,1)",
