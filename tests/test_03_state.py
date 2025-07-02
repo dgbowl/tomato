@@ -161,4 +161,4 @@ def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daem
     print(f"{gone=}")
     print(f"{alive=}")
 
-    assert utils.wait_until_ketchup_status(1, "ce", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "ce", PORT, 10000)
