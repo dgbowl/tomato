@@ -12,7 +12,8 @@ def comm(
     data: Any,
     endpoint: str,
     context: zmq.Context,
-    retries: int = 0,
+    retries: int = REQ_RETRIES,
+    timeout: int = REQ_TIMEOUT,
     sender: str = None,
 ) -> tuple[Reply, zmq.Socket]:
     if sender is None:
@@ -23,14 +24,14 @@ def comm(
     req.send_pyobj(data)
 
     while True:
-        if (req.poll(REQ_TIMEOUT) & zmq.POLLIN) != 0:
+        if (req.poll(timeout) & zmq.POLLIN) != 0:
             ret = req.recv_pyobj()
             break
 
-        retries += 1
+        retries -= 1
         req.setsockopt(zmq.LINGER, 0)
         req.close()
-        if retries >= REQ_RETRIES:
+        if retries == 0:
             logger.error("Server '%s' offline, abandoning", endpoint)
             ret = Reply(
                 success=False,
@@ -38,7 +39,7 @@ def comm(
             )
             break
         else:
-            logger.warning("Server '%s' unavailable, retry %d", endpoint, retries)
+            logger.warning("Server '%s' unavailable, retries %d", endpoint, retries)
             req = context.socket(zmq.REQ)
             req.connect(endpoint)
             req.send_pyobj(data)

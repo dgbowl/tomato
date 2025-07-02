@@ -150,6 +150,16 @@ def sync_files():
 
 def check_npoints_file(fn: str, npoints: dict[str, int], attempts: int = 5):
     assert os.path.exists(fn)
+    with xr.open_datatree(fn) as dt:
+        assert "tomato_version" in dt.attrs
+        assert "tomato_Job" in dt.attrs
+        for group, points in npoints.items():
+            assert group in dt
+            assert dt[group]["uts"].size == points
+            print(f"{dt[group].attrs=}")
+            assert "tomato_Component" in dt[group].attrs
+    return
+
     for attempt in range(attempts):
         sync_files()
         try:
@@ -157,12 +167,13 @@ def check_npoints_file(fn: str, npoints: dict[str, int], attempts: int = 5):
                 assert "tomato_version" in dt.attrs
                 assert "tomato_Job" in dt.attrs
                 for group, points in npoints.items():
-                    print(f"{dt[group]=}")
+                    assert group in dt
                     assert dt[group]["uts"].size == points
                     assert "tomato_Component" in dt[group].attrs
+                dt.close()
             break
-        except AssertionError as e:
+        except Exception as e:
             if attempt == attempts - 1:
-                raise AssertionError from e
+                raise AssertionError(e) from e
             else:
                 continue

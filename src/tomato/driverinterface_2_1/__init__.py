@@ -200,7 +200,7 @@ class ModelInterface(metaclass=ABCMeta):
         if status.data:
             logger.warning("tearing down component %s with a running task!", key)
             self.task_stop(key=key, **kwargs)
-        self.dev_reset(key=key, do_run=False, **kwargs)
+        self.cmp_reset(key=key, do_run=False, **kwargs)
         del self.devmap[key]
         return (True, f"device {key!r} torn down", None)
 
@@ -513,7 +513,7 @@ class ModelInterface(metaclass=ABCMeta):
                 logger.error("task on component %s is still running", key)
             else:
                 logger.debug("component %s has no running task", key)
-            self.dev_reset(key=key)
+            self.cmp_reset(key=key)
         return Reply(
             success=True,
             msg="all components on driver have been reset",

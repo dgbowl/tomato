@@ -25,6 +25,7 @@ from threading import current_thread, Thread
 import zmq
 import psutil
 import sys
+import xarray as xr
 
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.daemon import jobdb, lpp
@@ -522,13 +523,13 @@ def job_thread(
             if tN - t0 > device.pollrate:
                 logger.debug("polling task %s:%d for data", component.role, ti)
                 msg = dict(cmd="task_data", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs)
+                ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
                 if req.closed:
                     thread.crashed = True
                     sys.exit()
-                elif ret.success:
+                elif ret.success and ret.data is not None:
                     logger.debug("pickling received data")
-                    ds = ret.data
+                    ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
                     data_to_pickle(ds, datapath, role=component.role)
                 t0 += device.pollrate
@@ -552,23 +553,29 @@ def job_thread(
             ):
                 logger.info("task %s:%d stop trigger met", component.role, ti)
                 msg = dict(cmd="task_stop", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs)
+                ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
                 if req.closed:
                     thread.crashed = True
                     sys.exit()
                 elif ret.success and ret.data is not None:
-                    data_to_pickle(ret.data, datapath, role=component.role)
+                    logger.debug("pickling received data")
+                    ds: xr.Dataset = ret.data
+                    ds.attrs["tomato_Component"] = component.model_dump_json()
+                    data_to_pickle(ds, datapath, role=component.role)
                 break
 
             time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
         logger.info("task %s:%d fetching final data", component.role, ti)
         msg = dict(cmd="task_data", params={**kwargs})
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
         if req.closed:
             thread.crashed = True
             sys.exit()
-        elif ret.success:
-            data_to_pickle(ret.data, datapath, role=component.role)
+        elif ret.success and ret.data is not None:
+            logger.debug("pickling received data")
+            ds: xr.Dataset = ret.data
+            ds.attrs["tomato_Component"] = component.model_dump_json()
+            data_to_pickle(ds, datapath, role=component.role)
         thread.completed_tasks.append(task)
         thread.current_task = None
 
@@ -577,7 +584,7 @@ def job_thread(
         msg = dict(cmd="dev_reset", params={**kwargs})
     else:
         msg = dict(cmd="cmp_reset", params={**kwargs})
-    ret, req = lpp.comm(req, msg, **lppargs)
+    ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
     if req.closed:
         thread.crashed = True
         sys.exit()
