@@ -299,7 +299,6 @@ def manager(port: int, timeout: int = 500):
     thread = current_thread()
     logger.info("launched successfully")
     req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{port}")
     lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
     while getattr(thread, "do_run"):
