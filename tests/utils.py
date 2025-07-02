@@ -91,7 +91,7 @@ def wait_until_tomato_stopped(port: int, timeout: int):
         )
         if "Failure" in ret.stdout:
             return True
-        time.sleep(0.1)
+        time.sleep(0.02)
     return False
 
 
@@ -106,7 +106,7 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
         print(f"{ret.stdout=}")
         if f"[{status!r}]" in ret.stdout:
             return True
-        time.sleep(0.1)
+        time.sleep(0.02)
     return False
 
 
