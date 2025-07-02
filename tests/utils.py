@@ -4,6 +4,7 @@ import logging
 import os
 import psutil
 import yaml
+import xarray as xr
 
 logger = logging.getLogger(__name__)
 
@@ -145,3 +146,23 @@ def sync_files():
         time.sleep(1)
     elif psutil.POSIX:
         subprocess.run(["sync"])
+
+
+def check_npoints_file(fn: str, npoints: dict[str, int], attempts: int = 5):
+    assert os.path.exists(fn)
+    for attempt in range(attempts):
+        sync_files()
+        try:
+            with xr.open_datatree(fn) as dt:
+                assert "tomato_version" in dt.attrs
+                assert "tomato_Job" in dt.attrs
+                for group, points in npoints.items():
+                    print(f"{dt[group]=}")
+                    assert dt[group]["uts"].size == points
+                    assert "tomato_Component" in dt[group].attrs
+            break
+        except AssertionError as e:
+            if attempt == attempts - 1:
+                raise AssertionError from e
+            else:
+                continue
