@@ -70,10 +70,10 @@ def tomato_daemon():
     poller.register(rep, zmq.POLLIN)
 
     logger.debug("entering main loop")
-    jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,))
+    jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,), daemon=True)
     jmgr.do_run = True
     jmgr.start()
-    dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,))
+    dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,), daemon=True)
     dmgr.do_run = True
     dmgr.start()
     t0 = time.process_time()
