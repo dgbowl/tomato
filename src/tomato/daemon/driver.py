@@ -26,6 +26,7 @@ from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
 from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
 from tomato.drivers import driver_to_interface
 from tomato.models import Reply, Daemon
+from tomato.daemon import lpp
 
 logger = logging.getLogger(__name__)
 ModelInterface = TypeVar("ModelInterface", MI_1_0, MI_2_0, MI_2_1)
@@ -371,25 +372,30 @@ def manager(port: int, timeout: int = 1000):
     logger.info("launched successfully")
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    poller = zmq.Poller()
-    poller.register(req, zmq.POLLIN)
-    to = timeout
+    lppargs = dict(
+        endpoint=f"tcp://127.0.0.1:{port}",
+        context=context,
+        sender=sender,
+        timeout=timeout,
+    )
 
     spawned_drivers = dict()
     driver_retries = defaultdict(int)
     component_retries = defaultdict(int)
 
     while getattr(thread, "do_run"):
-        req.send_pyobj(dict(cmd="status", sender=sender))
-        events = dict(poller.poll(to))
-        if req not in events:
-            logger.warning("could not contact tomato-daemon in %d ms", to)
-            to = to * 2
-            continue
-        elif to > timeout:
-            to = timeout
+        msg = dict(cmd="status", sender=sender)
+        ret, req = lpp.comm(req, msg, **lppargs)
+        if req.closed:
+            thread.do_run = False
+            break
+        if ret.success:
+            daemon: Daemon = ret.data
+        else:
+            logger.critical(ret.msg)
+            thread.do_run = False
+            break
 
-        daemon = req.recv_pyobj().data
         for driver in daemon.drvs.keys():
             args = [
                 daemon.port,

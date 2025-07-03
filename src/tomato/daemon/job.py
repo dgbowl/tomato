@@ -475,7 +475,7 @@ def job_thread(
     )
 
     logger.info(
-        "%s: job thread of %s connected to tomato-daemon", component.role, component.name
+        "%s: job thread of %s attached to tomato-daemon", component.role, component.name
     )
 
     kwargs = dict(address=component.address, channel=component.channel)

@@ -161,4 +161,5 @@ def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daem
     print(f"{gone=}")
     print(f"{alive=}")
 
-    assert utils.wait_until_ketchup_status(1, "ce", PORT, 10000)
+    # The wait here has to be quite long - polling task_data has a 3 x 5s timeout
+    assert utils.wait_until_ketchup_status(1, "ce", PORT, 20000)
