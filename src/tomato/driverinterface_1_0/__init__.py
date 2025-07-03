@@ -103,7 +103,7 @@ class ModelInterface(metaclass=ABCMeta):
             self.driver = driver
             self.key = key
             self.task_list = Queue()
-            self.thread = Thread(target=self.task_runner, daemon=True)
+            self.thread = Thread(target=self.task_runner, daemon=False)
             self.data = defaultdict(list)
             self.running = False
             self.datalock = RLock()
@@ -146,7 +146,7 @@ class ModelInterface(metaclass=ABCMeta):
 
             self.task_list.task_done()
             self.running = False
-            self.thread = Thread(target=self.task_runner, daemon=True)
+            self.thread = Thread(target=self.task_runner, daemon=False)
             logger.info(
                 "task '%s' on component %s is done", task.technique_name, self.key
             )
@@ -215,7 +215,7 @@ class ModelInterface(metaclass=ABCMeta):
             """Resets the component to an initial status."""
             logger.info("resetting component %s", self.key)
             self.task_list = Queue()
-            self.thread = Thread(target=self.task_runner, daemon=True)
+            self.thread = Thread(target=self.task_runner, daemon=False)
             self.data = defaultdict(list)
             self.running = False
             self.datalock = RLock()

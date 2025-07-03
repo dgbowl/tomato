@@ -661,6 +661,7 @@ def job_main_loop(
             target=job_thread,
             args=(tasks, component, device, driver, job.jobpath, logpath),
             name="job-thread",
+            daemon=False,
         )
         threads[component.role].crashed = False
         threads[component.role].completed_tasks = []

@@ -559,7 +559,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.driver = driver
         self.key = key
         self.task_list = queue.Queue()
-        self.thread = Thread(target=self.task_runner, daemon=True)
+        self.thread = Thread(target=self.task_runner, daemon=False)
         self.thread.do_run = True
         self.thread.do_run_task = False
         self.thread.start()
@@ -755,7 +755,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.data = None
         self.datalock = RLock()
         self.task_list = queue.Queue()
-        self.thread = Thread(target=self.task_runner, daemon=True)
+        self.thread = Thread(target=self.task_runner, daemon=False)
         self.thread.do_run = do_run
         self.thread.do_run_task = False
         self.thread.start()
