@@ -38,3 +38,9 @@ Submodules
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+.. automodule:: tomato.daemon.lpp
+   :members:
+   :undoc-members:
+   :show-inheritance:
