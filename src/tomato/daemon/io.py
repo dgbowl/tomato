@@ -50,10 +50,8 @@ def merge_netcdfs(job: Job, snapshot=False):
     using the Component `role` as the group label.
     """
     logger = logging.getLogger(f"{__name__}.merge_netcdf")
-    logger.debug("opening datasets")
+    logger.debug("opening datasets in '%s'", job.jobpath)
     datasets = []
-    logger.debug(f"{job=}")
-    logger.debug(f"{job.jobpath=}")
     for fn in Path(job.jobpath).glob("*.pkl"):
         with fn.open("rb") as pkl:
             ds = pickle.load(pkl)
@@ -68,10 +66,9 @@ def merge_netcdfs(job: Job, snapshot=False):
     }
     dt.attrs = root_attrs
     outpath = job.snappath if snapshot else job.respath
-    logger.debug("saving DataTree into '%s'", outpath)
+    logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
     dt.to_netcdf(outpath)
     dt.close()
-    logger.debug(f"{dt=}")
 
 
 def data_to_pickle(ds: xr.Dataset, path: Path, role: str):

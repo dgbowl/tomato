@@ -429,7 +429,7 @@ class ModelInterface(metaclass=ABCMeta):
             units = {} if attrs[k].units is None else {"units": attrs[k].units}
             data_vars[k] = ("uts", v, units)
         ds = Dataset(data_vars=data_vars, coords=uts)
-        return Reply(success=True, msg=f"found {len(data)} new datapoints", data=ds)
+        return Reply(success=True, msg=f"found {ds['uts'].size} datapoints", data=ds)
 
     def status(self) -> Reply:
         """

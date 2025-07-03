@@ -467,8 +467,6 @@ def job_thread(
     thread = current_thread()
     sender = f"{__name__}.job_thread({thread.ident})"
     logger = logging.getLogger(sender)
-    logger.debug(f"in job thread of {component.role!r}")
-
     context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{driver.port}")
@@ -476,20 +474,20 @@ def job_thread(
         endpoint=f"tcp://127.0.0.1:{driver.port}", context=context, sender=sender
     )
 
-    logger.info(f"job thread of {component.role!r} connected to tomato-daemon")
+    logger.info(
+        "%s: job thread of %s connected to tomato-daemon", component.role, component.name
+    )
 
     kwargs = dict(address=component.address, channel=component.channel)
 
     datapath = Path(jobpath) / f"{component.role}.pkl"
-    logger.debug("distributing tasks:")
+    logger.debug("%s: processing tasks on component %s", component.role, component.name)
     for ti, task in enumerate(tasks):
-        thread.current_task = task
+        taskid = f"{component.role}:{ti}"
         if task.task_name is not None:
-            logger.info(
-                "processing task '%s' %s:%d", task.task_name, component.role, ti
-            )
-        else:
-            logger.info("processing task %s:%d", component.role, ti)
+            taskid += f":{task.task_name!r}"
+        thread.current_task = task
+        logger.info("%s: processing task", taskid)
         while True:
             time.sleep(1e-1)
             if task.start_with_task_name is None:
@@ -497,9 +495,13 @@ def job_thread(
             elif task.start_with_task_name in thread.started_task_names:
                 pass
             else:
-                logger.debug("waiting for task_name '%s'", task.start_with_task_name)
+                logger.debug(
+                    "%s: waiting for task_name '%s'", taskid, task.start_with_task_name
+                )
                 continue
-            logger.debug("polling component '%s' for task readiness", component.role)
+            logger.debug(
+                "%s: polling component %s for task readiness", taskid, component.name
+            )
             ret, req = lpp.comm(
                 req, dict(cmd="task_status", params={**kwargs}), **lppargs
             )
@@ -508,9 +510,11 @@ def job_thread(
             elif req.closed:
                 thread.crashed = True
                 sys.exit()
-            logger.warning("cannot submit onto component '%s', waiting", component.role)
+            logger.warning(
+                "%s: cannot submit onto component %s, waiting", taskid, component.name
+            )
 
-        logger.info("sending task %s:%d to component", component.role, ti)
+        logger.info("%s: sending task to component %s", taskid, component.name)
         msg = dict(cmd="task_start", params={"task": task, **kwargs})
         ret, req = lpp.comm(req, msg, **lppargs)
         if req.closed:
@@ -521,27 +525,27 @@ def job_thread(
         while True:
             tN = time.perf_counter()
             if tN - t0 > device.pollrate:
-                logger.debug("polling task %s:%d for data", component.role, ti)
+                logger.debug("%s: polling task for data", taskid)
                 msg = dict(cmd="task_data", params={**kwargs})
                 ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
                 if req.closed:
                     thread.crashed = True
                     sys.exit()
                 elif ret.success and ret.data is not None:
-                    logger.debug("pickling received data")
+                    logger.debug("%s: pickling received data", taskid)
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
                     data_to_pickle(ds, datapath, role=component.role)
                 t0 += device.pollrate
 
-            logger.debug("polling task %s:%d for completion", component.role, ti)
+            logger.debug("%s: polling task for completion", taskid)
             msg = dict(cmd="task_status", params={**kwargs})
             ret, req = lpp.comm(req, msg, **lppargs)
             if req.closed:
                 thread.crashed = True
                 sys.exit()
             elif ret.success and not ret.data["running"]:
-                logger.info("task %s:%d no longer running, break", component.role, ti)
+                logger.info("%s: task no longer running, break", taskid)
                 break
             elif ret.success is False:
                 logger.critical(f"{ret=}")
@@ -551,35 +555,37 @@ def job_thread(
                 task.stop_with_task_name is not None
                 and task.stop_with_task_name in thread.started_task_names
             ):
-                logger.info("task %s:%d stop trigger met", component.role, ti)
+                logger.info("%s: task stop trigger met", taskid)
                 msg = dict(cmd="task_stop", params={**kwargs})
                 ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
                 if req.closed:
                     thread.crashed = True
                     sys.exit()
                 elif ret.success and ret.data is not None:
-                    logger.debug("pickling received data")
+                    logger.debug("%s: pickling received data", taskid)
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
                     data_to_pickle(ds, datapath, role=component.role)
                 break
 
             time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
-        logger.info("task %s:%d fetching final data", component.role, ti)
+        logger.info("%s: task fetching final data", taskid)
         msg = dict(cmd="task_data", params={**kwargs})
         ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
         if req.closed:
             thread.crashed = True
             sys.exit()
         elif ret.success and ret.data is not None:
-            logger.debug("pickling received data")
+            logger.debug("%s: pickling received data", taskid)
             ds: xr.Dataset = ret.data
             ds.attrs["tomato_Component"] = component.model_dump_json()
             data_to_pickle(ds, datapath, role=component.role)
         thread.completed_tasks.append(task)
         thread.current_task = None
 
-    logger.info("all tasks done on component '%s', resetting", component.role)
+    logger.info(
+        "%s: all tasks done on component %s, resetting", component.role, component.name
+    )
     if driver.version == "1.0":
         msg = dict(cmd="dev_reset", params={**kwargs})
     else:
@@ -589,9 +595,9 @@ def job_thread(
         thread.crashed = True
         sys.exit()
     elif not ret.success:
-        logger.warning("could not reset component '%s': %s", component.role, ret.msg)
+        logger.warning("%s: could not reset component: %s", component.role, ret.msg)
     else:
-        logger.info("reset of component '%s' complete", component.role)
+        logger.info("%s: reset of component %s done", component.role, component.name)
     req.close()
 
 
