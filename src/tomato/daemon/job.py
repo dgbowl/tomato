@@ -465,7 +465,7 @@ def job_thread(
     Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
     """
     thread = current_thread()
-    sender = f"{__name__}.job_thread({thread.ident})"
+    sender = f"{__name__}.job_thread({thread.ident:5d})"
     logger = logging.getLogger(sender)
     context = zmq.Context()
     req = context.socket(zmq.REQ)
