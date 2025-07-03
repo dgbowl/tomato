@@ -50,13 +50,13 @@ def merge_netcdfs(job: Job, snapshot=False):
     using the Component `role` as the group label.
     """
     logger = logging.getLogger(f"{__name__}.merge_netcdf")
-    logger.debug("opening datasets")
+    logger.debug("opening datasets in '%s'", job.jobpath)
     datasets = []
-    logger.debug(f"{job=}")
-    logger.debug(f"{job.jobpath=}")
     for fn in Path(job.jobpath).glob("*.pkl"):
-        with pickle.load(fn.open("rb")) as ds:
-            datasets.append(ds)
+        with fn.open("rb") as pkl:
+            ds = pickle.load(pkl)
+            if ds is not None:
+                datasets.append(ds)
     logger.debug("creating a DataTree from %d groups", len(datasets))
     dt = xr.DataTree.from_dict({ds.attrs["role"]: ds for ds in datasets})
     logger.debug(f"{dt=}")
@@ -66,10 +66,9 @@ def merge_netcdfs(job: Job, snapshot=False):
     }
     dt.attrs = root_attrs
     outpath = job.snappath if snapshot else job.respath
-    logger.debug("saving DataTree into '%s'", outpath)
+    logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
     dt.to_netcdf(outpath)
     dt.close()
-    logger.debug(f"{dt=}")
 
 
 def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
@@ -81,9 +80,11 @@ def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
     ds.attrs["role"] = role
     logger.debug("checking for existing pickle at '%s'", path)
     if path.exists():
-        with pickle.load(path.open("rb")) as oldds:
-            logger.debug("concatenating Dataset with existing data")
-            ds = xr.concat([oldds, ds], dim="uts")
+        with path.open("rb") as old:
+            oldds = pickle.load(old)
+            if oldds is not None:
+                logger.debug("concatenating Dataset with existing data")
+                ds = xr.concat([oldds, ds], dim="uts")
     logger.debug("dumping Dataset into pickle at '%s'", path)
     with path.open("wb") as out:
         pickle.dump(ds, out, protocol=5)

@@ -35,16 +35,8 @@ def test_counter_npoints_metadata(
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
-    utils.sync_files()
     if prefix is not None:
-        assert os.path.exists(f"{prefix}.nc")
-        with xr.open_datatree(f"{prefix}.nc") as dt:
-            assert "tomato_version" in dt.attrs
-            assert "tomato_Job" in dt.attrs
-            ds = dt["counter"]
-            print(f"{ds=}")
-            assert ds["uts"].size == npoints
-            assert "tomato_Component" in ds.attrs
+        utils.check_npoints_file(f"{prefix}.nc", {"counter": npoints})
 
 
 @pytest.mark.parametrize(
@@ -116,11 +108,7 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
-    utils.sync_files()
-    with xr.open_datatree("results.1.nc") as dt:
-        for group, points in npoints.items():
-            print(f"{dt[group]=}")
-            assert dt[group]["uts"].size == points
+    utils.check_npoints_file("results.1.nc", npoints)
 
 
 def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):

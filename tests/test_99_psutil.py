@@ -3,7 +3,6 @@ import os
 import subprocess
 import json
 import yaml
-import xarray as xr
 import zmq
 from tomato import tomato
 
@@ -41,12 +40,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
-    assert os.path.exists("results.1.nc")
-    utils.sync_files()
-    with xr.open_datatree("results.1.nc") as dt:
-        for group, points in npoints.items():
-            print(f"{dt[group]=}")
-            assert dt[group]["uts"].size == points
+    utils.check_npoints_file("results.1.nc", npoints)
 
 
 def test_psutil_passata(datadir, stop_tomato_daemon):
