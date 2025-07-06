@@ -143,7 +143,7 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
     logger.debug(f"{running=}")
     for pip in running:
         job = jobdb.get_job_id(pip.jobid, dbpath)
-        
+
         if job.pid is None and job.connected_at is not None:
             # pid is set in the same command as connected_at
             # unclear how we'd end here
@@ -171,7 +171,9 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
                 logger.info(f"job {job.id} with pid {job.pid} will be terminated")
                 proc = psutil.Process(pid=job.pid)
                 kill_tomato_job(proc)
-                logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
+                logger.info(
+                    f"job {job.id} with pid {job.pid} was terminated successfully"
+                )
                 merge_netcdfs(job)
             update = True
             params = dict(status="cd")
@@ -294,7 +296,9 @@ def action_queued_jobs(daemon, matched, req, dbpath):
                 subprocess.Popen(cmd, start_new_session=True)
             params = dict(launched_at=str(datetime.now(timezone.utc)))
             job = jobdb.update_job_id(jobid, params, dbpath)
-            logger.info(f"job {jobid} launched on pip: {pip.name!r} and path: {jpath!r}")
+            logger.info(
+                f"job {jobid} launched on pip: {pip.name!r} and path: {jpath!r}"
+            )
             break
 
 

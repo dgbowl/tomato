@@ -39,8 +39,10 @@ def jobdb_setup(dbpath: str) -> None:
         # Below is an example of upgrading databases to new user_version:
         while curr_version < user_version:
             if curr_version == 1:
-                log.info("upgrading table 'queue' from version 1 to 2")
-                cur.execute("ALTER TABLE queue RENAME COLUMN executed_at TO connected_at;")
+                logger.info("upgrading table 'queue' from version 1 to 2")
+                cur.execute(
+                    "ALTER TABLE queue RENAME COLUMN executed_at TO connected_at;"
+                )
                 cur.execute("ALTER TABLE queue ADD COLUMN launched_at TEXT;")
                 cur.execute("UPDATE queue SET launched_at = connected_at;")
                 cur.execute("PRAGMA user_version = 2;")
