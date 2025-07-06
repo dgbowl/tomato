@@ -36,9 +36,12 @@ def test_counter_npoints_metadata(
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
     assert "job-1.log" in files
+    with open(os.path.join(".", "Jobs", "1", f"counter.pkl"), "rb") as inp:
+        ds = pickle.load(inp)
+        print(f"{ds=}")
+        assert ds["uts"].size == npoints
     if prefix is not None:
         utils.check_npoints_file(f"{prefix}.nc", {"counter": npoints})
-    assert False
 
 
 @pytest.mark.parametrize(
