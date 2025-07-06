@@ -7,6 +7,7 @@ import xarray as xr
 import tomato
 import zmq
 import time
+import pickle
 
 from . import utils
 
@@ -37,6 +38,7 @@ def test_counter_npoints_metadata(
     assert "job-1.log" in files
     if prefix is not None:
         utils.check_npoints_file(f"{prefix}.nc", {"counter": npoints})
+    assert False
 
 
 @pytest.mark.parametrize(
@@ -108,6 +110,11 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
     assert "jobdata.json" in files
     assert "job-1.log" in files
     assert os.path.exists("results.1.nc")
+    for k, v in npoints.items():
+        with open(os.path.join(".", "Jobs", "1", f"{k}.pkl"), "rb") as inp:
+            ds = pickle.load(inp)
+        print(f"{ds=}")
+        assert ds["uts"].size == v
     utils.check_npoints_file("results.1.nc", npoints)
 
 
