@@ -88,7 +88,8 @@ class Job(BaseModel):
     pid: Optional[int] = None
     status: Literal["q", "qw", "r", "rd", "c", "cd", "ce"] = "q"
     submitted_at: Optional[str] = None
-    executed_at: Optional[str] = None
+    launched_at: Optional[str] = None
+    connected_at: Optional[str] = None
     completed_at: Optional[str] = None
     jobpath: Optional[str] = None
     respath: Optional[str] = None
