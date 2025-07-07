@@ -19,7 +19,7 @@ import json
 import time
 import argparse
 from importlib import metadata
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from threading import current_thread, Thread
 import zmq
@@ -34,6 +34,8 @@ from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Task
 
 logger = logging.getLogger(__name__)
+
+MAX_JOB_NOPID = timedelta(seconds=10)
 
 
 def method_validate(
@@ -151,16 +153,23 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
             pidexists = False
         elif job.pid is None and job.launched_at is not None:
             # subprocess was started but job is not (yet) connected
-            # TODO: timeout to be implemented
-            continue
+            td = datetime.now(timezone.utc) - datetime.fromisoformat(job.launched_at)
+            if td > MAX_JOB_NOPID:
+                logger.error("job %d failed to register, aborting", job.id)
+                job.status = "rd"
+                pidexists = False
+            else:
+                continue
         elif job.pid is None:
             # subprocess was not yet started
+            logger.warning("job %d failed to start", job.id)
             # TODO: timeout to be implemented
             continue
         else:
             pidexists = psutil.pid_exists(job.pid)
         if pidexists:
             pidexists = psutil.Process(job.pid).status() is not psutil.STATUS_ZOMBIE
+
         reset = False
         update = False
         ready = False
@@ -254,19 +263,13 @@ def action_queued_jobs(daemon, matched, req, dbpath):
                 continue
             elif pip.sampleid != job.payload.sample.name:
                 continue
-            logger.info(f"job {job.id} found a matched & ready pip: {pip.name!r}")
-            params = dict(jobid=job.id, ready=False, name=pip.name)
-            req.send_pyobj(dict(cmd="pipeline", params=params))
-            ret = req.recv_pyobj()
-            if not ret.success:
-                logger.error(f"could not set params {params} on pip: {pip.name!r}")
-                continue
-            else:
-                pip.ready = False
+            logger.info("job %d: found a matched & ready pip '%s'", job.id, pip.name)
 
+            logger.debug("job %d: making job directory", job.id)
             root = Path(daemon.settings["jobs"]["storage"]) / str(job.id)
             os.makedirs(root)
 
+            logger.debug("job %d: storing jobdata.json", job.id)
             jpath = root / "jobdata.json"
             jobargs = {
                 "pipeline": pip.model_dump(),
@@ -274,10 +277,20 @@ def action_queued_jobs(daemon, matched, req, dbpath):
                 "devices": {dn: dev.model_dump() for dn, dev in daemon.devs.items()},
                 "job": dict(id=job.id, path=str(root)),
             }
-
             with jpath.open("w", encoding="UTF-8") as of:
                 json.dump(jobargs, of, indent=1)
 
+            logger.debug("job %d: reserving pipeline %s", job.id, pip.name)
+            params = dict(jobid=job.id, ready=False, name=pip.name)
+            req.send_pyobj(dict(cmd="pipeline", params=params))
+            ret = req.recv_pyobj()
+            if not ret.success:
+                logger.error("job %d: could not set params %s", job.id, params)
+                continue
+            else:
+                pip.ready = False
+
+            logger.debug("job %d: executing tomato-job", job.id)
             cmd = [
                 "tomato-job",
                 "--port",
@@ -294,10 +307,12 @@ def action_queued_jobs(daemon, matched, req, dbpath):
                 subprocess.Popen(cmd, creationflags=cfs)
             elif psutil.POSIX:
                 subprocess.Popen(cmd, start_new_session=True)
+
+            logger.debug("job %d: setting launched_at")
             params = dict(launched_at=str(datetime.now(timezone.utc)))
             job = jobdb.update_job_id(jobid, params, dbpath)
             logger.info(
-                f"job {jobid} launched on pip: {pip.name!r} and path: {jpath!r}"
+                "job %d: launched on pip '%s' and path '%s'", job.id, pip.name, jpath
             )
             break
 

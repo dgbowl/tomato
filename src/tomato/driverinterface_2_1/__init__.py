@@ -339,6 +339,8 @@ class ModelInterface(metaclass=ABCMeta):
         """
         if self.devmap[key].running:
             return (False, f"measurement already running on component {key!r}", None)
+        elif not self.devmap[key].task_list.empty():
+            return (False, f"task list component {key!r} not empty", None)
         else:
             self.devmap[key].task_list.put("measure")
             return (True, f"measurement started on component {key!r}", None)
