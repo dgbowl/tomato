@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato package &mdash; tomato 2.2rc2.post1 documentation</title>
+  <title>tomato package &mdash; tomato 2.2rc2.post2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=3d0ad2cb"></script>
+        <script src="../_static/documentation_options.js?v=0af258a1"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2rc2.post1
+                2.2rc2.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -134,7 +134,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.pid"><code class="docutils literal notranslate"><span class="pre">Job.pid</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.status"><code class="docutils literal notranslate"><span class="pre">Job.status</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.submitted_at"><code class="docutils literal notranslate"><span class="pre">Job.submitted_at</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.executed_at"><code class="docutils literal notranslate"><span class="pre">Job.executed_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.launched_at"><code class="docutils literal notranslate"><span class="pre">Job.launched_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.connected_at"><code class="docutils literal notranslate"><span class="pre">Job.connected_at</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.completed_at"><code class="docutils literal notranslate"><span class="pre">Job.completed_at</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.jobpath"><code class="docutils literal notranslate"><span class="pre">Job.jobpath</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Job.respath"><code class="docutils literal notranslate"><span class="pre">Job.respath</span></code></a></li>
@@ -1044,7 +1045,7 @@
 <span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Submitted At&quot;</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;executed_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;launched_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
@@ -1054,7 +1055,19 @@
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">],</span>
 <span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Executed At&quot;</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Launched At&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;connected_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;null&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Connected At&quot;</span>
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;completed_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -1418,8 +1431,13 @@
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="tomato.models.Job.executed_at">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">executed_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.executed_at" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="tomato.models.Job.launched_at">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">launched_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.launched_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.models.Job.connected_at">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connected_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.models.Job.connected_at" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -1885,7 +1903,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2rc2.post1
+      v: 2.2rc2.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

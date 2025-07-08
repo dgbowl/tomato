@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.ketchup package &mdash; tomato 2.2rc2.post1 documentation</title>
+  <title>tomato.ketchup package &mdash; tomato 2.2rc2.post2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=3d0ad2cb"></script>
+        <script src="../_static/documentation_options.js?v=0af258a1"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2rc2.post1
+                2.2rc2.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -166,7 +166,8 @@ and submit it to tomato’s queue.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="n">counter_15_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
 <span class="go">    completed_at: null</span>
-<span class="go">    executed_at: null</span>
+<span class="go">    launched_at: null</span>
+<span class="go">    connected_at: null</span>
 <span class="go">    id: 1</span>
 <span class="go">    [...]</span>
 <span class="go">    status: q</span>
@@ -208,7 +209,8 @@ and submit it to tomato’s queue.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
 <span class="go">  - completed_at: null</span>
-<span class="go">    executed_at: null</span>
+<span class="go">    launched_at: null</span>
+<span class="go">    connected_at: null</span>
 <span class="go">    id: 1</span>
 <span class="go">    [...]</span>
 <span class="go">    status: qw</span>
@@ -239,7 +241,8 @@ job to <code class="docutils literal notranslate"><span class="pre">rd</span></c
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">2</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
 <span class="go">  - completed_at: null</span>
-<span class="go">    executed_at: null</span>
+<span class="go">    launched_at: null</span>
+<span class="go">    connected_at: null</span>
 <span class="go">    id: 2</span>
 <span class="go">    [...]</span>
 <span class="go">    status: cd</span>
@@ -312,7 +315,7 @@ job status and <code class="docutils literal notranslate"><span class="pre">jobi
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2rc2.post1
+      v: 2.2rc2.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
