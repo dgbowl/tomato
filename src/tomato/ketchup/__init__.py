@@ -36,7 +36,7 @@ from tomato.models import Reply
 
 log = logging.getLogger(__name__)
 
-__latest_payload__ = "2.1"
+__latest_payload__ = "2.2"
 
 
 def submit(
@@ -70,7 +70,8 @@ def submit(
     >>> ketchup submit counter_15_0.1.yml -y
     data:
         completed_at: null
-        executed_at: null
+        launched_at: null
+        connected_at: null
         id: 1
         [...]
         status: q
@@ -166,7 +167,8 @@ def status(
     >>> ketchup status 1 -y
     data:
       - completed_at: null
-        executed_at: null
+        launched_at: null
+        connected_at: null
         id: 1
         [...]
         status: qw
@@ -241,7 +243,8 @@ def cancel(
     >>> ketchup cancel 2 -y
     data:
       - completed_at: null
-        executed_at: null
+        launched_at: null
+        connected_at: null
         id: 2
         [...]
         status: cd

@@ -19,7 +19,7 @@ import json
 import time
 import argparse
 from importlib import metadata
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from threading import current_thread, Thread
 import zmq
@@ -34,6 +34,8 @@ from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Task
 
 logger = logging.getLogger(__name__)
+
+MAX_JOB_NOPID = timedelta(seconds=10)
 
 
 def method_validate(
@@ -143,30 +145,48 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
     logger.debug(f"{running=}")
     for pip in running:
         job = jobdb.get_job_id(pip.jobid, dbpath)
-        if job.pid is None and job.status in {"qw"}:
-            continue
+
+        if job.pid is None and job.connected_at is not None:
+            # pid is set in the same command as connected_at
+            # unclear how we'd end here
+            logger.error("job status shouldn't be possible: %s", job)
+            pidexists = False
+        elif job.pid is None and job.launched_at is not None:
+            # subprocess was started but job is not (yet) connected
+            td = datetime.now(timezone.utc) - datetime.fromisoformat(job.launched_at)
+            if td > MAX_JOB_NOPID:
+                logger.error("job %d failed to register, aborting", job.id)
+                job.status = "rd"
+                pidexists = False
+            else:
+                continue
         elif job.pid is None:
-            logger.error("we shouldn't be here:")
-            logger.error(f"{pip=}")
-            logger.error(f"{job=}")
+            # subprocess was not yet started
+            logger.warning("job %d failed to start", job.id)
+            # TODO: timeout to be implemented
             continue
-        pidexists = psutil.pid_exists(job.pid)
+        else:
+            pidexists = psutil.pid_exists(job.pid)
         if pidexists:
             pidexists = psutil.Process(job.pid).status() is not psutil.STATUS_ZOMBIE
-        logger.debug(f"{pidexists=}")
+
         reset = False
         update = False
         ready = False
         # running jobs scheduled for killing (status == 'rd') should be killed
-        if pidexists and job.status == "rd":
-            logger.info(f"job {job.id} with pid {job.pid} will be terminated")
-            proc = psutil.Process(pid=job.pid)
-            kill_tomato_job(proc)
-            logger.info(f"job {job.id} with pid {job.pid} was terminated successfully")
-            merge_netcdfs(job)
-            reset = True
+        # jobs that have status == 'rd' but no valid pid should be cleared
+        if job.status == "rd":
+            if pidexists:
+                logger.info(f"job {job.id} with pid {job.pid} will be terminated")
+                proc = psutil.Process(pid=job.pid)
+                kill_tomato_job(proc)
+                logger.info(
+                    f"job {job.id} with pid {job.pid} was terminated successfully"
+                )
+                merge_netcdfs(job)
             update = True
             params = dict(status="cd")
+            reset = True
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
             logger.warning(f"the pid {job.pid} of running job {job.id} was not found")
@@ -174,7 +194,7 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
             update = True
             params = dict(status="ce")
         # crashed jobs marked as such (status == 'ce') should also be cleared
-        elif (not pidexists) and job.status == "ce":
+        elif (not pidexists) and job.status in {"ce", "cd"}:
             logger.info(f"the pid {job.pid} of crashed job {job.id} was not found")
             reset = True
         # pipelines of completed jobs should be reset
@@ -229,7 +249,7 @@ def check_queued_jobs(
     return matched
 
 
-def action_queued_jobs(daemon, matched, req):
+def action_queued_jobs(daemon, matched, req, dbpath):
     """
     Function that assigns jobs if a matched pipeline contains the requested sample.
 
@@ -243,19 +263,13 @@ def action_queued_jobs(daemon, matched, req):
                 continue
             elif pip.sampleid != job.payload.sample.name:
                 continue
-            logger.info(f"job {job.id} found a matched & ready pip: {pip.name!r}")
-            params = dict(jobid=job.id, ready=False, name=pip.name)
-            req.send_pyobj(dict(cmd="pipeline", params=params))
-            ret = req.recv_pyobj()
-            if not ret.success:
-                logger.error(f"could not set params {params} on pip: {pip.name!r}")
-                continue
-            else:
-                pip.ready = False
+            logger.info("job %d: found a matched & ready pip '%s'", job.id, pip.name)
 
+            logger.debug("job %d: making job directory", job.id)
             root = Path(daemon.settings["jobs"]["storage"]) / str(job.id)
             os.makedirs(root)
 
+            logger.debug("job %d: storing jobdata.json", job.id)
             jpath = root / "jobdata.json"
             jobargs = {
                 "pipeline": pip.model_dump(),
@@ -263,10 +277,20 @@ def action_queued_jobs(daemon, matched, req):
                 "devices": {dn: dev.model_dump() for dn, dev in daemon.devs.items()},
                 "job": dict(id=job.id, path=str(root)),
             }
-
             with jpath.open("w", encoding="UTF-8") as of:
                 json.dump(jobargs, of, indent=1)
 
+            logger.debug("job %d: reserving pipeline %s", job.id, pip.name)
+            params = dict(jobid=job.id, ready=False, name=pip.name)
+            req.send_pyobj(dict(cmd="pipeline", params=params))
+            ret = req.recv_pyobj()
+            if not ret.success:
+                logger.error("job %d: could not set params %s", job.id, params)
+                continue
+            else:
+                pip.ready = False
+
+            logger.debug("job %d: executing tomato-job", job.id)
             cmd = [
                 "tomato-job",
                 "--port",
@@ -283,7 +307,13 @@ def action_queued_jobs(daemon, matched, req):
                 subprocess.Popen(cmd, creationflags=cfs)
             elif psutil.POSIX:
                 subprocess.Popen(cmd, start_new_session=True)
-            logger.info(f"job {jobid} started on pip: {pip.name!r} and path: {jpath!r}")
+
+            logger.debug("job %d: setting launched_at")
+            params = dict(launched_at=str(datetime.now(timezone.utc)))
+            job = jobdb.update_job_id(jobid, params, dbpath)
+            logger.info(
+                "job %d: launched on pip '%s' and path '%s'", job.id, pip.name, jpath
+            )
             break
 
 
@@ -317,7 +347,7 @@ def manager(port: int, timeout: int = 500):
         matched_pips = check_queued_jobs(
             daemon.pips, daemon.cmps, daemon.drvs, dbpath, context
         )
-        action_queued_jobs(daemon, matched_pips, req)
+        action_queued_jobs(daemon, matched_pips, req, dbpath)
         time.sleep(timeout / 1e3)
     req.close()
     logger.info("instructed to quit")
@@ -411,7 +441,7 @@ def tomato_job() -> None:
     logger.info(f"assigning job {jobid} with pid {pid} into pipeline {pip!r}")
     context = zmq.Context()
 
-    params = dict(pid=pid, status="r", executed_at=str(datetime.now(timezone.utc)))
+    params = dict(pid=pid, status="r", connected_at=str(datetime.now(timezone.utc)))
     job = jobdb.update_job_id(jobid, params, args.dbpath)
 
     output = payload.settings.output

@@ -339,6 +339,8 @@ class ModelInterface(metaclass=ABCMeta):
         """
         if self.devmap[key].running:
             return (False, f"measurement already running on component {key!r}", None)
+        elif not self.devmap[key].task_list.empty():
+            return (False, f"task list component {key!r} not empty", None)
         else:
             self.devmap[key].task_list.put("measure")
             return (True, f"measurement started on component {key!r}", None)
@@ -397,15 +399,9 @@ class ModelInterface(metaclass=ABCMeta):
         If there is any cached data, it is returned as a :class:`xarray.Dataset` in the
         :obj:`Reply.data` and the cache is cleared.
         """
-        ret = self.devmap[key].stop_task(**kwargs)
-        if ret is not None:
-            return (False, "failed to stop task", ret)
-        else:
-            ret = self.task_data(key=key)
-            if ret.success:
-                return (True, f"task stopped, {ret.msg}", ret.data)
-            else:
-                return (True, f"task stopped, {ret.msg}", None)
+        self.devmap[key].stop_task(**kwargs)
+        ret = self.task_data(key=key)
+        return (True, f"task stopped, {ret.msg}", ret.data)
 
     @log_errors
     @to_reply

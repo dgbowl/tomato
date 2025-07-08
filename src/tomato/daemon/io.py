@@ -23,7 +23,7 @@ def store(daemon: Daemon):
     outfile = datadir / f"tomato_state_{daemon.port}.pkl"
     logger.debug("storing daemon state to '%s'", outfile)
     with outfile.open("wb") as out:
-        pickle.dump(daemon, out, protocol=5)
+        pickle.dump(daemon, out, protocol=4)
 
 
 def load(daemon: Daemon):
@@ -82,9 +82,9 @@ def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
     if path.exists():
         with path.open("rb") as old:
             oldds = pickle.load(old)
-            if oldds is not None:
-                logger.debug("concatenating Dataset with existing data")
-                ds = xr.concat([oldds, ds], dim="uts")
+        if oldds is not None:
+            logger.debug("concatenating Dataset with existing data")
+            ds = xr.concat([oldds, ds], dim="uts")
     logger.debug("dumping Dataset into pickle at '%s'", path)
     with path.open("wb") as out:
-        pickle.dump(ds, out, protocol=5)
+        pickle.dump(ds, out, protocol=4)

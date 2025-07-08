@@ -26,7 +26,7 @@ def connect_jobdb(dbpath: str):
 
 
 def jobdb_setup(dbpath: str) -> None:
-    user_version = 1
+    user_version = 2
     conn, cur = connect_jobdb(dbpath)
     logger.debug("attempting to find table 'queue' in '%s'", dbpath)
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='queue';")
@@ -37,14 +37,18 @@ def jobdb_setup(dbpath: str) -> None:
         curr_version = cur.fetchone()[0]
         assert curr_version == user_version
         # Below is an example of upgrading databases to new user_version:
-        # while curr_version < user_version:
-        #    if curr_version == 0:
-        #        log.info("upgrading table 'queue' from version 0 to 1")
-        #        cur.execute("ALTER TABLE queue ADD COLUMN jobname TEXT;")
-        #        cur.execute("PRAGMA user_version = 1;")
-        #        conn.commit()
-        #    cur.execute("PRAGMA user_version;")
-        #    curr_version = cur.fetchone()[0]
+        while curr_version < user_version:
+            if curr_version == 1:
+                logger.info("upgrading table 'queue' from version 1 to 2")
+                cur.execute(
+                    "ALTER TABLE queue RENAME COLUMN executed_at TO connected_at;"
+                )
+                cur.execute("ALTER TABLE queue ADD COLUMN launched_at TEXT;")
+                cur.execute("UPDATE queue SET launched_at = connected_at;")
+                cur.execute("PRAGMA user_version = 2;")
+                conn.commit()
+            cur.execute("PRAGMA user_version;")
+            curr_version = cur.fetchone()[0]
     else:
         logger.info("creating a new sqlite3 'queue' table at '%s'", dbpath)
         cur.execute(
@@ -55,7 +59,8 @@ def jobdb_setup(dbpath: str) -> None:
             "    pid INTEGER,"
             "    status TEXT NOT NULL,"
             "    submitted_at TEXT NOT NULL,"
-            "    executed_at TEXT,"
+            "    launched_at TEXT,"
+            "    connected_at TEXT,"
             "    completed_at TEXT,"
             "    jobpath TEXT,"
             "    respath TEXT,"
@@ -71,15 +76,16 @@ def insert_job(job: Job, dbpath: str) -> int:
     conn, cur = connect_jobdb(dbpath)
     cur.execute(
         "INSERT INTO queue (payload, jobname, pid, status, submitted_at, "
-        "executed_at, completed_at, jobpath, respath, snappath)"
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+        "launched_at, connected_at, completed_at, jobpath, respath, snappath)"
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
         (
             pickle.dumps(job.payload),
             job.jobname,
             job.pid,
             job.status,
             job.submitted_at,
-            job.executed_at,
+            job.launched_at,
+            job.connected_at,
             job.completed_at,
             job.jobpath,
             job.respath,
