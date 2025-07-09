@@ -96,7 +96,7 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
     )
     print(f"{ret=}")
     assert ret.success
-    assert ret.data["running"] is True
+    assert ret.data["running"]
 
     ret = tomato.passata.reset(
         name="example_counter:(example-addr,1)",
