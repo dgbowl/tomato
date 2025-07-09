@@ -586,7 +586,7 @@ def job_thread(
             elif ret.success and not ret.data["running"]:
                 logger.info("%s: task no longer running, break", taskid)
                 break
-            elif ret.success and ret.data["task"] != task:
+            elif ret.success and "task" in ret.data and ret.data["task"] != task:
                 logger.critical("%s: wront task running, break", taskid)
                 logger.debug("%s: expected task: %s", taskid, task)
                 logger.debug("%s: executed task: %s", taskid, ret.data["task"])
