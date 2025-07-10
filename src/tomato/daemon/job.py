@@ -571,7 +571,7 @@ def job_thread(
                     "%s: task submitted %f s ago but not yet running", taskid, dt
                 )
                 pass
-            elif ret.success and ret.data["task"] != task:
+            elif ret.success and "task" in ret.data and ret.data["task"] != task:
                 logger.warning(
                     "%s: task submitted %f s ago but other task running: %s",
                     taskid,
@@ -579,14 +579,16 @@ def job_thread(
                     ret.data["task"],
                 )
                 pass
-            elif ret.success and ret.data["task"] == task:
+            elif ret.success and "task" in ret.data and ret.data["task"] == task:
+                break
+            elif ret.success and "task" not in ret.data:
                 break
             if dt > MAX_TASK_WAIT:
                 logger.critical("%s: task was submitted, but is not executed, aborting")
                 thread.crashed = True
                 sys.exit()
             time.sleep(0.1)
-
+        logger.info("%s: correct task running on component %s", taskid, component.role)
 
         # Main task loop
         tP = time.perf_counter()
