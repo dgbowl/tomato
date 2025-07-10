@@ -1,5 +1,29 @@
 Version history
 ===============
+**tomato**-v2.2
+---------------
+..
+    .. image:: https://img.shields.io/static/v1?label=tomato&message=v2.1&color=blue&logo=github
+        :target: https://github.com/dgbowl/tomato/tree/2.1
+    .. image:: https://img.shields.io/static/v1?label=tomato&message=v2.1&color=blue&logo=pypi
+        :target: https://pypi.org/project/tomato/2.1/
+    .. image:: https://img.shields.io/static/v1?label=release%20date&message=2025-06-07&color=red&logo=pypi
+
+.. sectionauthor::
+     Peter Kraus
+
+Developed at the ConCat lab at TU Berlin.
+
+Changes from ``tomato-2.1`` include:
+
+- Fixes many bugs due to the :func:`cmp_measure` function race condition with running tasks.
+- Introduces the "lazy pirate" pattern in ``tomato-job`` processes, which should make jobs more reliable.
+
+- A new ``Payload-2.2``, where the ``settings.snapshot.snapshot_interval`` replaces ``settings.snapshot.frequency``. As a consequence, the ``snapshot_interval`` can be provided as :class:`str`, which will be converted to the number of seconds using :mod:`pint`.
+
+.. codeauthor::
+    Peter Kraus
+
 **tomato**-v2.1
 ---------------
 .. image:: https://img.shields.io/static/v1?label=tomato&message=v2.1&color=blue&logo=github

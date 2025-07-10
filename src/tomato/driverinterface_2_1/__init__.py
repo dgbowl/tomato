@@ -379,11 +379,11 @@ class ModelInterface(metaclass=ABCMeta):
         """
         running = self.devmap[key].running
         can_submit = not self.devmap[key].task_list.full()
-        data = dict(running=running, can_submit=can_submit)
-        if running:
-            return (True, "component has a running task", data)
-        else:
+        data = dict(running=bool(running), can_submit=can_submit, task=running)
+        if running is False:
             return (True, "component is idle", data)
+        else:
+            return (True, "component has a running task", data)
 
     @log_errors
     @to_reply
@@ -589,9 +589,9 @@ class ModelDevice(metaclass=ABCMeta):
                 thread.do_run = False
                 break
 
-            self.running = True
-            if isinstance(task, Task):
-                try:
+            self.running = task
+            try:
+                if isinstance(task, Task):
                     thread.do_run_task = True
                     self.prepare_task(task=task)
                     t_0 = time.perf_counter()
@@ -614,28 +614,18 @@ class ModelDevice(metaclass=ABCMeta):
                         task.technique_name,
                         self.key,
                     )
-                except Exception as e:
-                    logger.critical(e, exc_info=True)
-                    thread.do_run = False
-                    break
-            elif task == "measure":
-                try:
+                elif task == "measure":
                     self.do_measure()
                     logger.debug("measurement on component %s is done", self.key)
-                except Exception as e:
-                    logger.critical(e, exc_info=True)
+                else:
+                    logger.critical("Unknown task received: '%s'", task)
                     thread.do_run = False
                     break
-            else:
-                logger.critical("Unknown task received: '%s'", task)
+                self.task_list.task_done()
+            except Exception as e:
+                logger.critical(e, exc_info=True)
                 thread.do_run = False
                 break
-
-            try:
-                self.task_list.task_done()
-            except ValueError as e:
-                logger.critical(e, exc_info=True)
-                logger.critical("above error raised on task '%s'", task)
             self.running = False
         logger.warning("task runner is quitting")
         self.running = False

@@ -19,7 +19,7 @@ CTXT = zmq.Context()
         ("psutil_1_0.1", {"psutil": 10}),
         ("psutil_counter", {"psutil": 12, "counter": 10}),
         ("psutil_counter_with_task_start", {"psutil": 12, "counter": 10}),
-        ("psutil_counter_with_task_stop", {"psutil": 10, "counter": 2}),
+        ("psutil_counter_with_task_stop", {"psutil": 10, "counter": 3}),
     ],
 )
 def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):

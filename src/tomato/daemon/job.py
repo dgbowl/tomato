@@ -36,6 +36,7 @@ from dgbowl_schemas.tomato.payload import Task
 logger = logging.getLogger(__name__)
 
 MAX_JOB_NOPID = timedelta(seconds=10)
+MAX_TASK_WAIT = 10
 
 
 def method_validate(
@@ -479,7 +480,7 @@ def tomato_job() -> None:
 
 
 def job_thread(
-    tasks: list,
+    tasks: list[Task],
     component: Component,
     device: Device,
     driver: Driver,
@@ -518,23 +519,26 @@ def job_thread(
             taskid += f":{task.task_name!r}"
         thread.current_task = task
         logger.info("%s: processing task", taskid)
+
+        # Hold while start contidions are not met
         while True:
-            time.sleep(1e-1)
             if task.start_with_task_name is None:
-                pass
+                break
             elif task.start_with_task_name in thread.started_task_names:
-                pass
+                break
             else:
                 logger.debug(
                     "%s: waiting for task_name '%s'", taskid, task.start_with_task_name
                 )
-                continue
+                time.sleep(0.1)
+
+        # Hold while component task_list is not ready
+        while True:
             logger.debug(
                 "%s: polling component %s for task readiness", taskid, component.name
             )
-            ret, req = lpp.comm(
-                req, dict(cmd="task_status", params={**kwargs}), **lppargs
-            )
+            msg = dict(cmd="task_status", params={**kwargs})
+            ret, req = lpp.comm(req, msg, **lppargs)
             if ret.success and ret.data["can_submit"]:
                 break
             elif req.closed:
@@ -543,18 +547,56 @@ def job_thread(
             logger.warning(
                 "%s: cannot submit onto component %s, waiting", taskid, component.name
             )
+            time.sleep(0.1)
 
+        # Send task to component
         logger.info("%s: sending task to component %s", taskid, component.name)
+        t0 = time.perf_counter()
         msg = dict(cmd="task_start", params={"task": task, **kwargs})
         ret, req = lpp.comm(req, msg, **lppargs)
         if req.closed:
             thread.crashed = True
             sys.exit()
 
-        t0 = time.perf_counter()
+        # Wait until the correct task is running, or MAX_TASK_WAIT
+        while True:
+            dt = time.perf_counter() - t0
+            msg = dict(cmd="task_status", params={**kwargs})
+            ret, req = lpp.comm(req, msg, **lppargs)
+            if req.closed:
+                thread.crashed = True
+                sys.exit()
+            elif ret.success and ret.data["running"] is False:
+                logger.warning(
+                    "%s: task submitted %f s ago but not yet running", taskid, dt
+                )
+                pass
+            elif ret.success and "task" in ret.data and ret.data["task"] != task:
+                logger.warning(
+                    "%s: task submitted %f s ago but other task running: %s",
+                    taskid,
+                    dt,
+                    ret.data["task"],
+                )
+                pass
+            elif ret.success and "task" in ret.data and ret.data["task"] == task:
+                break
+            elif ret.success and "task" not in ret.data:
+                break
+            if dt > MAX_TASK_WAIT:
+                logger.critical("%s: task was submitted, but is not executed, aborting")
+                thread.crashed = True
+                sys.exit()
+            time.sleep(0.1)
+        logger.info("%s: correct task running on component %s", taskid, component.role)
+
+        # Main task loop
+        tP = time.perf_counter()
         while True:
             tN = time.perf_counter()
-            if tN - t0 > device.pollrate:
+
+            # Poll for data every device.pollrate, save to pickle
+            if tN - tP > device.pollrate:
                 logger.debug("%s: polling task for data", taskid)
                 msg = dict(cmd="task_data", params={**kwargs})
                 ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
@@ -566,8 +608,9 @@ def job_thread(
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
                     data_to_pickle(ds, datapath, role=component.role)
-                t0 += device.pollrate
+                tP += device.pollrate
 
+            # Poll for completion and correct task status
             logger.debug("%s: polling task for completion", taskid)
             msg = dict(cmd="task_status", params={**kwargs})
             ret, req = lpp.comm(req, msg, **lppargs)
@@ -577,10 +620,16 @@ def job_thread(
             elif ret.success and not ret.data["running"]:
                 logger.info("%s: task no longer running, break", taskid)
                 break
+            elif ret.success and "task" in ret.data and ret.data["task"] != task:
+                logger.critical("%s: wront task running, break", taskid)
+                logger.debug("%s: expected task: %s", taskid, task)
+                logger.debug("%s: executed task: %s", taskid, ret.data["task"])
+                break
             elif ret.success is False:
                 logger.critical(f"{ret=}")
                 break
 
+            # Stop task if stop trigger condition met, save to pickle
             if (
                 task.stop_with_task_name is not None
                 and task.stop_with_task_name in thread.started_task_names
@@ -598,7 +647,9 @@ def job_thread(
                     data_to_pickle(ds, datapath, role=component.role)
                 break
 
-            time.sleep(max(1e-1, (device.pollrate - (tN - t0)) / 2))
+            time.sleep(max(1e-1, (device.pollrate - (tN - tP)) / 2))
+
+        # Store final task data, housekeeping.
         logger.info("%s: task fetching final data", taskid)
         msg = dict(cmd="task_data", params={**kwargs})
         ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
@@ -613,6 +664,7 @@ def job_thread(
         thread.completed_tasks.append(task)
         thread.current_task = None
 
+    # Reset component at the end of the job
     logger.info(
         "%s: all tasks done on component %s, resetting", component.role, component.name
     )
@@ -705,10 +757,10 @@ def job_main_loop(
     started_task_names = set()
     while True:
         tN = time.perf_counter()
-        if snapshot is not None and tN - t0 > snapshot.frequency:
+        if snapshot is not None and tN - t0 > snapshot.snapshot_interval:
             logger.debug("creating snapshot")
             merge_netcdfs(job, snapshot=True)
-            t0 += snapshot.frequency
+            t0 += snapshot.snapshot_interval
 
         # Collect and push task names
         for t in threads.values():
