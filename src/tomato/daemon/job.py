@@ -36,6 +36,7 @@ from dgbowl_schemas.tomato.payload import Task
 logger = logging.getLogger(__name__)
 
 MAX_JOB_NOPID = timedelta(seconds=10)
+MAX_TASK_WAIT = 10
 
 
 def method_validate(
@@ -529,7 +530,7 @@ def job_thread(
                 logger.debug(
                     "%s: waiting for task_name '%s'", taskid, task.start_with_task_name
                 )
-                time.sleep(1e-1)
+                time.sleep(0.1)
 
         # Hold while component task_list is not ready
         while True:
@@ -546,15 +547,46 @@ def job_thread(
             logger.warning(
                 "%s: cannot submit onto component %s, waiting", taskid, component.name
             )
-            time.sleep(1e-1)
+            time.sleep(0.1)
 
         # Send task to component
         logger.info("%s: sending task to component %s", taskid, component.name)
+        t0 = time.perf_counter()
         msg = dict(cmd="task_start", params={"task": task, **kwargs})
         ret, req = lpp.comm(req, msg, **lppargs)
         if req.closed:
             thread.crashed = True
             sys.exit()
+
+        # Wait until the correct task is running, or MAX_TASK_WAIT
+        while True:
+            dt = time.perf_counter() - t0
+            msg = dict(cmd="task_status", params={**kwargs})
+            ret, req = lpp.comm(req, msg, **lppargs)
+            if req.closed:
+                thread.crashed = True
+                sys.exit()
+            elif ret.success and ret.data["running"] is False:
+                logger.warning(
+                    "%s: task submitted %f s ago but not yet running", taskid, dt
+                )
+                pass
+            elif ret.success and ret.data["task"] != task:
+                logger.warning(
+                    "%s: task submitted %f s ago but other task running: %s",
+                    taskid,
+                    dt,
+                    ret.data["task"],
+                )
+                pass
+            elif ret.success and ret.data["task"] == task:
+                break
+            if dt > MAX_TASK_WAIT:
+                logger.critical("%s: task was submitted, but is not executed, aborting")
+                thread.crashed = True
+                sys.exit()
+            time.sleep(0.1)
+
 
         # Main task loop
         tP = time.perf_counter()
