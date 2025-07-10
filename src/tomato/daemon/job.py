@@ -757,10 +757,10 @@ def job_main_loop(
     started_task_names = set()
     while True:
         tN = time.perf_counter()
-        if snapshot is not None and tN - t0 > snapshot.frequency:
+        if snapshot is not None and tN - t0 > snapshot.snapshot_interval:
             logger.debug("creating snapshot")
             merge_netcdfs(job, snapshot=True)
-            t0 += snapshot.frequency
+            t0 += snapshot.snapshot_interval
 
         # Collect and push task names
         for t in threads.values():
