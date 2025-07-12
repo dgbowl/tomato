@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 MAX_JOB_NOPID = timedelta(seconds=10)
 MAX_TASK_WAIT = 10
+JOB_INFO_INTERVAL = 5
 
 
 def method_validate(
@@ -568,12 +569,12 @@ def job_thread(
                 sys.exit()
             elif ret.success and ret.data["running"] is False:
                 logger.warning(
-                    "%s: task submitted %f s ago but not yet running", taskid, dt
+                    "%s: task was submitted %f s ago but is not yet running", taskid, dt
                 )
                 pass
             elif ret.success and "task" in ret.data and ret.data["task"] != task:
                 logger.warning(
-                    "%s: task submitted %f s ago but other task running: %s",
+                    "%s: task was submitted %f s ago but another task is running: %s",
                     taskid,
                     dt,
                     ret.data["task"],
@@ -677,7 +678,7 @@ def job_thread(
         thread.crashed = True
         sys.exit()
     elif not ret.success:
-        logger.warning("%s: could not reset component: %s", component.role, ret.msg)
+        logger.warning("%s: could not reset component %s", component.role, ret.msg)
     else:
         logger.info("%s: reset of component %s done", component.role, component.name)
     req.close()
@@ -753,29 +754,37 @@ def job_main_loop(
 
     # wait until threads join or we're killed
     snapshot = job.payload.settings.snapshot
-    t0 = time.perf_counter()
+    tS = time.perf_counter()
+    tD = tS
     started_task_names = set()
+    logger.debug("polling threads until completion")
     while True:
         tN = time.perf_counter()
-        if snapshot is not None and tN - t0 > snapshot.snapshot_interval:
+        if snapshot is not None and tN - tS > snapshot.snapshot_interval:
             logger.debug("creating snapshot")
             merge_netcdfs(job, snapshot=True)
-            t0 += snapshot.snapshot_interval
+            tS += snapshot.snapshot_interval
 
         # Collect and push task names
         for t in threads.values():
             if t.current_task is not None and t.current_task.task_name is not None:
                 started_task_names.add(t.current_task.task_name)
-        logger.debug("started task names are: %s", started_task_names)
         for t in threads.values():
             t.started_task_names.update(started_task_names)
         crashed = [t.crashed for t in threads.values()]
         joined = [t.is_alive() is False or t.crashed for t in threads.values()]
+        if tN - tD > JOB_INFO_INTERVAL:
+            logger.info("started task names are: %s", started_task_names)
+            logger.info("joined threads are: %s", joined)
+            logger.info("crashed threads are: %s", crashed)
+            tD += JOB_INFO_INTERVAL
         if all(joined):
-            if any(crashed):
-                return 1
-            else:
-                return None
-        else:
-            # We'd like to execute this loop exactly once every second
-            time.sleep(1.0 - tN % 1)
+            break
+        # We'd like to execute this loop exactly once every second
+        time.sleep(1.0 - tN % 1)
+
+    logger.info("all threads have joined")
+    if any(crashed):
+        return 1
+    else:
+        return None
