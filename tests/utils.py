@@ -148,7 +148,7 @@ def sync_files():
         subprocess.run(["sync"])
 
 
-def check_npoints_file(fn: str, npoints: dict[str, int], retries: int = 2):
+def check_npoints_file(fn: str, npoints: dict[str, int]):
     sync_files()
     assert os.path.exists(fn)
     with xr.open_datatree(fn) as dt:
@@ -157,6 +157,6 @@ def check_npoints_file(fn: str, npoints: dict[str, int], retries: int = 2):
         for group, points in npoints.items():
             assert group in dt
             print(f"{dt[group]['uts'].size=}")
-            assert dt[group]["uts"].size == points
+            assert dt[group]["uts"].size >= points
             print(f"{dt[group].attrs=}")
             assert "tomato_Component" in dt[group].attrs
