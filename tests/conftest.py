@@ -60,12 +60,12 @@ def stop_tomato_daemon(port: int = 12345):
     for p in psutil.process_iter(["name"]):
         for name in ["tomato-daemon", "tomato-job", "tomato-driver"]:
             if name in p.info["name"]:
-                pc = p.children()
-                pc.append(p)
-                for proc in pc:
-                    procs.append(proc)
-                    try:
-                        proc.terminate()
-                    except psutil.NoSuchProcess:
-                        pass
+                try:
+                    pc = p.children()
+                    pc.append(p)
+                    for proc in pc:
+                        procs.append(proc)
+                    proc.terminate()
+                except psutil.NoSuchProcess:
+                    pass
     gone, alive = psutil.wait_procs(procs, timeout=1)
