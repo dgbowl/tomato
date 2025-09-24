@@ -491,6 +491,7 @@ def init(
 
         [drivers]
         example_counter.idle_measurement_interval = 1
+        example_counter.lpp_timeout = 2
         """
     )
     if not appdir.exists():

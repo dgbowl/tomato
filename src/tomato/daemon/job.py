@@ -506,10 +506,15 @@ def job_thread(
         endpoint=f"tcp://127.0.0.1:{driver.port}", context=context, sender=sender
     )
 
+    if "lpp_timeout" in driver.settings:
+        lppargs["timeout"] = driver.settings["lpp_timeout"] * 1000
+        logger.debug(
+            "%s: setting lpp_timeout to %d ms", component.role, lppargs["timeout"]
+        )
+
     logger.info(
         "%s: job thread of %s attached to tomato-daemon", component.role, component.name
     )
-
     kwargs = dict(address=component.address, channel=component.channel)
 
     datapath = Path(jobpath) / f"{component.role}.pkl"
@@ -600,7 +605,7 @@ def job_thread(
             if tN - tP > device.pollrate:
                 logger.debug("%s: polling task for data", taskid)
                 msg = dict(cmd="task_data", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
+                ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
                 if req.closed:
                     thread.crashed = True
                     sys.exit()
@@ -637,7 +642,7 @@ def job_thread(
             ):
                 logger.info("%s: task stop trigger met", taskid)
                 msg = dict(cmd="task_stop", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
+                ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
                 if req.closed:
                     thread.crashed = True
                     sys.exit()
@@ -653,7 +658,7 @@ def job_thread(
         # Store final task data, housekeeping.
         logger.info("%s: task fetching final data", taskid)
         msg = dict(cmd="task_data", params={**kwargs})
-        ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
+        ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
         if req.closed:
             thread.crashed = True
             sys.exit()
@@ -673,7 +678,7 @@ def job_thread(
         msg = dict(cmd="dev_reset", params={**kwargs})
     else:
         msg = dict(cmd="cmp_reset", params={**kwargs})
-    ret, req = lpp.comm(req, msg, **lppargs, timeout=5000)
+    ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
     if req.closed:
         thread.crashed = True
         sys.exit()

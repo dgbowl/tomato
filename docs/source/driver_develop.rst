@@ -21,6 +21,7 @@ When the *driver* process is launched (as a ``tomato-driver``), it's given infor
 The following keywords in the driver-specific settings in the |setfile|_ are reserved for use by **tomato**:
 
 - ``idle_measurement_interval``: Specifies the interval (in seconds) after which the :func:`cmp_measure` function of all *components* registered on the *driver* should be called. The :func:`cmp_measure` checks that *components* are idle, i.e. without a running :class:`Task`. Overrides any :obj:`DriverInterface.idle_measurement_interval`.
+- ``lpp_timeout``: Specifies the timeout (in seconds) after which the communication with this *driver* interface will be retried. When unset, defaults to :obj:`tomato.daemon.lpp.REQ_TIMEOUT` (in milliseconds).
 
 
 Communication between *jobs* and *drivers*
