@@ -50,6 +50,9 @@ docs = [
     "autodoc-pydantic ~= 2.1",
     "sphinxcontrib-mermaid ~= 0.9.2",
 ]
+rocrate = [
+    "rocrate >= 0.14"
+]
 
 [project.urls]
 Documentation = "https://dgbowl.github.io/tomato/main"
