@@ -43,7 +43,7 @@ def load(daemon: Daemon):
     daemon.status = "running"
 
 
-def merge_netcdfs(job: Job, snapshot=False):
+def merge_netcdfs(job: Job, snapshot=False) -> str:
     """
     Merges the individual pickled :class:`xr.Datasets` of each Component found in :obj:`job.jobpath`
     into a single :class:`xr.DataTree`, which is then stored in the NetCDF file,
@@ -69,6 +69,7 @@ def merge_netcdfs(job: Job, snapshot=False):
     logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
     dt.to_netcdf(outpath)
     dt.close()
+    return outpath
 
 
 def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
