@@ -8,11 +8,11 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Any, Mapping, Sequence, Literal
 from dgbowl_schemas.tomato import to_payload
-from dgbowl_schemas.tomato.payload import Payload
+from dgbowl_schemas.tomato.payload import Payload, Task
 import logging
 import pickle
 
-
+__all__ = ["Task"]
 logger = logging.getLogger(__name__)
 
 
@@ -120,3 +120,4 @@ class Reply(BaseModel):
     success: bool
     msg: Optional[str] = None
     data: Optional[Any] = None
+
