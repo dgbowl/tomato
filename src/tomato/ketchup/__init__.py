@@ -32,7 +32,7 @@ from packaging.version import Version
 from dgbowl_schemas.tomato import to_payload
 
 from tomato.daemon.io import merge_netcdfs
-from tomato.models import Reply
+from tomato.models import Daemon, Reply
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +45,7 @@ def submit(
     context: zmq.Context,
     payload: str,
     jobname: str,
+    daemon: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -111,6 +112,11 @@ def submit(
         cwd = str(Path().resolve())
         log.info(f"Snapshot path not set. Setting output path to {cwd}")
         payload.settings.snapshot.path = cwd
+    if payload.settings.output.repository != ["default"]:
+        for repo in payload.settings.output.repository:
+            if repo != "default" and repo not in daemon.settings.repositories:
+                msg = f"payload specifies unknown output repository {repo!r}"
+                return Reply(success=False, msg=msg, data=daemon.settings.repositories)
 
     log.debug("queueing 'payload' into 'queue'")
     req = context.socket(zmq.REQ)

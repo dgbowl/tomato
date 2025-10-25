@@ -489,6 +489,10 @@ def init(
         [devices]
         config = '{appdir / "devices.yml"}'
 
+        [repositories]
+        # default.endpoint = 'https://example.endpoint/'
+        # default.api_key = 'abcd23abcd23'
+
         [drivers]
         example_counter.idle_measurement_interval = 1
         example_counter.lpp_timeout = 2
