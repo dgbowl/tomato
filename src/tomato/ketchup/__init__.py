@@ -112,8 +112,8 @@ def submit(
         cwd = str(Path().resolve())
         log.info(f"Snapshot path not set. Setting output path to {cwd}")
         payload.settings.snapshot.path = cwd
-    if payload.settings.output.repository != ["default"]:
-        for repo in payload.settings.output.repository:
+    if payload.settings.output.repositories != ["default"]:
+        for repo in payload.settings.output.repositories:
             if repo != "default" and repo not in daemon.settings.repositories:
                 msg = f"payload specifies unknown output repository {repo!r}"
                 return Reply(success=False, msg=msg, data=daemon.settings.repositories)

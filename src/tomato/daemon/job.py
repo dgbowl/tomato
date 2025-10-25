@@ -281,10 +281,15 @@ def action_queued_jobs(daemon, matched, req, dbpath):
 
             logger.debug("job %d: storing jobdata.json", job.id)
             jpath = root / "jobdata.json"
+            repositories = {}
+            for repo, repoparams in daemon.settings["repositories"].items():
+                if repo in job.payload.settings.output.repositories:
+                    repositories[repo] = repoparams
             jobargs = {
                 "pipeline": pip.model_dump(),
                 "payload": job.payload.model_dump(),
                 "devices": {dn: dev.model_dump() for dn, dev in daemon.devs.items()},
+                "repositories": repositories,
                 "job": dict(id=job.id, path=str(root)),
             }
             with jpath.open("w", encoding="UTF-8") as of:
@@ -416,7 +421,9 @@ def tomato_job() -> None:
 
     with args.jobfile.open() as infile:
         jsdata = json.load(infile)
+
     payload = to_payload(**jsdata["payload"])
+    repositories = jsdata["repositories"]
 
     pip = jsdata["pipeline"]["name"]
     jobid = jsdata["job"]["id"]
@@ -429,7 +436,7 @@ def tomato_job() -> None:
         handlers=[logging.FileHandler(logpath, mode="a")],
     )
     logger = logging.getLogger(__name__)
-
+    logger.debug(f"{jsdata=}")
     logger.debug(f"{payload=}")
 
     verbosity = payload.settings.verbosity
@@ -481,13 +488,17 @@ def tomato_job() -> None:
         job.status = "ce"
     logger.info("writing final data to a NetCDF file")
     outpath = merge_netcdfs(job)
-    logger.info("writing final RO-crate")
-    to_rocrate(
-        datapath=outpath,
-        userid=job.payload.user.identifier,
-        sampleid=job.payload.sample.identifier,
-        make_child=job.payload.sample.sample_is_parent,
-    )
+    if len(jsdata["repositories"]) > 0:
+        logger.debug(
+            "job configured with repositories: '%s'", list(repositories.keys())
+        )
+        logger.info("writing final RO-crate")
+        to_rocrate(
+            datapath=outpath,
+            userid=job.payload.user.identifier,
+            sampleid=job.payload.sample.identifier,
+            make_child=job.payload.sample.sample_is_parent,
+        )
     logger.info("job finished with status '%s', updating job db", job.status)
     params = dict(status=job.status, completed_at=job.completed_at)
     job = jobdb.update_job_id(job.id, params, args.dbpath)
