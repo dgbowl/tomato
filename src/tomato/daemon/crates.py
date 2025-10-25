@@ -1,7 +1,16 @@
-from pathlib import Path
-from rocrate.rocrate import ROCrate
-from rocrate.model import Person, ContextEntity
+import logging
 from typing import Union
+
+try:
+    from rocrate.rocrate import ROCrate
+    from rocrate.model import Person, ContextEntity
+
+    _has_rocrate = True
+except ImportError:
+    _has_rocrate = False
+
+logger = logging.getLogger(__name__)
+
 
 PROFILE_URI = "https://github.com/MADICES/MADICES-2025/discussions/25"
 PROFILE_VER = "0.2"
@@ -27,8 +36,10 @@ def Profile(
 
 
 def to_rocrate(
-    datafile: Path, userid: str, sampleid: str, make_child: bool = True
+    datapath: str, userid: str, sampleid: str, make_child: bool = True
 ) -> Union[ROCrate, None]:
+    if _has_rocrate is False:
+        return None
     crate = ROCrate()
     profile = crate.add(Profile(crate))
     author = crate.add(Person(crate, userid))
@@ -39,7 +50,7 @@ def to_rocrate(
         parent["hasPart"] = child
         target = child
     crate.add_file(
-        str(datafile),
+        datapath,
         properties={
             "encodingFormat": "application/netcdf",
             "author": author,
@@ -48,5 +59,7 @@ def to_rocrate(
     dataset = crate.get("./")
     dataset["conformsTo"] = profile
     target["hasPart"] = dataset
-
-    return crate
+    logger.debug("RO-crate created, writing a zip file")
+    cratepath = f"{datapath[:-3]}.zip"
+    crate.write_zip(cratepath)
+    logger.debug("RO-crate written into '%s'", cratepath)

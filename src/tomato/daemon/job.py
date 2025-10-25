@@ -12,26 +12,34 @@
 
 """
 
-import os
-import subprocess
-import logging
-import json
-import time
 import argparse
-from importlib import metadata
+import json
+import logging
+import os
+import psutil
+import subprocess
+import sys
+import time
+import xarray as xr
+import zmq
+
 from datetime import datetime, timezone, timedelta
+from importlib import metadata
 from pathlib import Path
 from threading import current_thread, Thread
-import zmq
-import psutil
-import sys
-import xarray as xr
-
+from tomato.daemon.crates import to_rocrate
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.daemon import jobdb, lpp
-from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job
-from dgbowl_schemas.tomato import to_payload
-from dgbowl_schemas.tomato.payload import Task
+from tomato.models import (
+    Pipeline,
+    Daemon,
+    Component,
+    Device,
+    Driver,
+    Job,
+    Task,
+    to_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -263,7 +271,7 @@ def action_queued_jobs(daemon, matched, req, dbpath):
         for pip in matched[job.id]:
             if not pip.ready:
                 continue
-            elif pip.sampleid != job.payload.sample.name:
+            elif pip.sampleid != job.payload.sample.identifier:
                 continue
             logger.info("job %d: found a matched & ready pip '%s'", job.id, pip.name)
 
@@ -472,7 +480,14 @@ def tomato_job() -> None:
     else:
         job.status = "ce"
     logger.info("writing final data to a NetCDF file")
-    merge_netcdfs(job)
+    outpath = merge_netcdfs(job)
+    logger.info("writing final RO-crate")
+    to_rocrate(
+        datapath=outpath,
+        userid=job.payload.user.identifier,
+        sampleid=job.payload.sample.identifier,
+        make_child=job.payload.sample.sample_is_parent,
+    )
     logger.info("job finished with status '%s', updating job db", job.status)
     params = dict(status=job.status, completed_at=job.completed_at)
     job = jobdb.update_job_id(job.id, params, args.dbpath)

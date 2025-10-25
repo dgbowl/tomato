@@ -120,4 +120,3 @@ class Reply(BaseModel):
     success: bool
     msg: Optional[str] = None
     data: Optional[Any] = None
-
