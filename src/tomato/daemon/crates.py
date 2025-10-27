@@ -17,7 +17,7 @@ PROFILE_VER = "0.2"
 
 
 def RepositoryObject(
-    crate: ROCrate, identifier: str = None, properties: dict = None
+    crate: "ROCrate", identifier: str = None, properties: dict = None
 ) -> ContextEntity:
     if properties is None:
         properties = {}
@@ -26,7 +26,7 @@ def RepositoryObject(
 
 
 def Profile(
-    crate: ROCrate, identifier: str = PROFILE_URI, properties: dict = None
+    crate: "ROCrate", identifier: str = PROFILE_URI, properties: dict = None
 ) -> ContextEntity:
     if properties is None:
         properties = {}
@@ -37,7 +37,7 @@ def Profile(
 
 def to_rocrate(
     datapath: str, userid: str, sampleid: str, make_child: bool = True
-) -> Union[ROCrate, None]:
+) -> Union["ROCrate", None]:
     if _has_rocrate is False:
         return None
     crate = ROCrate()
