@@ -18,7 +18,7 @@ PROFILE_VER = "0.2"
 
 def RepositoryObject(
     crate: "ROCrate", identifier: str = None, properties: dict = None
-) -> ContextEntity:
+) -> "ContextEntity":
     if properties is None:
         properties = {}
     properties["@type"] = "RepositoryObject"
@@ -27,7 +27,7 @@ def RepositoryObject(
 
 def Profile(
     crate: "ROCrate", identifier: str = PROFILE_URI, properties: dict = None
-) -> ContextEntity:
+) -> "ContextEntity":
     if properties is None:
         properties = {}
     properties["@type"] = "Profile"
