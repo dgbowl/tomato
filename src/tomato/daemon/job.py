@@ -791,10 +791,10 @@ def job_main_loop(
     logger.debug("polling threads until completion")
     while True:
         tN = time.perf_counter()
-        if snapshot is not None and tN - tS > snapshot.snapshot_interval:
+        if snapshot is not None and tN - tS > snapshot.interval:
             logger.debug("creating snapshot")
             merge_netcdfs(job, snapshot=True)
-            tS += snapshot.snapshot_interval
+            tS += snapshot.interval
 
         # Collect and push task names
         for t in threads.values():
