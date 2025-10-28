@@ -21,8 +21,12 @@ def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon)
     assert ret.success
     daemon = ret.data
 
-    ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", **kwargs, daemon=daemon)
-    ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", **kwargs, daemon=daemon)
+    ketchup.submit(
+        payload="counter_1_0.1.yml", jobname="job-1", **kwargs, daemon=daemon
+    )
+    ketchup.submit(
+        payload="counter_5_0.2.yml", jobname="job-2", **kwargs, daemon=daemon
+    )
 
     time.sleep(1)
     tomato.stop(**kwargs)
@@ -43,7 +47,9 @@ def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon
     assert ret.success
     daemon = ret.data
 
-    ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs, daemon=daemon)
+    ketchup.submit(
+        payload="counter_5_0.2.yml", jobname="job-1", **kwargs, daemon=daemon
+    )
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
@@ -92,7 +98,9 @@ def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_da
     assert ret.success
     daemon = ret.data
 
-    ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs, daemon=daemon)
+    ketchup.submit(
+        payload="counter_5_0.2.yml", jobname="job-1", **kwargs, daemon=daemon
+    )
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     assert utils.wait_until_ketchup_status(1, "r", PORT, timeout=WAIT)
@@ -170,7 +178,9 @@ def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daem
     assert ret.success
     daemon = ret.data
 
-    ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", **kwargs, daemon=daemon)
+    ketchup.submit(
+        payload="counter_5_0.2.yml", jobname="job-1", **kwargs, daemon=daemon
+    )
     tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
     tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
     assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
