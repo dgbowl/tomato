@@ -158,62 +158,6 @@ class ModelInterface(metaclass=ABCMeta):
         """
         pass
 
-    def dev_register(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_register' is deprecated in favour of 'cmp_register' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_register(**kwargs)
-
-    def dev_teardown(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_teardown' is deprecated in favour of 'cmp_teardown' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_teardown(**kwargs)
-
-    def dev_reset(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_reset' is deprecated in favour of 'cmp_reset' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_reset(**kwargs)
-
-    def dev_set_attr(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_set_attr' is deprecated in favour of 'cmp_set_attr' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_set_attr(**kwargs)
-
-    def dev_get_attr(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_get_attr' is deprecated in favour of 'cmp_get_attr' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_get_attr(**kwargs)
-
-    def dev_status(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_status' is deprecated in favour of 'cmp_status' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_status(**kwargs)
-
-    def dev_capabilities(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_capabilities' is deprecated in favour of 'cmp_capabilities' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_capabilities(**kwargs)
-
-    def dev_attrs(self, **kwargs):
-        logger.warning(
-            "Use of 'dev_attrs' is deprecated in favour of 'cmp_attrs' "
-            "and will stop working in tomato-3.0"
-        )
-        return self.cmp_attrs(**kwargs)
-
     @log_errors
     @to_reply
     def cmp_register(
@@ -249,7 +193,7 @@ class ModelInterface(metaclass=ABCMeta):
         if status.data:
             logger.warning("tearing down component %s with a running task!", key)
             self.task_stop(key=key, **kwargs)
-        self.dev_reset(key=key, **kwargs)
+        self.cmp_reset(key=key, **kwargs)
         del self.devmap[key]
         return (True, f"device {key!r} torn down", None)
 
@@ -539,8 +483,8 @@ class ModelInterface(metaclass=ABCMeta):
         Resets the driver.
 
         Called when the driver process is quitting. Instructs all remaining tasks to
-        stop. Warns when devices linger. Passes through to :func:`dev_reset`. This is
-        not a pass-through to :func:`dev_teardown`.
+        stop. Warns when devices linger. Passes through to :func:`cmp_reset`. This is
+        not a pass-through to :func:`cmp_teardown`.
 
         """
         logger.info("resetting all components on this driver")
@@ -553,7 +497,7 @@ class ModelInterface(metaclass=ABCMeta):
                 logger.error("task on component %s is still running", key)
             else:
                 logger.debug("component %s has no running task", key)
-            self.dev_reset(key=key)
+            self.cmp_reset(key=key)
         return Reply(
             success=True,
             msg="all components on driver have been reset",

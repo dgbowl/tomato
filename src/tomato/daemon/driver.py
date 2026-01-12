@@ -57,7 +57,7 @@ def tomato_driver_bootstrap(
                 )
                 continue
             logger.info("registering component %s", comp.name)
-            ret = interface.dev_register(address=comp.address, channel=comp.channel)
+            ret = interface.cmp_register(address=comp.address, channel=comp.channel)
             if ret.success:
                 logger.debug("registered component %s: %s", comp.name, ret.msg)
             else:

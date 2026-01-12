@@ -71,10 +71,7 @@ def status(
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    if drv.version == "1.0":
-        req.send_pyobj(dict(cmd="dev_status", params={**kwargs}))
-    else:
-        req.send_pyobj(dict(cmd="cmp_status", params={**kwargs}))
+    req.send_pyobj(dict(cmd="cmp_status", params={**kwargs}))
     try:
         ret = req.recv_pyobj()
     except zmq.ZMQError:
@@ -100,10 +97,7 @@ def register(
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    if drv.version == "1.0":
-        req.send_pyobj(dict(cmd="dev_register", params={**kwargs}))
-    else:
-        req.send_pyobj(dict(cmd="cmp_register", params={**kwargs}))
+    req.send_pyobj(dict(cmd="cmp_register", params={**kwargs}))
 
     try:
         ret = req.recv_pyobj()
@@ -236,10 +230,7 @@ def get_attrs(
     data = dict()
     msg = ""
     for attr in attrs:
-        if drv.version == "1.0":
-            req.send_pyobj(dict(cmd="dev_get_attr", params={"attr": attr, **kwargs}))
-        else:
-            req.send_pyobj(dict(cmd="cmp_get_attr", params={"attr": attr, **kwargs}))
+        req.send_pyobj(dict(cmd="cmp_get_attr", params={"attr": attr, **kwargs}))
         try:
             ret = req.recv_pyobj()
         except zmq.ZMQError:
@@ -284,14 +275,9 @@ def set_attr(
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    if drv.version == "1.0":
-        req.send_pyobj(
-            dict(cmd="dev_set_attr", params={"attr": attr, "val": val, **kwargs})
-        )
-    else:
-        req.send_pyobj(
-            dict(cmd="cmp_set_attr", params={"attr": attr, "val": val, **kwargs})
-        )
+    req.send_pyobj(
+        dict(cmd="cmp_set_attr", params={"attr": attr, "val": val, **kwargs})
+    )
 
     try:
         ret = req.recv_pyobj()
@@ -325,10 +311,7 @@ def reset(
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    if drv.version == "1.0":
-        req.send_pyobj(dict(cmd="dev_reset", params=kwargs))
-    else:
-        req.send_pyobj(dict(cmd="cmp_reset", params=kwargs))
+    req.send_pyobj(dict(cmd="cmp_reset", params=kwargs))
 
     try:
         ret = req.recv_pyobj()
