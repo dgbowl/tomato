@@ -10,11 +10,10 @@ import importlib
 import logging
 
 from typing import Union, TypeVar
-from tomato.driverinterface_1_0 import ModelInterface as MI_1_0
 from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
 from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
 
-ModelInterface = TypeVar("ModelInterface", MI_1_0, MI_2_0, MI_2_1)
+ModelInterface = TypeVar("ModelInterface", MI_2_0, MI_2_1)
 
 logger = logging.getLogger(__name__)
 
