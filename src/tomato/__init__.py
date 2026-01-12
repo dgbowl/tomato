@@ -31,6 +31,7 @@ def parse_args(parser, verbose, is_tomato=False):
     set_loglevel(verbosity)
 
     context = zmq.Context()
+    kwargs = {}
     if not is_tomato:
         status = tomato.status(**vars(args), context=context)
         if not status.success:
@@ -39,9 +40,10 @@ def parse_args(parser, verbose, is_tomato=False):
             else:
                 print(f"Failure: {status.msg}")
             return
+        kwargs["daemon"] = status.data
 
     if "func" in args:
-        ret = args.func(**vars(args), verbosity=verbosity, context=context)
+        ret = args.func(**vars(args), verbosity=verbosity, context=context, **kwargs)
         if args.yaml:
             print(yaml.dump(ret.dict()))
         else:

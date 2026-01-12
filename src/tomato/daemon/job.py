@@ -12,26 +12,34 @@
 
 """
 
-import os
-import subprocess
-import logging
-import json
-import time
 import argparse
-from importlib import metadata
+import json
+import logging
+import os
+import psutil
+import subprocess
+import sys
+import time
+import xarray as xr
+import zmq
+
 from datetime import datetime, timezone, timedelta
+from importlib import metadata
 from pathlib import Path
 from threading import current_thread, Thread
-import zmq
-import psutil
-import sys
-import xarray as xr
-
+from tomato.daemon.crates import to_rocrate
 from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.daemon import jobdb, lpp
-from tomato.models import Pipeline, Daemon, Component, Device, Driver, Job
-from dgbowl_schemas.tomato import to_payload
-from dgbowl_schemas.tomato.payload import Task
+from tomato.models import (
+    Pipeline,
+    Daemon,
+    Component,
+    Device,
+    Driver,
+    Job,
+    Task,
+    to_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -263,7 +271,7 @@ def action_queued_jobs(daemon, matched, req, dbpath):
         for pip in matched[job.id]:
             if not pip.ready:
                 continue
-            elif pip.sampleid != job.payload.sample.name:
+            elif pip.sampleid != job.payload.sample.identifier:
                 continue
             logger.info("job %d: found a matched & ready pip '%s'", job.id, pip.name)
 
@@ -273,10 +281,15 @@ def action_queued_jobs(daemon, matched, req, dbpath):
 
             logger.debug("job %d: storing jobdata.json", job.id)
             jpath = root / "jobdata.json"
+            repositories = {}
+            for repo, repoparams in daemon.settings["repositories"].items():
+                if repo in job.payload.settings.output.repositories:
+                    repositories[repo] = repoparams
             jobargs = {
                 "pipeline": pip.model_dump(),
                 "payload": job.payload.model_dump(),
                 "devices": {dn: dev.model_dump() for dn, dev in daemon.devs.items()},
+                "repositories": repositories,
                 "job": dict(id=job.id, path=str(root)),
             }
             with jpath.open("w", encoding="UTF-8") as of:
@@ -408,7 +421,9 @@ def tomato_job() -> None:
 
     with args.jobfile.open() as infile:
         jsdata = json.load(infile)
+
     payload = to_payload(**jsdata["payload"])
+    repositories = jsdata["repositories"]
 
     pip = jsdata["pipeline"]["name"]
     jobid = jsdata["job"]["id"]
@@ -421,7 +436,7 @@ def tomato_job() -> None:
         handlers=[logging.FileHandler(logpath, mode="a")],
     )
     logger = logging.getLogger(__name__)
-
+    logger.debug(f"{jsdata=}")
     logger.debug(f"{payload=}")
 
     verbosity = payload.settings.verbosity
@@ -472,7 +487,18 @@ def tomato_job() -> None:
     else:
         job.status = "ce"
     logger.info("writing final data to a NetCDF file")
-    merge_netcdfs(job)
+    outpath = merge_netcdfs(job)
+    if len(jsdata["repositories"]) > 0:
+        logger.debug(
+            "job configured with repositories: '%s'", list(repositories.keys())
+        )
+        logger.info("writing final RO-crate")
+        to_rocrate(
+            datapath=outpath,
+            userid=job.payload.user.identifier,
+            sampleid=job.payload.sample.identifier,
+            make_child=job.payload.sample.sample_is_parent,
+        )
     logger.info("job finished with status '%s', updating job db", job.status)
     params = dict(status=job.status, completed_at=job.completed_at)
     job = jobdb.update_job_id(job.id, params, args.dbpath)
@@ -765,10 +791,10 @@ def job_main_loop(
     logger.debug("polling threads until completion")
     while True:
         tN = time.perf_counter()
-        if snapshot is not None and tN - tS > snapshot.snapshot_interval:
+        if snapshot is not None and tN - tS > snapshot.interval:
             logger.debug("creating snapshot")
             merge_netcdfs(job, snapshot=True)
-            tS += snapshot.snapshot_interval
+            tS += snapshot.interval
 
         # Collect and push task names
         for t in threads.values():

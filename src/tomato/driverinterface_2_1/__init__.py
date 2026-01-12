@@ -13,10 +13,9 @@ from pydantic import BaseModel, Field
 from threading import Thread, current_thread, RLock
 from collections import defaultdict
 import queue
-from tomato.models import Reply
+from tomato.models import Reply, Task
 from tomato.driverinterface_2_1.decorators import in_devmap, to_reply, log_errors
 from tomato.driverinterface_2_1.types import Type, Val, Key
-from dgbowl_schemas.tomato.payload import Task
 import logging
 
 import xarray as xr

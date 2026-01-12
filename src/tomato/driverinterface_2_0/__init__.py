@@ -12,8 +12,7 @@ from typing import TypeVar, Any, Union, TypeAlias, Optional
 from pydantic import BaseModel, Field
 from threading import Thread, current_thread, RLock
 from queue import Queue
-from tomato.models import Reply
-from dgbowl_schemas.tomato.payload import Task
+from tomato.models import Reply, Task
 import logging
 from functools import wraps
 import xarray as xr
