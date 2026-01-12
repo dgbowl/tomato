@@ -21,6 +21,7 @@ Changes from ``tomato-2.1`` include:
 - Added functionality for automatically creating RO-crates from completed jobs.
 
 - A new ``Payload-2.2``:
+
   - The ``settings.snapshot.snapshot_interval`` replaces ``settings.snapshot.frequency``. The ``snapshot_interval`` can be provided as :class:`str`, which will be converted to the number of seconds using :mod:`pint`.
   - The ``sample.identifier`` replaces ``sample.name``. A new required ``user.identifier`` section
   - The ``settings.output.repositories`` entry is added, which allows users to select which repository configured in the ``settings.toml`` file will be used to upload the job data.
