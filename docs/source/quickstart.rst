@@ -337,8 +337,10 @@ As of ``tomato-2.1``, execution of a certain :class:`Task` can be postponed and 
 As of ``tomato-2.0``, the :obj:`task_params` specified in the *payload* are validated by the device *driver*. In particular, the values of all entries within :obj:`task_params` are checked for compatibility with the :obj:`Attr.type` and :obj:`Attr.options` (if supplied), as well as against the provided :obj:`Attr.minimum` and :obj:`Attr.maximum`, as specified in the matching :class:`~tomato.driverinterface_2_1.Attr`.
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Payload
+  :no-index:
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
+  :no-index:
 
 .. |devfile| replace:: *devices file*
 
