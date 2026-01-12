@@ -159,6 +159,10 @@ The *settings file* contains the basic information required to start the ``tomat
     [devices]
     config = '/home/kraus/.config/tomato/1.0a1/devices.yml'
 
+    [repositories]
+    default.endpoint = 'https://example.endpoint/uri-here'
+    default.api_key = 'your-api-key-here'
+
     [drivers]
     example_counter.idle_measurement_interval = 1
 
@@ -173,13 +177,40 @@ Finally, another path, *logdir*, is used to specify where logs for **tomato** ar
 - ``$env:localappdata\dgbowl\tomato\<version>`` on Windows,
 - ``$HOME/.cache/tomato/<version>/log`` on Linux.
 
-In the default *settings file* shown above, the following entries are specified:
+**jobs** section
+****************
 
-- ``jobs.storage`` which is the directory where the data of **tomato** *jobs* will be stored,
-- ``jobs.dbpath`` which is the location of the ``sqlite3`` database used to track *jobs*,
-- ``devices.config`` which points to a ``yaml``-formatted |devfile|_, defining the hardware configuration of the devices managed by **tomato**.
+Section for configuring behaviour of **tomato** *jobs*. The following entries can be specified:
 
-Additional, *driver*-specific settings may be provided in the ``[drivers]`` section, following the example of the ``drivers.example_counter.idle_measurement_interval`` entry. These *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.
+- ``jobs.storage`` which is the directory where the data of **tomato** *jobs* will be stored
+- ``jobs.dbpath`` which is the location of the ``sqlite3`` database used to track *jobs*
+
+**devices** section
+*******************
+
+Section for configuring **tomato** *devices*. The following entries can be specified:
+
+- ``devices.config`` which points to a ``yaml``-formatted |devfile|_, defining the hardware configuration of the devices managed by **tomato**
+
+**repositories** section
+************************
+
+Section for settings related to the upload of completed *payloads* to pre-configured repositories using the RO-crate mechanism. By default, all *payloads* will attempt to submit to the ``default`` repository, which can be configured as follows:
+
+- ``repositories.default.endpoint`` should be the API endpoint of the repository where the RO-crates should be sent
+- ``repositories.default.api_key`` should contain any API key / token necessary for authenticating the upload
+
+More than one repository can be specified using a separate sub-section. If a ``default`` repository is not specified, RO-crate objects will **not** be created and data from completed *payloads* will **not** be uploaded.
+
+**drivers** section
+*******************
+
+Additional, *driver*-specific settings may be provided in this section. Each *driver* should be configured separately in its own sub-section. The following entries can be specified for all *drivers*:
+
+- ``drivers.<driver_name>.idle_measurement_interval`` for configuring the interval between measurements performed when any registered *component* is idle,
+- ``drivers.<driver_name>.lpp_timeout`` for configuring the timeout for communication between **tomato** and the *driver* process, in seconds
+
+Further *driver*-specific settings, such as ``dllpath`` or ``calibration``, can be specified here. All of these *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.
 
 Devices file
 ````````````
@@ -306,8 +337,10 @@ As of ``tomato-2.1``, execution of a certain :class:`Task` can be postponed and 
 As of ``tomato-2.0``, the :obj:`task_params` specified in the *payload* are validated by the device *driver*. In particular, the values of all entries within :obj:`task_params` are checked for compatibility with the :obj:`Attr.type` and :obj:`Attr.options` (if supplied), as well as against the provided :obj:`Attr.minimum` and :obj:`Attr.maximum`, as specified in the matching :class:`~tomato.driverinterface_2_1.Attr`.
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Payload
+  :no-index:
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
+  :no-index:
 
 .. |devfile| replace:: *devices file*
 
