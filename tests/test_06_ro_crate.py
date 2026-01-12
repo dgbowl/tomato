@@ -1,9 +1,7 @@
 import os
 import pytest
 import subprocess
-from rocrate.rocrate import ROCrate
 from tomato.daemon.crates import to_rocrate
-
 from . import utils
 
 try:
