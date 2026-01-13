@@ -6,7 +6,7 @@ Since ``tomato-1.0``, all device *drivers* are developed as separate Python pack
 
 .. note::
 
-    The :class:`~tomato.driverinterface_2_1.ModelInterface` is versioned. Your driver should target a single version of this :class:`ModelInterface` by inheriting from only one such abstract class. **Any deprecation notices will be provided well in advance directly to driver maintainers.** Support for :mod:`~tomato.driverinterface_1_0` introduced in ``tomato-1.0`` is guaranteed until at least ``tomato-3.0``.
+    The :class:`~tomato.driverinterface_2_1.ModelInterface` is versioned. Your driver should target a single version of this :class:`ModelInterface` by inheriting from only one such abstract class. **Any deprecation notices will be provided well in advance directly to driver maintainers.** Support for :mod:`~tomato.driverinterface_1_0` was removed in ``tomato-2.2``.
 
 Bootstrapping a *driver* process
 ````````````````````````````````
@@ -89,12 +89,6 @@ DriverInterface ver. 2.0
     :no-index:
     :members:
 
-DriverInterface ver. 1.0
-````````````````````````
-
-.. autoclass:: tomato.driverinterface_1_0.ModelInterface
-    :no-index:
-    :members:
 
 .. |setfile| replace:: *settings file*
 

@@ -13,7 +13,6 @@ Subpackages
    :maxdepth: 4
 
    tomato.daemon
-   tomato.driverinterface_1_0
    tomato.driverinterface_2_0
    tomato.driverinterface_2_1
    tomato.ketchup
