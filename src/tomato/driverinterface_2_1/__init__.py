@@ -432,6 +432,12 @@ class ModelInterface(metaclass=ABCMeta):
             data=devkeys,
         )
 
+    def quit(self) -> Reply:
+        """
+        Passthrough to :func:`reset` for foward compatibility.
+        """
+        return self.reset()
+
     @log_errors
     def reset(self) -> Reply:
         """
@@ -444,15 +450,10 @@ class ModelInterface(metaclass=ABCMeta):
         """
         logger.info("resetting all components on this driver")
         for key, dev in self.devmap.items():
-            if dev.thread.is_alive():
-                logger.warning("stopping task on component %s", key)
-                setattr(dev.thread, "do_run", False)
-                dev.thread.join(timeout=1)
-            if dev.thread.is_alive():
-                logger.error("task on component %s is still running", key)
-            else:
-                logger.debug("component %s has no running task", key)
-            self.cmp_reset(key=key)
+            logger.warning("stopping task on component %s", key)
+            self.task_stop(key=key)
+            logger.warning("resetting component %s", key)
+            self.cmp_reset(key=key, do_run=False)
         return Reply(
             success=True,
             msg="all components on driver have been reset",
@@ -498,7 +499,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.driver = driver
         self.key = key
         self.task_list = queue.Queue()
-        self.thread = Thread(target=self.task_runner, daemon=False)
+        self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = True
         self.thread.do_run_task = False
         self.thread.start()
@@ -534,9 +535,10 @@ class ModelDevice(metaclass=ABCMeta):
 
             self.running = task
             try:
+                thread.do_run_task = False
                 if isinstance(task, Task):
-                    thread.do_run_task = True
                     self.prepare_task(task=task)
+                    thread.do_run_task = True
                     t_0 = time.perf_counter()
                     t_p = t_0
                     self.data = None
@@ -684,7 +686,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.data = None
         self.datalock = RLock()
         self.task_list = queue.Queue()
-        self.thread = Thread(target=self.task_runner, daemon=False)
+        self.thread = Thread(target=self.task_runner, daemon=True)
         self.thread.do_run = do_run
         self.thread.do_run_task = False
         self.thread.start()
