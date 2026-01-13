@@ -81,7 +81,4 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         text=True,
     )
     print(f"{ret=}")
-    assert (
-        "Failure: driver of component 'psutil:(psutil-addr,10)' is on version 1.0"
-        in ret.stdout
-    )
+    assert "Success: constants of component ('psutil-addr', '10') are" in ret.stdout
