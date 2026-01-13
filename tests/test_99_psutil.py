@@ -57,7 +57,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
 
     ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
     assert ret.success
-    assert ret.data["psutil"].version == "1.0"
+    assert ret.data["psutil"].version == "2.1"
 
     ret = subprocess.run(
         ["passata", "status", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
@@ -81,7 +81,4 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         text=True,
     )
     print(f"{ret=}")
-    assert (
-        "Failure: driver of component 'psutil:(psutil-addr,10)' is on version 1.0"
-        in ret.stdout
-    )
+    assert "Success: constants of component ('psutil-addr', '10') are" in ret.stdout

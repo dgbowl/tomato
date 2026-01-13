@@ -700,10 +700,7 @@ def job_thread(
     logger.info(
         "%s: all tasks done on component %s, resetting", component.role, component.name
     )
-    if driver.version == "1.0":
-        msg = dict(cmd="dev_reset", params={**kwargs})
-    else:
-        msg = dict(cmd="cmp_reset", params={**kwargs})
+    msg = dict(cmd="cmp_reset", params={**kwargs})
     ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
     if req.closed:
         thread.crashed = True

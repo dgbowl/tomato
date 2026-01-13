@@ -21,7 +21,6 @@ from typing import Union, TypeVar
 import zmq
 import psutil
 
-from tomato.driverinterface_1_0 import ModelInterface as MI_1_0
 from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
 from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
 from tomato.drivers import driver_to_interface
@@ -29,7 +28,7 @@ from tomato.models import Reply, Daemon
 from tomato.daemon import lpp
 
 logger = logging.getLogger(__name__)
-ModelInterface = TypeVar("ModelInterface", MI_1_0, MI_2_0, MI_2_1)
+ModelInterface = TypeVar("ModelInterface", MI_2_0, MI_2_1)
 IDLE_MEASUREMENT_INTERVAL = None
 MAX_REGISTER_RETRIES = 3
 
@@ -58,7 +57,7 @@ def tomato_driver_bootstrap(
                 )
                 continue
             logger.info("registering component %s", comp.name)
-            ret = interface.dev_register(address=comp.address, channel=comp.channel)
+            ret = interface.cmp_register(address=comp.address, channel=comp.channel)
             if ret.success:
                 logger.debug("registered component %s: %s", comp.name, ret.msg)
             else:

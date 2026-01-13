@@ -41,7 +41,7 @@ dependencies = [
 testing = [
     "pytest",
     "tomato-example-counter >= 2.0.0",
-    "tomato-psutil >= 1.0.0",
+    "tomato-psutil >= 2.1.0",
 ]
 docs = [
     "sphinx ~= 7.2",
