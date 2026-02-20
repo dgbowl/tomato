@@ -477,6 +477,12 @@ class ModelInterface(metaclass=ABCMeta):
             data=devkeys,
         )
 
+    def quit(self) -> Reply:
+        """
+        Passthrough to :func:`reset` for foward compatibility.
+        """
+        return self.reset()
+
     @log_errors
     def reset(self) -> Reply:
         """

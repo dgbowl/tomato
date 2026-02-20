@@ -310,8 +310,8 @@ def tomato_driver() -> None:
         logger.critical("uncaught exception %s", type(e), exc_info=True)
         raise e
 
-    logger.info("driver '%s' is beginning reset", args.driver)
-    interface.reset()
+    logger.info("driver '%s' is beginning to quit", args.driver)
+    interface.quit()
 
     logger.info("driver '%s' is quitting", args.driver)
 
