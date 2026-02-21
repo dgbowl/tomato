@@ -65,7 +65,7 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
         "tomato_Job": job.model_dump_json(),
     }
     dt.attrs = root_attrs
-    outpath = job.snappath if snapshot else job.respath
+    outpath = Path(job.snappath if snapshot else job.respath).resolve()
     logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
     dt.to_netcdf(outpath)
     dt.close()
