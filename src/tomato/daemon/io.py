@@ -65,11 +65,11 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
         "tomato_Job": job.model_dump_json(),
     }
     dt.attrs = root_attrs
-    outpath = job.snappath if snapshot else job.respath
+    outpath = Path(job.snappath if snapshot else job.respath).resolve()
     logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
-    dt.to_netcdf(outpath)
+    dt.to_netcdf(outpath, engine="h5netcdf")
     dt.close()
-    return outpath
+    return str(outpath)
 
 
 def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
