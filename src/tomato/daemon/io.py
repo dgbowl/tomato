@@ -69,7 +69,7 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
     logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
     dt.to_netcdf(outpath)
     dt.close()
-    return outpath
+    return str(outpath)
 
 
 def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
