@@ -67,7 +67,7 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
     dt.attrs = root_attrs
     outpath = Path(job.snappath if snapshot else job.respath).resolve()
     logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
-    dt.to_netcdf(outpath)
+    dt.to_netcdf(outpath, engine="h5netcdf")
     dt.close()
     return str(outpath)
 
