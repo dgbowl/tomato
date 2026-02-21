@@ -19,13 +19,8 @@ Changes from ``tomato-2.1`` include:
 - Fixes many bugs due to the :func:`cmp_measure` function race condition with running tasks.
 - Introduces the "lazy pirate" pattern in ``tomato-job`` processes, which should make jobs more reliable.
 - Added functionality for automatically creating RO-crates from completed jobs.
-<<<<<<< HEAD
 - The NetCDF export using :mod:`xarray` now uses :mod:`h5netcdf` for exporting NetCDF files, as :mod:`netcdf4` has some issues with filesystem paths.
 - The deprecated :mod:`tomato.driverinterface_1_0` has been removed.
-=======
-- ``tomato-2.2`` now depends on :mod:`h5netcdf` for exporting NetCDF files, as :mod:`netcdf4` has some issues with filesystem paths. Note that if both :mod:`netcdf4` and :mod:`h5netcdf` are installed, :mod:`xarray` will use :mod:`netcdf4` to export NetCDF files!
-- :mod:`tomato.driverinterface_1_0` has been removed
->>>>>>> 5d33ecf (add docs.)
 
 - A new ``Payload-2.2``:
 
