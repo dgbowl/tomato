@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Version history &mdash; tomato 2.2rc3.post4 documentation</title>
+  <title>Version history &mdash; tomato 2.2rc3.post5 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=754674bb"></script>
+        <script src="_static/documentation_options.js?v=d13ef0a2"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2rc3.post4
+                2.2rc3.post5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -113,6 +113,8 @@
 <li><p>Fixes many bugs due to the <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_measure()</span></code> function race condition with running tasks.</p></li>
 <li><p>Introduces the “lazy pirate” pattern in <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> processes, which should make jobs more reliable.</p></li>
 <li><p>Added functionality for automatically creating RO-crates from completed jobs.</p></li>
+<li><p>The NetCDF export using <a class="reference external" href="https://docs.xarray.dev/en/stable/index.html#module-xarray" title="(in xarray v2026.2.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xarray</span></code></a> now uses <code class="xref py py-mod docutils literal notranslate"><span class="pre">h5netcdf</span></code> for exporting NetCDF files, as <code class="xref py py-mod docutils literal notranslate"><span class="pre">netcdf4</span></code> has some issues with filesystem paths.</p></li>
+<li><p>The deprecated <code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.driverinterface_1_0</span></code> has been removed.</p></li>
 <li><p>A new <code class="docutils literal notranslate"><span class="pre">Payload-2.2</span></code>:</p>
 <ul>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">settings.snapshot.snapshot_interval</span></code> replaces <code class="docutils literal notranslate"><span class="pre">settings.snapshot.frequency</span></code>. The <code class="docutils literal notranslate"><span class="pre">snapshot_interval</span></code> can be provided as <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, which will be converted to the number of seconds using <code class="xref py py-mod docutils literal notranslate"><span class="pre">pint</span></code>.</p></li>
@@ -242,7 +244,7 @@ Loris Ercole.</em></p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2rc3.post4
+      v: 2.2rc3.post5
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
