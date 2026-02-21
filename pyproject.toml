@@ -31,7 +31,7 @@ dependencies = [
     "psutil >= 5.9",
     "dgbowl_schemas @ git+https://github.com/dgbowl/dgbowl-schemas.git",
     "pyzmq >= 25.1",
-    "netcdf4 >= 1.7",
+    "h5netcdf[h5py] >= 1.5.0",
     "xarray >= 2024.10.0",
     "pydantic >= 2.0",
     "pint >= 0.24.1",
