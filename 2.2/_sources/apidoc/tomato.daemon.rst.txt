@@ -1,0 +1,52 @@
+tomato.daemon package
+=====================
+
+.. automodule:: tomato.daemon
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+
+.. automodule:: tomato.daemon.cmd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.crates
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.driver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.io
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.job
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.jobdb
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.lpp
+   :members:
+   :undoc-members:
+   :show-inheritance:
