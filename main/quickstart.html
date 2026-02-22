@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 2.2rc3.post5 documentation</title>
+  <title>Quick start guide &mdash; tomato 2.2rc3.post6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=d13ef0a2"></script>
+        <script src="_static/documentation_options.js?v=e6c67ac8"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -41,7 +41,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2rc3.post5
+                2.2rc3.post6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -399,7 +399,7 @@
 </section>
 <section id="payload-file">
 <span id="payfile"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Link to this heading"></a></h2>
-<p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>.</p>
+<p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>.</p>
 <p>Of particular importance here is the specification of the individual <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> within the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Payload.method</span></code> field. The <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> are distributed onto individual <em>components</em> of the <em>pipeline</em> (as matched by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">component_role</span></code> field), and then executed in sequence. Some general <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> parameters are abstracted by <strong>tomato</strong>, such as the <code class="docutils literal notranslate"><span class="pre">max_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">sampling_interval</span></code> and <code class="docutils literal notranslate"><span class="pre">polling_interval</span></code>. The other are <em>driver</em> or <em>component</em> specific, and can be specified using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">task_params</span></code> field.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -707,9 +707,9 @@
 </dd>
 <dt class="field-even">Validators<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.validate_task_names" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_task_names</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.method" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">method</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.validate_task_names" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_task_names</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.method" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">method</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -719,8 +719,8 @@
 <dd><dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -728,13 +728,13 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.settings.Settings" title="(in dgbowl-schemas v124.dev3)"><span class="pre">Settings</span></a></em><em class="property"> <span class="pre">[Optional]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.settings.Settings" title="(in dgbowl-schemas v124.dev5)"><span class="pre">Settings</span></a></em><em class="property"> <span class="pre">[Optional]</span></em></dt>
 <dd><p>Additional configuration options for tomato.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -742,13 +742,13 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">user</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.user.User" title="(in dgbowl-schemas v124.dev3)"><span class="pre">User</span></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">user</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.user.User" title="(in dgbowl-schemas v124.dev5)"><span class="pre">User</span></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
 <dd><p>Specification of the user running the payload.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -756,13 +756,13 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.sample.Sample" title="(in dgbowl-schemas v124.dev3)"><span class="pre">Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.sample.Sample" title="(in dgbowl-schemas v124.dev5)"><span class="pre">Sample</span></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
 <dd><p>Specification of the experimental sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -775,9 +775,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.validate_task_names" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_task_names</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_methodfile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_methodfile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.extract_samplefile" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_samplefile</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.validate_task_names" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_task_names</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -797,7 +797,7 @@
 
 <dl class="py method pydantic_validator">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_task_names</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.method" title="(in dgbowl-schemas v124.dev3)"><em class="xref py py-obj"><span class="pre">method</span></em></a></dt>
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_task_names</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.Payload.method" title="(in dgbowl-schemas v124.dev5)"><em class="xref py py-obj"><span class="pre">method</span></em></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -807,7 +807,7 @@
 <em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dgbowl_schemas.tomato.payload.</span></span><span class="sig-name descname"><span class="pre">Task</span></span></dt>
 <dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> is a driver/device-independent abstraction describing the
 measurement steps. The driver-specific information for the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> can be
-provided via the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.technique_name" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">technique_name</span></code></a> and <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_params" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_params</span></code></a> parameters.</p>
+provided via the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.technique_name" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">technique_name</span></code></a> and <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_params" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_params</span></code></a> parameters.</p>
 <p><details  class="autodoc_pydantic_collapsable_json">
 <summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="p">,</span>
@@ -909,10 +909,10 @@ provided via the <a class="reference external" href="https://dgbowl.github.io/dg
 </dd>
 <dt class="field-even">Validators<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_duration</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polling_interval</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampling_interval</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_duration</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polling_interval</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampling_interval</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -923,7 +923,7 @@ provided via the <a class="reference external" href="https://dgbowl.github.io/dg
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -936,8 +936,8 @@ provided via the <a class="reference external" href="https://dgbowl.github.io/dg
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -950,8 +950,8 @@ provided via the <a class="reference external" href="https://dgbowl.github.io/dg
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -965,8 +965,8 @@ defaults to the value in driver settings</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -980,7 +980,7 @@ on which this <code class="xref py py-class docutils literal notranslate"><span 
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -990,11 +990,11 @@ on which this <code class="xref py py-class docutils literal notranslate"><span 
 <dt class="sig sig-object py">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">task_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
 <dd><p>the (optional) name of the current <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>; can be used for triggering other
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> in parallel to this one via <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.start_with_task_name" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_with_task_name</span></code></a></p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> in parallel to this one via <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.start_with_task_name" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_with_task_name</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -1009,7 +1009,7 @@ pairs by the <code class="xref py py-func docutils literal notranslate"><span cl
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -1018,13 +1018,13 @@ pairs by the <code class="xref py py-func docutils literal notranslate"><span cl
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_with_task_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
-<dd><p>the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> that this <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> should be
+<dd><p>the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> that this <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> should be
 started in parallel with; when set, this <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> will wait for execution until
-a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> with the matching <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> is started</p>
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> with the matching <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> is started</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -1033,14 +1033,14 @@ a <code class="xref py py-class docutils literal notranslate"><span class="pre">
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stop_with_task_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
-<dd><p>the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> that, when started, will stop the execution
+<dd><p>the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> that, when started, will stop the execution
 of this <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>; when set, this <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> will execute normally, but if a
-a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> with the matching <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> is started, this <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> with the matching <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload.html#dgbowl_schemas.tomato.payload.Task.task_name" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a> is started, this <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>
 will be stopped</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -1053,7 +1053,7 @@ will be stopped</p>
 
 <dl class="py method pydantic_validator">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v124.dev3)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v124.dev3)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v124.dev3)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a></dt>
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v124.dev5)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v124.dev5)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v124.dev5)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1088,7 +1088,7 @@ will be stopped</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2rc3.post5
+      v: 2.2rc3.post6
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

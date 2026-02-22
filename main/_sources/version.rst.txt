@@ -2,12 +2,12 @@ Version history
 ===============
 **tomato**-v2.2
 ---------------
-..
-    .. image:: https://img.shields.io/static/v1?label=tomato&message=v2.1&color=blue&logo=github
-        :target: https://github.com/dgbowl/tomato/tree/2.1
-    .. image:: https://img.shields.io/static/v1?label=tomato&message=v2.1&color=blue&logo=pypi
-        :target: https://pypi.org/project/tomato/2.1/
-    .. image:: https://img.shields.io/static/v1?label=release%20date&message=2025-06-07&color=red&logo=pypi
+
+.. image:: https://img.shields.io/static/v1?label=tomato&message=v2.2&color=blue&logo=github
+    :target: https://github.com/dgbowl/tomato/tree/2.2
+.. image:: https://img.shields.io/static/v1?label=tomato&message=v2.2&color=blue&logo=pypi
+    :target: https://pypi.org/project/tomato/2.2/
+.. image:: https://img.shields.io/static/v1?label=release%20date&message=2026-02-22&color=red&logo=pypi
 
 .. sectionauthor::
      Peter Kraus
