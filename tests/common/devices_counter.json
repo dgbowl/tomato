@@ -4,7 +4,7 @@
             "name": "dev-counter",
             "driver": "example_counter",
             "address": "example-addr",
-            "channels": [1, 2, 3, 4],
+            "channels": ["1", "2", "3", "4"],
             "pollrate": 2
         }
     ],
