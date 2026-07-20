@@ -78,7 +78,6 @@ def tomato_daemon():
     dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,), daemon=True)
     dmgr.do_run = True
     dmgr.start()
-    daemon.status = "running"
     t0 = time.process_time()
     while True:
         socks = dict(poller.poll(1000))

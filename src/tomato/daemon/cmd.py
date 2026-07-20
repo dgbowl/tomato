@@ -86,11 +86,15 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
         Path(daemon.settings["devices"]["config"]),
         logger,
     )
+
+    try:
+        df = DeviceFile(filename=daemon.settings["devices"]["config"])
+        logger.critical(f"{df=}")
+    except Exception as e:
+        logger.critical(e)
+        return Reply(success=False, msg=str(e))
+
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
-
-    df = DeviceFile(filename=daemon.settings["devices"]["config"])
-    logger.critical(f"{df=}")
-
     pips, cmps = tomato.utils.get_pipelines(
         devs,
         devicefile["pipelines"],

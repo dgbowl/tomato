@@ -411,8 +411,9 @@ def init(
     if not appdir.exists():
         logger.debug("creating directory '%s'", appdir)
         os.makedirs(appdir)
-    with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
-        of.write(defaults)
+    if not (appdir / "settings.toml").exists():
+        with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
+            of.write(defaults)
     devices = textwrap.dedent(
         """\
         devices:
@@ -429,8 +430,9 @@ def init(
                 channel: "1"
         """
     )
-    with (appdir / "devices.yml").open("w", encoding="utf-8") as of:
-        of.write(devices)
+    if not (appdir / "devices.yml").exists():
+        with (appdir / "devices.yml").open("w", encoding="utf-8") as of:
+            of.write(devices)
     if not logdir.exists():
         logger.debug("creating directory '%s'", logdir)
         os.makedirs(logdir)
