@@ -36,16 +36,6 @@ class Device(BaseModel):
     channels: Sequence[str]
     pollrate: int = 1
 
-    @field_validator("channels", mode="before")
-    def coerce_channels(cls, v):
-        if any([isinstance(vv, int) for vv in v]):
-            logger.warning(
-                "Supplying 'channels' as a Sequence[int] is deprecated "
-                "and will stop working in tomato-2.0."
-            )
-            return [str(vv) for vv in v]
-        return v
-
 
 class Component(BaseModel):
     name: str
@@ -55,16 +45,6 @@ class Component(BaseModel):
     channel: str
     role: str
     capabilities: Optional[set[str]] = None
-
-    @field_validator("channel", mode="before")
-    def coerce_channel(cls, v):
-        if isinstance(v, int):
-            logger.warning(
-                "Supplying 'channel' as an int is deprecated "
-                "and will stop working in tomato-3.0."
-            )
-            return str(v)
-        return v
 
     @field_validator("role", mode="after")
     def check_role(cls, value):
@@ -202,7 +182,7 @@ class DeviceFile(BaseModel):
                     )
                     dev = self.devices[comp["device"]]
                     # TODO: implement optional channels here
-                    assert str(comp["channel"]) in dev.channels, (
+                    assert comp["channel"] in dev.channels, (
                         f"channel {comp['channel']} is not among "
                         f"device channels {dev.channels}."
                     )
