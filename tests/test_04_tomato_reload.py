@@ -16,7 +16,7 @@ def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.reload(**kwargs, appdir=Path())
     assert ret.success
     assert len(ret.data.drvs) == 1
-    assert len(ret.data.devs) == 1
+    assert len(ret.data.devicefile.devices) == 1
     assert len(ret.data.pips) == 1
     assert len(ret.data.cmps) == 1
 
@@ -28,7 +28,7 @@ def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.drvs) == 1
-    assert len(ret.data.devs) == 1
+    assert len(ret.data.devicefile.devices) == 1
     assert len(ret.data.pips) == 1
     assert len(ret.data.cmps) == 1
     assert ret.data.drvs["example_counter"].settings["testparb"] == 1
@@ -44,7 +44,7 @@ def test_reload_cmps_pips(datadir, start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.drvs) == 1
-    assert len(ret.data.devs) == 1
+    assert len(ret.data.devicefile.devices) == 1
     assert len(ret.data.pips) == 4
     assert len(ret.data.cmps) == 4
 
@@ -59,7 +59,7 @@ def test_reload_devs(datadir, start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.drvs) == 1
-    assert len(ret.data.devs) == 2
+    assert len(ret.data.devicefile.devices) == 2
     assert len(ret.data.pips) == 2
     assert len(ret.data.cmps) == 3
 
@@ -75,7 +75,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.drvs) == 2
-    assert len(ret.data.devs) == 2
+    assert len(ret.data.devicefile.devices) == 2
     assert len(ret.data.pips) == 1
     assert len(ret.data.cmps) == 2
     assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
@@ -91,7 +91,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert len(ret.data.drvs) == 1
-    assert len(ret.data.devs) == 1
+    assert len(ret.data.devicefile.devices) == 1
     assert len(ret.data.pips) == 4
     assert len(ret.data.cmps) == 4
     assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
