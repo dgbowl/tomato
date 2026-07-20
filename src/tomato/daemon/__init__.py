@@ -6,19 +6,19 @@
 
 """
 
-import logging
 import argparse
-from pathlib import Path
-from threading import Thread
-import toml
+import logging
 import time
-import zmq
-
-from tomato.models import Reply, Daemon
 import tomato.daemon.cmd as cmd
-import tomato.daemon.job
 import tomato.daemon.driver
 import tomato.daemon.io as io
+import tomato.daemon.job
+import toml
+import zmq
+
+from pathlib import Path
+from threading import Thread
+from tomato.models import Reply, Daemon
 
 logger = logging.getLogger(__name__)
 
@@ -53,12 +53,14 @@ def tomato_daemon():
     parser.add_argument("--appdir", "-A", type=str, default=str(Path.cwd()))
 
     args = parser.parse_args()
-    settings = toml.load(Path(args.appdir) / "settings.toml")
 
-    daemon = Daemon(**vars(args), status="bootstrap", settings=settings)
+    daemon = Daemon(**vars(args), status="bootstrap", settings={})
+    cmd.reload(daemon)
     setup_logging(daemon)
     logger.info("logging set up with verbosity %s", daemon.verbosity)
 
+    # TODO: setup should not be a thing really.
+    cmd.setup(daemon=daemon)
     logger.debug("attempting to restore daemon state")
     io.load(daemon)
 

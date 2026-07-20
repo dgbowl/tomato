@@ -12,6 +12,15 @@ All functions in this module return a :class:`~tomato.models.Reply`.
 
 """
 
+import logging
+import tomato.daemon.io as io
+import tomato.daemon.jobdb as jobdb
+import tomato.utils
+import toml
+import yaml
+
+from pathlib import Path
+from pydantic import BaseModel
 from tomato.models import (
     Daemon,
     Driver,
@@ -21,12 +30,8 @@ from tomato.models import (
     Job,
     Component,
 )
-from pydantic import BaseModel
 from typing import Any
-import logging
 
-import tomato.daemon.io as io
-import tomato.daemon.jobdb as jobdb
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +77,35 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
         return Reply(success=True)
 
 
-def setup(msg: dict, daemon: Daemon) -> Reply:
+def setup(daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.setup")
-    logger.debug("%s", msg)
+
+    # TODO: Rework this!
+    devicefile = tomato.utils.load_device_file(
+        Path(daemon.settings["devices"]["config"]),
+        logger,
+    )
+    devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
+
+    pips, cmps = tomato.utils.get_pipelines(
+        devs,
+        devicefile["pipelines"],
+        logger,
+    )
+    drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
+
+    for drv in drvs.keys():
+        if drv in daemon.settings["drivers"]:
+            drvs[drv].settings.update(daemon.settings["drivers"][drv])
+
     if daemon.status == "bootstrap":
-        for key in ["drvs", "devs", "pips", "cmps"]:
-            setattr(daemon, key, msg[key])
+        for key, val in [
+            ("drvs", drvs),
+            ("devs", devs),
+            ("pips", pips),
+            ("cmps", cmps),
+        ]:
+            setattr(daemon, key, val)
         logger.info("setup successful with pipelines: '%s'", daemon.pips.keys())
         daemon.status = "running"
     else:
@@ -293,3 +321,14 @@ def _api(otype: str, msg: dict, ddict: dict[str, Any], Cls: BaseModel) -> Reply:
             msg=f"{otype} {obj['name']!r} updated",
             data=ddict[obj["name"]],
         )
+
+
+import toml
+
+
+def reload(daemon: Daemon, **kwargs: dict) -> Reply:
+    settings = toml.load(Path(daemon.appdir) / "settings.toml")
+    with open(settings["devices"]["config"], "r") as df:
+        settings["devicefile"] = yaml.safe_load(df)
+    daemon.settings = settings
+    return Reply(success=True, msg="daemon settings reloaded", data=settings)

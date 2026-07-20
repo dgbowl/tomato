@@ -109,7 +109,8 @@ class Daemon(BaseModel, arbitrary_types_allowed=True):
     port: int
     verbosity: int
     appdir: str
-    settings: dict
+    settings: dict = Field(default_factory=dict)
+    drivers: dict[str, int] = Field(default_factory=dict)
     pips: Mapping[str, Pipeline] = Field(default_factory=dict)
     devs: Mapping[str, Device] = Field(default_factory=dict)
     drvs: Mapping[str, Driver] = Field(default_factory=dict)
