@@ -55,13 +55,7 @@ def load_device_file(yamlpath: Path) -> dict:
         with yamlpath.open("r") as infile:
             jsdata = yaml.safe_load(infile)
     except FileNotFoundError:
-        logger.error("device file not found. Running with default devices.")
-        devpath = Path(__file__).parent / ".." / "data" / "default_devices.json"
-        with devpath.open() as inp:
-            jsdata = json.load(inp)
-        logger.debug("writing default devices to '%s'", yamlpath)
-        with yamlpath.open("w") as outfile:
-            yaml.dump(jsdata, outfile)
+        raise RuntimeError("Device file not found. Did you run 'tomato init'?")
     return jsdata
 
 
@@ -503,6 +497,24 @@ def init(
         os.makedirs(appdir)
     with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
         of.write(defaults)
+    devices = textwrap.dedent(
+        """\
+        devices:
+          - name: dev-counter
+            driver: example_counter
+            address: example-addr
+            channels: ["1"]
+            pollrate: 1.0
+        pipelines:
+          - name: pip-counter
+            devices:
+              - role: counter
+                device: dev-counter
+                channel: "1"
+        """
+    )
+    with (appdir / "devices.yml").open("w", encoding="utf-8") as of:
+        of.write(devices)
     if not logdir.exists():
         logger.debug("creating directory '%s'", logdir)
         os.makedirs(logdir)
