@@ -474,25 +474,32 @@ def reload(
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
+    logger.debug(f"status")
     ret = status(**kwargs)
     if not ret.success:
         return ret
+
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
+
+    logger.debug(f"reload")
+    req.send_pyobj(dict(cmd="reload", sender=f"{__name__}.reload"))
+    ret = req.recv_pyobj()
+    if ret.success is False:
+        return ret
+
+    logger.debug(f"setup")
     req.send_pyobj(dict(cmd="setup", sender=f"{__name__}.reload"))
     ret = req.recv_pyobj()
-    if ret.success:
-        return Reply(
-            success=True,
-            msg=f"tomato on port {port} reloaded with settings from {appdir}",
-            data=ret.data,
-        )
-    else:
-        return Reply(
-            success=False,
-            msg=f"tomato on port {port} could not be reloaded: {ret.msg}",
-            data=ret.data,
-        )
+    if ret.success is False:
+        return ret
+    logger.debug(f"done")
+
+    return Reply(
+        success=True,
+        msg=f"tomato on port {port} reloaded with settings from {appdir}",
+        data=ret.data,
+    )
 
 
 def pipeline_load(

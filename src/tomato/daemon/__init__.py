@@ -55,12 +55,12 @@ def tomato_daemon():
     args = parser.parse_args()
 
     daemon = Daemon(**vars(args), status="bootstrap", settings={})
-    cmd.reload(daemon)
+    cmd.reload(msg={}, daemon=daemon)
     setup_logging(daemon)
     logger.info("logging set up with verbosity %s", daemon.verbosity)
 
     # TODO: setup should not be a thing really.
-    cmd.setup(daemon=daemon)
+    cmd.setup(msg={}, daemon=daemon)
     logger.debug("attempting to restore daemon state")
     io.load(daemon)
 
@@ -78,6 +78,7 @@ def tomato_daemon():
     dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,), daemon=True)
     dmgr.do_run = True
     dmgr.start()
+    daemon.status = "running"
     t0 = time.process_time()
     while True:
         socks = dict(poller.poll(1000))

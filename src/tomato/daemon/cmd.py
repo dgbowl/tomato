@@ -77,7 +77,7 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
         return Reply(success=True)
 
 
-def setup(daemon: Daemon) -> Reply:
+def setup(msg: dict, daemon: Daemon) -> Reply:
     logger = logging.getLogger(f"{__name__}.setup")
 
     # TODO: Rework this!
@@ -98,6 +98,8 @@ def setup(daemon: Daemon) -> Reply:
         if drv in daemon.settings["drivers"]:
             drvs[drv].settings.update(daemon.settings["drivers"][drv])
 
+    logger
+
     if daemon.status == "bootstrap":
         for key, val in [
             ("drvs", drvs),
@@ -116,13 +118,13 @@ def setup(daemon: Daemon) -> Reply:
         for dpip in daemon.pips.values():
             if dpip.jobid is None:
                 continue
-            if dpip.name not in msg["pips"]:
+            if dpip.name not in pips:
                 return Reply(
                     success=False,
                     msg="reload would delete a running pipeline",
                     data=dpip,
                 )
-            pip = msg["pips"][dpip.name]
+            pip = pips[dpip.name]
             if pip.components != dpip.components:
                 return Reply(
                     success=False,
@@ -133,13 +135,13 @@ def setup(daemon: Daemon) -> Reply:
 
         for cname in check_components:
             dcomp = daemon.cmps[cname]
-            if cname not in msg["cmps"]:
+            if cname not in cmps:
                 return Reply(
                     success=False,
                     msg="reload would delete a component of a running pipeline",
                     data=dcomp,
                 )
-            comp = msg["cmps"][cname]
+            comp = cmps[cname]
             if (
                 dcomp.name != comp.name
                 or dcomp.driver != comp.driver
@@ -158,13 +160,13 @@ def setup(daemon: Daemon) -> Reply:
 
         for dname in check_devices:
             ddev = daemon.devs[dname]
-            if dname not in msg["devs"]:
+            if dname not in devs:
                 return Reply(
                     success=False,
                     msg="reload would delete a device of a component in a running pipeline",
                     data=ddev,
                 )
-            dev = msg["devs"][dname]
+            dev = devs[dname]
             if (
                 ddev.name != dev.name
                 or ddev.driver != dev.driver
@@ -180,13 +182,13 @@ def setup(daemon: Daemon) -> Reply:
 
         for dname in check_drivers:
             ddrv = daemon.drvs[dname]
-            if dname not in msg["drvs"]:
+            if dname not in drvs:
                 return Reply(
                     success=False,
                     msg="reload would delete a driver of a device in a running pipeline",
                     data=ddev,
                 )
-            drv = msg["drvs"][dname]
+            drv = drvs[dname]
             if ddrv.name != drv.name or ddrv.settings != drv.settings:
                 return Reply(
                     success=False,
@@ -194,14 +196,14 @@ def setup(daemon: Daemon) -> Reply:
                     data=ddrv,
                 )
 
-        _api_reload(msg["drvs"], daemon.drvs, "driver", ["settings"])
+        _api_reload(drvs, daemon.drvs, "driver", ["settings"])
 
-        _api_reload(msg["pips"], daemon.pips, "pipeline", ["components"])
+        _api_reload(pips, daemon.pips, "pipeline", ["components"])
 
         attrlist = ["driver", "device", "address", "channel", "role"]
-        _api_reload(msg["cmps"], daemon.cmps, "component", attrlist)
+        _api_reload(cmps, daemon.cmps, "component", attrlist)
 
-        _api_reload(msg["devs"], daemon.devs, "device", ["channels", "pollrate"])
+        _api_reload(devs, daemon.devs, "device", ["channels", "pollrate"])
 
         logger.info("reload successful with pipelines: '%s'", daemon.pips.keys())
     return Reply(success=True, data=daemon)
@@ -323,10 +325,7 @@ def _api(otype: str, msg: dict, ddict: dict[str, Any], Cls: BaseModel) -> Reply:
         )
 
 
-import toml
-
-
-def reload(daemon: Daemon, **kwargs: dict) -> Reply:
+def reload(msg: dict, daemon: Daemon, **kwargs: dict) -> Reply:
     settings = toml.load(Path(daemon.appdir) / "settings.toml")
     with open(settings["devices"]["config"], "r") as df:
         settings["devicefile"] = yaml.safe_load(df)
