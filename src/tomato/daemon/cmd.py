@@ -87,12 +87,8 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
         logger,
     )
 
-    try:
-        df = DeviceFile(filename=daemon.settings["devices"]["config"])
-        logger.critical(f"{df=}")
-    except Exception as e:
-        logger.critical(e)
-        return Reply(success=False, msg=str(e))
+    daemon.devicefile = DeviceFile(filename=daemon.settings["devices"]["config"])
+    logger.critical(f"{daemon.devicefile=}")
 
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
     pips, cmps = tomato.utils.get_pipelines(
@@ -111,7 +107,7 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
     if daemon.status == "bootstrap":
         for key, val in [
             ("drvs", drvs),
-            ("devs", devs),
+            # ("devs", devs),
             ("pips", pips),
             ("cmps", cmps),
         ]:
@@ -166,28 +162,6 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
             check_devices.add(dcomp.device)
             check_drivers.add(dcomp.driver)
 
-        for dname in check_devices:
-            ddev = daemon.devs[dname]
-            if dname not in devs:
-                return Reply(
-                    success=False,
-                    msg="reload would delete a device of a component in a running pipeline",
-                    data=ddev,
-                )
-            dev = devs[dname]
-            if (
-                ddev.name != dev.name
-                or ddev.driver != dev.driver
-                or ddev.address != dev.address
-                or ddev.pollrate != dev.pollrate
-                or any(ch not in dev.channels for ch in ddev.channels)
-            ):
-                return Reply(
-                    success=False,
-                    msg="reload would modify a device of a component in a running pipeline",
-                    data=ddev,
-                )
-
         for dname in check_drivers:
             ddrv = daemon.drvs[dname]
             if dname not in drvs:
@@ -210,8 +184,6 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
 
         attrlist = ["driver", "device", "address", "channel", "role"]
         _api_reload(cmps, daemon.cmps, "component", attrlist)
-
-        _api_reload(devs, daemon.devs, "device", ["channels", "pollrate"])
 
         logger.info("reload successful with pipelines: '%s'", daemon.pips.keys())
     return Reply(success=True, data=daemon)

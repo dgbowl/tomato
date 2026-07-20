@@ -35,7 +35,6 @@ def load(daemon: Daemon):
     with infile.open("rb") as inp:
         loaded = pickle.load(inp)
     daemon.pips = loaded.pips
-    daemon.devs = loaded.devs
     daemon.drvs = loaded.drvs
     for cmp in loaded.cmps:
         loaded.cmps[cmp].capabilities = None

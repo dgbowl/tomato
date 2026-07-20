@@ -288,7 +288,6 @@ def action_queued_jobs(daemon, matched, req, dbpath):
             jobargs = {
                 "pipeline": pip.model_dump(),
                 "payload": job.payload.model_dump(),
-                "devices": {dn: dev.model_dump() for dn, dev in daemon.devs.items()},
                 "repositories": repositories,
                 "job": dict(id=job.id, path=str(root)),
             }
@@ -764,7 +763,7 @@ def job_main_loop(
             continue
         tasks = plan[component.role]
         logger.debug(" tasks=%s", tasks)
-        device = daemon.devs[component.device]
+        device = daemon.devicefile.devices[component.device]
         logger.debug(" device=%s", device)
         driver = daemon.drvs[component.driver]
         logger.debug(" driver=%s", driver)
