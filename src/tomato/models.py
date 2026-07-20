@@ -5,12 +5,15 @@
     Peter Kraus
 """
 
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Any, Mapping, Sequence, Literal
+from pathlib import Path
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Optional, Any, Mapping, Sequence, Literal, Union
+from typing_extensions import Self
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Payload, Task
 import logging
 import pickle
+import yaml
 
 __all__ = ["Task"]
 logger = logging.getLogger(__name__)
@@ -121,3 +124,97 @@ class Reply(BaseModel):
     success: bool
     msg: Optional[str] = None
     data: Optional[Any] = None
+
+
+class _Pipeline(BaseModel):
+    name: str
+    components: Mapping[str, str]
+
+
+class _Component(BaseModel):
+    name: str
+    driver: str
+    address: str
+    channel: Optional[str] = None
+
+
+class DeviceFile(BaseModel):
+    filename: Path
+    components: dict[str, _Component] = Field(default_factory=dict)
+    devices: dict[str, Device] = Field(default_factory=dict)
+    pipelines: dict[str, _Pipeline] = Field(default_factory=dict)
+
+    @field_validator("filename", mode="before")
+    @classmethod
+    def coerce_filename(cls, val: Union[str, Path]) -> Path:
+        if isinstance(val, str):
+            return Path(val)
+        return val
+
+    @field_validator("filename", mode="after")
+    @classmethod
+    def filename_exists(cls, val: Path) -> Path:
+        assert val.exists(), f"filename {val!r} does not exist"
+        return val
+
+    @model_validator(mode="after")
+    def populate_attrs(self) -> Self:
+        with self.filename.open("r") as inf:
+            jsdata = yaml.safe_load(inf)
+
+        devices = jsdata.get("devices", {})
+        pipelines = jsdata.get("pipelines", {})
+
+        # populate devices
+        self.devices = {d["name"]: Device(**d) for d in devices}
+
+        for pip in pipelines:
+            if pip["name"].endswith("*"):
+                assert len(pip["devices"]) == 1, (
+                    f"only one component allowd in wildcard pipelines."
+                )
+                for comp in pip["devices"]:
+                    assert comp["device"] in self.devices, (
+                        f"device {comp['device']!r} is not specified."
+                    )
+                    dev = self.devices[comp["device"]]
+                    assert comp["channel"] == "each", (
+                        f"channel specification must be 'each', not {comp['chanel']!r}."
+                    )
+                    for ch in dev.channels:
+                        pname = pip["name"].replace("*", ch)
+                        cname = f"{dev.driver}:({dev.address},{ch})"
+                        self.components[cname] = _Component(
+                            name=cname,
+                            driver=dev.driver,
+                            address=dev.address,
+                            channel=ch,
+                        )
+                        self.pipelines[pname] = _Pipeline(
+                            name=pname,
+                            components={comp["role"]: cname},
+                        )
+            else:
+                cmps = {}
+                for comp in pip["devices"]:
+                    assert comp["device"] in self.devices, (
+                        f"device {comp['device']!r} is not specified."
+                    )
+                    dev = self.devices[comp["device"]]
+                    # TODO: implement optional channels here
+                    assert str(comp["channel"]) in dev.channels, (
+                        f"channel {comp['channel']} is not among "
+                        f"device channels {dev.channels}."
+                    )
+                    cname = f"{dev.driver}:({dev.address},{comp['channel']})"
+                    self.components[cname] = _Component(
+                        name=cname,
+                        driver=dev.driver,
+                        address=dev.address,
+                        channel=comp["channel"],
+                    )
+                    cmps[comp["role"]] = cname
+                self.pipelines[pip["name"]] = _Pipeline(
+                    name=pip["name"],
+                    components=cmps,
+                )

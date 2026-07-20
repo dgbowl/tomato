@@ -29,6 +29,7 @@ from tomato.models import (
     Pipeline,
     Job,
     Component,
+    DeviceFile,
 )
 from typing import Any
 
@@ -86,6 +87,9 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
         logger,
     )
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
+
+    df = DeviceFile(filename=daemon.settings["devices"]["config"])
+    logger.critical(f"{df=}")
 
     pips, cmps = tomato.utils.get_pipelines(
         devs,
