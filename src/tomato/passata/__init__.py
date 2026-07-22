@@ -1,7 +1,9 @@
-import zmq
-from tomato import tomato
-from tomato.models import Reply, Component, Driver
 from typing import Any
+
+import zmq
+
+from tomato import tomato
+from tomato.models import Component, Daemon, Reply, SpawnData
 
 RCVTIMEO = 3000
 
@@ -11,20 +13,21 @@ def _name_to_cmp(
     port: int,
     timeout: int,
     context: zmq.Context,
-) -> tuple[Component, Driver]:
+) -> tuple[Component, SpawnData] | Reply:
     ret = tomato.status(
         port=port, timeout=timeout, context=context, stgrp="tomato", yaml=True
     )
-    if not ret.success:
+    if ret.success is False or ret.data is None:
         return ret
-    if name not in ret.data.cmps:
+    daemon: Daemon = ret.data
+    if name not in daemon.devicefile.components:
         return Reply(
             success=False,
             msg=f"component {name!r} not found on tomato",
             data=ret.data,
         )
-    cmp = ret.data.cmps[name]
-    drv = ret.data.drivers[cmp.driver]
+    cmp = daemon.devicefile.components[name]
+    drv = daemon.drivers[cmp.driver]
     return cmp, drv
 
 
@@ -37,7 +40,7 @@ def _running_or_force(
 ) -> Reply:
     if not force:
         ret = status(port=port, timeout=timeout, context=context, name=name)
-        if not ret.success:
+        if not ret.success or ret.data is None:
             return Reply(
                 success=False,
                 msg="will not 'set_attr' on a component with invalid status",

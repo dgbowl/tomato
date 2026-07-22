@@ -1,8 +1,9 @@
 import os
-import pytest
-import subprocess
-import psutil
 import shutil
+import subprocess
+
+import psutil
+import pytest
 
 from . import utils
 

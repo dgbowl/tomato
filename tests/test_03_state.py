@@ -1,11 +1,13 @@
-import os
-from pathlib import Path
-import zmq
-import time
-import psutil
 import logging
+import os
+import time
+from pathlib import Path
+
+import psutil
+import zmq
 
 from tomato import ketchup, tomato
+
 from . import utils
 
 PORT = 12345
@@ -158,7 +160,7 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
     assert ret.success
     print(f"{ret.data=}")
 
-    pid = ret.data["example_counter"].pid
+    pid = ret.data["example_counter"]["pid"]
     p = psutil.Process(pid)
     p.terminate()
     gone, alive = psutil.wait_procs([p], timeout=5)
@@ -169,7 +171,7 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
     ret = tomato.status(**kwargs, stgrp="drivers")
     assert ret.success
     print(f"{ret.data=}")
-    assert pid != ret.data["example_counter"].pid
+    assert pid != ret.data["example_counter"]["pid"]
 
 
 def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -188,7 +190,7 @@ def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daem
     ret = tomato.status(**kwargs, stgrp="drivers")
     assert ret.success
     print(f"{ret.data=}")
-    pid = ret.data["example_counter"].pid
+    pid = ret.data["example_counter"]["pid"]
     p = psutil.Process(pid)
     p.terminate()
     gone, alive = psutil.wait_procs([p], timeout=5)

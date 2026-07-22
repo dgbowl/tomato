@@ -6,11 +6,13 @@
 
 """
 
-import pickle
-import logging
-import xarray as xr
 import importlib.metadata
+import logging
+import pickle
 from pathlib import Path
+
+import xarray as xr
+
 from tomato.models import Daemon, Job
 
 logger = logging.getLogger(__name__)
@@ -35,10 +37,6 @@ def load(daemon: Daemon):
     with infile.open("rb") as inp:
         loaded = pickle.load(inp)
     daemon.pips = loaded.pips
-    # daemon.drvs = loaded.drvs
-    for cmp in loaded.cmps:
-        loaded.cmps[cmp].capabilities = None
-    daemon.cmps = loaded.cmps
     daemon.status = "running"
 
 

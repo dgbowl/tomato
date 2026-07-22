@@ -7,13 +7,14 @@
 
 import logging
 import pickle
+from pathlib import Path
+from typing import Any, Literal, Optional, Sequence, Union
+
 import toml
 import yaml
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Payload, Task
-from pathlib import Path
 from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import Any, Literal, Mapping, Optional, Sequence, Union
 from typing_extensions import Self
 
 __all__ = ["Task"]
@@ -26,25 +27,6 @@ class Device(BaseModel):
     address: str
     channels: Sequence[str]
     pollrate: int = 1
-
-
-class Component(BaseModel):
-    name: str
-    driver: str
-    device: str
-    address: str
-    channel: str
-    role: str
-    capabilities: Optional[set[str]] = None
-
-    @field_validator("role", mode="after")
-    def check_role(cls, value):
-        if "/" in value:
-            raise ValueError(
-                f"Cannot have '/' as part of component.role: {value!r}, "
-                "please fix your devices.yml file accordingly and run 'tomato reload'."
-            )
-        return value
 
 
 class Pipeline(BaseModel):
@@ -88,7 +70,7 @@ class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
     drivers: dict[str, "SpawnData"] = Field(default_factory=dict)
     pips: dict[str, Pipeline] = Field(default_factory=dict)
     # drvs: Mapping[str, Driver] = Field(default_factory=dict)
-    cmps: dict[str, Component] = Field(default_factory=dict)
+    # cmps: dict[str, Component] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
@@ -126,11 +108,13 @@ class Reply(BaseModel):
 
 class _Pipeline(BaseModel):
     name: str
-    components: Mapping[str, str]
+    components: dict[str, str]
+    """Mapping of component roles to names."""
 
 
-class _Component(BaseModel):
+class Component(BaseModel):
     name: str
+    device: str
     driver: str
     address: str
     channel: Optional[str] = None
@@ -153,7 +137,7 @@ class SpawnData(BaseModel):
 
 class DeviceFile(BaseModel):
     filename: Path
-    components: dict[str, _Component] = Field(default_factory=dict)
+    components: dict[str, Component] = Field(default_factory=dict)
     devices: dict[str, Device] = Field(default_factory=dict)
     drivers: dict[str, Driver] = Field(default_factory=dict)
     pipelines: dict[str, _Pipeline] = Field(default_factory=dict)
@@ -198,8 +182,9 @@ class DeviceFile(BaseModel):
                     for ch in dev.channels:
                         pname = pip["name"].replace("*", ch)
                         cname = f"{dev.driver}:({dev.address},{ch})"
-                        self.components[cname] = _Component(
+                        self.components[cname] = Component(
                             name=cname,
+                            device=dev.name,
                             driver=dev.driver,
                             address=dev.address,
                             channel=ch,
@@ -221,8 +206,9 @@ class DeviceFile(BaseModel):
                         f"device channels {dev.channels}."
                     )
                     cname = f"{dev.driver}:({dev.address},{comp['channel']})"
-                    self.components[cname] = _Component(
+                    self.components[cname] = Component(
                         name=cname,
+                        device=dev.name,
                         driver=dev.driver,
                         address=dev.address,
                         channel=comp["channel"],

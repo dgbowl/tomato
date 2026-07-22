@@ -24,12 +24,14 @@ import logging
 import os
 import textwrap
 import time
-import toml
-import zmq
 from collections import defaultdict
 from datetime import datetime, timezone
 from importlib import metadata
 from pathlib import Path
+
+import toml
+import zmq
+
 from tomato.daemon.jobdb import jobdb_setup
 from tomato.models import Daemon, Reply
 from tomato.utils import spawn_cmd
@@ -97,24 +99,6 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str) -> Reply:
                 msg = f"tomato running on port {daemon.port} with the following devices:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "components":
-        if yaml:
-            rep = Reply(
-                success=True,
-                msg=f"tomato running on port {daemon.port}",
-                data=daemon.cmps,
-            )
-        else:
-            ii = make_padded_lines(
-                daemon.cmps,
-                ["name", "driver", "device", "role", "capabilities"],
-            )
-            if len(ii) == 0:
-                msg = f"tomato running on port {daemon.port} with no components"
-            else:
-                msg = f"tomato running on port {daemon.port} with the following components:\n\t "
-                msg += "\n\t ".join(ii)
-            rep = Reply(success=True, msg=msg)
     return rep
 
 
@@ -126,9 +110,15 @@ def make_padded_lines(data: dict, keys: list) -> list:
     for obj in data.values():
         for key in keys:
             if key == "heartbeat":
-                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+                if isinstance(obj, dict):
+                    val = f"{tN - obj['heartbeat_time']:<.1f} s"
+                else:
+                    val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
             else:
-                val = str(getattr(obj, key))
+                if isinstance(obj, dict):
+                    val = str(obj[key])
+                else:
+                    val = str(getattr(obj, key))
             temp[key].append(len(val))
     for key in keys:
         maxlen[key] = max(temp[key])
@@ -136,9 +126,15 @@ def make_padded_lines(data: dict, keys: list) -> list:
         line = ""
         for key in keys:
             if key == "heartbeat":
-                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+                if isinstance(obj, dict):
+                    val = f"{tN - obj['heartbeat_time']:<.1f} s"
+                else:
+                    val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
             else:
-                val = str(getattr(obj, key))
+                if isinstance(obj, dict):
+                    val = str(obj[key])
+                else:
+                    val = str(getattr(obj, key))
             line += f"{key}:{val:<{maxlen[key] + 2}}"
         lines.append(line)
     return lines
@@ -250,7 +246,28 @@ def status(
             )
         elif stgrp == "drivers":
             keys = ["name", "port", "pid", "version", "heartbeat"]
-            rets = daemon.drivers
+            rets = {k: v.model_dump() for k, v in daemon.drivers.items()}
+            return Reply(
+                success=True,
+                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+                data=rets,
+            )
+        elif stgrp == "components":
+            keys = ["name", "driver", "device", "role", "capabilities"]
+            rets = {k: v.model_dump() for k, v in daemon.devicefile.components.items()}
+            for ckey, cval in rets.items():
+                drv = daemon.drivers[cval["driver"]]
+                dreq = context.socket(zmq.REQ)
+                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                params = dict(address=cval["address"], channel=cval["channel"])
+                dreq.send_pyobj(dict(cmd="cmp_capabilities", params=params))
+                dret = dreq.recv_pyobj()
+                if dret.success and dret.data is not None and len(dret.data) > 0:
+                    rets[ckey]["capabilities"] = dret.data
+                else:
+                    rets[ckey]["capabilities"] = None
+                rets[ckey]["role"] = None
+                dreq.close()
             return Reply(
                 success=True,
                 msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),

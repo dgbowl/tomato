@@ -13,11 +13,14 @@ All functions in this module return a :class:`~tomato.models.Reply`.
 """
 
 import logging
+from pathlib import Path
+from typing import Any
+
+from pydantic import BaseModel
+
 import tomato.daemon.io as io
 import tomato.daemon.jobdb as jobdb
 import tomato.utils
-from pathlib import Path
-from pydantic import BaseModel
 from tomato.models import (
     Component,
     Daemon,
@@ -27,7 +30,6 @@ from tomato.models import (
     Reply,
     SpawnData,
 )
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +99,7 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
             # ("drvs", drvs),
             # ("devs", devs),
             ("pips", pips),
-            ("cmps", cmps),
+            # ("cmps", cmps),
         ]:
             setattr(daemon, key, val)
 
@@ -124,7 +126,6 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
         ndf = nd.devicefile
         # First, check that we're not touching anything associated with a running job
         check_components = set()
-        check_devices = set()
         check_drivers = set()
         for dpip in daemon.pips.values():
             logger.debug(f"{dpip=}")
@@ -146,7 +147,7 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
             check_components.update(dpip.components)
 
         for cname in check_components:
-            dcomp = daemon.cmps[cname]
+            dcomp = daemon.devicefile.components[cname]
             if cname not in cmps:
                 return Reply(
                     success=False,
@@ -157,17 +158,14 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
             if (
                 dcomp.name != comp.name
                 or dcomp.driver != comp.driver
-                or dcomp.device != comp.device
                 or dcomp.address != comp.address
                 or dcomp.channel != comp.channel
-                or dcomp.role != comp.role
             ):
                 return Reply(
                     success=False,
                     msg="reload would modify a component of a running pipeline",
                     data=dcomp,
                 )
-            check_devices.add(dcomp.device)
             check_drivers.add(dcomp.driver)
 
         for dname in check_drivers:
@@ -188,8 +186,7 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
         logger.critical("goint into api reload")
 
         _api_reload(pips, daemon.pips, "pipeline", ["components"])
-        attrlist = ["driver", "device", "address", "channel", "role"]
-        _api_reload(cmps, daemon.cmps, "component", attrlist)
+
         # Add new drivers, they will be spawned by driver.manager
         for dname in ndf.drivers.keys():
             if dname not in daemon.drivers:

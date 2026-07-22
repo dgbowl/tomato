@@ -1,8 +1,9 @@
 import logging
 import os
-import psutil
 import subprocess
 import time
+
+import psutil
 import xarray as xr
 import yaml
 
@@ -40,7 +41,7 @@ def wait_until_tomato_running(port: int, timeout: int):
             capture_output=True,
             text=True,
         )
-        logger.info("\n" + ret.stdout)
+        logger.debug("\n" + ret.stdout)
         if "Success" in ret.stdout:
             return True
         time.sleep(0.1)
@@ -55,7 +56,7 @@ def wait_until_tomato_drivers(port: int, timeout: int):
             capture_output=True,
             text=True,
         )
-        logger.info("\n" + ret.stdout)
+        logger.debug("\n" + ret.stdout)
         yml = yaml.safe_load(ret.stdout)
         for name, drv in yml["data"].items():
             if drv["port"] is None:
@@ -74,7 +75,7 @@ def wait_until_tomato_components(port: int, timeout: int):
             capture_output=True,
             text=True,
         )
-        logger.info("\n" + ret.stdout)
+        logger.debug("\n" + ret.stdout)
         yml = yaml.safe_load(ret.stdout)
         for name, cmp in yml["data"].items():
             if cmp["capabilities"] is None:

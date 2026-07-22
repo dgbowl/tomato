@@ -1,11 +1,12 @@
-import pytest
+import json
 import os
 import subprocess
-import json
+
+import pytest
 import yaml
 import zmq
-from tomato import tomato
 
+from tomato import tomato
 
 from . import utils
 
@@ -57,7 +58,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
 
     ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
     assert ret.success
-    assert ret.data["psutil"].version == "2.1"
+    assert ret.data["psutil"]["version"] == "2.1"
 
     ret = subprocess.run(
         ["passata", "status", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
