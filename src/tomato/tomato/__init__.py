@@ -54,7 +54,7 @@ def _updater(context, port, cmd, params):
     return ret
 
 
-def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
+def _status_helper(daemon: Daemon, yaml: bool, stgrp: str) -> Reply:
     if stgrp == "tomato":
         rep = Reply(
             success=True,
@@ -243,7 +243,7 @@ def status(
         daemon: Daemon = rep.data
         msg = f"tomato running on port {daemon.port}"
         if stgrp == "tomato":
-            rep = Reply(
+            return Reply(
                 success=True,
                 msg=f"tomato running on port {daemon.port}",
                 data=daemon,
