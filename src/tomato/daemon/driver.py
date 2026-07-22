@@ -6,31 +6,29 @@
 
 """
 
-import os
-import subprocess
-import logging
-import time
 import argparse
-from importlib import metadata
-from collections import defaultdict
-from datetime import datetime, timezone
-from threading import current_thread
-from pathlib import Path
-from typing import Union, TypeVar
-
-import zmq
+import logging
 import psutil
-
-from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
-from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
-from tomato.drivers import driver_to_interface
-from tomato.models import Reply, Daemon
+import subprocess
+import time
+import tomato.utils
+import zmq
+from collections import defaultdict
+from importlib import metadata
+from pathlib import Path
+from threading import current_thread
 from tomato.daemon import lpp
+from tomato.drivers import ModelInterface, driver_to_interface
+from tomato.models import Daemon, Reply, SpawnData
+from typing import Union
 
 logger = logging.getLogger(__name__)
-ModelInterface = TypeVar("ModelInterface", MI_2_0, MI_2_1)
 IDLE_MEASUREMENT_INTERVAL = None
 MAX_REGISTER_RETRIES = 3
+
+SPAWN_RETRIES = 3
+SPAWN_DELAY = 5.0
+HEARTBEAT = 5.0
 
 
 def tomato_driver_bootstrap(
@@ -50,7 +48,10 @@ def tomato_driver_bootstrap(
                     comp.name,
                 )
                 continue
-            elif interface.retries.get(key, 0) == MAX_REGISTER_RETRIES:
+            elif (
+                hasattr(interface, "retries")
+                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES
+            ):
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
                     comp.name,
@@ -117,6 +118,23 @@ def kill_tomato_driver(pid: int):
     return gone
 
 
+def driver_heartbeat(
+    req: zmq.Socket, params: dict, HEARTBEAT: float = HEARTBEAT
+) -> Reply | None:
+    tN = time.perf_counter()
+    if tN - params["heartbeat_time"] > HEARTBEAT:
+        sender = f"{__name__}.driver_heartbeat"
+        logger = logging.getLogger(sender)
+        logger.critical("heartbeating driver '%s'", params["name"])
+        params["heartbeat_time"] = tN
+        req.send_pyobj(dict(cmd="driver_set", params=params, sender=sender))
+        ret = req.recv_pyobj()
+        if ret.success:
+            logger.debug("heartbeat of driver '%s' successful", params["name"])
+        else:
+            logger.warning("heartbeat of driver '%s' failed", params["name"])
+
+
 def tomato_driver() -> None:
     """
     The function called when `tomato-driver` is executed.
@@ -166,7 +184,7 @@ def tomato_driver() -> None:
     args = parser.parse_args()
 
     # LOGFILE
-    logfile = f"driver_{args.driver}_{args.port}.log"
+    logfile = f"tomato_daemon_{args.port}_driver_{args.driver}.log"
     logpath = Path(args.logdir) / logfile
     logger = logging.getLogger(f"{__name__}.tomato_driver({args.driver!r})")
     logging.basicConfig(
@@ -182,18 +200,6 @@ def tomato_driver() -> None:
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{args.port}")
 
-    logger.debug("getting pid")
-    if psutil.WINDOWS:
-        pid = os.getpid()
-        thispid = os.getpid()
-        thisproc = psutil.Process(thispid)
-        for p in thisproc.parents():
-            if p.name() == "tomato-driver.exe":
-                pid = p.pid
-                break
-    elif psutil.POSIX:
-        pid = os.getpid()
-
     logger.info("attempting to create Interface for driver '%s'", args.driver)
     Interface = driver_to_interface(args.driver)
     if Interface is None:
@@ -203,28 +209,24 @@ def tomato_driver() -> None:
     logger.debug("getting daemon status")
     req.send_pyobj(dict(cmd="status"))
     daemon: Daemon = req.recv_pyobj().data
-    drv = daemon.drvs[args.driver]
+    settings = daemon.devicefile.drivers[args.driver].settings
     try:
-        interface: ModelInterface = Interface(settings=drv.settings)
+        interface = Interface(settings=settings)  # ty: ignore[call-non-callable]
     except Exception as e:
         logger.critical(
             "could not instantiate driver '%s': %s", args.driver, e, exc_info=True
         )
         raise RuntimeError("could not instantiate driver '%s'") from e
 
-    params = dict(
-        name=args.driver,
-        port=port,
-        pid=pid,
-        connected_at=str(datetime.now(timezone.utc)),
-        version=interface.version,
-        settings=interface.settings,
-    )
-    req.send_pyobj(
-        dict(cmd="driver", params=params, sender=f"{__name__}.tomato_driver")
-    )
-    ret = req.recv_pyobj()
-    if not ret.success:
+    hb_pars = {
+        "name": args.driver,
+        "port": port,
+        "version": Interface.version,
+        "pid": tomato.utils.get_pid(),
+        "heartbeat_time": 0,
+    }
+    ret = driver_heartbeat(req, hb_pars)
+    if ret is not None and not ret.success:
         logger.error("could not push driver '%s' state to tomato-daemon", args.driver)
         logger.debug(f"{ret=}")
         return
@@ -267,7 +269,6 @@ def tomato_driver() -> None:
                     )
                 elif msg["cmd"] == "settings":
                     interface.settings = msg["params"]
-                    params["settings"] = interface.settings
                     ret = Reply(
                         success=True,
                         msg="settings received",
@@ -282,7 +283,8 @@ def tomato_driver() -> None:
                         ret = req.recv_pyobj()
                 elif hasattr(interface, msg["cmd"]):
                     try:
-                        ret = getattr(interface, msg["cmd"])(**msg["params"])
+                        # ret = getattr(interface, msg["cmd"])(**msg["params"])
+                        ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
                     except (ValueError, AttributeError) as e:
                         logger.info("above error caught by driver process")
                         ret = Reply(
@@ -306,6 +308,7 @@ def tomato_driver() -> None:
                     t_last = perform_idle_measurements(interface, t_last)
                 except (RuntimeError, ValueError, AttributeError):
                     logger.info("above error caught by driver process")
+                    driver_heartbeat(req, hb_pars)
     except Exception as e:
         logger.critical("uncaught exception %s", type(e), exc_info=True)
         raise e
@@ -314,40 +317,6 @@ def tomato_driver() -> None:
     interface.quit()
 
     logger.info("driver '%s' is quitting", args.driver)
-
-
-def spawn_tomato_driver(
-    port: int, driver: str, req: zmq.Socket, verbosity: int, logpath: str
-):
-    cmd = [
-        "tomato-driver",
-        "--port",
-        str(port),
-        "--verbosity",
-        str(verbosity),
-        "--logdir",
-        str(logpath),
-        driver,
-    ]
-    if psutil.WINDOWS:
-        cfs = subprocess.CREATE_NO_WINDOW
-        cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
-        subprocess.Popen(cmd, creationflags=cfs)
-    elif psutil.POSIX:
-        subprocess.Popen(cmd, start_new_session=True)
-    params = dict(name=driver, spawned_at=str(datetime.now(timezone.utc)))
-    req.send_pyobj(
-        dict(
-            cmd="driver",
-            params=params,
-            sender=f"{__name__}.spawn_tomato_driver",
-        )
-    )
-    ret = req.recv_pyobj()
-    if ret.success:
-        logger.info("driver process for driver '%s' launched", driver)
-    else:
-        logger.error("could not launch driver process for driver '%s'", driver)
 
 
 def stop_tomato_driver(port: int, context):
@@ -378,81 +347,80 @@ def manager(port: int, timeout: int = 1000):
         timeout=timeout,
     )
 
-    spawned_drivers = dict()
-    driver_retries = defaultdict(int)
     component_retries = defaultdict(int)
 
     while getattr(thread, "do_run"):
+        spawned_drivers = []
         msg = dict(cmd="status", sender=sender)
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
-            thread.do_run = False
+            setattr(thread, "do_run", False)
             break
-        if ret.success:
+        if ret.success and ret.data is not None:
             daemon: Daemon = ret.data
         else:
             logger.critical(ret.msg)
-            thread.do_run = False
+            setattr(thread, "do_run", False)
             break
 
-        for driver in daemon.drvs.keys():
-            args = [
-                daemon.port,
-                driver,
-                req,
-                daemon.verbosity,
-                daemon.settings["logdir"],
-            ]
-            if driver not in daemon.drvs:
-                logger.debug("spawning driver '%s'", driver)
-                spawn_tomato_driver(*args)
-                spawned_drivers[driver] = 1
-            elif driver not in spawned_drivers or spawned_drivers[driver] > 5:
-                drv = daemon.drvs[driver]
-                if drv.pid is not None and (
-                    not psutil.pid_exists(drv.pid)
-                    or psutil.Process(drv.pid).status() in psutil.STATUS_ZOMBIE
-                ):
-                    # this happens when a fully-registered driver has crashed
-                    logger.warning("respawning crashed driver '%s'", driver)
-                    spawn_tomato_driver(*args)
-                    spawned_drivers[driver] = 1
-                elif drv.pid is None and drv.spawned_at is None:
-                    # this happens when spawn_tomato_driver crashed for some reason
-                    # as drv.spawned_at is set in spawn_tomato_driver
-                    retry = driver_retries[driver]
-                    if retry < MAX_REGISTER_RETRIES:
-                        logger.info("spawning driver '%s' (retry %d)", driver, retry)
-                        spawn_tomato_driver(*args)
-                        driver_retries[driver] += 1
-                    elif retry == MAX_REGISTER_RETRIES:
-                        logger.warning(
-                            "driver '%s' reached maximum spawn retries, check config",
-                            driver,
-                        )
-                        driver_retries[driver] += 1
-                    spawned_drivers[driver] = 1
-                elif drv.pid is None and drv.connected_at is None:
-                    # this happens when tomato-driver was launched but did not
-                    # report to tomato-daemon for some reason
-                    retry = driver_retries[driver]
-                    if retry < MAX_REGISTER_RETRIES:
-                        logger.info("spawning driver '%s' (retry %d)", driver, retry)
-                        spawn_tomato_driver(*args)
-                        driver_retries[driver] += 1
-                    elif retry == MAX_REGISTER_RETRIES:
-                        logger.warning(
-                            "driver '%s' reached maximum spawn retries, see driver log",
-                            driver,
-                        )
-                        driver_retries[driver] += 1
-                    spawned_drivers[driver] = 1
-                elif driver in spawned_drivers:
-                    logger.info("driver '%s' spawned with pid %d", driver, drv.pid)
-                    spawned_drivers.pop(driver)
-            elif driver in spawned_drivers:
-                spawned_drivers[driver] += 1
+        for n, d in daemon.drivers.items():
+            tN = time.perf_counter()
+            if n not in daemon.devicefile.drivers:
+                if d.port is not None:
+                    logger.warning("stopping driver '%s", n)
+                    ret = stop_tomato_driver(d.port, context)
+                req.send_pyobj(dict(cmd="driver_del", params={"name": n}))
+                ret = req.recv_pyobj()
+                logger.warning("removed driver '%s'", n)
+            elif d.port is not None:
+                logger.debug("checking driver '%s' on port %d", d.name, d.port)
+                if tN - d.heartbeat_time > HEARTBEAT:
+                    try:
+                        logger.debug("heartbeat driver '%s' on port %d", d.name, d.port)
+                        dreq = context.socket(zmq.REQ)
+                        dreq.RCVTIMEO = 1000
+                        dreq.connect(f"tcp://127.0.0.1:{d.port}")
+                        dreq.send_pyobj(dict(cmd="status"))
+                        ret = dreq.recv_pyobj()
+                        params = {"name": d.name, "heartbeat_time": tN}
+                        d.heartbeat_time = tN
+                    except zmq.error.Again:
+                        logger.warning("check of driver '%s' failed, resetting", d.name)
+                        params = vars(SpawnData(name=d.name))
+                    except Exception as e:
+                        logger.critical(e)
+                        raise e
+                    req.send_pyobj(dict(cmd="driver_set", params=params))
+                    ret = req.recv_pyobj()
+            elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
+                logger.info("spawning driver '%s', retry %d", d.name, d.spawn_count)
+                cmd = [
+                    "tomato-driver",
+                    "--port",
+                    f"{daemon.port}",
+                    "--verbosity",
+                    f"{daemon.verbosity}",
+                    "--logdir",
+                    daemon.settings["logdir"],
+                    d.name,
+                ]
+                if psutil.WINDOWS:
+                    cfs = subprocess.CREATE_NO_WINDOW
+                    cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
+                    subprocess.Popen(cmd, creationflags=cfs)
+                elif psutil.POSIX:
+                    subprocess.Popen(cmd, start_new_session=True)
+                logger.info("process for driver '%s' launched", d.name)
+                params = {
+                    "name": d.name,
+                    "spawn_time": tN,
+                    "spawn_count": d.spawn_count + 1,
+                }
+                req.send_pyobj(dict(cmd="driver_set", params=params))
+                ret = req.recv_pyobj()
+                spawned_drivers.append(d.name)
 
+        # TODO: component registration
         if len(spawned_drivers) == 0:
             contact_drivers = set()
             for comp in daemon.cmps.values():
@@ -461,7 +429,10 @@ def manager(port: int, timeout: int = 1000):
                     if component_retries[key] < MAX_REGISTER_RETRIES:
                         contact_drivers.add(comp.driver)
             for driver in contact_drivers:
-                drv = daemon.drvs[driver]
+                if driver not in daemon.drivers:
+                    logger.critical("driver %s disappeared: %s", driver, daemon.drivers)
+                    continue
+                drv = daemon.drivers[driver]
                 if drv.port is None:
                     continue
                 logger.info("contacting driver '%s' to re-register components", driver)
@@ -476,7 +447,7 @@ def manager(port: int, timeout: int = 1000):
     logger.info("instructed to quit")
     req.send_pyobj(dict(cmd="status", sender=sender))
     daemon = req.recv_pyobj().data
-    for driver in daemon.drvs.values():
+    for driver in daemon.drivers.values():
         if driver.pid is None:
             logger.info(
                 "stopping driver '%s' - no action (no pid)",
@@ -499,10 +470,6 @@ def manager(port: int, timeout: int = 1000):
                 driver.port,
             )
             ret = stop_tomato_driver(driver.port, context)
-            if ret.success:
-                params = dict(name=driver.name, port=None)
-                req.send_pyobj(dict(cmd="driver", params=params))
-                ret = req.recv_pyobj()
 
         if ret.success:
             logger.info("stopped driver '%s'", driver.name)

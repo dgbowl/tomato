@@ -5,25 +5,19 @@
     Peter Kraus
 """
 
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Any, Mapping, Sequence, Literal
-from dgbowl_schemas.tomato import to_payload
-from dgbowl_schemas.tomato.payload import Payload, Task
 import logging
 import pickle
+import toml
+import yaml
+from dgbowl_schemas.tomato import to_payload
+from dgbowl_schemas.tomato.payload import Payload, Task
+from pathlib import Path
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Any, Literal, Mapping, Optional, Sequence, Union
+from typing_extensions import Self
 
 __all__ = ["Task"]
 logger = logging.getLogger(__name__)
-
-
-class Driver(BaseModel):
-    name: str
-    version: Optional[str] = None
-    port: Optional[int] = None
-    pid: Optional[int] = None
-    spawned_at: Optional[str] = None
-    connected_at: Optional[str] = None
-    settings: Mapping[str, Any] = Field(default_factory=dict)
 
 
 class Device(BaseModel):
@@ -32,16 +26,6 @@ class Device(BaseModel):
     address: str
     channels: Sequence[str]
     pollrate: int = 1
-
-    @field_validator("channels", mode="before")
-    def coerce_channels(cls, v):
-        if any([isinstance(vv, int) for vv in v]):
-            logger.warning(
-                "Supplying 'channels' as a Sequence[int] is deprecated "
-                "and will stop working in tomato-2.0."
-            )
-            return [str(vv) for vv in v]
-        return v
 
 
 class Component(BaseModel):
@@ -52,16 +36,6 @@ class Component(BaseModel):
     channel: str
     role: str
     capabilities: Optional[set[str]] = None
-
-    @field_validator("channel", mode="before")
-    def coerce_channel(cls, v):
-        if isinstance(v, int):
-            logger.warning(
-                "Supplying 'channel' as an int is deprecated "
-                "and will stop working in tomato-3.0."
-            )
-            return str(v)
-        return v
 
     @field_validator("role", mode="after")
     def check_role(cls, value):
@@ -104,19 +78,162 @@ class Job(BaseModel):
         return v
 
 
-class Daemon(BaseModel, arbitrary_types_allowed=True):
+class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
     status: Literal["bootstrap", "running", "stop"]
     port: int
     verbosity: int
     appdir: str
-    settings: dict
-    pips: Mapping[str, Pipeline] = Field(default_factory=dict)
-    devs: Mapping[str, Device] = Field(default_factory=dict)
-    drvs: Mapping[str, Driver] = Field(default_factory=dict)
-    cmps: Mapping[str, Component] = Field(default_factory=dict)
+    settings: dict = Field(default_factory=dict)
+    devicefile: "DeviceFile" = Field(default_factory="DeviceFile")
+    drivers: dict[str, "SpawnData"] = Field(default_factory=dict)
+    pips: dict[str, Pipeline] = Field(default_factory=dict)
+    # drvs: Mapping[str, Driver] = Field(default_factory=dict)
+    cmps: dict[str, Component] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_devicefile(cls, data: Any) -> Any:
+        if data.get("devicefile") is not None:
+            pass
+        else:
+            data["devicefile"] = DeviceFile(
+                filename=data["settings"]["devices"]["config"]
+            )
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_settings(cls, data: Any) -> Any:
+        if data.get("settings") is not None:
+            pass
+        else:
+            data["settings"] = toml.load(Path(data.get("appdir")) / "settings.toml")
+        return data
+
+    @model_validator(mode="after")
+    def device_settings(self) -> Self:
+        for drv, settings in self.settings["drivers"].items():
+            if drv in self.devicefile.drivers:
+                self.devicefile.drivers[drv].settings.update(settings)
+        return self
 
 
 class Reply(BaseModel):
     success: bool
     msg: Optional[str] = None
     data: Optional[Any] = None
+
+
+class _Pipeline(BaseModel):
+    name: str
+    components: Mapping[str, str]
+
+
+class _Component(BaseModel):
+    name: str
+    driver: str
+    address: str
+    channel: Optional[str] = None
+
+
+class Driver(BaseModel):
+    name: str
+    settings: dict = Field(default_factory=dict)
+
+
+class SpawnData(BaseModel):
+    name: str
+    port: Optional[int] = None
+    pid: Optional[int] = None
+    version: Optional[str] = None
+    spawn_time: float = 0.0
+    spawn_count: int = 0
+    heartbeat_time: float = 0.0
+
+
+class DeviceFile(BaseModel):
+    filename: Path
+    components: dict[str, _Component] = Field(default_factory=dict)
+    devices: dict[str, Device] = Field(default_factory=dict)
+    drivers: dict[str, Driver] = Field(default_factory=dict)
+    pipelines: dict[str, _Pipeline] = Field(default_factory=dict)
+
+    @field_validator("filename", mode="before")
+    @classmethod
+    def coerce_filename(cls, val: Union[str, Path]) -> Path:
+        if isinstance(val, str):
+            return Path(val)
+        return val
+
+    @field_validator("filename", mode="after")
+    @classmethod
+    def filename_exists(cls, val: Path) -> Path:
+        assert val.exists(), f"filename {val!r} does not exist"
+        return val
+
+    @model_validator(mode="after")
+    def populate_attrs(self) -> Self:
+        with self.filename.open("r") as inf:
+            jsdata = yaml.safe_load(inf)
+
+        devices = jsdata.get("devices", {})
+        pipelines = jsdata.get("pipelines", {})
+
+        # populate devices
+        self.devices = {d["name"]: Device(**d) for d in devices}
+
+        for pip in pipelines:
+            if pip["name"].endswith("*"):
+                assert len(pip["devices"]) == 1, (
+                    "only one component allowed in wildcard pipelines."
+                )
+                for comp in pip["devices"]:
+                    assert comp["device"] in self.devices, (
+                        f"device {comp['device']!r} is not specified."
+                    )
+                    dev = self.devices[comp["device"]]
+                    assert comp["channel"] == "each", (
+                        f"channel specification must be 'each', not {comp['chanel']!r}."
+                    )
+                    for ch in dev.channels:
+                        pname = pip["name"].replace("*", ch)
+                        cname = f"{dev.driver}:({dev.address},{ch})"
+                        self.components[cname] = _Component(
+                            name=cname,
+                            driver=dev.driver,
+                            address=dev.address,
+                            channel=ch,
+                        )
+                        self.pipelines[pname] = _Pipeline(
+                            name=pname,
+                            components={comp["role"]: cname},
+                        )
+            else:
+                cmps = {}
+                for comp in pip["devices"]:
+                    assert comp["device"] in self.devices, (
+                        f"device {comp['device']!r} is not specified."
+                    )
+                    dev = self.devices[comp["device"]]
+                    # TODO: implement optional channels here
+                    assert comp["channel"] in dev.channels, (
+                        f"channel {comp['channel']} is not among "
+                        f"device channels {dev.channels}."
+                    )
+                    cname = f"{dev.driver}:({dev.address},{comp['channel']})"
+                    self.components[cname] = _Component(
+                        name=cname,
+                        driver=dev.driver,
+                        address=dev.address,
+                        channel=comp["channel"],
+                    )
+                    cmps[comp["role"]] = cname
+                self.pipelines[pip["name"]] = _Pipeline(
+                    name=pip["name"],
+                    components=cmps,
+                )
+        # populate drivers
+        drivers_needed = {c.driver for c in self.components.values()}
+        self.drivers = {d: Driver(name=d) for d in drivers_needed}
+
+        return self

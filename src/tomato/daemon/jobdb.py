@@ -6,18 +6,19 @@
 
 """
 
-import sqlite3
 import logging
 import os
 import pickle
+import sqlite3
+from pathlib import Path
 from tomato.models import Job
 
 logger = logging.getLogger(__name__)
 
 
-def connect_jobdb(dbpath: str):
-    head, tail = os.path.split(dbpath)
-    if head != "" and not os.path.exists(head):
+def connect_jobdb(dbpath: str | Path):
+    head = Path(dbpath).parent
+    if not head.exists():
         logger.warning("making local data folder '%s'", head)
         os.makedirs(head)
     conn = sqlite3.connect(dbpath)
@@ -25,7 +26,7 @@ def connect_jobdb(dbpath: str):
     return conn, cur
 
 
-def jobdb_setup(dbpath: str) -> None:
+def jobdb_setup(dbpath: str | Path) -> None:
     user_version = 2
     conn, cur = connect_jobdb(dbpath)
     logger.debug("attempting to find table 'queue' in '%s'", dbpath)

@@ -20,23 +20,19 @@ Also includes the following *pipeline* management functions:
 
 """
 
+import logging
 import os
-import subprocess
 import textwrap
-import json
-from pathlib import Path
+import time
+import toml
+import zmq
+from collections import defaultdict
 from datetime import datetime, timezone
 from importlib import metadata
-from collections import defaultdict
-
-import logging
-import psutil
-import zmq
-import yaml
-import toml
-
-from tomato.models import Reply, Pipeline, Device, Driver, Component, Daemon
+from pathlib import Path
 from tomato.daemon.jobdb import jobdb_setup
+from tomato.models import Daemon, Reply
+from tomato.utils import spawn_cmd
 
 logger = logging.getLogger(__name__)
 VERSION = metadata.version("tomato")
@@ -49,87 +45,6 @@ def set_loglevel(delta: int):
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
 
 
-def load_device_file(yamlpath: Path) -> dict:
-    logger.debug("loading device file from '%s'", yamlpath)
-    try:
-        with yamlpath.open("r") as infile:
-            jsdata = yaml.safe_load(infile)
-    except FileNotFoundError:
-        logger.error("device file not found. Running with default devices.")
-        devpath = Path(__file__).parent / ".." / "data" / "default_devices.json"
-        with devpath.open() as inp:
-            jsdata = json.load(inp)
-        logger.debug("writing default devices to '%s'", yamlpath)
-        with yamlpath.open("w") as outfile:
-            yaml.dump(jsdata, outfile)
-    return jsdata
-
-
-def get_pipelines(
-    devs: dict[str, Device], pipelines: list
-) -> tuple[dict[str, Pipeline], dict[str, Component]]:
-    pips = {}
-    cmps = {}
-    for pip in pipelines:
-        if "*" in pip["name"]:
-            data = {"name": pip["name"], "devs": {}}
-            if len(pip["devices"]) > 1:
-                logger.error("more than one component in a wildcard pipeline")
-                continue
-            for comp in pip["devices"]:
-                if comp["device"] not in devs:
-                    logger.error("device '%s' not found", comp["device"])
-                    break
-                dev = devs[comp["device"]]
-                for ch in dev.channels:
-                    name = pip["name"].replace("*", f"{ch}")
-                    h = f"{dev.driver}:({dev.address},{ch})"
-                    c = Component(
-                        name=h,
-                        driver=dev.driver,
-                        device=dev.name,
-                        address=dev.address,
-                        channel=ch,
-                        role=comp["role"],
-                    )
-                    cmps[h] = c
-                    p = Pipeline(name=name, components=[h])
-                    pips[p.name] = p
-        else:
-            data = {"name": pip["name"], "components": []}
-            for comp in pip["devices"]:
-                if comp["device"] not in devs:
-                    logger.error("device '%s' not found", comp["device"])
-                    break
-                dev = devs[comp["device"]]
-                if isinstance(comp["channel"], int):
-                    logger.warning(
-                        "Supplying 'channel' as an int is deprecated "
-                        "and will stop working in tomato-2.0."
-                    )
-                    comp["channel"] = str(comp["channel"])
-                if comp["channel"] not in dev.channels:
-                    logger.error(
-                        "channel %s not found on device '%s'",
-                        comp["channel"],
-                        comp["device"],
-                    )
-                    break
-                h = f"{dev.driver}:({dev.address},{comp['channel']})"
-                c = Component(
-                    name=h,
-                    driver=dev.driver,
-                    device=dev.name,
-                    address=dev.address,
-                    channel=comp["channel"],
-                    role=comp["role"],
-                )
-                data["components"].append(h)
-                cmps[h] = c
-            pips[data["name"]] = Pipeline(**data)
-    return pips, cmps
-
-
 def _updater(context, port, cmd, params):
     dreq = context.socket(zmq.REQ)
     dreq.connect(f"tcp://127.0.0.1:{port}")
@@ -139,7 +54,7 @@ def _updater(context, port, cmd, params):
     return ret
 
 
-def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
+def _status_helper(daemon: Daemon, yaml: bool, stgrp: str) -> Reply:
     if stgrp == "tomato":
         rep = Reply(
             success=True,
@@ -155,7 +70,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
             )
         else:
             ii = make_padded_lines(
-                daemon.pips.values(),
+                daemon.pips,
                 ["name", "ready", "sampleid", "jobid"],
             )
             if len(ii) == 0:
@@ -164,34 +79,16 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following pipelines:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "drivers":
-        if yaml:
-            rep = Reply(
-                success=True,
-                msg=f"tomato running on port {daemon.port}",
-                data=daemon.drvs,
-            )
-        else:
-            ii = make_padded_lines(
-                daemon.drvs.values(),
-                ["name", "port", "pid", "version"],
-            )
-            if len(ii) == 0:
-                msg = f"tomato running on port {daemon.port} with no drivers"
-            else:
-                msg = f"tomato running on port {daemon.port} with the following drivers:\n\t "
-                msg += "\n\t ".join(ii)
-            rep = Reply(success=True, msg=msg)
     elif stgrp == "devices":
         if yaml:
             rep = Reply(
                 success=True,
                 msg=f"tomato running on port {daemon.port}",
-                data=daemon.devs,
+                data=daemon.devicefile.devices,
             )
         else:
             ii = make_padded_lines(
-                daemon.devs.values(),
+                daemon.devicefile.devices,
                 ["name", "driver", "address", "channels"],
             )
             if len(ii) == 0:
@@ -209,7 +106,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
             )
         else:
             ii = make_padded_lines(
-                daemon.cmps.values(),
+                daemon.cmps,
                 ["name", "driver", "device", "role", "capabilities"],
             )
             if len(ii) == 0:
@@ -221,21 +118,49 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
     return rep
 
 
-def make_padded_lines(data, keys):
+def make_padded_lines(data: dict, keys: list) -> list:
     temp = defaultdict(list)
     maxlen = dict()
     lines = list()
-    for obj in data:
+    tN = time.perf_counter()
+    for obj in data.values():
         for key in keys:
-            temp[key].append(len(str(getattr(obj, key))))
+            if key == "heartbeat":
+                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+            else:
+                val = str(getattr(obj, key))
+            temp[key].append(len(val))
     for key in keys:
         maxlen[key] = max(temp[key])
-    for obj in data:
+    for obj in data.values():
         line = ""
         for key in keys:
-            line += f"{key}:{str(getattr(obj, key)):<{maxlen[key] + 2}}"
+            if key == "heartbeat":
+                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+            else:
+                val = str(getattr(obj, key))
+            line += f"{key}:{val:<{maxlen[key] + 2}}"
         lines.append(line)
     return lines
+
+
+def format_msg(
+    msg: str,
+    objs: str,
+    yml: bool,
+    keys: list[str],
+    data: dict,
+) -> str:
+    if yml:
+        return ""
+    else:
+        lines = make_padded_lines(data, keys)
+        if len(lines) == 0:
+            msg = f"{msg} with no {objs}"
+        else:
+            msg = f"{msg} with the following {objs}:\n\t"
+            msg += "\n\t".join(lines)
+        return msg
 
 
 def status(
@@ -315,7 +240,26 @@ def status(
     events = dict(poller.poll(timeout))
     if req in events:
         rep = req.recv_pyobj()
-        return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
+        daemon: Daemon = rep.data
+        msg = f"tomato running on port {daemon.port}"
+        if stgrp == "tomato":
+            return Reply(
+                success=True,
+                msg=f"tomato running on port {daemon.port}",
+                data=daemon,
+            )
+        elif stgrp == "drivers":
+            keys = ["name", "port", "pid", "version", "heartbeat"]
+            rets = daemon.drivers
+            return Reply(
+                success=True,
+                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+                data=rets,
+            )
+        elif rep.data is not None:
+            return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
+        else:
+            return rep
     else:
         req.setsockopt(zmq.LINGER, 0)
         req.close()
@@ -330,7 +274,7 @@ def start(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
+    appdir: str | Path,
     verbosity: int,
     **_: dict,
 ) -> Reply:
@@ -378,35 +322,25 @@ def start(
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
+    # TODO: This is read just to make sure database is set-up. Should be maybe on the driver? Or init?
     settings = toml.load(Path(appdir) / "settings.toml")
     jobdb_setup(settings["jobs"]["dbpath"])
 
-    logger.debug("starting tomato on port %d", port)
-    cmd = [
-        "tomato-daemon",
-        "-p",
-        f"{port}",
-        "-A",
-        f"{appdir}",
-        "-V",
-        f"{verbosity}",
-    ]
-    if psutil.WINDOWS:
-        cfs = subprocess.CREATE_NO_WINDOW
-        cfs |= subprocess.CREATE_NEW_PROCESS_GROUP
-        subprocess.Popen(cmd, creationflags=cfs)
-    elif psutil.POSIX:
-        subprocess.Popen(cmd, start_new_session=True)
+    spawn_cmd(
+        cmd=[
+            "tomato-daemon",
+            "-p",
+            f"{port}",
+            "-A",
+            f"{appdir}",
+            "-V",
+            f"{verbosity}",
+        ],
+        logger=logger,
+    )
+
     kwargs = dict(port=port, timeout=max(timeout, 5000), context=context)
-    stat = status(**kwargs)
-    if stat.success:
-        return reload(**kwargs, appdir=appdir)
-    else:
-        return Reply(
-            success=False,
-            msg=f"failed to start tomato on port {port}: {stat.msg}",
-            data=stat.data,
-        )
+    return status(**kwargs)
 
 
 def stop(
@@ -453,9 +387,9 @@ def stop(
 
 def init(
     *,
-    appdir: str,
-    datadir: str,
-    logdir: str,
+    appdir: str | Path,
+    datadir: str | Path,
+    logdir: str | Path,
     **_: dict,
 ) -> Reply:
     """
@@ -501,8 +435,28 @@ def init(
     if not appdir.exists():
         logger.debug("creating directory '%s'", appdir)
         os.makedirs(appdir)
-    with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
-        of.write(defaults)
+    if not (appdir / "settings.toml").exists():
+        with (appdir / "settings.toml").open("w", encoding="utf-8") as of:
+            of.write(defaults)
+    devices = textwrap.dedent(
+        """\
+        devices:
+          - name: dev-counter
+            driver: example_counter
+            address: example-addr
+            channels: ["1"]
+            pollrate: 1.0
+        pipelines:
+          - name: pip-counter
+            devices:
+              - role: counter
+                device: dev-counter
+                channel: "1"
+        """
+    )
+    if not (appdir / "devices.yml").exists():
+        with (appdir / "devices.yml").open("w", encoding="utf-8") as of:
+            of.write(devices)
     if not logdir.exists():
         logger.debug("creating directory '%s'", logdir)
         os.makedirs(logdir)
@@ -522,7 +476,7 @@ def reload(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
+    appdir: str | Path,
     **_: dict,
 ) -> Reply:
     """
@@ -539,53 +493,39 @@ def reload(
     kwargs = dict(port=port, timeout=timeout, context=context)
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
-        settings = toml.load(Path(appdir) / "settings.toml")
+        toml.load(Path(appdir) / "settings.toml")
     except FileNotFoundError:
         return Reply(
             success=False,
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
-    devicefile = load_device_file(Path(settings["devices"]["config"]))
-    devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
-    pips, cmps = get_pipelines(devs, devicefile["pipelines"])
-    drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
-    logger.debug(f"{pips=}")
-    logger.debug(f"{cmps=}")
-    logger.debug(f"{devs=}")
-    logger.debug(f"{drvs=}")
-    for drv in drvs.keys():
-        if drv in settings["drivers"]:
-            drvs[drv].settings.update(settings["drivers"][drv])
+    logger.debug("status")
     ret = status(**kwargs)
     if not ret.success:
         return ret
+
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(
-        dict(
-            cmd="setup",
-            settings=settings,
-            pips=pips,
-            devs=devs,
-            drvs=drvs,
-            cmps=cmps,
-            sender=f"{__name__}.reload",
-        )
-    )
+
+    logger.debug("reload")
+    req.send_pyobj(dict(cmd="reload", sender=f"{__name__}.reload"))
     ret = req.recv_pyobj()
-    if ret.success:
-        return Reply(
-            success=True,
-            msg=f"tomato on port {port} reloaded with settings from {appdir}",
-            data=ret.data,
-        )
-    else:
-        return Reply(
-            success=False,
-            msg=f"tomato on port {port} could not be reloaded: {ret.msg}",
-            data=ret.data,
-        )
+    if ret.success is False:
+        return ret
+
+    logger.debug("setup")
+    req.send_pyobj(dict(cmd="setup", sender=f"{__name__}.reload"))
+    ret = req.recv_pyobj()
+    if ret.success is False:
+        return ret
+    logger.debug("done")
+
+    return Reply(
+        success=True,
+        msg=f"tomato on port {port} reloaded with settings from {appdir}",
+        data=ret.data,
+    )
 
 
 def pipeline_load(

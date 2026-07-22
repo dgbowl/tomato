@@ -6,19 +6,17 @@
 
 """
 
-import logging
 import argparse
-from pathlib import Path
-from threading import Thread
-import toml
+import logging
 import time
-import zmq
-
-from tomato.models import Reply, Daemon
 import tomato.daemon.cmd as cmd
-import tomato.daemon.job
 import tomato.daemon.driver
 import tomato.daemon.io as io
+import tomato.daemon.job
+import zmq
+from pathlib import Path
+from threading import Thread
+from tomato.models import Daemon, Reply
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +28,7 @@ def setup_logging(daemon: Daemon):
     """
     logdir = Path(daemon.settings["logdir"])
     logdir.mkdir(parents=True, exist_ok=True)
-    logfile = logdir / f"daemon_{daemon.port}.log"
+    logfile = logdir / f"tomato_daemon_{daemon.port}.log"
     logging.basicConfig(
         level=daemon.verbosity,
         format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
@@ -53,12 +51,13 @@ def tomato_daemon():
     parser.add_argument("--appdir", "-A", type=str, default=str(Path.cwd()))
 
     args = parser.parse_args()
-    settings = toml.load(Path(args.appdir) / "settings.toml")
 
-    daemon = Daemon(**vars(args), status="bootstrap", settings=settings)
+    daemon = Daemon(**vars(args), status="bootstrap")
     setup_logging(daemon)
     logger.info("logging set up with verbosity %s", daemon.verbosity)
 
+    # TODO: setup should not be a thing really.
+    cmd.setup(msg={}, daemon=daemon)
     logger.debug("attempting to restore daemon state")
     io.load(daemon)
 
@@ -71,10 +70,10 @@ def tomato_daemon():
 
     logger.debug("entering main loop")
     jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,), daemon=True)
-    jmgr.do_run = True
+    setattr(jmgr, "do_run", True)
     jmgr.start()
     dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,), daemon=True)
-    dmgr.do_run = True
+    setattr(dmgr, "do_run", True)
     dmgr.start()
     t0 = time.process_time()
     while True:
@@ -93,9 +92,9 @@ def tomato_daemon():
             rep.send_pyobj(ret)
         if daemon.status == "stop":
             for mgr, label in [(jmgr, "job"), (dmgr, "driver")]:
-                if mgr is not None and mgr.do_run:
+                if mgr is not None and getattr(mgr, "do_run"):
                     logger.debug("stopping %s manager thread", label)
-                    mgr.do_run = False
+                    setattr(mgr, "do_run", False)
             if jmgr is not None:
                 jmgr.join(1e-3)
                 if not jmgr.is_alive():
