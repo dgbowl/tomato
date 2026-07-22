@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato package &mdash; tomato 2.2rc3.post6 documentation</title>
+  <title>tomato package &mdash; tomato 2.2.post1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=e6c67ac8"></script>
+        <script src="../_static/documentation_options.js?v=ee150b31"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2rc3.post6
+                2.2.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -101,6 +101,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.convert_str_to_seconds"><code class="docutils literal notranslate"><span class="pre">Task.convert_str_to_seconds</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#tomato.utils.spawn_cmd"><code class="docutils literal notranslate"><span class="pre">spawn_cmd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tomato.utils.load_device_file"><code class="docutils literal notranslate"><span class="pre">load_device_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tomato.utils.get_pipelines"><code class="docutils literal notranslate"><span class="pre">get_pipelines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tomato.utils.get_pid"><code class="docutils literal notranslate"><span class="pre">get_pid()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -175,9 +179,11 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.pipeline"><code class="docutils literal notranslate"><span class="pre">pipeline()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.set_job"><code class="docutils literal notranslate"><span class="pre">set_job()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.get_jobs"><code class="docutils literal notranslate"><span class="pre">get_jobs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.driver"><code class="docutils literal notranslate"><span class="pre">driver()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.device"><code class="docutils literal notranslate"><span class="pre">device()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.component"><code class="docutils literal notranslate"><span class="pre">component()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.reload"><code class="docutils literal notranslate"><span class="pre">reload()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.driver_set"><code class="docutils literal notranslate"><span class="pre">driver_set()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.cmd.driver_del"><code class="docutils literal notranslate"><span class="pre">driver_del()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.crates.RepositoryObject"><code class="docutils literal notranslate"><span class="pre">RepositoryObject()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.crates.Profile"><code class="docutils literal notranslate"><span class="pre">Profile()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.crates.to_rocrate"><code class="docutils literal notranslate"><span class="pre">to_rocrate()</span></code></a></li>
@@ -185,8 +191,8 @@
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.tomato_driver_bootstrap"><code class="docutils literal notranslate"><span class="pre">tomato_driver_bootstrap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.perform_idle_measurements"><code class="docutils literal notranslate"><span class="pre">perform_idle_measurements()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.kill_tomato_driver"><code class="docutils literal notranslate"><span class="pre">kill_tomato_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.driver_heartbeat"><code class="docutils literal notranslate"><span class="pre">driver_heartbeat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.tomato_driver"><code class="docutils literal notranslate"><span class="pre">tomato_driver()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.spawn_tomato_driver"><code class="docutils literal notranslate"><span class="pre">spawn_tomato_driver()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.stop_tomato_driver"><code class="docutils literal notranslate"><span class="pre">stop_tomato_driver()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato.daemon.driver.manager"><code class="docutils literal notranslate"><span class="pre">manager()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html#tomato-daemon-io-functions-for-storing-and-loading-data"><strong>tomato.daemon.io</strong>: functions for storing and loading data</a></li>
@@ -389,9 +395,8 @@
 <li class="toctree-l1"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato-tomato-command-line-interface-to-the-tomato-daemon"><strong>tomato.tomato</strong>: command line interface to the tomato daemon</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.set_loglevel"><code class="docutils literal notranslate"><span class="pre">set_loglevel()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.load_device_file"><code class="docutils literal notranslate"><span class="pre">load_device_file()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.get_pipelines"><code class="docutils literal notranslate"><span class="pre">get_pipelines()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.make_padded_lines"><code class="docutils literal notranslate"><span class="pre">make_padded_lines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.format_msg"><code class="docutils literal notranslate"><span class="pre">format_msg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.start"><code class="docutils literal notranslate"><span class="pre">start()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.tomato.html#tomato.tomato.stop"><code class="docutils literal notranslate"><span class="pre">stop()</span></code></a></li>
@@ -413,7 +418,7 @@
 </section>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.drivers.driver_to_interface">
-<span class="sig-prename descclassname"><span class="pre">tomato.drivers.</span></span><span class="sig-name descname"><span class="pre">driver_to_interface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drivername</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ModelInterface</span></span></span><a class="headerlink" href="#tomato.drivers.driver_to_interface" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.drivers.</span></span><span class="sig-name descname"><span class="pre">driver_to_interface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drivername</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.ModelInterface" title="tomato.driverinterface_2_0.ModelInterface"><span class="pre">ModelInterface</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="tomato.driverinterface_2_1.html#tomato.driverinterface_2_1.ModelInterface" title="tomato.driverinterface_2_1.ModelInterface"><span class="pre">ModelInterface</span></a></span></span><a class="headerlink" href="#tomato.drivers.driver_to_interface" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <section id="tomato-models-pydantic-models-for-internal-tomato-use">
@@ -528,10 +533,10 @@ provided via the <a class="reference internal" href="#tomato.models.Task.techniq
 </dd>
 <dt class="field-even">Validators<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_duration</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polling_interval</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampling_interval</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_duration</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polling_interval</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a> » <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampling_interval</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a> » <code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span> <span class="pre">fields</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -542,7 +547,7 @@ provided via the <a class="reference internal" href="#tomato.models.Task.techniq
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -555,8 +560,8 @@ provided via the <a class="reference internal" href="#tomato.models.Task.techniq
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -569,8 +574,8 @@ provided via the <a class="reference internal" href="#tomato.models.Task.techniq
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -584,8 +589,8 @@ defaults to the value in driver settings</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.convert_str_to_seconds" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_str_to_seconds</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -599,7 +604,7 @@ on which this <a class="reference internal" href="#tomato.models.Task" title="to
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -613,7 +618,7 @@ on which this <a class="reference internal" href="#tomato.models.Task" title="to
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -628,7 +633,7 @@ pairs by the <code class="xref py py-func docutils literal notranslate"><span cl
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -643,7 +648,7 @@ a <a class="reference internal" href="#tomato.models.Task" title="tomato.models.
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -659,7 +664,7 @@ will be stopped</p>
 <dl class="field-list simple">
 <dt class="field-odd">Validated by<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v124.dev5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
+<li><p><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.task_names_cannot_be_same" title="(in dgbowl-schemas v126rc1.dev2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_names_cannot_be_same</span></code></a></p></li>
 </ul>
 </dd>
 </dl>
@@ -672,10 +677,30 @@ will be stopped</p>
 
 <dl class="py method pydantic_validator">
 <dt class="sig sig-object py" id="tomato.models.Task.convert_str_to_seconds">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v124.dev5)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v124.dev5)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v124.dev5)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><a class="headerlink" href="#tomato.models.Task.convert_str_to_seconds" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><a class="headerlink" href="#tomato.models.Task.convert_str_to_seconds" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
+
+<dl class="py function" id="module-tomato.utils">
+<dt class="sig sig-object py" id="tomato.utils.spawn_cmd">
+<span class="sig-prename descclassname"><span class="pre">tomato.utils.</span></span><span class="sig-name descname"><span class="pre">spawn_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Logger</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#tomato.utils.spawn_cmd" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.utils.load_device_file">
+<span class="sig-prename descclassname"><span class="pre">tomato.utils.</span></span><span class="sig-name descname"><span class="pre">load_device_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamlpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Logger</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#tomato.utils.load_device_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.utils.get_pipelines">
+<span class="sig-prename descclassname"><span class="pre">tomato.utils.</span></span><span class="sig-name descname"><span class="pre">get_pipelines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Device</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipelines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Logger</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Pipeline</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Component</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.utils.get_pipelines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tomato.utils.get_pid">
+<span class="sig-prename descclassname"><span class="pre">tomato.utils.</span></span><span class="sig-name descname"><span class="pre">get_pid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#tomato.utils.get_pid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 </section>
@@ -707,7 +732,7 @@ will be stopped</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2rc3.post6
+      v: 2.2.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

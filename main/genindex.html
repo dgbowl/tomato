@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; tomato 2.2rc3.post6 documentation</title>
+  <title>Index &mdash; tomato 2.2.post1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e6c67ac8"></script>
+        <script src="_static/documentation_options.js?v=ee150b31"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -38,7 +38,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2rc3.post6
+                2.2.post1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -294,7 +294,11 @@
         <li><a href="apidoc/tomato.driverinterface_2_1.html#tomato.driverinterface_2_1.ModelDevice.driver">(tomato.driverinterface_2_1.ModelDevice attribute)</a>
 </li>
       </ul></li>
-      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.driver">driver() (in module tomato.daemon.cmd)</a>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.driver_del">driver_del() (in module tomato.daemon.cmd)</a>
+</li>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.driver_heartbeat">driver_heartbeat() (in module tomato.daemon.driver)</a>
+</li>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.driver_set">driver_set() (in module tomato.daemon.cmd)</a>
 </li>
       <li><a href="apidoc/tomato.html#tomato.drivers.driver_to_interface">driver_to_interface() (in module tomato.drivers)</a>
 </li>
@@ -305,6 +309,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.job.find_matching_pipelines">find_matching_pipelines() (in module tomato.daemon.job)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.format_msg">format_msg() (in module tomato.tomato)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -342,7 +350,9 @@
         <li><a href="apidoc/tomato.driverinterface_2_1.html#tomato.driverinterface_2_1.ModelDevice.get_last_data">(tomato.driverinterface_2_1.ModelDevice method)</a>
 </li>
       </ul></li>
-      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.get_pipelines">get_pipelines() (in module tomato.tomato)</a>
+      <li><a href="apidoc/tomato.html#tomato.utils.get_pid">get_pid() (in module tomato.utils)</a>
+</li>
+      <li><a href="apidoc/tomato.html#tomato.utils.get_pipelines">get_pipelines() (in module tomato.utils)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -416,7 +426,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.load_device_file">load_device_file() (in module tomato.tomato)</a>
+      <li><a href="apidoc/tomato.html#tomato.utils.load_device_file">load_device_file() (in module tomato.utils)</a>
 </li>
       <li><a href="apidoc/tomato.driverinterface_2_0.html#tomato.driverinterface_2_0.log_errors">log_errors() (in module tomato.driverinterface_2_0)</a>
 
@@ -522,6 +532,8 @@
 </li>
         <li><a href="apidoc/tomato.tomato.html#module-tomato.tomato">tomato.tomato</a>
 </li>
+        <li><a href="apidoc/tomato.html#module-tomato.utils">tomato.utils</a>
+</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -581,8 +593,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/tomato.passata.html#tomato.passata.register">register() (in module tomato.passata)</a>
 </li>
-      <li><a href="apidoc/tomato.tomato.html#tomato.tomato.reload">reload() (in module tomato.tomato)</a>
+      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.cmd.reload">reload() (in module tomato.daemon.cmd)</a>
+
+      <ul>
+        <li><a href="apidoc/tomato.tomato.html#tomato.tomato.reload">(in module tomato.tomato)</a>
 </li>
+      </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.crates.RepositoryObject">RepositoryObject() (in module tomato.daemon.crates)</a>
 </li>
       <li><a href="apidoc/tomato.passata.html#tomato.passata.reset">reset() (in module tomato.passata)</a>
@@ -659,7 +675,7 @@
 </li>
       <li><a href="apidoc/tomato.ketchup.html#tomato.ketchup.snapshot">snapshot() (in module tomato.ketchup)</a>
 </li>
-      <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.spawn_tomato_driver">spawn_tomato_driver() (in module tomato.daemon.driver)</a>
+      <li><a href="apidoc/tomato.html#tomato.utils.spawn_cmd">spawn_cmd() (in module tomato.utils)</a>
 </li>
       <li><a href="apidoc/tomato.tomato.html#tomato.tomato.start">start() (in module tomato.tomato)</a>
 </li>
@@ -909,6 +925,13 @@
         <li><a href="apidoc/tomato.tomato.html#module-tomato.tomato">module</a>
 </li>
       </ul></li>
+      <li>
+    tomato.utils
+
+      <ul>
+        <li><a href="apidoc/tomato.html#module-tomato.utils">module</a>
+</li>
+      </ul></li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.tomato_daemon">tomato_daemon() (in module tomato.daemon)</a>
 </li>
       <li><a href="apidoc/tomato.daemon.html#tomato.daemon.driver.tomato_driver">tomato_driver() (in module tomato.daemon.driver)</a>
@@ -979,7 +1002,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2rc3.post6
+      v: 2.2.post1
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

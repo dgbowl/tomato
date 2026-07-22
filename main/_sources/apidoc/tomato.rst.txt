@@ -33,3 +33,9 @@ Submodules
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+.. automodule:: tomato.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
