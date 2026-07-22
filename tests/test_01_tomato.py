@@ -112,14 +112,14 @@ def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "--quiet"])
     assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
-    assert Path("daemon_12345.log").exists()
-    assert Path("daemon_12345.log").stat().st_size > 0
+    assert Path("tomato_daemon_12345.log").exists()
+    assert Path("tomato_daemon_12345.log").stat().st_size > 0
 
 
 def test_tomato_log_verbosity_testing(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
-    assert Path("daemon_12345.log").exists()
-    assert Path("daemon_12345.log").stat().st_size > 0
+    assert Path("tomato_daemon_12345.log").exists()
+    assert Path("tomato_daemon_12345.log").stat().st_size > 0
 
 
 def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
@@ -127,8 +127,8 @@ def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", "."])
     assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
-    assert Path("daemon_12345.log").exists()
-    assert Path("daemon_12345.log").stat().st_size > 0
+    assert Path("tomato_daemon_12345.log").exists()
+    assert Path("tomato_daemon_12345.log").stat().st_size > 0
 
 
 def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
@@ -146,8 +146,8 @@ def test_tomato_stop(start_tomato_daemon, stop_tomato_daemon):
     assert ret.success
     assert utils.wait_until_tomato_stopped(port=PORT, timeout=5000)
 
-    assert Path("daemon_12345.log").exists()
-    with Path("daemon_12345.log").open() as logf:
+    assert Path("tomato_daemon_12345.log").exists()
+    with Path("tomato_daemon_12345.log").open() as logf:
         text = logf.read()
     assert "driver manager thread joined" in text
     assert "job manager thread joined" in text
@@ -159,7 +159,7 @@ def test_tomato_component(start_tomato_daemon, stop_tomato_daemon):
     daemon = ret.data
     print(f"{daemon=}")
 
-    drv = daemon.drvs["example_counter"]
+    drv = daemon.drivers["example_counter"]
     req: zmq.Socket = CTXT.socket(zmq.REQ)
     req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv.port}")

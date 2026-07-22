@@ -16,23 +16,18 @@ import logging
 import tomato.daemon.io as io
 import tomato.daemon.jobdb as jobdb
 import tomato.utils
-import toml
-import yaml
-
 from pathlib import Path
 from pydantic import BaseModel
 from tomato.models import (
-    Daemon,
-    Driver,
-    Device,
-    Reply,
-    Pipeline,
-    Job,
     Component,
-    DeviceFile,
+    Daemon,
+    Device,
+    Job,
+    Pipeline,
+    Reply,
+    SpawnData,
 )
 from typing import Any
-
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +45,7 @@ def merge_pipelines(
             if pip.jobid is not None:
                 ret[pname] = pip
         else:
-            if pip.devs == new[pname].devs:
+            if pip.components == new[pname].components:
                 ret[pname] = pip
             elif pip.jobid is None:
                 ret[pname] = new[pname]
@@ -86,40 +81,53 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
         Path(daemon.settings["devices"]["config"]),
         logger,
     )
-
-    daemon.devicefile = DeviceFile(filename=daemon.settings["devices"]["config"])
-    logger.critical(f"{daemon.devicefile=}")
-
+    logger.debug(f"{devicefile=}")
     devs = {dev["name"]: Device(**dev) for dev in devicefile["devices"]}
+    logger.debug(f"{devs=}")
     pips, cmps = tomato.utils.get_pipelines(
         devs,
         devicefile["pipelines"],
         logger,
     )
-    drvs = {dev.driver: Driver(name=dev.driver) for dev in devs.values()}
-
-    for drv in drvs.keys():
-        if drv in daemon.settings["drivers"]:
-            drvs[drv].settings.update(daemon.settings["drivers"][drv])
-
-    logger
+    logger.debug(f"{pips=}")
+    logger.debug(f"{cmps=}")
 
     if daemon.status == "bootstrap":
         for key, val in [
-            ("drvs", drvs),
+            # ("drvs", drvs),
             # ("devs", devs),
             ("pips", pips),
             ("cmps", cmps),
         ]:
             setattr(daemon, key, val)
+
+        daemon.drivers = {
+            key: SpawnData(name=key) for key in daemon.devicefile.drivers.keys()
+        }
         logger.info("setup successful with pipelines: '%s'", daemon.pips.keys())
         daemon.status = "running"
     else:
+        try:
+            nd = Daemon(
+                status=daemon.status,
+                port=daemon.port,
+                appdir=daemon.appdir,
+                verbosity=daemon.verbosity,
+            )
+        except Exception as e:
+            logger.critical("Error", exc_info=e)
+            return Reply(
+                success=False,
+                msg="could not parse updated settings",
+            )
+        logger.debug(f"{nd=}")
+        ndf = nd.devicefile
         # First, check that we're not touching anything associated with a running job
         check_components = set()
         check_devices = set()
         check_drivers = set()
         for dpip in daemon.pips.values():
+            logger.debug(f"{dpip=}")
             if dpip.jobid is None:
                 continue
             if dpip.name not in pips:
@@ -163,29 +171,36 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
             check_drivers.add(dcomp.driver)
 
         for dname in check_drivers:
-            ddrv = daemon.drvs[dname]
-            if dname not in drvs:
+            if dname not in ndf.drivers:
                 return Reply(
                     success=False,
                     msg="reload would delete a driver of a device in a running pipeline",
-                    data=ddev,
+                    data=daemon.drivers[dname],
                 )
-            drv = drvs[dname]
-            if ddrv.name != drv.name or ddrv.settings != drv.settings:
+
+            if daemon.devicefile.drivers[dname].settings != ndf.drivers[dname].settings:
                 return Reply(
                     success=False,
                     msg="reload would modify a driver of a device in a running pipeline",
-                    data=ddrv,
+                    data=daemon.devicefile.drivers[dname].settings,
                 )
 
-        _api_reload(drvs, daemon.drvs, "driver", ["settings"])
+        logger.critical("goint into api reload")
 
         _api_reload(pips, daemon.pips, "pipeline", ["components"])
-
         attrlist = ["driver", "device", "address", "channel", "role"]
         _api_reload(cmps, daemon.cmps, "component", attrlist)
+        # Add new drivers, they will be spawned by driver.manager
+        for dname in ndf.drivers.keys():
+            if dname not in daemon.drivers:
+                logger.info("adding new driver '%s'", dname)
+                daemon.drivers[dname] = SpawnData(name=dname)
 
+        # We want to trigger re-parse of config files on daemon
+        daemon.settings = nd.settings
+        daemon.devicefile = ndf
         logger.info("reload successful with pipelines: '%s'", daemon.pips.keys())
+
     return Reply(success=True, data=daemon)
 
 
@@ -253,15 +268,6 @@ def get_jobs(msg: dict, daemon: Daemon) -> Reply:
     return Reply(success=True, msg=f"found {len(jobs)} jobs", data=jobs)
 
 
-def driver(msg: dict, daemon: Daemon) -> Reply:
-    return _api(
-        otype="driver",
-        msg=msg,
-        ddict=daemon.drvs,
-        Cls=Driver,
-    )
-
-
 def device(msg: dict, daemon: Daemon) -> Reply:
     return _api(
         otype="device",
@@ -306,8 +312,19 @@ def _api(otype: str, msg: dict, ddict: dict[str, Any], Cls: BaseModel) -> Reply:
 
 
 def reload(msg: dict, daemon: Daemon, **kwargs: dict) -> Reply:
-    settings = toml.load(Path(daemon.appdir) / "settings.toml")
-    with open(settings["devices"]["config"], "r") as df:
-        settings["devicefile"] = yaml.safe_load(df)
-    daemon.settings = settings
-    return Reply(success=True, msg="daemon settings reloaded", data=settings)
+    # daemon.settings = toml.load(Path(daemon.appdir) / "settings.toml")
+    return Reply(success=True, msg="daemon settings reloaded", data=daemon.settings)
+
+
+def driver_set(msg: dict, daemon: Daemon) -> Reply:
+    params = msg.pop("params")
+    name = params.pop("name")
+    for k, v in params.items():
+        setattr(daemon.drivers[name], k, v)
+    return Reply(success=True, msg=f"updated driver {name}", data=daemon.drivers[name])
+
+
+def driver_del(msg: dict, daemon: Daemon) -> Reply:
+    name = msg.pop("params").pop("name")
+    del daemon.drivers[name]
+    return Reply(success=True, msg=f"removed driver {name}")

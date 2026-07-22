@@ -20,24 +20,19 @@ Also includes the following *pipeline* management functions:
 
 """
 
-import json
 import logging
 import os
-import psutil
-import subprocess
 import textwrap
+import time
 import toml
-import yaml
 import zmq
-
 from collections import defaultdict
 from datetime import datetime, timezone
 from importlib import metadata
 from pathlib import Path
 from tomato.daemon.jobdb import jobdb_setup
-from tomato.models import Reply, Pipeline, Device, Driver, Component, Daemon
+from tomato.models import Daemon, Reply
 from tomato.utils import spawn_cmd
-
 
 logger = logging.getLogger(__name__)
 VERSION = metadata.version("tomato")
@@ -75,7 +70,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
             )
         else:
             ii = make_padded_lines(
-                daemon.pips.values(),
+                daemon.pips,
                 ["name", "ready", "sampleid", "jobid"],
             )
             if len(ii) == 0:
@@ -84,34 +79,16 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
                 msg = f"tomato running on port {daemon.port} with the following pipelines:\n\t "
                 msg += "\n\t ".join(ii)
             rep = Reply(success=True, msg=msg)
-    elif stgrp == "drivers":
-        if yaml:
-            rep = Reply(
-                success=True,
-                msg=f"tomato running on port {daemon.port}",
-                data=daemon.drvs,
-            )
-        else:
-            ii = make_padded_lines(
-                daemon.drvs.values(),
-                ["name", "port", "pid", "version"],
-            )
-            if len(ii) == 0:
-                msg = f"tomato running on port {daemon.port} with no drivers"
-            else:
-                msg = f"tomato running on port {daemon.port} with the following drivers:\n\t "
-                msg += "\n\t ".join(ii)
-            rep = Reply(success=True, msg=msg)
     elif stgrp == "devices":
         if yaml:
             rep = Reply(
                 success=True,
                 msg=f"tomato running on port {daemon.port}",
-                data=daemon.devs,
+                data=daemon.devicefile.devices,
             )
         else:
             ii = make_padded_lines(
-                daemon.devs.values(),
+                daemon.devicefile.devices,
                 ["name", "driver", "address", "channels"],
             )
             if len(ii) == 0:
@@ -129,7 +106,7 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
             )
         else:
             ii = make_padded_lines(
-                daemon.cmps.values(),
+                daemon.cmps,
                 ["name", "driver", "device", "role", "capabilities"],
             )
             if len(ii) == 0:
@@ -141,21 +118,49 @@ def _status_helper(daemon: Daemon, yaml: bool, stgrp: str):
     return rep
 
 
-def make_padded_lines(data, keys):
+def make_padded_lines(data: dict, keys: list) -> list:
     temp = defaultdict(list)
     maxlen = dict()
     lines = list()
-    for obj in data:
+    tN = time.perf_counter()
+    for obj in data.values():
         for key in keys:
-            temp[key].append(len(str(getattr(obj, key))))
+            if key == "heartbeat":
+                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+            else:
+                val = str(getattr(obj, key))
+            temp[key].append(len(val))
     for key in keys:
         maxlen[key] = max(temp[key])
-    for obj in data:
+    for obj in data.values():
         line = ""
         for key in keys:
-            line += f"{key}:{str(getattr(obj, key)):<{maxlen[key] + 2}}"
+            if key == "heartbeat":
+                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+            else:
+                val = str(getattr(obj, key))
+            line += f"{key}:{val:<{maxlen[key] + 2}}"
         lines.append(line)
     return lines
+
+
+def format_msg(
+    msg: str,
+    objs: str,
+    yml: bool,
+    keys: list[str],
+    data: dict,
+) -> str:
+    if yml:
+        return ""
+    else:
+        lines = make_padded_lines(data, keys)
+        if len(lines) == 0:
+            msg = f"{msg} with no {objs}"
+        else:
+            msg = f"{msg} with the following {objs}:\n\t"
+            msg += "\n\t".join(lines)
+        return msg
 
 
 def status(
@@ -235,6 +240,23 @@ def status(
     events = dict(poller.poll(timeout))
     if req in events:
         rep = req.recv_pyobj()
+        daemon: Daemon = rep.data
+        msg = f"tomato running on port {daemon.port}"
+        if stgrp == "tomato":
+            rep = Reply(
+                success=True,
+                msg=f"tomato running on port {daemon.port}",
+                data=daemon,
+            )
+        elif stgrp == "drivers":
+            keys = ["name", "port", "pid", "version", "heartbeat"]
+            rets = daemon.drivers
+            return Reply(
+                success=True,
+                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+                data=rets,
+            )
+
         return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
     else:
         req.setsockopt(zmq.LINGER, 0)

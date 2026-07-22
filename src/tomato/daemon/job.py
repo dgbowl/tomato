@@ -20,23 +20,24 @@ import psutil
 import subprocess
 import sys
 import time
+from datetime import datetime, timedelta, timezone
+from importlib import metadata
+from pathlib import Path
+from threading import Thread, current_thread
+
+
 import xarray as xr
 import zmq
 
-from datetime import datetime, timezone, timedelta
-from importlib import metadata
-from pathlib import Path
-from threading import current_thread, Thread
-from tomato.daemon.crates import to_rocrate
-from tomato.daemon.io import merge_netcdfs, data_to_pickle
 from tomato.daemon import jobdb, lpp
+from tomato.daemon.crates import to_rocrate
+from tomato.daemon.io import data_to_pickle, merge_netcdfs
 from tomato.models import (
-    Pipeline,
-    Daemon,
     Component,
+    Daemon,
     Device,
-    Driver,
     Job,
+    Pipeline,
     Task,
     to_payload,
 )
@@ -51,28 +52,28 @@ JOB_INFO_INTERVAL = 5
 def method_validate(
     method: list[Task],
     pip: Pipeline,
-    drvs: dict[str, Driver],
-    cmps: dict[str, Component],
+    daemon: Daemon,
     context: zmq.Context,
 ):
     for task in method:
-        for cmp in pip.components:
-            if task.technique_name in cmps[cmp].capabilities:
-                drv = drvs[cmps[cmp].driver]
-                if drv.version == "1.0":
-                    logger.info("cannot validate task using DriverInterface-1.0")
-                    break
+        for cname in pip.components:
+            cmp = daemon.cmps[cname]
+            if (
+                task.component_role == cmp.role
+                and task.technique_name in cmp.capabilities
+            ):
+                dport = daemon.drivers[cmp.driver].port
                 req: zmq.Socket = context.socket(zmq.REQ)
-                req.connect(f"tcp://127.0.0.1:{drv.port}")
+                req.connect(f"tcp://127.0.0.1:{dport}")
                 params = dict(
                     task=task,
-                    address=cmps[cmp].address,
-                    channel=cmps[cmp].channel,
+                    address=cmp.address,
+                    channel=cmp.channel,
                 )
                 ret, req = lpp.comm(
                     req,
                     dict(cmd="task_validate", params=params),
-                    f"tcp://127.0.0.1:{drv.port}",
+                    f"tcp://127.0.0.1:{dport}",
                     context,
                 )
                 if ret.success:
@@ -84,9 +85,7 @@ def method_validate(
 
 
 def find_matching_pipelines(
-    pips: dict[str, Pipeline],
-    cmps: dict[str, Component],
-    drvs: dict[str, Driver],
+    daemon: Daemon,
     method: list[Task],
     context: zmq.Context,
 ) -> list[Pipeline]:
@@ -94,17 +93,17 @@ def find_matching_pipelines(
     req_capabs = set([item.technique_name for item in method])
 
     candidates = []
-    for pip in pips.values():
+    for pip in daemon.pips.values():
         roles = set()
         capabs = set()
         for comp in pip.components:
-            c = cmps[comp]
+            c = daemon.cmps[comp]
             if c.capabilities is not None:
                 roles.add(c.role)
                 capabs.update(c.capabilities)
         if req_roles.intersection(roles) == req_roles:
             if req_capabs.intersection(capabs) == req_capabs:
-                if method_validate(method, pip, drvs, cmps, context):
+                if method_validate(method, pip, daemon, context):
                     candidates.append(pip)
     return candidates
 
@@ -229,10 +228,7 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
 
 
 def check_queued_jobs(
-    pips: dict,
-    cmps: dict,
-    drvs: dict,
-    dbpath: str,
+    daemon: Daemon,
     context: zmq.Context,
 ) -> dict[int, list[Pipeline]]:
     """
@@ -243,11 +239,10 @@ def check_queued_jobs(
     """
     logger = logging.getLogger(f"{__name__}.check_queued_jobs")
     matched = {}
+    dbpath = daemon.settings["jobs"]["dbpath"]
     queue = jobdb.get_jobs_where("status IN ('q', 'qw')", dbpath)
     for job in queue:
-        matched[job.id] = find_matching_pipelines(
-            pips, cmps, drvs, job.payload.method, context
-        )
+        matched[job.id] = find_matching_pipelines(daemon, job.payload.method, context)
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
                 "job %d can queue on pips: {%s}",
@@ -358,9 +353,7 @@ def manager(port: int, timeout: int = 500):
         daemon: Daemon = ret.data
         dbpath = daemon.settings["jobs"]["dbpath"]
         manage_running_pips(daemon.pips, dbpath, req)
-        matched_pips = check_queued_jobs(
-            daemon.pips, daemon.cmps, daemon.drvs, dbpath, context
-        )
+        matched_pips = check_queued_jobs(daemon, context)
         action_queued_jobs(daemon, matched_pips, req, dbpath)
         time.sleep(timeout / 1e3)
     req.close()
@@ -509,7 +502,8 @@ def job_thread(
     tasks: list[Task],
     component: Component,
     device: Device,
-    driver: Driver,
+    dport: int,
+    dsettings: dict,
     jobpath: Path,
     logpath: Path,
 ):
@@ -526,13 +520,11 @@ def job_thread(
     logger = logging.getLogger(sender)
     context = zmq.Context()
     req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{driver.port}")
-    lppargs = dict(
-        endpoint=f"tcp://127.0.0.1:{driver.port}", context=context, sender=sender
-    )
+    req.connect(f"tcp://127.0.0.1:{dport}")
+    lppargs = dict(endpoint=f"tcp://127.0.0.1:{dport}", context=context, sender=sender)
 
-    if "lpp_timeout" in driver.settings:
-        lppargs["timeout"] = driver.settings["lpp_timeout"] * 1000
+    if "lpp_timeout" in dsettings:
+        lppargs["timeout"] = dsettings["lpp_timeout"] * 1000
         logger.debug(
             "%s: setting lpp_timeout to %d ms", component.role, lppargs["timeout"]
         )
@@ -735,7 +727,7 @@ def job_main_loop(
             daemon: Daemon = ret.data
         else:
             sys.exit()
-        if all([drv.port is not None for drv in daemon.drvs.values()]):
+        if all([drv.port is not None for drv in daemon.drivers.values()]):
             break
         else:
             logger.debug("not all tomato-drivers have a port, waiting")
@@ -765,11 +757,12 @@ def job_main_loop(
         logger.debug(" tasks=%s", tasks)
         device = daemon.devicefile.devices[component.device]
         logger.debug(" device=%s", device)
-        driver = daemon.drvs[component.driver]
-        logger.debug(" driver=%s", driver)
+        dport = daemon.drivers[component.driver].port
+        dsettings = daemon.devicefile.drivers[component.driver].settings
+        logger.debug(" settings=%s", dsettings)
         threads[component.role] = Thread(
             target=job_thread,
-            args=(tasks, component, device, driver, job.jobpath, logpath),
+            args=(tasks, component, device, dport, dsettings, job.jobpath, logpath),
             name="job-thread",
             daemon=False,
         )

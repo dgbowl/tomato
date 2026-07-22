@@ -24,7 +24,7 @@ def _name_to_cmp(
             data=ret.data,
         )
     cmp = ret.data.cmps[name]
-    drv = ret.data.drvs[cmp.driver]
+    drv = ret.data.drivers[cmp.driver]
     return cmp, drv
 
 
@@ -126,10 +126,7 @@ def attrs(
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    if drv.version == "1.0":
-        req.send_pyobj(dict(cmd="attrs", params={**kwargs}))
-    else:
-        req.send_pyobj(dict(cmd="cmp_attrs", params={**kwargs}))
+    req.send_pyobj(dict(cmd="cmp_attrs", params={**kwargs}))
 
     try:
         ret = req.recv_pyobj()
@@ -158,10 +155,7 @@ def capabilities(
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    if drv.version == "1.0":
-        req.send_pyobj(dict(cmd="capabilities", params={**kwargs}))
-    else:
-        req.send_pyobj(dict(cmd="cmp_capabilities", params={**kwargs}))
+    req.send_pyobj(dict(cmd="cmp_capabilities", params={**kwargs}))
 
     try:
         ret = req.recv_pyobj()
@@ -185,13 +179,6 @@ def constants(
     cmp, drv = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
-
-    if drv.version == "1.0":
-        return Reply(
-            success=False,
-            msg=f"driver of component {name!r} is on version {drv.version}",
-            data=None,
-        )
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)
@@ -336,13 +323,6 @@ def get_last_data(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    if drv.version == "1.0":
-        return Reply(
-            success=False,
-            msg=f"driver of component {name!r} is on version {drv.version}",
-            data=None,
-        )
-
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
@@ -371,13 +351,6 @@ def measure(
     cmp, drv = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
-
-    if drv.version == "1.0":
-        return Reply(
-            success=False,
-            msg=f"driver of component {name!r} is on version {drv.version}",
-            data=None,
-        )
 
     kwargs = dict(channel=cmp.channel, address=cmp.address)
     req: zmq.Socket = context.socket(zmq.REQ)

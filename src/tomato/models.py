@@ -5,28 +5,19 @@
     Peter Kraus
 """
 
-from pathlib import Path
-from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import Optional, Any, Mapping, Sequence, Literal, Union
-from typing_extensions import Self
-from dgbowl_schemas.tomato import to_payload
-from dgbowl_schemas.tomato.payload import Payload, Task
 import logging
 import pickle
+import toml
 import yaml
+from dgbowl_schemas.tomato import to_payload
+from dgbowl_schemas.tomato.payload import Payload, Task
+from pathlib import Path
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Any, Literal, Mapping, Optional, Sequence, Union
+from typing_extensions import Self
 
 __all__ = ["Task"]
 logger = logging.getLogger(__name__)
-
-
-class Driver(BaseModel):
-    name: str
-    version: Optional[str] = None
-    port: Optional[int] = None
-    pid: Optional[int] = None
-    spawned_at: Optional[str] = None
-    connected_at: Optional[str] = None
-    settings: Mapping[str, Any] = Field(default_factory=dict)
 
 
 class Device(BaseModel):
@@ -87,17 +78,44 @@ class Job(BaseModel):
         return v
 
 
-class Daemon(BaseModel, arbitrary_types_allowed=True):
+class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
     status: Literal["bootstrap", "running", "stop"]
     port: int
     verbosity: int
     appdir: str
-    devicefile: Optional["DeviceFile"] = None
     settings: dict = Field(default_factory=dict)
-    drivers: dict[str, int] = Field(default_factory=dict)
-    pips: Mapping[str, Pipeline] = Field(default_factory=dict)
-    drvs: Mapping[str, Driver] = Field(default_factory=dict)
-    cmps: Mapping[str, Component] = Field(default_factory=dict)
+    devicefile: "DeviceFile" = Field(default_factory="DeviceFile")
+    drivers: dict[str, "SpawnData"] = Field(default_factory=dict)
+    pips: dict[str, Pipeline] = Field(default_factory=dict)
+    # drvs: Mapping[str, Driver] = Field(default_factory=dict)
+    cmps: dict[str, Component] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_devicefile(cls, data: Any) -> Any:
+        if data.get("devicefile") is not None:
+            pass
+        else:
+            data["devicefile"] = DeviceFile(
+                filename=data["settings"]["devices"]["config"]
+            )
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_settings(cls, data: Any) -> Any:
+        if data.get("settings") is not None:
+            pass
+        else:
+            data["settings"] = toml.load(Path(data.get("appdir")) / "settings.toml")
+        return data
+
+    @model_validator(mode="after")
+    def device_settings(self) -> Self:
+        for drv, settings in self.settings["drivers"].items():
+            if drv in self.devicefile.drivers:
+                self.devicefile.drivers[drv].settings.update(settings)
+        return self
 
 
 class Reply(BaseModel):
@@ -118,10 +136,26 @@ class _Component(BaseModel):
     channel: Optional[str] = None
 
 
+class Driver(BaseModel):
+    name: str
+    settings: dict = Field(default_factory=dict)
+
+
+class SpawnData(BaseModel):
+    name: str
+    port: Optional[int] = None
+    pid: Optional[int] = None
+    version: Optional[str] = None
+    spawn_time: float = 0.0
+    spawn_count: int = 0
+    heartbeat_time: float = 0.0
+
+
 class DeviceFile(BaseModel):
     filename: Path
     components: dict[str, _Component] = Field(default_factory=dict)
     devices: dict[str, Device] = Field(default_factory=dict)
+    drivers: dict[str, Driver] = Field(default_factory=dict)
     pipelines: dict[str, _Pipeline] = Field(default_factory=dict)
 
     @field_validator("filename", mode="before")
@@ -151,7 +185,7 @@ class DeviceFile(BaseModel):
         for pip in pipelines:
             if pip["name"].endswith("*"):
                 assert len(pip["devices"]) == 1, (
-                    f"only one component allowd in wildcard pipelines."
+                    "only one component allowed in wildcard pipelines."
                 )
                 for comp in pip["devices"]:
                     assert comp["device"] in self.devices, (
@@ -198,3 +232,8 @@ class DeviceFile(BaseModel):
                     name=pip["name"],
                     components=cmps,
                 )
+        # populate drivers
+        drivers_needed = {c.driver for c in self.components.values()}
+        self.drivers = {d: Driver(name=d) for d in drivers_needed}
+
+        return self
