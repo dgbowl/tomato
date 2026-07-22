@@ -256,8 +256,10 @@ def status(
                 msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
                 data=rets,
             )
-
-        return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
+        elif rep.data is not None:
+            return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
+        else:
+            return rep
     else:
         req.setsockopt(zmq.LINGER, 0)
         req.close()
@@ -272,7 +274,7 @@ def start(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
+    appdir: str | Path,
     verbosity: int,
     **_: dict,
 ) -> Reply:
@@ -385,9 +387,9 @@ def stop(
 
 def init(
     *,
-    appdir: str,
-    datadir: str,
-    logdir: str,
+    appdir: str | Path,
+    datadir: str | Path,
+    logdir: str | Path,
     **_: dict,
 ) -> Reply:
     """
@@ -474,7 +476,7 @@ def reload(
     port: int,
     timeout: int,
     context: zmq.Context,
-    appdir: str,
+    appdir: str | Path,
     **_: dict,
 ) -> Reply:
     """
@@ -491,14 +493,14 @@ def reload(
     kwargs = dict(port=port, timeout=timeout, context=context)
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
-        settings = toml.load(Path(appdir) / "settings.toml")
+        toml.load(Path(appdir) / "settings.toml")
     except FileNotFoundError:
         return Reply(
             success=False,
             msg=f"settings file not found in {appdir}, run 'tomato init' to create one",
         )
 
-    logger.debug(f"status")
+    logger.debug("status")
     ret = status(**kwargs)
     if not ret.success:
         return ret
@@ -506,18 +508,18 @@ def reload(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
 
-    logger.debug(f"reload")
+    logger.debug("reload")
     req.send_pyobj(dict(cmd="reload", sender=f"{__name__}.reload"))
     ret = req.recv_pyobj()
     if ret.success is False:
         return ret
 
-    logger.debug(f"setup")
+    logger.debug("setup")
     req.send_pyobj(dict(cmd="setup", sender=f"{__name__}.reload"))
     ret = req.recv_pyobj()
     if ret.success is False:
         return ret
-    logger.debug(f"done")
+    logger.debug("done")
 
     return Reply(
         success=True,

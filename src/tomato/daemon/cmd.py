@@ -226,7 +226,7 @@ def pipeline(msg: dict, daemon: Daemon) -> Reply:
     logger.debug("%s", msg)
     pip = msg["params"]
     if pip["name"] is None:
-        logger.error()
+        logger.error("no pipeline name supplied")
         return Reply(success=False, msg="no pipeline name supplied", data=msg)
     if pip["name"] not in daemon.pips:
         dest = Pipeline(**pip)

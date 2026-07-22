@@ -48,7 +48,10 @@ def tomato_driver_bootstrap(
                     comp.name,
                 )
                 continue
-            elif interface.retries.get(key, 0) == MAX_REGISTER_RETRIES:
+            elif (
+                hasattr(interface, "retries")
+                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES
+            ):
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
                     comp.name,
@@ -266,7 +269,6 @@ def tomato_driver() -> None:
                     )
                 elif msg["cmd"] == "settings":
                     interface.settings = msg["params"]
-                    params["settings"] = interface.settings
                     ret = Reply(
                         success=True,
                         msg="settings received",
@@ -350,7 +352,7 @@ def manager(port: int, timeout: int = 1000):
     while getattr(thread, "do_run"):
         spawned_drivers = []
         msg = dict(cmd="status", sender=sender)
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
             setattr(thread, "do_run", False)
             break
