@@ -346,11 +346,8 @@ def manager(port: int, timeout: int = 1000):
         timeout=timeout,
     )
 
-    component_retries = defaultdict(int)
-
     while getattr(thread, "do_run"):
         spawned_drivers = set()
-        spawned_components = set()
         msg = dict(cmd="status", sender=sender)
         ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
