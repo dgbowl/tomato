@@ -1,9 +1,11 @@
 import os
-from pathlib import Path
-import zmq
 import subprocess
+from pathlib import Path
+
+import zmq
 
 from tomato import tomato
+
 from . import utils
 
 PORT = 12345
@@ -23,7 +25,7 @@ def test_tomato_status_up(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.status(**kwargs)
     print(f"{ret=}")
     assert ret.success
-    assert len(ret.data.pips) == 1
+    assert len(ret.data.devicefile.pipelines) == 1
 
 
 def test_tomato_start_no_init(datadir, stop_tomato_daemon):
@@ -31,6 +33,7 @@ def test_tomato_start_no_init(datadir, stop_tomato_daemon):
     ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
     print(f"{ret=}")
     assert ret.success is False
+    assert ret.msg is not None
     assert "settings file not found" in ret.msg
 
 
@@ -109,11 +112,12 @@ def test_tomato_pipeline_invalid(datadir, start_tomato_daemon, stop_tomato_daemo
 
 
 def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
+    os.chdir(datadir)
     subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
     subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "--quiet"])
     assert utils.wait_until_tomato_running(port=PORT, timeout=5000)
     assert Path("tomato_daemon_12345.log").exists()
-    assert Path("tomato_daemon_12345.log").stat().st_size > 0
+    assert Path("tomato_daemon_12345.log").stat().st_size == 0
 
 
 def test_tomato_log_verbosity_testing(datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -149,20 +153,19 @@ def test_tomato_stop(start_tomato_daemon, stop_tomato_daemon):
     assert Path("tomato_daemon_12345.log").exists()
     with Path("tomato_daemon_12345.log").open() as logf:
         text = logf.read()
-    assert "driver manager thread joined" in text
-    assert "job manager thread joined" in text
+    assert "all manager threads joined" in text
 
 
 def test_tomato_component(start_tomato_daemon, stop_tomato_daemon):
-    ret = tomato.status(**kwargs, stgrp="tomato", yaml=True)
+    ret = tomato.status(**kwargs, stgrp="drivers", yaml=True)
+    print(f"{ret=}")
     assert ret.success
-    daemon = ret.data
-    print(f"{daemon=}")
+    assert ret.data is not None
 
-    drv = daemon.drivers["example_counter"]
+    drv = ret.data["example_counter"]
     req: zmq.Socket = CTXT.socket(zmq.REQ)
     req.RCVTIMEO = 1000
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
+    req.connect(f"tcp://127.0.0.1:{drv['port']}")
 
     req.send_pyobj(dict(cmd="status", params={}))
     ret = req.recv_pyobj()

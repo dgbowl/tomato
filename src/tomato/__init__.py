@@ -1,14 +1,14 @@
-import sys
-from pathlib import Path
-
-from importlib import metadata
 import argparse
 import logging
-import zmq
+import sys
+from importlib import metadata
+from pathlib import Path
+
 import appdirs
 import yaml
+import zmq
 
-from tomato import tomato, ketchup, passata
+from tomato import ketchup, passata, tomato
 
 sys.path += sys.modules["tomato"].__path__
 
@@ -36,7 +36,7 @@ def parse_args(parser, verbose, is_tomato=False):
         status = tomato.status(**vars(args), context=context)
         if not status.success:
             if args.yaml:
-                print(yaml.dump(status.dict()))
+                print(yaml.dump(status.model_dump()))
             else:
                 print(f"Failure: {status.msg}")
             return

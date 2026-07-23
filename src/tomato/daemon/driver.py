@@ -18,10 +18,11 @@ from typing import Union
 import psutil
 import zmq
 
+import tomato.daemon.drvdb as drvdb
 import tomato.utils
 from tomato.daemon import lpp
 from tomato.drivers import ModelInterface, driver_to_interface
-from tomato.models import Daemon, Reply, SpawnData
+from tomato.models import Daemon, DrvState, Reply
 
 logger = logging.getLogger(__name__)
 IDLE_MEASUREMENT_INTERVAL = None
@@ -116,23 +117,6 @@ def kill_tomato_driver(pid: int):
     return gone
 
 
-def driver_heartbeat(
-    req: zmq.Socket, params: dict, HEARTBEAT: float = HEARTBEAT
-) -> Reply | None:
-    tN = time.perf_counter()
-    if tN - params["heartbeat_time"] > HEARTBEAT:
-        sender = f"{__name__}.driver_heartbeat"
-        logger = logging.getLogger(sender)
-        logger.critical("heartbeating driver '%s'", params["name"])
-        params["heartbeat_time"] = tN
-        req.send_pyobj(dict(cmd="driver_set", params=params, sender=sender))
-        ret = req.recv_pyobj()
-        if ret.success:
-            logger.debug("heartbeat of driver '%s' successful", params["name"])
-        else:
-            logger.warning("heartbeat of driver '%s' failed", params["name"])
-
-
 def tomato_driver() -> None:
     """
     The function called when `tomato-driver` is executed.
@@ -207,6 +191,7 @@ def tomato_driver() -> None:
     logger.debug("getting daemon status")
     req.send_pyobj(dict(cmd="status"))
     daemon: Daemon = req.recv_pyobj().data
+    dbpath = daemon.settings["jobs"]["dbpath"]
     settings = daemon.devicefile.drivers[args.driver].settings
     try:
         interface = Interface(settings=settings)  # ty: ignore[call-non-callable]
@@ -216,17 +201,15 @@ def tomato_driver() -> None:
         )
         raise RuntimeError("could not instantiate driver '%s'") from e
 
-    hb_pars = {
-        "name": args.driver,
+    params = {
         "port": port,
         "version": Interface.version,
         "pid": tomato.utils.get_pid(),
         "heartbeat_time": 0,
     }
-    ret = driver_heartbeat(req, hb_pars)
-    if ret is not None and not ret.success:
+    drv = drvdb.update_drv(name=args.driver, params=params, dbpath=dbpath)
+    if drv is None:
         logger.error("could not push driver '%s' state to tomato-daemon", args.driver)
-        logger.debug(f"{ret=}")
         return
 
     logger.info("driver '%s' is entering main loop", args.driver)
@@ -306,7 +289,6 @@ def tomato_driver() -> None:
                     t_last = perform_idle_measurements(interface, t_last)
                 except (RuntimeError, ValueError, AttributeError):
                     logger.info("above error caught by driver process")
-                    driver_heartbeat(req, hb_pars)
     except Exception as e:
         logger.critical("uncaught exception %s", type(e), exc_info=True)
         raise e
@@ -359,50 +341,55 @@ def manager(port: int, timeout: int = 1000):
             setattr(thread, "do_run", False)
             break
 
-        for n, d in daemon.drivers.items():
+        dbpath = daemon.settings["jobs"]["dbpath"]
+        drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+        for d in drivers:
             tN = time.perf_counter()
-            if n not in daemon.devicefile.drivers:
+            if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
-                    logger.warning("%s: stopping driver", n)
+                    logger.warning("%s: stopping driver", d.name)
                     ret = stop_tomato_driver(d.port, context)
                     if not ret.success:
-                        logger.warning("%s: failed to stop driver: %s", n, ret.msg)
-                req.send_pyobj(dict(cmd="driver_del", params={"name": n}))
-                ret = req.recv_pyobj()
-                logger.warning("%s: removed driver", n)
+                        logger.warning("%s: failed to stop driver: %s", d.name, ret.msg)
+                ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
+                if ret is None:
+                    logger.warning("%s: removed driver", d.name)
+                else:
+                    logger.error("%s: could not delete driver", d.name)
             elif d.port is not None:
                 if (tN - d.heartbeat_time > HEARTBEAT) or (
                     d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY
                 ):
                     try:
-                        logger.debug("%s: checking driver on port %d", n, d.port)
+                        logger.debug("%s: checking driver on port %d", d.name, d.port)
                         dreq = context.socket(zmq.REQ)
                         dreq.RCVTIMEO = 1000
                         dreq.connect(f"tcp://127.0.0.1:{d.port}")
                         dreq.send_pyobj(dict(cmd="status"))
                         ret = dreq.recv_pyobj()
                         if ret.success and len(ret.data) == 0:
-                            logger.info("%s: registering components", n)
+                            logger.info("%s: registering components", d.name)
                             dreq.send_pyobj(dict(cmd="register", sender=sender))
                             ret = dreq.recv_pyobj()
                             if ret.success:
-                                logger.info("%s: component registration successful", n)
+                                logger.info(
+                                    "%s: component registration successful", d.name
+                                )
                             else:
                                 logger.warning(
-                                    "%s: component registration failed: %s", n, ret
+                                    "%s: component registration failed: %s", d.name, ret
                                 )
-                        params = {"name": d.name, "heartbeat_time": tN}
-                        d.heartbeat_time = tN
+                        params = {"heartbeat_time": tN}
                     except zmq.error.Again:
-                        logger.warning("%s: check of driver failed, resetting", n)
-                        params = vars(SpawnData(name=d.name))
+                        logger.warning("%s: check of driver failed, resetting", d.name)
+                        params = vars(DrvState(name=d.name))
+                        params.pop("name")
                     except Exception as e:
                         logger.critical(e)
                         raise e
-                    req.send_pyobj(dict(cmd="driver_set", params=params))
-                    ret = req.recv_pyobj()
+                    drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
             elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
-                logger.info("%s: spawning driver: retry %d", n, d.spawn_count)
+                logger.info("%s: spawning driver: retry %d", d.name, d.spawn_count)
                 cmd = [
                     "tomato-driver",
                     "--port",
@@ -411,7 +398,7 @@ def manager(port: int, timeout: int = 1000):
                     f"{daemon.verbosity}",
                     "--logdir",
                     daemon.settings["logdir"],
-                    n,
+                    d.name,
                 ]
                 if psutil.WINDOWS:
                     cfs = subprocess.CREATE_NO_WINDOW
@@ -419,14 +406,12 @@ def manager(port: int, timeout: int = 1000):
                     subprocess.Popen(cmd, creationflags=cfs)
                 elif psutil.POSIX:
                     subprocess.Popen(cmd, start_new_session=True)
-                logger.info("%s: driver process launched", n)
+                logger.info("%s: driver process launched", d.name)
                 params = {
-                    "name": n,
                     "spawn_time": tN,
                     "spawn_count": d.spawn_count + 1,
                 }
-                req.send_pyobj(dict(cmd="driver_set", params=params))
-                ret = req.recv_pyobj()
+                drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
                 spawned_drivers.add(d.name)
 
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
@@ -434,31 +419,15 @@ def manager(port: int, timeout: int = 1000):
     logger.info("instructed to quit")
     req.send_pyobj(dict(cmd="status", sender=sender))
     daemon = req.recv_pyobj().data
-    for driver in daemon.drivers.values():
-        if driver.pid is None:
-            logger.info(
-                "stopping driver '%s' - no action (no pid)",
-                driver.name,
-            )
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+    for d in drivers:
+        if d.pid is None:
+            logger.info("%s: stopping driver - no action (no pid)", d.name)
             continue
-        elif driver.port is None:
-            logger.info(
-                "stopping driver '%s' - killing pid %d",
-                driver.name,
-                driver.pid,
-            )
-            gone = kill_tomato_driver(driver.pid)
-            if driver.pid in gone:
-                ret = Reply(success=True)
+        elif d.port is None:
+            logger.info("%s: stopping driver - killing pid %d", d.name, d.pid)
+            kill_tomato_driver(d.pid)
         else:
-            logger.info(
-                "stopping driver '%s' - sending 'stop' command on port %s",
-                driver.name,
-                driver.port,
-            )
-            ret = stop_tomato_driver(driver.port, context)
-
-        if ret.success:
-            logger.info("stopped driver '%s'", driver.name)
-        else:
-            logger.warning("could not stop driver '%s'", driver.name)
+            logger.info("%s: stopping driver - 'stop' on port %d", d.name, d.port)
+            stop_tomato_driver(d.port, context)

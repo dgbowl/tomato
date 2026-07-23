@@ -21,24 +21,25 @@ __all__ = ["Task"]
 logger = logging.getLogger(__name__)
 
 
-class Device(BaseModel):
-    name: str
-    driver: str
-    address: str
-    channels: Sequence[str]
-    pollrate: int = 1
-
-
-class Pipeline(BaseModel):
+class PipState(BaseModel):
     name: str
     ready: bool = False
     jobid: Optional[int] = None
     sampleid: Optional[str] = None
-    components: Sequence[str] = Field(default_factory=list)
+
+
+class DrvState(BaseModel):
+    name: str
+    port: Optional[int] = None
+    pid: Optional[int] = None
+    version: Optional[str] = None
+    spawn_time: float = 0.0
+    spawn_count: int = 0
+    heartbeat_time: float = 0.0
 
 
 class Job(BaseModel):
-    id: Optional[int] = None
+    id: int
     payload: Payload
     jobname: Optional[str] = None
     pid: Optional[int] = None
@@ -67,10 +68,6 @@ class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
     appdir: str
     settings: dict = Field(default_factory=dict)
     devicefile: "DeviceFile" = Field(default_factory="DeviceFile")
-    drivers: dict[str, "SpawnData"] = Field(default_factory=dict)
-    pips: dict[str, Pipeline] = Field(default_factory=dict)
-    # drvs: Mapping[str, Driver] = Field(default_factory=dict)
-    # cmps: dict[str, Component] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
@@ -102,11 +99,11 @@ class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
 
 class Reply(BaseModel):
     success: bool
-    msg: Optional[str] = None
+    msg: str
     data: Optional[Any] = None
 
 
-class _Pipeline(BaseModel):
+class Pipeline(BaseModel):
     name: str
     components: dict[str, str]
     """Mapping of component roles to names."""
@@ -120,19 +117,17 @@ class Component(BaseModel):
     channel: Optional[str] = None
 
 
+class Device(BaseModel):
+    name: str
+    driver: str
+    address: str
+    channels: Sequence[str]
+    pollrate: int = 1
+
+
 class Driver(BaseModel):
     name: str
     settings: dict = Field(default_factory=dict)
-
-
-class SpawnData(BaseModel):
-    name: str
-    port: Optional[int] = None
-    pid: Optional[int] = None
-    version: Optional[str] = None
-    spawn_time: float = 0.0
-    spawn_count: int = 0
-    heartbeat_time: float = 0.0
 
 
 class DeviceFile(BaseModel):
@@ -140,7 +135,7 @@ class DeviceFile(BaseModel):
     components: dict[str, Component] = Field(default_factory=dict)
     devices: dict[str, Device] = Field(default_factory=dict)
     drivers: dict[str, Driver] = Field(default_factory=dict)
-    pipelines: dict[str, _Pipeline] = Field(default_factory=dict)
+    pipelines: dict[str, Pipeline] = Field(default_factory=dict)
 
     @field_validator("filename", mode="before")
     @classmethod
@@ -189,7 +184,7 @@ class DeviceFile(BaseModel):
                             address=dev.address,
                             channel=ch,
                         )
-                        self.pipelines[pname] = _Pipeline(
+                        self.pipelines[pname] = Pipeline(
                             name=pname,
                             components={comp["role"]: cname},
                         )
@@ -214,7 +209,7 @@ class DeviceFile(BaseModel):
                         channel=comp["channel"],
                     )
                     cmps[comp["role"]] = cname
-                self.pipelines[pip["name"]] = _Pipeline(
+                self.pipelines[pip["name"]] = Pipeline(
                     name=pip["name"],
                     components=cmps,
                 )

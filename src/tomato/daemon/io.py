@@ -13,31 +13,9 @@ from pathlib import Path
 
 import xarray as xr
 
-from tomato.models import Daemon, Job
+from tomato.models import Job
 
 logger = logging.getLogger(__name__)
-
-
-def store(daemon: Daemon):
-    """Stores the status of the provided :class:`Daemon` as a ``pickle`` file."""
-    datadir = Path(daemon.settings["datadir"])
-    datadir.mkdir(parents=True, exist_ok=True)
-    outfile = datadir / f"tomato_state_{daemon.port}.pkl"
-    logger.debug("storing daemon state to '%s'", outfile)
-    with outfile.open("wb") as out:
-        pickle.dump(daemon, out, protocol=4)
-
-
-def load(daemon: Daemon):
-    """Restores a saved status from a ``pickle`` file into the provided :class:`Daemon`."""
-    infile = Path(daemon.settings["datadir"]) / f"tomato_state_{daemon.port}.pkl"
-    if infile.exists() is False:
-        logger.debug("daemon state file '%s' does not exist", infile)
-        return
-    with infile.open("rb") as inp:
-        loaded = pickle.load(inp)
-    daemon.pips = loaded.pips
-    daemon.status = "running"
 
 
 def merge_netcdfs(job: Job, snapshot=False) -> str:

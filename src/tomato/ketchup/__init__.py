@@ -24,15 +24,17 @@ functions:
 
 import json
 import logging
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
+
 import yaml
 import zmq
-from packaging.version import Version
 from dgbowl_schemas.tomato import to_payload
+from packaging.version import Version
 
+import tomato.daemon.jobdb as jobdb
 from tomato.daemon.io import merge_netcdfs
-from tomato.models import Daemon, Reply
+from tomato.models import Daemon, Job, Reply
 
 log = logging.getLogger(__name__)
 
@@ -41,9 +43,7 @@ __latest_payload__ = "2.2"
 
 def submit(
     *,
-    port: int,
-    context: zmq.Context,
-    payload: str,
+    payload: str | Path,
     jobname: str,
     daemon: Daemon,
     **_: dict,
@@ -114,33 +114,26 @@ def submit(
         payload.settings.snapshot.path = cwd
     if payload.settings.output.repositories != ["default"]:
         for repo in payload.settings.output.repositories:
-            if repo != "default" and repo not in daemon.settings.repositories:
+            if repo != "default" and repo not in daemon.settings["repositories"]:
                 msg = f"payload specifies unknown output repository {repo!r}"
-                return Reply(success=False, msg=msg, data=daemon.settings.repositories)
+                return Reply(success=False, msg=msg, data=daemon.settings)
 
     log.debug("queueing 'payload' into 'queue'")
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
+    dbpath = daemon.settings["jobs"]["dbpath"]
     dt = str(datetime.now(timezone.utc))
     params = dict(payload=payload, jobname=jobname, submitted_at=dt)
-    req.send_pyobj(dict(cmd="set_job", id=None, params=params))
-    ret = req.recv_pyobj()
-    req.close()
-    if ret.success:
-        msg = f"job submitted successfully with jobid {ret.data.id}"
-        if ret.data.jobname is not None:
-            msg += f" and jobname {ret.data.jobname!r}"
-        return Reply(success=True, msg=msg, data=ret.data)
-    else:
-        return Reply(success=False, msg="unknown error", data=ret.data)
+    job = jobdb.insert_job(job=Job(id=0, **params), dbpath=dbpath)
+
+    msg = f"job submitted successfully with jobid {job.id}"
+    if job.jobname is not None:
+        msg += f" and jobname {job.jobname!r}"
+    return Reply(success=True, msg=msg, data=job)
 
 
 def status(
     *,
-    port: int,
-    context: zmq.Context,
-    verbosity: int,
     jobids: list[int],
+    daemon: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -183,33 +176,27 @@ def status(
     success: true
 
     """
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-
+    dbpath = daemon.settings["jobs"]["dbpath"]
     if len(jobids) == 0:
-        req.send_pyobj(dict(cmd="get_jobs", where="id IS NOT NULL"))
-        rets = req.recv_pyobj().data
-        if len(rets) == 0:
+        jobs = jobdb.get_jobs_where(where="id IS NOT NULL", dbpath=dbpath)
+        if len(jobs) == 0:
             return Reply(success=False, msg="job queue is empty")
     else:
         where = f"id IN ({', '.join([str(j) for j in jobids])})"
-        req.send_pyobj(dict(cmd="get_jobs", where=where))
-        rets = req.recv_pyobj().data
-        if len(rets) == 0:
+        jobs = jobdb.get_jobs_where(where=where, dbpath=dbpath)
+        if len(jobs) == 0:
             if len(jobids) == 1:
                 msg = f"found no job with jobid {jobids}"
             else:
                 msg = f"found no jobs with jobids {jobids}"
             return Reply(success=False, msg=msg)
 
-    req.close()
-
-    if len(rets) == 1:
-        msg = f"found {len(rets)} job with status {[job.status for job in rets]}"
+    if len(jobs) == 1:
+        msg = f"found {len(jobs)} job with status {[job.status for job in jobs]}"
     else:
         msg = ""
         for st in ["q", "qw", "r", "rd", "c", "cd", "ce"]:
-            jobst = [j.id for j in rets if j.status == st]
+            jobst = [j.id for j in jobs if j.status == st]
             if len(jobst) > 1:
                 msg += (
                     f"found {len(jobst)} jobs with status {st!r:4s}: {jobst}\n         "
@@ -219,14 +206,13 @@ def status(
                     f"found {len(jobst)} job with status {st!r:4s}: {jobst}\n         "
                 )
         msg = msg.strip()
-    return Reply(success=True, msg=msg, data=rets)
+    return Reply(success=True, msg=msg, data=jobs)
 
 
 def cancel(
     *,
-    port: int,
-    context: zmq.Context,
     jobids: list[int],
+    daemon: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -259,31 +245,26 @@ def cancel(
     success: true
 
     """
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
+    dbpath = daemon.settings["jobs"]["dbpath"]
     where = f"id IN ({', '.join([str(j) for j in jobids])})"
-    req.send_pyobj(dict(cmd="get_jobs", where=where))
-    jobs = {i.id: i for i in req.recv_pyobj().data}
+    jobs = jobdb.get_jobs_where(where=where, dbpath=dbpath)
+    rjobids = {j.id for j in jobs}
 
     for jobid in jobids:
-        if jobid not in jobs:
+        if jobid not in rjobids:
             return Reply(success=False, msg=f"job with jobid {jobid} does not exist")
 
     data = []
-    for jobid in jobids:
-        if jobs[jobid].status in {"q", "qw"}:
+    for job in jobs:
+        if job.status in {"q", "qw"}:
             params = dict(status="cd")
-        elif jobs[jobid].status in {"r"}:
+        elif job.status in {"r"}:
             params = dict(status="rd")
-        elif jobs[jobid].status in {"cd", "ce", "c"}:
+        elif job.status in {"cd", "ce", "c"}:
             continue
-        req.send_pyobj(dict(cmd="set_job", id=jobid, params=params))
-        ret = req.recv_pyobj()
-        if ret.success:
-            data.append(ret.data)
-        else:
-            return Reply(success=False, msg="unknown error", data=ret.data)
-    req.close()
+        job = jobdb.update_job_id(id=jobid, params=params, dbpath=dbpath)
+        data.append(job)
+
     if len(data) == 0:
         msg = "all jobs were already cancelled"
     elif len(data) == 1:
@@ -295,9 +276,8 @@ def cancel(
 
 def snapshot(
     *,
-    port: int,
     jobids: list[int],
-    context: zmq.Context,
+    daemon: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -314,22 +294,20 @@ def snapshot(
     Success: snapshot for job [3] created successfully
 
     """
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
+    dbpath = daemon.settings["jobs"]["dbpath"]
     where = f"id IN ({', '.join([str(j) for j in jobids])})"
-    req.send_pyobj(dict(cmd="get_jobs", where=where))
-    jobs = {i.id: i for i in req.recv_pyobj().data}
-    req.close()
+    jobs = jobdb.get_jobs_where(where=where, dbpath=dbpath)
+    rjobids = {j.id: j for j in jobs}
 
     for jobid in jobids:
-        if jobid not in jobs:
+        if jobid not in rjobids:
             return Reply(success=False, msg=f"job {jobid} does not exist")
-        if jobs[jobid].status in {"q", "qw"}:
+        if rjobids[jobid].status in {"q", "qw"}:
             return Reply(success=False, msg=f"job {jobid} is still queued")
 
-    for jobid in jobids:
-        jobs[jobid].snappath = f"snapshot.{jobid}.nc"
-        merge_netcdfs(jobs[jobid], snapshot=True)
+    for jobid, job in rjobids.items():
+        job.snappath = f"snapshot.{jobid}.nc"
+        merge_netcdfs(job, snapshot=True)
     if len(jobids) > 1:
         msg = f"snapshot for jobs {jobids} created successfully"
     else:
@@ -339,9 +317,8 @@ def snapshot(
 
 def search(
     *,
-    port: int,
     jobname: str,
-    context: zmq.Context,
+    daemon: Daemon,
     **_: dict,
 ) -> Reply:
     """
@@ -362,12 +339,9 @@ def search(
     Failure: no job matching 'nothing' found
 
     """
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
+    dbpath = daemon.settings["jobs"]["dbpath"]
     where = f"jobname LIKE '%{jobname}%'"
-    req.send_pyobj(dict(cmd="get_jobs", where=where))
-    jobs = req.recv_pyobj().data
-    req.close()
+    jobs = jobdb.get_jobs_where(where=where, dbpath=dbpath)
 
     if len(jobs) > 0:
         if len(jobs) == 1:

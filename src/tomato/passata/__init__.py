@@ -2,8 +2,9 @@ from typing import Any
 
 import zmq
 
+import tomato.daemon.drvdb as drvdb
 from tomato import tomato
-from tomato.models import Component, Daemon, Reply, SpawnData
+from tomato.models import Component, DrvState, Reply
 
 RCVTIMEO = 3000
 
@@ -13,13 +14,14 @@ def _name_to_cmp(
     port: int,
     timeout: int,
     context: zmq.Context,
-) -> tuple[Component, SpawnData] | Reply:
+) -> tuple[Component, DrvState] | Reply:
     ret = tomato.status(
         port=port, timeout=timeout, context=context, stgrp="tomato", yaml=True
     )
     if ret.success is False or ret.data is None:
         return ret
-    daemon: Daemon = ret.data
+    daemon = ret.data
+    dbpath = daemon.settings["jobs"]["dbpath"]
     if name not in daemon.devicefile.components:
         return Reply(
             success=False,
@@ -27,7 +29,9 @@ def _name_to_cmp(
             data=ret.data,
         )
     cmp = daemon.devicefile.components[name]
-    drv = daemon.drivers[cmp.driver]
+    drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
+    assert drv is not None
+
     return cmp, drv
 
 
@@ -52,7 +56,7 @@ def _running_or_force(
                 msg=f"will not 'set_attr' on a running component {name!r}",
                 data=None,
             )
-    return Reply(success=True)
+    return Reply(success=True, msg="can 'set_attr'")
 
 
 def status(

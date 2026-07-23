@@ -7,21 +7,22 @@
 
 """
 
-from abc import ABCMeta, abstractmethod
-from typing import Any, Union, Optional
-from pydantic import BaseModel, Field
-from threading import Thread, current_thread, RLock
-from collections import defaultdict
-import queue
-from tomato.models import Reply, Task
-from tomato.driverinterface_2_1.decorators import in_devmap, to_reply, log_errors
-from tomato.driverinterface_2_1.types import Type, Val, Key
-import logging
-
-import xarray as xr
-import time
 import atexit
+import logging
+import queue
+import time
+from abc import ABCMeta, abstractmethod
+from collections import defaultdict
+from threading import RLock, Thread, current_thread
+from typing import Any, Optional, Union
+
 import pint
+import xarray as xr
+from pydantic import BaseModel, Field
+
+from tomato.driverinterface_2_1.decorators import in_devmap, log_errors, to_reply
+from tomato.driverinterface_2_1.types import Key, Type, Val
+from tomato.models import Reply, Task
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class Attr(BaseModel, arbitrary_types_allowed=True):
     status: bool = False
     """Should the attribute be included in component status?"""
 
-    units: str = None
+    units: Optional[str] = None
     """Default units for the attribute, optional."""
 
     maximum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
