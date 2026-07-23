@@ -28,7 +28,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
-import zmq
 from dgbowl_schemas.tomato import to_payload
 from packaging.version import Version
 

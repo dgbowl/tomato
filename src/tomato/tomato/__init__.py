@@ -357,7 +357,7 @@ def stop(
     Failure: tomato not running on port 1235
 
     """
-    logger = logging.getLogger(f"{__name__}.stop")
+    # logger = logging.getLogger(f"{__name__}.stop")
     stat = status(port=port, timeout=timeout, context=context)
     if stat.success:
         req = context.socket(zmq.REQ)
@@ -534,7 +534,7 @@ def pipeline_load(
         tomato pipeline load <pipeline> <sampleid>
 
     """
-    logger = logging.getLogger(f"{__name__}.pipeline_load")
+    # logger = logging.getLogger(f"{__name__}.pipeline_load")
     stat = status(port=port, timeout=timeout, context=context)
     if not stat.success or stat.data is None:
         return stat
@@ -573,7 +573,7 @@ def pipeline_eject(
         tomato pipeline eject <pipeline>
 
     """
-    logger = logging.getLogger(f"{__name__}.pipeline_eject")
+    # logger = logging.getLogger(f"{__name__}.pipeline_eject")
     stat = status(port=port, timeout=timeout, context=context)
     if not stat.success or stat.data is None:
         return stat
@@ -583,6 +583,7 @@ def pipeline_eject(
         return Reply(success=False, msg=f"pipeline {pipeline!r} not found on tomato")
     dbpath = daemon.settings["jobs"]["dbpath"]
     pip = pipdb.get_pip(name=pipeline, dbpath=dbpath)
+    assert pip is not None
 
     if pip.sampleid is None:
         return Reply(
@@ -618,7 +619,7 @@ def pipeline_ready(
         pipeline ready <pipeline>
 
     """
-    logger = logging.getLogger(f"{__name__}.pipeline_ready")
+    # logger = logging.getLogger(f"{__name__}.pipeline_ready")
     stat = status(port=port, timeout=timeout, context=context)
     if not stat.success or stat.data is None:
         return stat
@@ -628,6 +629,7 @@ def pipeline_ready(
         return Reply(success=False, msg=f"pipeline {pipeline!r} not found on tomato")
     dbpath = daemon.settings["jobs"]["dbpath"]
     pip = pipdb.get_pip(name=pipeline, dbpath=dbpath)
+    assert pip is not None
 
     if pip.ready:
         return Reply(
