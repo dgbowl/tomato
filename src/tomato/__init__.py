@@ -45,7 +45,8 @@ def parse_args(parser, verbose, is_tomato=False):
     if "func" in args:
         ret = args.func(**vars(args), verbosity=verbosity, context=context, **kwargs)
         if args.yaml:
-            ret.data.model_dump()
+            # if ret.data is not None:
+            #    ret.data.model_dump()
             print(yaml.dump(ret.model_dump()))
         else:
             print(f"{'Success' if ret.success else 'Failure'}: {ret.msg}")
