@@ -258,12 +258,20 @@ def action_queued(
     """
     dbpath = daemon.settings["jobs"]["dbpath"]
     logger = logging.getLogger(f"{__name__}.action_queued")
+    # We have to cache the available pipelines once per queue pass
+    # in order to avoid race conditions, where the pipeline in the
+    # sqlite database is made available in the middle of the loop
+    # over the jobs.
+    where = "jobid IS NULL"
+    avail_pips = {p.name: p for p in pipdb.get_pips_where(where=where, dbpath=dbpath)}
     for jobid in sorted(matched.keys()):
         job = jobdb.get_job_id(jobid, daemon.settings["jobs"]["dbpath"])
         for pname in matched[jobid]:
-            ps = pipdb.get_pip(name=pname, dbpath=dbpath)
-            assert ps is not None
-            if not ps.ready:
+            ps = avail_pips.get(pname)
+            if ps is None:
+                # This happens if the pipeline has already been popped below
+                continue
+            elif not ps.ready:
                 continue
             elif ps.sampleid != job.payload.sample.identifier:
                 continue
@@ -291,6 +299,8 @@ def action_queued(
             logger.debug("job %d: reserving pipeline %s", job.id, pname)
             params = dict(jobid=job.id, ready=False)
             pipdb.update_pip(name=pname, params=params, dbpath=dbpath)
+            # pop this pipeline to make sure we don't double submit
+            avail_pips.pop(pname)
 
             logger.debug("job %d: executing tomato-job", job.id)
             cmd = [

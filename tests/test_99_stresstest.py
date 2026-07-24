@@ -1,9 +1,12 @@
-import pytest
 import os
 import subprocess
-import xarray as xr
 from datetime import datetime
+
+import pytest
+import xarray as xr
+
 from tomato.models import Job
+
 from . import utils
 
 PORT = 12345
@@ -37,6 +40,7 @@ def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
         assert os.path.exists(f"results.{i}.nc")
         with xr.open_datatree(f"results.{i}.nc") as dt:
             completed_at = Job.model_validate_json(dt.attrs["tomato_Job"]).completed_at
+        assert completed_at is not None
         ti = datetime.fromisoformat(completed_at)
         if prev is not None:
             assert ti > prev
