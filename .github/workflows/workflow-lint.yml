@@ -11,7 +11,6 @@ jobs:
      - name: Run ruff check
        uses: astral-sh/ruff-action@v4
        with:
-         version: "<0.16"
-       run: ruff check
+           version: "<0.16"
      - name: Run ruff format
        run: ruff format --check
