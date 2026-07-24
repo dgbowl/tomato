@@ -3,7 +3,6 @@ import random
 import subprocess
 import time
 
-import zmq
 
 import tomato
 
