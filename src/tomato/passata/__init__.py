@@ -1,7 +1,29 @@
-import zmq
-from tomato import tomato
-from tomato.models import Reply, Component, Driver
+"""
+.. codeauthor::
+    Peter Kraus
+
+Module of functions to interact with drivers and components of :mod:`tomato`. Includes the following functions:
+
+- :func:`status` to query the status of a tomato component
+- :func:`register` to register an individual component on a tomato driver
+- :func:`attrs` to query attribute information on a component
+- :func:`capabilities` to query capabilities of a component
+- :func:`constants` to query constants on a component
+- :func:`get_attrs` to query values of attributes on a component
+- :func:`set_attr` to set value of an attribute on a component
+- :func:`reset` to reset a component
+- :func:`get_last_data` to retrieve the last recorded datapoint from a component
+- :func:`measure` to trigger an idle measurement on a component
+
+"""
+
 from typing import Any
+
+import zmq
+
+import tomato.daemon.drvdb as drvdb
+from tomato import tomato
+from tomato.models import Component, DrvState, Reply
 
 RCVTIMEO = 3000
 
@@ -11,20 +33,24 @@ def _name_to_cmp(
     port: int,
     timeout: int,
     context: zmq.Context,
-) -> tuple[Component, Driver]:
+) -> tuple[Component, DrvState] | Reply:
     ret = tomato.status(
         port=port, timeout=timeout, context=context, stgrp="tomato", yaml=True
     )
-    if not ret.success:
+    if ret.success is False or ret.data is None:
         return ret
-    if name not in ret.data.cmps:
+    daemon = ret.data
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    if name not in daemon.devicefile.components:
         return Reply(
             success=False,
             msg=f"component {name!r} not found on tomato",
             data=ret.data,
         )
-    cmp = ret.data.cmps[name]
-    drv = ret.data.drivers[cmp.driver]
+    cmp = daemon.devicefile.components[name]
+    drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
+    assert drv is not None
+
     return cmp, drv
 
 
@@ -37,7 +63,7 @@ def _running_or_force(
 ) -> Reply:
     if not force:
         ret = status(port=port, timeout=timeout, context=context, name=name)
-        if not ret.success:
+        if not ret.success or ret.data is None:
             return Reply(
                 success=False,
                 msg="will not 'set_attr' on a component with invalid status",
@@ -49,7 +75,7 @@ def _running_or_force(
                 msg=f"will not 'set_attr' on a running component {name!r}",
                 data=None,
             )
-    return Reply(success=True)
+    return Reply(success=True, msg="can 'set_attr'")
 
 
 def status(

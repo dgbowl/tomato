@@ -75,5 +75,5 @@ dirty_template = "{tag}.post{ccount}+dirty"
 [tool.ruff]
 
 [tool.pytest.ini_options]
-# log_cli = true
-# log_cli_level = "DEBUG"
+log_cli = true
+log_cli_level = "DEBUG"

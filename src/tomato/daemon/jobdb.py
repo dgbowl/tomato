@@ -7,74 +7,16 @@
 """
 
 import logging
-import os
 import pickle
-import sqlite3
-from pathlib import Path
+
+from tomato.daemon.db import connect_db
 from tomato.models import Job
 
 logger = logging.getLogger(__name__)
 
 
-def connect_jobdb(dbpath: str | Path):
-    head = Path(dbpath).parent
-    if not head.exists():
-        logger.warning("making local data folder '%s'", head)
-        os.makedirs(head)
-    conn = sqlite3.connect(dbpath)
-    cur = conn.cursor()
-    return conn, cur
-
-
-def jobdb_setup(dbpath: str | Path) -> None:
-    user_version = 2
-    conn, cur = connect_jobdb(dbpath)
-    logger.debug("attempting to find table 'queue' in '%s'", dbpath)
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='queue';")
-    exists = bool(len(cur.fetchall()))
-    if exists:
-        logger.debug("table 'queue' present at '%s'", dbpath)
-        cur.execute("PRAGMA user_version;")
-        curr_version = cur.fetchone()[0]
-        assert curr_version == user_version
-        # Below is an example of upgrading databases to new user_version:
-        while curr_version < user_version:
-            if curr_version == 1:
-                logger.info("upgrading table 'queue' from version 1 to 2")
-                cur.execute(
-                    "ALTER TABLE queue RENAME COLUMN executed_at TO connected_at;"
-                )
-                cur.execute("ALTER TABLE queue ADD COLUMN launched_at TEXT;")
-                cur.execute("UPDATE queue SET launched_at = connected_at;")
-                cur.execute("PRAGMA user_version = 2;")
-                conn.commit()
-            cur.execute("PRAGMA user_version;")
-            curr_version = cur.fetchone()[0]
-    else:
-        logger.info("creating a new sqlite3 'queue' table at '%s'", dbpath)
-        cur.execute(
-            "CREATE TABLE IF NOT EXISTS queue ("
-            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "    payload BLOB NOT NULL,"
-            "    jobname TEXT,"
-            "    pid INTEGER,"
-            "    status TEXT NOT NULL,"
-            "    submitted_at TEXT NOT NULL,"
-            "    launched_at TEXT,"
-            "    connected_at TEXT,"
-            "    completed_at TEXT,"
-            "    jobpath TEXT,"
-            "    respath TEXT,"
-            "    snappath TEXT"
-            ");",
-        )
-        cur.execute(f"PRAGMA user_version = {user_version};")
-        conn.commit()
-    conn.close()
-
-
-def insert_job(job: Job, dbpath: str) -> int:
-    conn, cur = connect_jobdb(dbpath)
+def insert_job(job: Job, dbpath: str) -> Job:
+    conn, cur = connect_db(dbpath)
     cur.execute(
         "INSERT INTO queue (payload, jobname, pid, status, submitted_at, "
         "launched_at, connected_at, completed_at, jobpath, respath, snappath)"
@@ -95,13 +37,13 @@ def insert_job(job: Job, dbpath: str) -> int:
     )
     conn.commit()
     cur.execute(f"SELECT id FROM queue WHERE submitted_at = '{job.submitted_at}';")
-    ret = cur.fetchone()[0]
+    id = cur.fetchone()[0]
     conn.close()
-    return ret
+    return get_job_id(id, dbpath)
 
 
 def update_job_id(id: int, params: dict, dbpath: str) -> Job:
-    conn, cur = connect_jobdb(dbpath)
+    conn, cur = connect_db(dbpath)
     for k, v in params.items():
         cur.execute(f"UPDATE queue SET {k} = ? WHERE id = {id};", (v,))
     conn.commit()
@@ -110,7 +52,7 @@ def update_job_id(id: int, params: dict, dbpath: str) -> Job:
 
 
 def get_job_id(id: int, dbpath: str) -> Job:
-    conn, cur = connect_jobdb(dbpath)
+    conn, cur = connect_db(dbpath)
     cur.execute("SELECT * FROM queue WHERE id = ?;", (id,))
     columns = [i[0] for i in cur.description]
     data = cur.fetchone()
@@ -120,7 +62,7 @@ def get_job_id(id: int, dbpath: str) -> Job:
 
 
 def get_jobs_where(where: str, dbpath: str) -> list[Job]:
-    conn, cur = connect_jobdb(dbpath)
+    conn, cur = connect_db(dbpath)
     cur.execute(f"SELECT * FROM queue WHERE {where};")
     columns = [i[0] for i in cur.description]
     data = cur.fetchall()

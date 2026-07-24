@@ -1,10 +1,11 @@
-from tomato.models import Reply
-from tomato.driverinterface_2_1.types import Val
-
-from functools import wraps
 import logging
 import sys
+from functools import wraps
+
 import pint
+
+from tomato.driverinterface_2_1.types import Val
+from tomato.models import Reply
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ def log_errors(func):
         # Other kinds of errors we abort the driver process
         except Exception as e:
             logger.critical(e, exc_info=True)
-            sys.exit(e)
+            sys.exit(str(e))
 
     return wrapper
 
@@ -97,7 +98,7 @@ def coerce_val(func):
 
         if isinstance(val, pint.Quantity):
             if val.dimensionless and props.units is not None:
-                val = pint.Quantity(val.m, props.units)
+                val: pint.Quantity = pint.Quantity(val.m, props.units)  # ty: ignore[invalid-assignment]
             if val.dimensionality != pint.Quantity(props.units).dimensionality:
                 raise ValueError(f"val {val!r} has the wrong dimensionality")
         if props.minimum is not None and val < props.minimum:

@@ -7,56 +7,51 @@
 
 import logging
 import pickle
+from pathlib import Path
+from typing import Annotated, Any, Literal, Optional, Sequence, Union
+
 import toml
 import yaml
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Payload, Task
-from pathlib import Path
-from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import Any, Literal, Mapping, Optional, Sequence, Union
+from pydantic import BaseModel, Field, PlainSerializer, field_validator, model_validator
 from typing_extensions import Self
 
-__all__ = ["Task"]
+__all__ = [
+    "Task",
+    "PipState",
+    "DrvState",
+    "Job",
+    "Daemon",
+    "Reply",
+    "Pipeline",
+    "Component",
+    "Device",
+    "Driver",
+    "DeviceFile",
+]
 logger = logging.getLogger(__name__)
 
 
-class Device(BaseModel):
-    name: str
-    driver: str
-    address: str
-    channels: Sequence[str]
-    pollrate: int = 1
-
-
-class Component(BaseModel):
-    name: str
-    driver: str
-    device: str
-    address: str
-    channel: str
-    role: str
-    capabilities: Optional[set[str]] = None
-
-    @field_validator("role", mode="after")
-    def check_role(cls, value):
-        if "/" in value:
-            raise ValueError(
-                f"Cannot have '/' as part of component.role: {value!r}, "
-                "please fix your devices.yml file accordingly and run 'tomato reload'."
-            )
-        return value
-
-
-class Pipeline(BaseModel):
+class PipState(BaseModel):
     name: str
     ready: bool = False
     jobid: Optional[int] = None
     sampleid: Optional[str] = None
-    components: Sequence[str] = Field(default_factory=list)
+
+
+class DrvState(BaseModel):
+    name: str
+    port: Optional[int] = None
+    pid: Optional[int] = None
+    version: Optional[str] = None
+    spawn_time: float = 0.0
+    spawn_count: int = 0
+    heartbeat_time: float = 0.0
 
 
 class Job(BaseModel):
-    id: Optional[int] = None
+    id: int
     payload: Payload
     jobname: Optional[str] = None
     pid: Optional[int] = None
@@ -70,6 +65,7 @@ class Job(BaseModel):
     snappath: Optional[str] = None
 
     @field_validator("payload", mode="before")
+    @classmethod
     def coerce_payload(cls, v):
         if isinstance(v, bytes):
             v = pickle.loads(v)
@@ -85,10 +81,6 @@ class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
     appdir: str
     settings: dict = Field(default_factory=dict)
     devicefile: "DeviceFile" = Field(default_factory="DeviceFile")
-    drivers: dict[str, "SpawnData"] = Field(default_factory=dict)
-    pips: dict[str, Pipeline] = Field(default_factory=dict)
-    # drvs: Mapping[str, Driver] = Field(default_factory=dict)
-    cmps: dict[str, Component] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
@@ -120,20 +112,30 @@ class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
 
 class Reply(BaseModel):
     success: bool
-    msg: Optional[str] = None
+    msg: str
     data: Optional[Any] = None
 
 
-class _Pipeline(BaseModel):
+class Pipeline(BaseModel):
     name: str
-    components: Mapping[str, str]
+    components: dict[str, str]
+    """Mapping of component roles to names."""
 
 
-class _Component(BaseModel):
+class Component(BaseModel):
     name: str
+    device: str
     driver: str
     address: str
     channel: Optional[str] = None
+
+
+class Device(BaseModel):
+    name: str
+    driver: str
+    address: str
+    channels: Sequence[str]
+    pollrate: int = 1
 
 
 class Driver(BaseModel):
@@ -141,22 +143,12 @@ class Driver(BaseModel):
     settings: dict = Field(default_factory=dict)
 
 
-class SpawnData(BaseModel):
-    name: str
-    port: Optional[int] = None
-    pid: Optional[int] = None
-    version: Optional[str] = None
-    spawn_time: float = 0.0
-    spawn_count: int = 0
-    heartbeat_time: float = 0.0
-
-
 class DeviceFile(BaseModel):
-    filename: Path
-    components: dict[str, _Component] = Field(default_factory=dict)
+    filename: Annotated[Path, PlainSerializer(str)]
+    components: dict[str, Component] = Field(default_factory=dict)
     devices: dict[str, Device] = Field(default_factory=dict)
     drivers: dict[str, Driver] = Field(default_factory=dict)
-    pipelines: dict[str, _Pipeline] = Field(default_factory=dict)
+    pipelines: dict[str, Pipeline] = Field(default_factory=dict)
 
     @field_validator("filename", mode="before")
     @classmethod
@@ -182,6 +174,7 @@ class DeviceFile(BaseModel):
         # populate devices
         self.devices = {d["name"]: Device(**d) for d in devices}
 
+        # populate pipelines and components
         for pip in pipelines:
             if pip["name"].endswith("*"):
                 assert len(pip["devices"]) == 1, (
@@ -198,13 +191,14 @@ class DeviceFile(BaseModel):
                     for ch in dev.channels:
                         pname = pip["name"].replace("*", ch)
                         cname = f"{dev.driver}:({dev.address},{ch})"
-                        self.components[cname] = _Component(
+                        self.components[cname] = Component(
                             name=cname,
+                            device=dev.name,
                             driver=dev.driver,
                             address=dev.address,
                             channel=ch,
                         )
-                        self.pipelines[pname] = _Pipeline(
+                        self.pipelines[pname] = Pipeline(
                             name=pname,
                             components={comp["role"]: cname},
                         )
@@ -221,14 +215,15 @@ class DeviceFile(BaseModel):
                         f"device channels {dev.channels}."
                     )
                     cname = f"{dev.driver}:({dev.address},{comp['channel']})"
-                    self.components[cname] = _Component(
+                    self.components[cname] = Component(
                         name=cname,
+                        device=dev.name,
                         driver=dev.driver,
                         address=dev.address,
                         channel=comp["channel"],
                     )
                     cmps[comp["role"]] = cname
-                self.pipelines[pip["name"]] = _Pipeline(
+                self.pipelines[pip["name"]] = Pipeline(
                     name=pip["name"],
                     components=cmps,
                 )

@@ -8,19 +8,21 @@
 
 import argparse
 import logging
-import psutil
 import subprocess
 import time
-import tomato.utils
-import zmq
-from collections import defaultdict
 from importlib import metadata
 from pathlib import Path
 from threading import current_thread
+from typing import Union
+
+import psutil
+import zmq
+
+import tomato.daemon.drvdb as drvdb
+import tomato.utils
 from tomato.daemon import lpp
 from tomato.drivers import ModelInterface, driver_to_interface
-from tomato.models import Daemon, Reply, SpawnData
-from typing import Union
+from tomato.models import Daemon, DrvState, Reply
 
 logger = logging.getLogger(__name__)
 IDLE_MEASUREMENT_INTERVAL = None
@@ -32,14 +34,25 @@ HEARTBEAT = 5.0
 
 
 def tomato_driver_bootstrap(
-    req: zmq.Socket, logger: logging.Logger, interface: ModelInterface, driver: str
+    req: zmq.Socket,
+    logger: logging.Logger,
+    interface: ModelInterface,
+    driver: str,
 ):
+    """
+    Function that attempts to register all configured components for this driver.
+
+    This helper function is executed when the ``register`` command is set to the driver process. The daemon is first polled for up-to-date configuration, and then each of the returned components is registered, if necessary, using :func:`cmp_register` of the driver interface.
+
+    In case the registration fails, a limited number of retries (as specified by the ``MAX_REGISTER_RETRIES`` constant) can be attempted on subsequent runs of this function.
+
+    """
     logger.debug("getting daemon status")
     req.send_pyobj(dict(cmd="status"))
     daemon: Daemon = req.recv_pyobj().data
 
     logger.info("registering components for driver '%s'", driver)
-    for comp in daemon.cmps.values():
+    for comp in daemon.devicefile.components.values():
         if comp.driver == driver:
             key = (comp.address, comp.channel)
             if key in interface.devmap:
@@ -50,7 +63,7 @@ def tomato_driver_bootstrap(
                 continue
             elif (
                 hasattr(interface, "retries")
-                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES
+                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES  # ty: ignore[unresolved-attribute]
             ):
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
@@ -65,15 +78,22 @@ def tomato_driver_bootstrap(
                 logger.critical(
                     "failed to register component %s: %s", comp.name, ret.msg
                 )
-            params = dict(name=comp.name, capabilities=ret.data)
-            req.send_pyobj(dict(cmd="component", params=params))
-            ret = req.recv_pyobj()
     logger.info("driver '%s' bootstrapped successfully", driver)
 
 
 def perform_idle_measurements(
     interface: ModelInterface, t_last: Union[float, None]
 ) -> Union[float, None]:
+    """
+    Function running idle measurements on the driver.
+
+    This function periodically runs the :func:`cmp_measure` on each component on the driver. The interval is determined from driver configuration using the ``"idle_measurement_interval"`` setting, driver defaults using the :obj:`interface.idle_measurement_interval` object, or tomato default (``IDLE_MEASUREMENT_INTERVAL``).
+
+    .. note::
+
+        How idle measurements are handled is up to the individual driver. By default, the :func:`cmp_measure` function will not submit new measurements when a task or a measurement is already running.
+
+    """
     if not hasattr(interface, "cmp_measure"):
         return t_last
 
@@ -94,17 +114,29 @@ def perform_idle_measurements(
     return t_now
 
 
+def stop_tomato_driver(port: int, context) -> Reply:
+    """
+    The default mechanism for stopping tomato drivers.
+
+    This function is used by the tomato driver manager to gracefully stop the driver, if an existing driver port is known.
+    """
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    req.send_pyobj(dict(cmd="stop", sender=f"{__name__}.stop_tomato_driver"))
+    return req.recv_pyobj()
+
+
 def kill_tomato_driver(pid: int):
     """
-    Wrapper around :func:`psutil.terminate`.
+    The backup mechanism for stoping tomato drivers.
 
-    Here we kill the (grand)children of the process with the name of `tomato-job`,
-    i.e. the individual task functions. This allows the `tomato-job` process to exit
-    gracefully once the task functions join.
+    This function is useful if the driver port is unknown or not responsive.
 
-    Note that on Windows, the `tomato-job.exe` process has two children: a `python.exe`
-    which is the actual process running the job, and `conhost.exe`, which we want to
-    avoid killing.
+    Wrapper around :func:`psutil.terminate`. Here we kill the (grand)children of the process with the name of `tomato-job`, i.e. the individual task functions. This allows the `tomato-job` process to exit gracefully once the task functions join.
+
+    .. note::
+
+        On Windows, the `tomato-job.exe` process has two children: a `python.exe` process which is the actual process running the job, and `conhost.exe` process, which we want to avoid killing.
 
     """
     proc = psutil.Process(pid)
@@ -118,38 +150,15 @@ def kill_tomato_driver(pid: int):
     return gone
 
 
-def driver_heartbeat(
-    req: zmq.Socket, params: dict, HEARTBEAT: float = HEARTBEAT
-) -> Reply | None:
-    tN = time.perf_counter()
-    if tN - params["heartbeat_time"] > HEARTBEAT:
-        sender = f"{__name__}.driver_heartbeat"
-        logger = logging.getLogger(sender)
-        logger.critical("heartbeating driver '%s'", params["name"])
-        params["heartbeat_time"] = tN
-        req.send_pyobj(dict(cmd="driver_set", params=params, sender=sender))
-        ret = req.recv_pyobj()
-        if ret.success:
-            logger.debug("heartbeat of driver '%s' successful", params["name"])
-        else:
-            logger.warning("heartbeat of driver '%s' failed", params["name"])
-
-
 def tomato_driver() -> None:
     """
     The function called when `tomato-driver` is executed.
 
-    This function is responsible for managing all activities involving devices of a
-    single driver type.
+    This function is responsible for managing all activities involving devices of a single driver type.
 
-    First, the list of devices (and their channel/address) for the specified driver is
-    fetched from the `tomato-daemon`. Then, a new instance of the specified driver is
-    spawned, populating its device map using the above list. If successful, the current
-    process information is fed back to the `tomato-daemon`.
+    First, the list of devices (and their channel/address) for the specified driver is fetched from the `tomato-daemon`. Then, a new instance of the specified driver is spawned, populating its device map using the above list. The state of the driver is stored .
 
-    Afterwards, the main loop handles all requests related to each of the devices
-    managed by this driver process, including job commands. Finally, if the driver is
-    instructed to stop, it attempts to perform a teardown before exiting.
+    Afterwards, the main loop handles all requests related to each of the devices managed by this driver process, including job commands. Finally, if the driver is instructed to stop, it attempts to perform a teardown before exiting.
     """
     # ARGUMENT PARSING
     parser = argparse.ArgumentParser()
@@ -186,10 +195,10 @@ def tomato_driver() -> None:
     # LOGFILE
     logfile = f"tomato_daemon_{args.port}_driver_{args.driver}.log"
     logpath = Path(args.logdir) / logfile
-    logger = logging.getLogger(f"{__name__}.tomato_driver({args.driver!r})")
+    logger = logging.getLogger(f"{__name__}.tomato_driver")
     logging.basicConfig(
         level=args.verbosity,
-        format="%(asctime)s - %(levelname)8s - %(name)-30s - %(message)s",
+        format="%(asctime)s - %(levelname)8s - %(name)-40s - %(message)s",
         handlers=[logging.FileHandler(logpath, mode="a")],
     )
 
@@ -209,6 +218,7 @@ def tomato_driver() -> None:
     logger.debug("getting daemon status")
     req.send_pyobj(dict(cmd="status"))
     daemon: Daemon = req.recv_pyobj().data
+    dbpath = daemon.settings["jobs"]["dbpath"]
     settings = daemon.devicefile.drivers[args.driver].settings
     try:
         interface = Interface(settings=settings)  # ty: ignore[call-non-callable]
@@ -218,17 +228,15 @@ def tomato_driver() -> None:
         )
         raise RuntimeError("could not instantiate driver '%s'") from e
 
-    hb_pars = {
-        "name": args.driver,
+    params = {
         "port": port,
         "version": Interface.version,
         "pid": tomato.utils.get_pid(),
         "heartbeat_time": 0,
     }
-    ret = driver_heartbeat(req, hb_pars)
-    if ret is not None and not ret.success:
+    drv = drvdb.update_drv(name=args.driver, params=params, dbpath=dbpath)
+    if drv is None:
         logger.error("could not push driver '%s' state to tomato-daemon", args.driver)
-        logger.debug(f"{ret=}")
         return
 
     logger.info("driver '%s' is entering main loop", args.driver)
@@ -308,7 +316,6 @@ def tomato_driver() -> None:
                     t_last = perform_idle_measurements(interface, t_last)
                 except (RuntimeError, ValueError, AttributeError):
                     logger.info("above error caught by driver process")
-                    driver_heartbeat(req, hb_pars)
     except Exception as e:
         logger.critical("uncaught exception %s", type(e), exc_info=True)
         raise e
@@ -319,19 +326,11 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is quitting", args.driver)
 
 
-def stop_tomato_driver(port: int, context):
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="stop", sender=f"{__name__}.stop_tomato_driver"))
-    return req.recv_pyobj()
-
-
 def manager(port: int, timeout: int = 1000):
     """
     The driver manager thread of `tomato-daemon`.
 
-    This manager ensures individual driver processes are (re-)spawned and instructed to
-    quit as necessary.
+    This manager ensures individual driver processes are (re-)spawned and instructed to quit as necessary. The drivers are periodically checked using the ``HEARTBEAT`` constant as the interval. All changes are stored in the drivers table.
     """
     sender = f"{__name__}.manager"
     context = zmq.Context()
@@ -347,10 +346,8 @@ def manager(port: int, timeout: int = 1000):
         timeout=timeout,
     )
 
-    component_retries = defaultdict(int)
-
     while getattr(thread, "do_run"):
-        spawned_drivers = []
+        spawned_drivers = set()
         msg = dict(cmd="status", sender=sender)
         ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
@@ -363,37 +360,55 @@ def manager(port: int, timeout: int = 1000):
             setattr(thread, "do_run", False)
             break
 
-        for n, d in daemon.drivers.items():
+        dbpath = daemon.settings["jobs"]["dbpath"]
+        drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+        for d in drivers:
             tN = time.perf_counter()
-            if n not in daemon.devicefile.drivers:
+            if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
-                    logger.warning("stopping driver '%s", n)
+                    logger.warning("%s: stopping driver", d.name)
                     ret = stop_tomato_driver(d.port, context)
-                req.send_pyobj(dict(cmd="driver_del", params={"name": n}))
-                ret = req.recv_pyobj()
-                logger.warning("removed driver '%s'", n)
+                    if not ret.success:
+                        logger.warning("%s: failed to stop driver: %s", d.name, ret.msg)
+                ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
+                if ret is None:
+                    logger.warning("%s: removed driver", d.name)
+                else:
+                    logger.error("%s: could not delete driver", d.name)
             elif d.port is not None:
-                logger.debug("checking driver '%s' on port %d", d.name, d.port)
-                if tN - d.heartbeat_time > HEARTBEAT:
+                if (tN - d.heartbeat_time > HEARTBEAT) or (
+                    d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY
+                ):
                     try:
-                        logger.debug("heartbeat driver '%s' on port %d", d.name, d.port)
+                        logger.debug("%s: checking driver on port %d", d.name, d.port)
                         dreq = context.socket(zmq.REQ)
                         dreq.RCVTIMEO = 1000
                         dreq.connect(f"tcp://127.0.0.1:{d.port}")
                         dreq.send_pyobj(dict(cmd="status"))
                         ret = dreq.recv_pyobj()
-                        params = {"name": d.name, "heartbeat_time": tN}
-                        d.heartbeat_time = tN
+                        if ret.success and len(ret.data) == 0:
+                            logger.info("%s: registering components", d.name)
+                            dreq.send_pyobj(dict(cmd="register", sender=sender))
+                            ret = dreq.recv_pyobj()
+                            if ret.success:
+                                logger.info(
+                                    "%s: component registration successful", d.name
+                                )
+                            else:
+                                logger.warning(
+                                    "%s: component registration failed: %s", d.name, ret
+                                )
+                        params = {"heartbeat_time": tN}
                     except zmq.error.Again:
-                        logger.warning("check of driver '%s' failed, resetting", d.name)
-                        params = vars(SpawnData(name=d.name))
+                        logger.warning("%s: check of driver failed, resetting", d.name)
+                        params = vars(DrvState(name=d.name))
+                        params.pop("name")
                     except Exception as e:
                         logger.critical(e)
                         raise e
-                    req.send_pyobj(dict(cmd="driver_set", params=params))
-                    ret = req.recv_pyobj()
+                    drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
             elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
-                logger.info("spawning driver '%s', retry %d", d.name, d.spawn_count)
+                logger.info("%s: spawning driver: retry %d", d.name, d.spawn_count)
                 cmd = [
                     "tomato-driver",
                     "--port",
@@ -410,68 +425,28 @@ def manager(port: int, timeout: int = 1000):
                     subprocess.Popen(cmd, creationflags=cfs)
                 elif psutil.POSIX:
                     subprocess.Popen(cmd, start_new_session=True)
-                logger.info("process for driver '%s' launched", d.name)
+                logger.info("%s: driver process launched", d.name)
                 params = {
-                    "name": d.name,
                     "spawn_time": tN,
                     "spawn_count": d.spawn_count + 1,
                 }
-                req.send_pyobj(dict(cmd="driver_set", params=params))
-                ret = req.recv_pyobj()
-                spawned_drivers.append(d.name)
+                drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
+                spawned_drivers.add(d.name)
 
-        # TODO: component registration
-        if len(spawned_drivers) == 0:
-            contact_drivers = set()
-            for comp in daemon.cmps.values():
-                if comp.capabilities is None:
-                    key = (comp.address, comp.channel)
-                    if component_retries[key] < MAX_REGISTER_RETRIES:
-                        contact_drivers.add(comp.driver)
-            for driver in contact_drivers:
-                if driver not in daemon.drivers:
-                    logger.critical("driver %s disappeared: %s", driver, daemon.drivers)
-                    continue
-                drv = daemon.drivers[driver]
-                if drv.port is None:
-                    continue
-                logger.info("contacting driver '%s' to re-register components", driver)
-                dreq = context.socket(zmq.REQ)
-                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                dreq.send_pyobj(dict(cmd="register", params=None, sender=sender))
-                ret = dreq.recv_pyobj()
-                component_retries = ret.data
-                dreq.close()
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
 
     logger.info("instructed to quit")
     req.send_pyobj(dict(cmd="status", sender=sender))
     daemon = req.recv_pyobj().data
-    for driver in daemon.drivers.values():
-        if driver.pid is None:
-            logger.info(
-                "stopping driver '%s' - no action (no pid)",
-                driver.name,
-            )
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+    for d in drivers:
+        if d.pid is None:
+            logger.info("%s: stopping driver - no action (no pid)", d.name)
             continue
-        elif driver.port is None:
-            logger.info(
-                "stopping driver '%s' - killing pid %d",
-                driver.name,
-                driver.pid,
-            )
-            gone = kill_tomato_driver(driver.pid)
-            if driver.pid in gone:
-                ret = Reply(success=True)
+        elif d.port is None:
+            logger.info("%s: stopping driver - killing pid %d", d.name, d.pid)
+            kill_tomato_driver(d.pid)
         else:
-            logger.info(
-                "stopping driver '%s' - sending 'stop' command on port %s",
-                driver.name,
-                driver.port,
-            )
-            ret = stop_tomato_driver(driver.port, context)
-
-        if ret.success:
-            logger.info("stopped driver '%s'", driver.name)
-        else:
-            logger.warning("could not stop driver '%s'", driver.name)
+            logger.info("%s: stopping driver - 'stop' on port %d", d.name, d.port)
+            stop_tomato_driver(d.port, context)

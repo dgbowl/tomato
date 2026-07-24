@@ -1,9 +1,16 @@
+"""
+**tomato.daemon.crates**: functions for creating RO-crates
+----------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+"""
+
 import logging
 from typing import Union
 
 try:
-    from rocrate.rocrate import ROCrate
-    from rocrate.model import Person, ContextEntity
+    from rocrate.model import ContextEntity, Person  # ty: ignore[unresolved-import]
+    from rocrate.rocrate import ROCrate  # ty: ignore[unresolved-import]
 
     _has_rocrate = True
 except ImportError:
@@ -17,7 +24,7 @@ PROFILE_VER = "0.2"
 
 
 def RepositoryObject(
-    crate: "ROCrate", identifier: str = None, properties: dict = None
+    crate: "ROCrate", identifier: str | None = None, properties: dict | None = None
 ) -> "ContextEntity":
     if properties is None:
         properties = {}
@@ -26,7 +33,7 @@ def RepositoryObject(
 
 
 def Profile(
-    crate: "ROCrate", identifier: str = PROFILE_URI, properties: dict = None
+    crate: "ROCrate", identifier: str = PROFILE_URI, properties: dict | None = None
 ) -> "ContextEntity":
     if properties is None:
         properties = {}

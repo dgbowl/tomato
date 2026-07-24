@@ -3,20 +3,12 @@
 -------------------------------------------------------
 .. codeauthor::
     Peter Kraus
-
-.. note::
-
-    Functions in this module that receive the :class:`~tomato.models.Daemon` state
-    object should be acting on a copy. All changes to the :class:`Daemon` state have to
-    be propagated via the :class:`tomato.daemon.cmd` set of functions.
-
 """
 
 import argparse
 import json
 import logging
 import os
-import psutil
 import subprocess
 import sys
 import time
@@ -24,11 +16,14 @@ from datetime import datetime, timedelta, timezone
 from importlib import metadata
 from pathlib import Path
 from threading import Thread, current_thread
+from typing import Sequence
 
-
+import psutil
 import xarray as xr
 import zmq
 
+import tomato.daemon.drvdb as drvdb
+import tomato.daemon.pipdb as pipdb
 from tomato.daemon import jobdb, lpp
 from tomato.daemon.crates import to_rocrate
 from tomato.daemon.io import data_to_pickle, merge_netcdfs
@@ -50,30 +45,35 @@ JOB_INFO_INTERVAL = 5
 
 
 def method_validate(
-    method: list[Task],
+    method: Sequence[Task],
     pip: Pipeline,
     daemon: Daemon,
     context: zmq.Context,
-):
+) -> bool:
+    """
+    Function for validating :class:`Task` parameters against components.
+
+    This function finds a component on the pipeline that matches the role of each :class:`Task`, and passes each :class:`Task` to the :func:`task_validate` function of that component.
+
+    .. note::
+
+        This function should be used to theck the method only after a matching pipeline has been identified, e.g. using :func:`find_matching_pipelines`.
+
+    """
+    dbpath = daemon.settings["jobs"]["dbpath"]
     for task in method:
-        for cname in pip.components:
-            cmp = daemon.cmps[cname]
-            if (
-                task.component_role == cmp.role
-                and task.technique_name in cmp.capabilities
-            ):
-                dport = daemon.drivers[cmp.driver].port
+        for crole, cname in pip.components.items():
+            if task.component_role == crole:
+                cmp = daemon.devicefile.components[cname]
+                drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
+                assert drv is not None
                 req: zmq.Socket = context.socket(zmq.REQ)
-                req.connect(f"tcp://127.0.0.1:{dport}")
-                params = dict(
-                    task=task,
-                    address=cmp.address,
-                    channel=cmp.channel,
-                )
+                req.connect(f"tcp://127.0.0.1:{drv.port}")
+                params = dict(task=task, address=cmp.address, channel=cmp.channel)
                 ret, req = lpp.comm(
                     req,
                     dict(cmd="task_validate", params=params),
-                    f"tcp://127.0.0.1:{dport}",
+                    f"tcp://127.0.0.1:{drv.port}",
                     context,
                 )
                 if ret.success:
@@ -86,25 +86,38 @@ def method_validate(
 
 def find_matching_pipelines(
     daemon: Daemon,
-    method: list[Task],
+    method: Sequence[Task],
     context: zmq.Context,
-) -> list[Pipeline]:
+) -> list[str]:
+    """
+    Function for finding the names of pipelines that match the provided method.
+
+    The matching is performed using the required roles of the method as well as using the required capabilities of the method. The role-matching can be checked statically against the :obj:`daemon.devicefile`; the latter is checked dynamically by polling each component for its capabilities using :func:`cmp_capabilities`.
+    """
     req_roles = set([item.component_role for item in method])
     req_capabs = set([item.technique_name for item in method])
+    dbpath = daemon.settings["jobs"]["dbpath"]
 
     candidates = []
-    for pip in daemon.pips.values():
-        roles = set()
+    for pip in daemon.devicefile.pipelines.values():
+        roles = set(pip.components.keys())
+        if req_roles.intersection(roles) != req_roles:
+            continue
         capabs = set()
-        for comp in pip.components:
-            c = daemon.cmps[comp]
-            if c.capabilities is not None:
-                roles.add(c.role)
-                capabs.update(c.capabilities)
-        if req_roles.intersection(roles) == req_roles:
-            if req_capabs.intersection(capabs) == req_capabs:
-                if method_validate(method, pip, daemon, context):
-                    candidates.append(pip)
+        for cname in pip.components.values():
+            cmp = daemon.devicefile.components[cname]
+            drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
+            assert drv is not None
+            dreq = context.socket(zmq.REQ)
+            dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+            params = dict(address=cmp.address, channel=cmp.channel)
+            dreq.send_pyobj(dict(cmd="cmp_capabilities", params=params))
+            dret = dreq.recv_pyobj()
+            if dret.success and dret.data is not None:
+                capabs.update(dret.data)
+        if req_capabs.intersection(capabs) == req_capabs:
+            if method_validate(method, pip, daemon, context):
+                candidates.append(pip.name)
     return candidates
 
 
@@ -112,13 +125,11 @@ def kill_tomato_job(process: psutil.Process):
     """
     Wrapper around :func:`psutil.terminate`.
 
-    Here we kill the (grand)children of the process with the name of `tomato-job`,
-    i.e. the individual task functions. This allows the `tomato-job` process to exit
-    gracefully once the task functions join.
+    Here we kill the (grand)children of the process with the name of `tomato-job`, i.e. the individual task functions. This allows the `tomato-job` process to exit gracefully once the task functions join.
 
-    Note that on Windows, the `tomato-job.exe` process has two children: a `python.exe`
-    which is the actual process running the job, and `conhost.exe`, which we want to
-    avoid killing.
+    .. note::
+
+        On Windows, the `tomato-job.exe` process has two children: a `python.exe` process, which is the actual process running the job, and `conhost.exe` process, which we want to avoid killing.
 
     """
     logger = logging.getLogger(f"{__name__}.kill_tomato_job")
@@ -137,28 +148,26 @@ def kill_tomato_job(process: psutil.Process):
     logger.debug(f"{alive=}")
 
 
-def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
+def manage_running(daemon: Daemon, context: zmq.Context):
     """
-    Function that manages jobs and `tomato-daemon` pipelines.
+    Function that manages jobs within the tomato job manager.
 
-    The function only affects pipelines marked as running, i.e. with a set ``jobid``.
-    Jobs scheduled for killing (i.e. ``status == "rd"``) are terminated. Jobs that
-    are supposed to be running but have crashed are given appropriate status (``"ce"``).
-    Pipelines of both are reset.
+    The function only affects jobs marked as running, i.e. with a set ``pid``. Jobs scheduled for killing (i.e. ``status == "rd"``) are terminated. Jobs that are supposed to be running but have crashed are given appropriate status (``"ce"``).
 
-    Successful job completions are not processed here, but within the job process.
+    .. note ::
+
+        Successful job completions are not processed here, but within the job process.
 
     """
-    logger = logging.getLogger(f"{__name__}.manage_running_pips")
-    running: list[Pipeline] = [pip for pip in pips.values() if pip.jobid is not None]
-    logger.debug(f"{running=}")
-    for pip in running:
-        job = jobdb.get_job_id(pip.jobid, dbpath)
-
+    logger = logging.getLogger(f"{__name__}.manage_running")
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    running: list[Job] = jobdb.get_jobs_where("pid IS NOT NULL", dbpath)
+    for job in running:
+        logger.debug("%d: checking job status", job.id)
         if job.pid is None and job.connected_at is not None:
             # pid is set in the same command as connected_at
             # unclear how we'd end here
-            logger.error("job status shouldn't be possible: %s", job)
+            logger.error("%d: job status shouldn't be possible: %s", job.id, job)
             pidexists = False
         elif job.pid is None and job.launched_at is not None:
             # subprocess was started but job is not (yet) connected
@@ -171,7 +180,7 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
                 continue
         elif job.pid is None:
             # subprocess was not yet started
-            logger.warning("job %d failed to start", job.id)
+            logger.warning("%d: job failed to start", job.id)
             # TODO: timeout to be implemented
             continue
         else:
@@ -179,65 +188,41 @@ def manage_running_pips(pips: dict, dbpath: str, req: zmq.Socket):
         if pidexists:
             pidexists = psutil.Process(job.pid).status() is not psutil.STATUS_ZOMBIE
 
-        reset = False
-        update = False
-        ready = False
         # running jobs scheduled for killing (status == 'rd') should be killed
         # jobs that have status == 'rd' but no valid pid should be cleared
         if job.status == "rd":
             if pidexists:
-                logger.info(f"job {job.id} with pid {job.pid} will be terminated")
+                logger.info("%d: job with pid %d will be terminated", job.id, job.pid)
                 proc = psutil.Process(pid=job.pid)
                 kill_tomato_job(proc)
-                logger.info(
-                    f"job {job.id} with pid {job.pid} was terminated successfully"
-                )
                 merge_netcdfs(job)
+                logger.info("%d: job with pid %d was terminated", job.id, job.pid)
             update = True
-            params = dict(status="cd")
-            reset = True
+            params = dict(status="cd", pid=None)
         # dead jobs marked as running (status == 'r') should be cleared
         elif (not pidexists) and job.status == "r":
-            logger.warning(f"the pid {job.pid} of running job {job.id} was not found")
-            reset = True
+            logger.warning("%d: the pid %d of the job was not found", job.id, job.pid)
             update = True
-            params = dict(status="ce")
-        # crashed jobs marked as such (status == 'ce') should also be cleared
-        elif (not pidexists) and job.status in {"ce", "cd"}:
-            logger.info(f"the pid {job.pid} of crashed job {job.id} was not found")
-            reset = True
-        # pipelines of completed jobs should be reset
-        elif (not pidexists) and job.status == "c":
-            logger.info(f"the pid {job.pid} of completed job {job.id} was not found")
-            ready = job.payload.settings.unlock_when_done
-            reset = True
+            params = dict(status="ce", pid=None)
+        else:
+            update = False
 
         if update:
             logger.debug(f"job {job.id} will be updated to status {params['status']!r}")
-            params["pid"] = None
             params["completed_at"] = str(datetime.now(timezone.utc))
             jobdb.update_job_id(job.id, params, dbpath)
-        if reset:
-            logger.debug(f"pipeline {pip.name!r} will be reset")
-            params = dict(jobid=None, ready=ready, name=pip.name)
-            req.send_pyobj(dict(cmd="pipeline", params=params))
-            ret = req.recv_pyobj()
-            if not ret.success:
-                logger.error(f"could not set params {params} on pip: {pip.name!r}")
-                continue
 
 
-def check_queued_jobs(
+def check_queued(
     daemon: Daemon,
     context: zmq.Context,
-) -> dict[int, list[Pipeline]]:
+) -> dict[int, list[str]]:
     """
-    Function to check whether the queued jobs can be submitted onto any pipeline.
+    Function to check whether the queued jobs can be submitted onto any configured pipeline.
 
-    Returns a :class:`dict` containing the jobids as keys and lists of matched
-    :class:`Pipelines` as values.
+    Returns a :class:`dict` containing the jobids as keys and lists of matched :class:`Pipelines` as values.
     """
-    logger = logging.getLogger(f"{__name__}.check_queued_jobs")
+    logger = logging.getLogger(f"{__name__}.check_queued")
     matched = {}
     dbpath = daemon.settings["jobs"]["dbpath"]
     queue = jobdb.get_jobs_where("status IN ('q', 'qw')", dbpath)
@@ -247,41 +232,63 @@ def check_queued_jobs(
             logger.info(
                 "job %d can queue on pips: {%s}",
                 job.id,
-                [p.name for p in matched[job.id]],
+                matched[job.id],
             )
             params = dict(status="qw")
-            job = jobdb.update_job_id(job.id, params, dbpath)
+            jobdb.update_job_id(job.id, params, dbpath)
     return matched
 
 
-def action_queued_jobs(daemon, matched, req, dbpath):
+def action_queued(
+    daemon: Daemon,
+    matched: dict[int, list[str]],
+    context: zmq.Context,
+):
     """
-    Function that assigns jobs if a matched pipeline contains the requested sample.
+    Function that assigns jobs if the pipeline is ready and contains the requested sample.
 
-    The `tomato-job` process is launched from this function.
+    .. warning::
+
+        No validation except checking the sample name and readiness is performed. A matching and validated pipeline has to be previously identified, using e.g. the :func:`check_queued` function.
+
+    .. note::
+
+        The `tomato-job` process is launched from this function.
+
     """
-    logger = logging.getLogger(f"{__name__}.action_queued_jobs")
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    logger = logging.getLogger(f"{__name__}.action_queued")
+    # We have to cache the available pipelines once per queue pass
+    # in order to avoid race conditions, where the pipeline in the
+    # sqlite database is made available in the middle of the loop
+    # over the jobs.
+    where = "jobid IS NULL"
+    avail_pips = {p.name: p for p in pipdb.get_pips_where(where=where, dbpath=dbpath)}
     for jobid in sorted(matched.keys()):
         job = jobdb.get_job_id(jobid, daemon.settings["jobs"]["dbpath"])
-        for pip in matched[job.id]:
-            if not pip.ready:
+        for pname in matched[jobid]:
+            ps = avail_pips.get(pname)
+            if ps is None:
+                # This happens if the pipeline has already been popped below
                 continue
-            elif pip.sampleid != job.payload.sample.identifier:
+            elif not ps.ready:
                 continue
-            logger.info("job %d: found a matched & ready pip '%s'", job.id, pip.name)
+            elif ps.sampleid != job.payload.sample.identifier:
+                continue
+            logger.info("job %d: found a matched & ready pip '%s'", jobid, pname)
 
-            logger.debug("job %d: making job directory", job.id)
-            root = Path(daemon.settings["jobs"]["storage"]) / str(job.id)
+            logger.debug("job %d: making job directory", jobid)
+            root = Path(daemon.settings["jobs"]["storage"]) / str(jobid)
             os.makedirs(root)
 
-            logger.debug("job %d: storing jobdata.json", job.id)
+            logger.debug("job %d: storing jobdata.json", jobid)
             jpath = root / "jobdata.json"
             repositories = {}
             for repo, repoparams in daemon.settings["repositories"].items():
                 if repo in job.payload.settings.output.repositories:
                     repositories[repo] = repoparams
             jobargs = {
-                "pipeline": pip.model_dump(),
+                "pipeline": daemon.devicefile.pipelines[pname].model_dump(),
                 "payload": job.payload.model_dump(),
                 "repositories": repositories,
                 "job": dict(id=job.id, path=str(root)),
@@ -289,15 +296,11 @@ def action_queued_jobs(daemon, matched, req, dbpath):
             with jpath.open("w", encoding="UTF-8") as of:
                 json.dump(jobargs, of, indent=1)
 
-            logger.debug("job %d: reserving pipeline %s", job.id, pip.name)
-            params = dict(jobid=job.id, ready=False, name=pip.name)
-            req.send_pyobj(dict(cmd="pipeline", params=params))
-            ret = req.recv_pyobj()
-            if not ret.success:
-                logger.error("job %d: could not set params %s", job.id, params)
-                continue
-            else:
-                pip.ready = False
+            logger.debug("job %d: reserving pipeline %s", job.id, pname)
+            params = dict(jobid=job.id, ready=False)
+            pipdb.update_pip(name=pname, params=params, dbpath=dbpath)
+            # pop this pipeline to make sure we don't double submit
+            avail_pips.pop(pname)
 
             logger.debug("job %d: executing tomato-job", job.id)
             cmd = [
@@ -317,11 +320,11 @@ def action_queued_jobs(daemon, matched, req, dbpath):
             elif psutil.POSIX:
                 subprocess.Popen(cmd, start_new_session=True)
 
-            logger.debug("job %d: setting launched_at")
+            logger.debug("job %d: setting launched_at", job.id)
             params = dict(launched_at=str(datetime.now(timezone.utc)))
             job = jobdb.update_job_id(jobid, params, dbpath)
             logger.info(
-                "job %d: launched on pip '%s' and path '%s'", job.id, pip.name, jpath
+                "job %d: launched on pip '%s' and path '%s'", job.id, pname, jpath
             )
             break
 
@@ -330,9 +333,12 @@ def manager(port: int, timeout: int = 500):
     """
     The job manager thread of `tomato-daemon`.
 
-    This manager ensures the job queue is iterated over and pipelines are managed/reset.
-    Note that we poll the `tomato-daemon` for status only once per iteration of the main
-    loop.
+    This manager ensures the job queue is iterated over and jobs are submitted to pipelines.
+
+    .. note::
+
+        Note that we poll the `tomato-daemon` for configuration only once per iteration of the main loop.
+
     """
     context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
@@ -342,19 +348,17 @@ def manager(port: int, timeout: int = 500):
     req.connect(f"tcp://127.0.0.1:{port}")
     lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
     while getattr(thread, "do_run"):
-        logger.debug("tick")
         msg = dict(cmd="status", sender=f"{__name__}.manager")
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
             break
-        elif ret.success is False:
+        elif ret.success is False or ret.data is None:
             logger.critical("tomato-daemon is not running: %s", ret.msg)
             break
         daemon: Daemon = ret.data
-        dbpath = daemon.settings["jobs"]["dbpath"]
-        manage_running_pips(daemon.pips, dbpath, req)
-        matched_pips = check_queued_jobs(daemon, context)
-        action_queued_jobs(daemon, matched_pips, req, dbpath)
+        manage_running(daemon, context)
+        matched_pips = check_queued(daemon, context)
+        action_queued(daemon, matched_pips, context)
         time.sleep(timeout / 1e3)
     req.close()
     logger.info("instructed to quit")
@@ -364,10 +368,8 @@ def tomato_job() -> None:
     """
     The function called when `tomato-job` is executed.
 
-    This function is responsible for managing all activities of a single job, including
-    contacting the daemon about job pid, spawning of sub-processes to run tasks on each
-    Component of the Pipeline, merging data at the end of the job, and reporting back
-    to the daemon once the job is successfully finished.
+    This function is responsible for managing all activities of a single job, including updating the queue table with the job pid, spawning of sub-processes to run tasks on each component of the pipeline, merging data at the end of the job, and updating the state of the pipeline once the job is successfully finished.
+
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -432,9 +434,8 @@ def tomato_job() -> None:
     logger.debug(f"{payload=}")
 
     verbosity = payload.settings.verbosity
-    loglevel = logging._checkLevel(verbosity)
     logger.debug("setting logger verbosity to '%s'", verbosity)
-    logger.setLevel(loglevel)
+    logger.setLevel(verbosity)
 
     if psutil.WINDOWS:
         pid = os.getpid()
@@ -495,10 +496,14 @@ def tomato_job() -> None:
     params = dict(status=job.status, completed_at=job.completed_at)
     job = jobdb.update_job_id(job.id, params, args.dbpath)
     logger.debug(f"{job=}")
+    params = dict(jobid=None, ready=job.payload.settings.unlock_when_done)
+    pip = pipdb.update_pip(name=pip, params=params, dbpath=args.dbpath)
+    logger.debug(f"{pip=}")
     logger.info("exiting tomato-job")
 
 
 def job_thread(
+    role: str,
     tasks: list[Task],
     component: Component,
     device: Device,
@@ -508,12 +513,14 @@ def job_thread(
     logpath: Path,
 ):
     """
-    A subthread of `tomato-job`, responsible for tasks on one Component of a Pipeline.
+    A subthread of `tomato-job`, responsible for tasks on one component of a pipeline.
 
-    For each task in tasks, starts the task, then monitors the Component status and polls
-    for data, and moves on to the next task as instructed in the payload.
+    For each :class:`Task`, this thread starts the task at an appropriate moment, then monitors the component status and polls periodically for data, and moves on to the next task as instructed in the task list.
 
-    Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
+    .. note::
+
+        The data from all tasks for that component is stored using the :func:`tomato.daemon.io.data_to_pickle` function.
+
     """
     thread = current_thread()
     sender = f"{__name__}.job_thread({thread.ident:5d})"
@@ -525,29 +532,25 @@ def job_thread(
 
     if "lpp_timeout" in dsettings:
         lppargs["timeout"] = dsettings["lpp_timeout"] * 1000
-        logger.debug(
-            "%s: setting lpp_timeout to %d ms", component.role, lppargs["timeout"]
-        )
+        logger.debug("%s: setting lpp_timeout to %d ms", role, lppargs["timeout"])
 
-    logger.info(
-        "%s: job thread of %s attached to tomato-daemon", component.role, component.name
-    )
+    logger.info("%s: job thread of %s attached to tomato-daemon", role, component.name)
     kwargs = dict(address=component.address, channel=component.channel)
 
-    datapath = Path(jobpath) / f"{component.role}.pkl"
-    logger.debug("%s: processing tasks on component %s", component.role, component.name)
+    datapath = Path(jobpath) / f"{role}.pkl"
+    logger.debug("%s: processing tasks on component %s", role, component.name)
     for ti, task in enumerate(tasks):
-        taskid = f"{component.role}:{ti}"
+        taskid = f"{role}:{ti}"
         if task.task_name is not None:
             taskid += f":{task.task_name!r}"
-        thread.current_task = task
+        setattr(thread, "current_task", task)
         logger.info("%s: processing task", taskid)
 
         # Hold while start contidions are not met
         while True:
             if task.start_with_task_name is None:
                 break
-            elif task.start_with_task_name in thread.started_task_names:
+            elif task.start_with_task_name in getattr(thread, "started_task_names"):
                 break
             else:
                 logger.debug(
@@ -561,11 +564,11 @@ def job_thread(
                 "%s: polling component %s for task readiness", taskid, component.name
             )
             msg = dict(cmd="task_status", params={**kwargs})
-            ret, req = lpp.comm(req, msg, **lppargs)
-            if ret.success and ret.data["can_submit"]:
+            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
+            if ret.success and ret.data is not None and ret.data["can_submit"]:
                 break
             elif req.closed:
-                thread.crashed = True
+                setattr(thread, "crashed", True)
                 sys.exit()
             logger.warning(
                 "%s: cannot submit onto component %s, waiting", taskid, component.name
@@ -576,25 +579,30 @@ def job_thread(
         logger.info("%s: sending task to component %s", taskid, component.name)
         t0 = time.perf_counter()
         msg = dict(cmd="task_start", params={"task": task, **kwargs})
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
-            thread.crashed = True
+            setattr(thread, "crashed", True)
             sys.exit()
 
         # Wait until the correct task is running, or MAX_TASK_WAIT
         while True:
             dt = time.perf_counter() - t0
             msg = dict(cmd="task_status", params={**kwargs})
-            ret, req = lpp.comm(req, msg, **lppargs)
+            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
             if req.closed:
-                thread.crashed = True
+                setattr(thread, "crashed", True)
                 sys.exit()
-            elif ret.success and ret.data["running"] is False:
+            elif ret.success and ret.data is not None and ret.data["running"] is False:
                 logger.warning(
                     "%s: task was submitted %f s ago but is not yet running", taskid, dt
                 )
                 pass
-            elif ret.success and "task" in ret.data and ret.data["task"] != task:
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] != task
+            ):
                 logger.warning(
                     "%s: task was submitted %f s ago but another task is running: %s",
                     taskid,
@@ -602,16 +610,23 @@ def job_thread(
                     ret.data["task"],
                 )
                 pass
-            elif ret.success and "task" in ret.data and ret.data["task"] == task:
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] == task
+            ):
                 break
-            elif ret.success and "task" not in ret.data:
+            elif ret.success and ret.data is not None and "task" not in ret.data:
                 break
             if dt > MAX_TASK_WAIT:
-                logger.critical("%s: task was submitted, but is not executed, aborting")
-                thread.crashed = True
+                logger.critical(
+                    "%s: task was submitted, but is not executed, aborting", taskid
+                )
+                setattr(thread, "crashed", True)
                 sys.exit()
             time.sleep(0.1)
-        logger.info("%s: correct task running on component %s", taskid, component.role)
+        logger.info("%s: correct task running on component %s", taskid, role)
 
         # Main task loop
         tP = time.perf_counter()
@@ -622,28 +637,33 @@ def job_thread(
             if tN - tP > device.pollrate:
                 logger.debug("%s: polling task for data", taskid)
                 msg = dict(cmd="task_data", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
                 if req.closed:
-                    thread.crashed = True
+                    setattr(thread, "crashed", True)
                     sys.exit()
                 elif ret.success and ret.data is not None:
                     logger.debug("%s: pickling received data", taskid)
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
-                    data_to_pickle(ds, datapath, role=component.role)
+                    data_to_pickle(ds, datapath, role=role)
                 tP += device.pollrate
 
             # Poll for completion and correct task status
             logger.debug("%s: polling task for completion", taskid)
             msg = dict(cmd="task_status", params={**kwargs})
-            ret, req = lpp.comm(req, msg, **lppargs)
+            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
             if req.closed:
-                thread.crashed = True
+                setattr(thread, "crashed", True)
                 sys.exit()
-            elif ret.success and not ret.data["running"]:
+            elif ret.success and ret.data is not None and not ret.data["running"]:
                 logger.info("%s: task no longer running, break", taskid)
                 break
-            elif ret.success and "task" in ret.data and ret.data["task"] != task:
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] != task
+            ):
                 logger.critical("%s: wront task running, break", taskid)
                 logger.debug("%s: expected task: %s", taskid, task)
                 logger.debug("%s: executed task: %s", taskid, ret.data["task"])
@@ -655,19 +675,19 @@ def job_thread(
             # Stop task if stop trigger condition met, save to pickle
             if (
                 task.stop_with_task_name is not None
-                and task.stop_with_task_name in thread.started_task_names
+                and task.stop_with_task_name in getattr(thread, "started_task_names")
             ):
                 logger.info("%s: task stop trigger met", taskid)
                 msg = dict(cmd="task_stop", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
                 if req.closed:
-                    thread.crashed = True
+                    setattr(thread, "crashed", True)
                     sys.exit()
                 elif ret.success and ret.data is not None:
                     logger.debug("%s: pickling received data", taskid)
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
-                    data_to_pickle(ds, datapath, role=component.role)
+                    data_to_pickle(ds, datapath, role=role)
                 break
 
             time.sleep(max(1e-1, (device.pollrate - (tN - tP)) / 2))
@@ -675,31 +695,30 @@ def job_thread(
         # Store final task data, housekeeping.
         logger.info("%s: task fetching final data", taskid)
         msg = dict(cmd="task_data", params={**kwargs})
-        ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
-            thread.crashed = True
+            setattr(thread, "crashed", True)
             sys.exit()
         elif ret.success and ret.data is not None:
             logger.debug("%s: pickling received data", taskid)
             ds: xr.Dataset = ret.data
             ds.attrs["tomato_Component"] = component.model_dump_json()
-            data_to_pickle(ds, datapath, role=component.role)
-        thread.completed_tasks.append(task)
-        thread.current_task = None
+            data_to_pickle(ds, datapath, role=role)
+        ct = getattr(thread, "completed_tasks").append(task)
+        setattr(thread, "completed_tasks", ct)
+        setattr(thread, "current_task", None)
 
     # Reset component at the end of the job
-    logger.info(
-        "%s: all tasks done on component %s, resetting", component.role, component.name
-    )
+    logger.info("%s: all tasks done on component %s, resetting", role, component.name)
     msg = dict(cmd="cmp_reset", params={**kwargs})
-    ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+    ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
     if req.closed:
-        thread.crashed = True
+        setattr(thread, "crashed", True)
         sys.exit()
     elif not ret.success:
-        logger.warning("%s: could not reset component %s", component.role, ret.msg)
+        logger.warning("%s: could not reset component %s", role, ret.msg)
     else:
-        logger.info("%s: reset of component %s done", component.role, component.name)
+        logger.info("%s: reset of component %s done", role, component.name)
     req.close()
 
 
@@ -709,7 +728,7 @@ def job_main_loop(
     job: Job,
     pipname: str,
     logpath: Path,
-) -> None:
+) -> int | None:
     """
     The main loop function of `tomato-job`, split for better readability.
     """
@@ -722,19 +741,22 @@ def job_main_loop(
     lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
 
     while True:
-        ret, req = lpp.comm(req, dict(cmd="status", sender=sender), **lppargs)
-        if ret.success:
+        ret, req = lpp.comm(req, dict(cmd="status", sender=sender), **lppargs)  # ty: ignore[invalid-argument-type]
+        if ret.success and ret.data is not None:
             daemon: Daemon = ret.data
+            dbpath = daemon.settings["jobs"]["dbpath"]
         else:
             sys.exit()
-        if all([drv.port is not None for drv in daemon.drivers.values()]):
+        drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+        if all([drv.port is not None for drv in drivers]):
             break
         else:
             logger.debug("not all tomato-drivers have a port, waiting")
             time.sleep(1)
     req.close()
 
-    pipeline = daemon.pips[pipname]
+    # pipeline = daemon.pips[pipname]
+    pipeline = daemon.devicefile.pipelines[pipname]
     logger.debug(f"{pipeline=}")
     logger.debug(f"{job=}")
 
@@ -748,29 +770,30 @@ def job_main_loop(
 
     # distribute plan into threads
     threads = {}
-    for cmpk in pipeline.components:
-        component = daemon.cmps[cmpk]
-        logger.debug(f"{component=}")
-        if component.role not in plan:
+    for crole, cname in pipeline.components.items():
+        cmp = daemon.devicefile.components[cname]
+        logger.debug(f"{cmp=}")
+        if crole not in plan:
             continue
-        tasks = plan[component.role]
+        tasks = plan[crole]
         logger.debug(" tasks=%s", tasks)
-        device = daemon.devicefile.devices[component.device]
+        device = daemon.devicefile.devices[cmp.device]
         logger.debug(" device=%s", device)
-        dport = daemon.drivers[component.driver].port
-        dsettings = daemon.devicefile.drivers[component.driver].settings
+        drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
+        assert drv is not None
+        dsettings = daemon.devicefile.drivers[cmp.driver].settings
         logger.debug(" settings=%s", dsettings)
-        threads[component.role] = Thread(
+        threads[crole] = Thread(
             target=job_thread,
-            args=(tasks, component, device, dport, dsettings, job.jobpath, logpath),
+            args=(crole, tasks, cmp, device, drv.port, dsettings, job.jobpath, logpath),
             name="job-thread",
             daemon=False,
         )
-        threads[component.role].crashed = False
-        threads[component.role].completed_tasks = []
-        threads[component.role].current_task = None
-        threads[component.role].started_task_names = set()
-        threads[component.role].start()
+        setattr(threads[crole], "crashed", False)
+        setattr(threads[crole], "completed_tasks", [])
+        setattr(threads[crole], "current_task", None)
+        setattr(threads[crole], "started_task_names", set())
+        threads[crole].start()
 
     # wait until threads join or we're killed
     snapshot = job.payload.settings.snapshot
@@ -787,12 +810,17 @@ def job_main_loop(
 
         # Collect and push task names
         for t in threads.values():
-            if t.current_task is not None and t.current_task.task_name is not None:
-                started_task_names.add(t.current_task.task_name)
+            current_task = getattr(t, "current_task")
+            if current_task is not None and current_task.task_name is not None:
+                started_task_names.add(current_task.task_name)
         for t in threads.values():
-            t.started_task_names.update(started_task_names)
-        crashed = [t.crashed for t in threads.values()]
-        joined = [t.is_alive() is False or t.crashed for t in threads.values()]
+            stn = getattr(t, "started_task_names")
+            stn.update(started_task_names)
+            setattr(t, "started_task_names", stn)
+        crashed = [getattr(t, "crashed") for t in threads.values()]
+        joined = [
+            t.is_alive() is False or getattr(t, "crashed") for t in threads.values()
+        ]
         if tN - tD > JOB_INFO_INTERVAL:
             logger.info("started task names are: %s", started_task_names)
             logger.info("joined threads are: %s", joined)

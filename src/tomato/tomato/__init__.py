@@ -1,6 +1,4 @@
 """
-**tomato.tomato**: command line interface to the tomato daemon
---------------------------------------------------------------
 .. codeauthor::
     Peter Kraus
 
@@ -24,13 +22,17 @@ import logging
 import os
 import textwrap
 import time
-import toml
-import zmq
 from collections import defaultdict
 from datetime import datetime, timezone
 from importlib import metadata
 from pathlib import Path
-from tomato.daemon.jobdb import jobdb_setup
+
+import toml
+import zmq
+
+import tomato.daemon.drvdb as drvdb
+import tomato.daemon.pipdb as pipdb
+from tomato.daemon.db import setup_db
 from tomato.models import Daemon, Reply
 from tomato.utils import spawn_cmd
 
@@ -45,79 +47,6 @@ def set_loglevel(delta: int):
     logger.debug("loglevel set to '%s'", logging._levelToName[loglevel])
 
 
-def _updater(context, port, cmd, params):
-    dreq = context.socket(zmq.REQ)
-    dreq.connect(f"tcp://127.0.0.1:{port}")
-    dreq.send_pyobj(dict(cmd=cmd, params=params, sender=f"{__name__}._updater"))
-    ret = dreq.recv_pyobj()
-    dreq.close()
-    return ret
-
-
-def _status_helper(daemon: Daemon, yaml: bool, stgrp: str) -> Reply:
-    if stgrp == "tomato":
-        rep = Reply(
-            success=True,
-            msg=f"tomato running on port {daemon.port}",
-            data=daemon,
-        )
-    elif stgrp == "pipelines":
-        if yaml:
-            rep = Reply(
-                success=True,
-                msg=f"tomato running on port {daemon.port}",
-                data=daemon.pips,
-            )
-        else:
-            ii = make_padded_lines(
-                daemon.pips,
-                ["name", "ready", "sampleid", "jobid"],
-            )
-            if len(ii) == 0:
-                msg = f"tomato running on port {daemon.port} with no pipelines"
-            else:
-                msg = f"tomato running on port {daemon.port} with the following pipelines:\n\t "
-                msg += "\n\t ".join(ii)
-            rep = Reply(success=True, msg=msg)
-    elif stgrp == "devices":
-        if yaml:
-            rep = Reply(
-                success=True,
-                msg=f"tomato running on port {daemon.port}",
-                data=daemon.devicefile.devices,
-            )
-        else:
-            ii = make_padded_lines(
-                daemon.devicefile.devices,
-                ["name", "driver", "address", "channels"],
-            )
-            if len(ii) == 0:
-                msg = f"tomato running on port {daemon.port} with no devices"
-            else:
-                msg = f"tomato running on port {daemon.port} with the following devices:\n\t "
-                msg += "\n\t ".join(ii)
-            rep = Reply(success=True, msg=msg)
-    elif stgrp == "components":
-        if yaml:
-            rep = Reply(
-                success=True,
-                msg=f"tomato running on port {daemon.port}",
-                data=daemon.cmps,
-            )
-        else:
-            ii = make_padded_lines(
-                daemon.cmps,
-                ["name", "driver", "device", "role", "capabilities"],
-            )
-            if len(ii) == 0:
-                msg = f"tomato running on port {daemon.port} with no components"
-            else:
-                msg = f"tomato running on port {daemon.port} with the following components:\n\t "
-                msg += "\n\t ".join(ii)
-            rep = Reply(success=True, msg=msg)
-    return rep
-
-
 def make_padded_lines(data: dict, keys: list) -> list:
     temp = defaultdict(list)
     maxlen = dict()
@@ -126,9 +55,15 @@ def make_padded_lines(data: dict, keys: list) -> list:
     for obj in data.values():
         for key in keys:
             if key == "heartbeat":
-                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+                if isinstance(obj, dict):
+                    val = f"{tN - obj['heartbeat_time']:<.1f} s"
+                else:
+                    val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
             else:
-                val = str(getattr(obj, key))
+                if isinstance(obj, dict):
+                    val = str(obj[key])
+                else:
+                    val = str(getattr(obj, key))
             temp[key].append(len(val))
     for key in keys:
         maxlen[key] = max(temp[key])
@@ -136,9 +71,15 @@ def make_padded_lines(data: dict, keys: list) -> list:
         line = ""
         for key in keys:
             if key == "heartbeat":
-                val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+                if isinstance(obj, dict):
+                    val = f"{tN - obj['heartbeat_time']:<.1f} s"
+                else:
+                    val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
             else:
-                val = str(getattr(obj, key))
+                if isinstance(obj, dict):
+                    val = str(obj[key])
+                else:
+                    val = str(getattr(obj, key))
             line += f"{key}:{val:<{maxlen[key] + 2}}"
         lines.append(line)
     return lines
@@ -186,27 +127,34 @@ def status(
     >>> tomato status
     Failure: tomato not running on port 1234
 
-    >>> # Status of a running daemon with data
+    >>> # Status of a running daemon with yaml data
     >>> tomato status -y
     data:
-      appdir: /home/kraus/.config/tomato/1.0rc2.dev2
-      cmps:
-        [...]
-      devs:
-        [...]
-      drvs:
-        [...]
-      jobs:
-        [...]
-      logdir: /home/kraus/.cache/tomato/1.0rc2.dev2/log
-      nextjob: 1
-      pips:
-        [...]
-      port: 1234
-      settings:
-        [...]
-      status: running
-      verbosity: 20
+        appdir: .config/tomato/2.2rc3
+        devicefile:
+            components:
+                [...]
+            devices:
+                [...]
+            drivers:
+                [...]
+            pipelines:
+                [...]
+            filename: .config/tomato/2.2rc3/devices.yml
+        port: 1234
+        settings:
+            datadir: .config/tomato/2.2rc3/
+            devices:
+                config: .config/tomato/2.2rc3/devices.yml
+            drivers:
+                [...]
+            jobs:
+                dbpath: .config/tomato/2.2rc3/Jobs/dbpath.sqlite
+                storage: .config/tomato/2.2rc3/Jobs/
+            logdir: .config/tomato/2.2rc3/
+            repositories: {}
+        status: running
+        verbosity: 20
     msg: tomato running on port 1234
     success: true
 
@@ -218,7 +166,7 @@ def status(
     >>> # Status of all configured drivers
     >>> tomato status drivers
     Success: tomato running on port 1234 with the following drivers:
-         name:example_counter   port:34747      pid:192318
+         name:example_counter   port:34747  pid:192318  version: 2.1    heartbeat: 4.4 s
 
     >>> # Status of all configured devices
     >>> tomato status devices
@@ -228,9 +176,10 @@ def status(
     >>> # Status of all configured components:
     >>> tomato status components
     Success: tomato running on port 1234 with the following components:
-         name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      role:counter
+         name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      capabilities:{'random', 'count'}
 
     """
+    logger = logging.getLogger(f"{__name__}.status")
     logger.debug("checking status of tomato on port %d", port)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
@@ -241,25 +190,65 @@ def status(
     if req in events:
         rep = req.recv_pyobj()
         daemon: Daemon = rep.data
+        dbpath = daemon.settings["jobs"]["dbpath"]
         msg = f"tomato running on port {daemon.port}"
         if stgrp == "tomato":
             return Reply(
                 success=True,
-                msg=f"tomato running on port {daemon.port}",
+                msg=msg,
                 data=daemon,
             )
-        elif stgrp == "drivers":
-            keys = ["name", "port", "pid", "version", "heartbeat"]
-            rets = daemon.drivers
+        elif stgrp == "devices":
+            keys = ["name", "driver", "address", "channels"]
+            rets = daemon.devicefile.devices
             return Reply(
                 success=True,
                 msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
                 data=rets,
             )
-        elif rep.data is not None:
-            return _status_helper(daemon=rep.data, yaml=yaml, stgrp=stgrp)
+        elif stgrp == "drivers":
+            keys = ["name", "port", "pid", "version", "heartbeat"]
+            drvs = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+            rets = {v.name: v.model_dump() for v in drvs}
+            return Reply(
+                success=True,
+                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+                data=rets,
+            )
+        elif stgrp == "components":
+            keys = ["name", "driver", "device", "capabilities"]
+            rets = {k: v.model_dump() for k, v in daemon.devicefile.components.items()}
+            for ckey, cval in rets.items():
+                drv = drvdb.get_drv(name=cval["driver"], dbpath=dbpath)
+                assert drv is not None
+                dreq = context.socket(zmq.REQ)
+                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                params = dict(address=cval["address"], channel=cval["channel"])
+                dreq.send_pyobj(dict(cmd="cmp_capabilities", params=params))
+                dret = dreq.recv_pyobj()
+                if dret.success and dret.data is not None and len(dret.data) > 0:
+                    rets[ckey]["capabilities"] = dret.data
+                else:
+                    rets[ckey]["capabilities"] = None
+                dreq.close()
+            return Reply(
+                success=True,
+                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+                data=rets,
+            )
+        elif stgrp == "pipelines":
+            keys = ["name", "ready", "sampleid", "jobid"]
+            rets = {}
+            for pname in daemon.devicefile.pipelines.keys():
+                pip = pipdb.get_pip(name=pname, dbpath=dbpath)
+                rets[pname] = {**vars(pip)}
+            return Reply(
+                success=True,
+                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+                data=rets,
+            )
         else:
-            return rep
+            return Reply(success=False, msg=f"unknown stgrp: {stgrp!r}")
     else:
         req.setsockopt(zmq.LINGER, 0)
         req.close()
@@ -297,6 +286,7 @@ def start(
     Failure: required port 1234 is already in use, choose a different one
 
     """
+    logger = logging.getLogger(f"{__name__}.start")
     logger.debug("checking for availability of port %d", port)
     try:
         rep = context.socket(zmq.REP)
@@ -324,7 +314,7 @@ def start(
 
     # TODO: This is read just to make sure database is set-up. Should be maybe on the driver? Or init?
     settings = toml.load(Path(appdir) / "settings.toml")
-    jobdb_setup(settings["jobs"]["dbpath"])
+    setup_db(settings["jobs"]["dbpath"])
 
     spawn_cmd(
         cmd=[
@@ -340,7 +330,7 @@ def start(
     )
 
     kwargs = dict(port=port, timeout=max(timeout, 5000), context=context)
-    return status(**kwargs)
+    return status(**kwargs)  # ty: ignore[invalid-argument-type]
 
 
 def stop(
@@ -371,6 +361,7 @@ def stop(
     Failure: tomato not running on port 1235
 
     """
+    # logger = logging.getLogger(f"{__name__}.stop")
     stat = status(port=port, timeout=timeout, context=context)
     if stat.success:
         req = context.socket(zmq.REQ)
@@ -404,6 +395,7 @@ def init(
     Success: wrote default settings into /home/kraus/.config/tomato/1.0rc2.dev2/settings.toml
 
     """
+    logger = logging.getLogger(f"{__name__}.init")
     appdir = Path(appdir).resolve()
     datadir = Path(datadir).resolve()
     logdir = Path(logdir).resolve()
@@ -464,7 +456,7 @@ def init(
         logger.debug("creating directory '%s'", storage)
         os.makedirs(storage)
     if not dbpath.exists():
-        jobdb_setup(dbpath)
+        setup_db(dbpath)
     return Reply(
         success=True,
         msg=f"wrote default settings into {appdir / 'settings.toml'}",
@@ -490,6 +482,7 @@ def reload(
     Success: tomato on port 1234 reloaded with settings from /home/kraus/.config/tomato/1.0rc2.dev2
 
     """
+    logger = logging.getLogger(f"{__name__}.reload")
     kwargs = dict(port=port, timeout=timeout, context=context)
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
@@ -501,25 +494,17 @@ def reload(
         )
 
     logger.debug("status")
-    ret = status(**kwargs)
+    ret = status(**kwargs)  # ty: ignore[invalid-argument-type]
     if not ret.success:
         return ret
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
 
-    logger.debug("reload")
     req.send_pyobj(dict(cmd="reload", sender=f"{__name__}.reload"))
     ret = req.recv_pyobj()
     if ret.success is False:
         return ret
-
-    logger.debug("setup")
-    req.send_pyobj(dict(cmd="setup", sender=f"{__name__}.reload"))
-    ret = req.recv_pyobj()
-    if ret.success is False:
-        return ret
-    logger.debug("done")
 
     return Reply(
         success=True,
@@ -545,32 +530,27 @@ def pipeline_load(
         tomato pipeline load <pipeline> <sampleid>
 
     """
+    # logger = logging.getLogger(f"{__name__}.pipeline_load")
     stat = status(port=port, timeout=timeout, context=context)
-    if not stat.success:
+    if not stat.success or stat.data is None:
         return stat
+    daemon: Daemon = stat.data
 
-    if pipeline not in stat.data.pips:
+    if pipeline not in daemon.devicefile.pipelines:
         return Reply(success=False, msg=f"pipeline {pipeline!r} not found on tomato")
-    pip = stat.data.pips[pipeline]
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    pip = pipdb.get_pip(name=pipeline, dbpath=dbpath)
 
-    if pip.sampleid is not None:
+    if pip is not None and pip.sampleid is not None:
         return Reply(
-            success=False, msg=f"pipeline {pipeline!r} is not empty, aborting", data=pip
+            success=False,
+            msg=f"pipeline {pipeline!r} is not empty, aborting",
+            data=pip,
         )
 
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(
-        dict(
-            cmd="pipeline",
-            params=dict(sampleid=sampleid, name=pipeline),
-            sender=f"{__name__}.pipeline_load",
-        ),
-    )
-    msg = req.recv_pyobj()
-    return Reply(
-        success=True, msg=f"loaded {sampleid!r} into {pipeline!r}", data=msg.data
-    )
+    params = dict(sampleid=sampleid, ready=False)
+    pip = pipdb.update_pip(name=pipeline, params=params, dbpath=dbpath)
+    return Reply(success=True, msg=f"loaded {sampleid!r} into {pipeline!r}", data=pip)
 
 
 def pipeline_eject(
@@ -589,41 +569,34 @@ def pipeline_eject(
         tomato pipeline eject <pipeline>
 
     """
+    # logger = logging.getLogger(f"{__name__}.pipeline_eject")
     stat = status(port=port, timeout=timeout, context=context)
-    if not stat.success:
+    if not stat.success or stat.data is None:
         return stat
+    daemon: Daemon = stat.data
 
-    if pipeline not in stat.data.pips:
-        return Reply(
-            success=False,
-            msg=f"pipeline {pipeline!r} not found on tomato",
-            data=stat.data.pips,
-        )
-    pip = stat.data.pips[pipeline]
+    if pipeline not in daemon.devicefile.pipelines:
+        return Reply(success=False, msg=f"pipeline {pipeline!r} not found on tomato")
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    pip = pipdb.get_pip(name=pipeline, dbpath=dbpath)
+    assert pip is not None
 
     if pip.sampleid is None:
         return Reply(
-            success=True, msg=f"pipeline {pipeline!r} was already empty", data=pip
+            success=True,
+            msg=f"pipeline {pipeline!r} was already empty",
+            data=pip,
         )
-
     if pip.jobid is not None:
         return Reply(
-            success=False, msg="cannot eject from a running pipeline", data=pip
+            success=False,
+            msg="cannot eject from a running pipeline",
+            data=pip,
         )
 
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(
-        dict(
-            cmd="pipeline",
-            params=dict(sampleid=None, ready=False, name=pipeline),
-            sender=f"{__name__}.pipeline_eject",
-        )
-    )
-    rep = req.recv_pyobj()
-    return Reply(
-        success=True, msg=f"pipeline {pipeline!r} ejected succesffully", data=rep.data
-    )
+    params = dict(sampleid=None, ready=False)
+    pip = pipdb.update_pip(name=pipeline, params=params, dbpath=dbpath)
+    return Reply(success=True, msg=f"ejected sample from {pipeline!r}", data=pip)
 
 
 def pipeline_ready(
@@ -639,39 +612,34 @@ def pipeline_ready(
 
     .. code:: bash
 
-        pipeline ready <pipeline>
+        tomato pipeline ready <pipeline>
 
     """
+    # logger = logging.getLogger(f"{__name__}.pipeline_ready")
     stat = status(port=port, timeout=timeout, context=context)
-    if not stat.success:
+    if not stat.success or stat.data is None:
         return stat
+    daemon: Daemon = stat.data
 
-    if pipeline not in stat.data.pips:
-        return Reply(
-            success=False,
-            msg=f"pipeline {pipeline!r} not found on tomato",
-            data=stat.data.pips,
-        )
-    pip = stat.data.pips[pipeline]
+    if pipeline not in daemon.devicefile.pipelines:
+        return Reply(success=False, msg=f"pipeline {pipeline!r} not found on tomato")
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    pip = pipdb.get_pip(name=pipeline, dbpath=dbpath)
+    assert pip is not None
 
     if pip.ready:
         return Reply(
-            success=True, msg=f"pipeline {pipeline!r} was already ready", data=pip
+            success=True,
+            msg=f"pipeline {pipeline!r} was already ready",
+            data=pip,
         )
-
     if pip.jobid is not None:
         return Reply(
-            success=False, msg="cannot mark a running pipeline as ready", data=pip
+            success=False,
+            msg="cannot mark a running pipeline as ready",
+            data=pip,
         )
 
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(
-        dict(
-            cmd="pipeline",
-            params=dict(ready=True, name=pipeline),
-            sender=f"{__name__}.pipeline_ready",
-        )
-    )
-    rep = req.recv_pyobj()
-    return Reply(success=True, msg=f"pipeline {pipeline!r} set as ready", data=rep.data)
+    params = dict(ready=True)
+    pip = pipdb.update_pip(name=pipeline, params=params, dbpath=dbpath)
+    return Reply(success=True, msg=f"pipeline {pipeline!r} set as ready", data=pip)

@@ -88,8 +88,3 @@ DriverInterface ver. 2.0
 .. autoclass:: tomato.driverinterface_2_0.ModelDevice
     :no-index:
     :members:
-
-
-.. |setfile| replace:: *settings file*
-
-.. _setfile: quickstart.html#settings-file
