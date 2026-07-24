@@ -1,16 +1,14 @@
 import os
 
 import pytest
-import zmq
 
 from tomato import ketchup, tomato
 
 from . import utils
 
 PORT = 12345
-CTXT = zmq.Context()
 
-kwargs = dict(port=PORT, timeout=1000, context=CTXT)
+kwargs = dict(port=PORT, timeout=1000)
 
 
 @pytest.mark.parametrize(

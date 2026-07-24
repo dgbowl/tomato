@@ -1,18 +1,18 @@
-import pytest
-import os
-import subprocess
 import json
-import yaml
-import xarray as xr
-import tomato
-import zmq
-import time
+import os
 import pickle
+import subprocess
+import time
+
+import pytest
+import xarray as xr
+import yaml
+
+import tomato
 
 from . import utils
 
 PORT = 12345
-CTXT = zmq.Context()
 
 
 @pytest.mark.parametrize(
@@ -123,11 +123,8 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
 
 def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    kwargs = dict(port=PORT, timeout=1000, context=CTXT)
-    ret = tomato.passata.measure(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
+    kwargs = dict(port=PORT, timeout=1000)
+    ret = tomato.passata.measure(name="example_counter:(example-addr,1)", **kwargs)
     assert ret.success
 
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])

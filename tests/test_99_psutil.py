@@ -4,14 +4,12 @@ import subprocess
 
 import pytest
 import yaml
-import zmq
 
 from tomato import tomato
 
 from . import utils
 
 PORT = 12345
-CTXT = zmq.Context()
 
 
 @pytest.mark.parametrize(
@@ -56,7 +54,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
-    ret = tomato.status(port=PORT, timeout=1000, context=CTXT, stgrp="drivers")
+    ret = tomato.status(port=PORT, timeout=1000, stgrp="drivers")
     assert ret.success
     assert ret.data is not None
     assert ret.data["psutil"]["version"] == "2.1"

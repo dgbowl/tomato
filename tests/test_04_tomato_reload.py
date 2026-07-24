@@ -2,16 +2,14 @@ import json
 from pathlib import Path
 
 import yaml
-import zmq
 
 from tomato import tomato
 
 from . import utils
 
 PORT = 12345
-CTXT = zmq.Context()
 timeout = 1000
-kwargs = dict(port=PORT, context=CTXT, timeout=timeout)
+kwargs = dict(port=PORT, timeout=timeout)
 
 
 def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):

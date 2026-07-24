@@ -16,6 +16,7 @@ import tomato.daemon.driver
 import tomato.daemon.job
 import tomato.daemon.pip
 from tomato.models import Daemon, Reply
+from tomato.utils import context
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,6 @@ def tomato_daemon():
     logger.info("logging set up with verbosity %s", daemon.verbosity)
 
     cmd.reload(msg={}, daemon=daemon)
-    context = zmq.Context()
     rep = context.socket(zmq.REP)
     logger.debug("binding zmq.REP socket on port %d", daemon.port)
     rep.bind(f"tcp://127.0.0.1:{daemon.port}")

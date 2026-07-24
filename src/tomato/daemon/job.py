@@ -36,6 +36,7 @@ from tomato.models import (
     Task,
     to_payload,
 )
+from tomato.utils import context
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,6 @@ def method_validate(
     method: Sequence[Task],
     pip: Pipeline,
     daemon: Daemon,
-    context: zmq.Context,
 ) -> bool:
     """
     Function for validating :class:`Task` parameters against components.
@@ -74,7 +74,6 @@ def method_validate(
                     req,
                     dict(cmd="task_validate", params=params),
                     f"tcp://127.0.0.1:{drv.port}",
-                    context,
                 )
                 if ret.success:
                     req.close()
@@ -87,7 +86,6 @@ def method_validate(
 def find_matching_pipelines(
     daemon: Daemon,
     method: Sequence[Task],
-    context: zmq.Context,
 ) -> list[str]:
     """
     Function for finding the names of pipelines that match the provided method.
@@ -116,7 +114,7 @@ def find_matching_pipelines(
             if dret.success and dret.data is not None:
                 capabs.update(dret.data)
         if req_capabs.intersection(capabs) == req_capabs:
-            if method_validate(method, pip, daemon, context):
+            if method_validate(method, pip, daemon):
                 candidates.append(pip.name)
     return candidates
 
@@ -148,7 +146,7 @@ def kill_tomato_job(process: psutil.Process):
     logger.debug(f"{alive=}")
 
 
-def manage_running(daemon: Daemon, context: zmq.Context):
+def manage_running(daemon: Daemon):
     """
     Function that manages jobs within the tomato job manager.
 
@@ -213,10 +211,7 @@ def manage_running(daemon: Daemon, context: zmq.Context):
             jobdb.update_job_id(job.id, params, dbpath)
 
 
-def check_queued(
-    daemon: Daemon,
-    context: zmq.Context,
-) -> dict[int, list[str]]:
+def check_queued(daemon: Daemon) -> dict[int, list[str]]:
     """
     Function to check whether the queued jobs can be submitted onto any configured pipeline.
 
@@ -227,7 +222,7 @@ def check_queued(
     dbpath = daemon.settings["jobs"]["dbpath"]
     queue = jobdb.get_jobs_where("status IN ('q', 'qw')", dbpath)
     for job in queue:
-        matched[job.id] = find_matching_pipelines(daemon, job.payload.method, context)
+        matched[job.id] = find_matching_pipelines(daemon, job.payload.method)
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
                 "job %d can queue on pips: {%s}",
@@ -242,7 +237,6 @@ def check_queued(
 def action_queued(
     daemon: Daemon,
     matched: dict[int, list[str]],
-    context: zmq.Context,
 ):
     """
     Function that assigns jobs if the pipeline is ready and contains the requested sample.
@@ -340,13 +334,12 @@ def manager(port: int, timeout: int = 500):
         Note that we poll the `tomato-daemon` for configuration only once per iteration of the main loop.
 
     """
-    context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
     thread = current_thread()
     logger.info("launched successfully")
     req: zmq.Socket = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
+    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}")
     while getattr(thread, "do_run"):
         msg = dict(cmd="status", sender=f"{__name__}.manager")
         ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
@@ -356,9 +349,9 @@ def manager(port: int, timeout: int = 500):
             logger.critical("tomato-daemon is not running: %s", ret.msg)
             break
         daemon: Daemon = ret.data
-        manage_running(daemon, context)
-        matched_pips = check_queued(daemon, context)
-        action_queued(daemon, matched_pips, context)
+        manage_running(daemon)
+        matched_pips = check_queued(daemon)
+        action_queued(daemon, matched_pips)
         time.sleep(timeout / 1e3)
     req.close()
     logger.info("instructed to quit")
@@ -449,7 +442,6 @@ def tomato_job() -> None:
         pid = os.getpid()
 
     logger.info(f"assigning job {jobid} with pid {pid} into pipeline {pip!r}")
-    context = zmq.Context()
 
     params = dict(pid=pid, status="r", connected_at=str(datetime.now(timezone.utc)))
     job = jobdb.update_job_id(jobid, params, args.dbpath)
@@ -470,7 +462,7 @@ def tomato_job() -> None:
 
     logger.info("handing off to 'job_main_loop'")
     logger.info("==============================")
-    ret = job_main_loop(context, args.port, job, pip, logpath)
+    ret = job_main_loop(args.port, job, pip, logpath)
     logger.info("==============================")
 
     job.completed_at = str(datetime.now(timezone.utc))
@@ -525,10 +517,9 @@ def job_thread(
     thread = current_thread()
     sender = f"{__name__}.job_thread({thread.ident:5d})"
     logger = logging.getLogger(sender)
-    context = zmq.Context()
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{dport}")
-    lppargs = dict(endpoint=f"tcp://127.0.0.1:{dport}", context=context, sender=sender)
+    lppargs = dict(endpoint=f"tcp://127.0.0.1:{dport}", sender=sender)
 
     if "lpp_timeout" in dsettings:
         lppargs["timeout"] = dsettings["lpp_timeout"] * 1000
@@ -723,7 +714,6 @@ def job_thread(
 
 
 def job_main_loop(
-    context: zmq.Context,
     port: int,
     job: Job,
     pipname: str,
@@ -738,7 +728,7 @@ def job_main_loop(
 
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
+    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}")
 
     while True:
         ret, req = lpp.comm(req, dict(cmd="status", sender=sender), **lppargs)  # ty: ignore[invalid-argument-type]

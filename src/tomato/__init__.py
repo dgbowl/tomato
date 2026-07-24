@@ -6,7 +6,6 @@ from pathlib import Path
 
 import appdirs
 import yaml
-import zmq
 
 from tomato import ketchup, passata, tomato
 
@@ -30,10 +29,9 @@ def parse_args(parser, verbose, is_tomato=False):
     verbosity = min(max((2 + args.quiet - args.verbose) * 10, 10), 50)
     set_loglevel(verbosity)
 
-    context = zmq.Context()
     kwargs = {}
     if not is_tomato:
-        status = tomato.status(**vars(args), context=context)
+        status = tomato.status(**vars(args))
         if not status.success:
             if args.yaml:
                 print(yaml.dump(status.model_dump()))
@@ -43,7 +41,7 @@ def parse_args(parser, verbose, is_tomato=False):
         kwargs["daemon"] = status.data
 
     if "func" in args:
-        ret = args.func(**vars(args), verbosity=verbosity, context=context, **kwargs)
+        ret = args.func(**vars(args), verbosity=verbosity, **kwargs)
         if args.yaml:
             # if ret.data is not None:
             #    ret.data.model_dump()

@@ -34,7 +34,7 @@ import tomato.daemon.drvdb as drvdb
 import tomato.daemon.pipdb as pipdb
 from tomato.daemon.db import setup_db
 from tomato.models import Daemon, Reply
-from tomato.utils import spawn_cmd
+from tomato.utils import context, spawn_cmd
 
 logger = logging.getLogger(__name__)
 VERSION = metadata.version("tomato")
@@ -108,7 +108,6 @@ def status(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     stgrp: str = "tomato",
     yaml: bool = True,
     **_: dict,
@@ -262,7 +261,6 @@ def start(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     appdir: str | Path,
     verbosity: int,
     **_: dict,
@@ -291,7 +289,7 @@ def start(
     try:
         rep = context.socket(zmq.REP)
         rep.bind(f"tcp://127.0.0.1:{port}")
-        stat = status(port=port, timeout=1000, context=context)
+        stat = status(port=port, timeout=1000)
         rep.unbind(f"tcp://127.0.0.1:{port}")
         rep.setsockopt(zmq.LINGER, 0)
         rep.close()
@@ -329,7 +327,7 @@ def start(
         logger=logger,
     )
 
-    kwargs = dict(port=port, timeout=max(timeout, 5000), context=context)
+    kwargs = dict(port=port, timeout=max(timeout, 5000))
     return status(**kwargs)  # ty: ignore[invalid-argument-type]
 
 
@@ -337,7 +335,6 @@ def stop(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     **_: dict,
 ) -> Reply:
     """
@@ -362,7 +359,7 @@ def stop(
 
     """
     # logger = logging.getLogger(f"{__name__}.stop")
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(port=port, timeout=timeout)
     if stat.success:
         req = context.socket(zmq.REQ)
         req.connect(f"tcp://127.0.0.1:{port}")
@@ -467,7 +464,6 @@ def reload(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     appdir: str | Path,
     **_: dict,
 ) -> Reply:
@@ -483,7 +479,7 @@ def reload(
 
     """
     logger = logging.getLogger(f"{__name__}.reload")
-    kwargs = dict(port=port, timeout=timeout, context=context)
+    kwargs = dict(port=port, timeout=timeout)
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
         toml.load(Path(appdir) / "settings.toml")
@@ -517,7 +513,6 @@ def pipeline_load(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     pipeline: str,
     sampleid: str,
     **_: dict,
@@ -531,7 +526,7 @@ def pipeline_load(
 
     """
     # logger = logging.getLogger(f"{__name__}.pipeline_load")
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(port=port, timeout=timeout)
     if not stat.success or stat.data is None:
         return stat
     daemon: Daemon = stat.data
@@ -557,7 +552,6 @@ def pipeline_eject(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     pipeline: str,
     **_: dict,
 ) -> Reply:
@@ -570,7 +564,7 @@ def pipeline_eject(
 
     """
     # logger = logging.getLogger(f"{__name__}.pipeline_eject")
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(port=port, timeout=timeout)
     if not stat.success or stat.data is None:
         return stat
     daemon: Daemon = stat.data
@@ -603,7 +597,6 @@ def pipeline_ready(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     pipeline: str,
     **_: dict,
 ) -> Reply:
@@ -616,7 +609,7 @@ def pipeline_ready(
 
     """
     # logger = logging.getLogger(f"{__name__}.pipeline_ready")
-    stat = status(port=port, timeout=timeout, context=context)
+    stat = status(port=port, timeout=timeout)
     if not stat.success or stat.data is None:
         return stat
     daemon: Daemon = stat.data
