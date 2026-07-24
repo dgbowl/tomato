@@ -1,22 +1,21 @@
-import zmq
+import os
 import random
 import subprocess
-import os
-from . import utils
-import tomato
 import time
+
+import zmq
+
+import tomato
+
+from . import utils
 
 PORT = 12345
 TIME = 1000
-CTXT = zmq.Context()
-kwargs = dict(port=PORT, timeout=TIME, context=CTXT)
+kwargs = dict(port=PORT, timeout=TIME)
 
 
 def test_passata_api_status(start_tomato_daemon, stop_tomato_daemon):
-    ret = tomato.passata.status(
-        name="example_counter:(example-addr,1)",
-        **kwargs,
-    )
+    ret = tomato.passata.status(name="example_counter:(example-addr,1)", **kwargs)
     print(f"{ret=}")
     assert ret.success
     assert "running" in ret.data

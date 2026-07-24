@@ -3,17 +3,15 @@ import time
 from pathlib import Path
 
 import psutil
-import zmq
 
 from tomato import ketchup, tomato
 
 from . import utils
 
 PORT = 12345
-CTXT = zmq.Context()
 WAIT = 10000
 
-kwargs = dict(port=PORT, timeout=1000, context=CTXT)
+kwargs = dict(port=PORT, timeout=1000)
 
 
 def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):

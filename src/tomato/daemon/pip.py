@@ -17,6 +17,7 @@ import zmq
 import tomato.daemon.drvdb as drvdb
 from tomato.daemon import jobdb, lpp, pipdb
 from tomato.models import Daemon
+from tomato.utils import context
 
 MAX_JOB_NOPID = 10
 
@@ -27,13 +28,12 @@ def manager(port: int, timeout: int = 500):
 
     This manager ensures the job queue is iterated over and pipelines are managed/reset. Note that we poll the `tomato-daemon` for status only once per iteration of the main loop.
     """
-    context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
     thread = current_thread()
     logger.info("launched successfully")
     req: zmq.Socket = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
+    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}")
     while getattr(thread, "do_run"):
         msg = dict(cmd="status", sender=f"{__name__}.manager")
         ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]

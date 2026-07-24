@@ -8,10 +8,10 @@ from tomato import tomato
 
 from . import utils
 
+context = zmq.Context()
 PORT = 12345
-CTXT = zmq.Context()
 timeout = 1000
-kwargs = dict(port=PORT, context=CTXT, timeout=timeout)
+kwargs = dict(port=PORT, timeout=timeout)
 
 
 def test_tomato_status_down():
@@ -136,7 +136,8 @@ def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
 
 
 def test_tomato_nocmd(start_tomato_daemon, stop_tomato_daemon):
-    req = CTXT.socket(zmq.REQ)
+
+    req = context.socket(zmq.REQ)
     req.connect("tcp://127.0.0.1:12345")
     req.send_pyobj(dict(cdm="typo"))
     rep = req.recv_pyobj()
@@ -163,7 +164,7 @@ def test_tomato_component(start_tomato_daemon, stop_tomato_daemon):
     assert ret.data is not None
 
     drv = ret.data["example_counter"]
-    req: zmq.Socket = CTXT.socket(zmq.REQ)
+    req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = 1000
     req.connect(f"tcp://127.0.0.1:{drv['port']}")
 

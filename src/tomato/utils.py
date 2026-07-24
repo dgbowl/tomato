@@ -5,6 +5,9 @@ from pathlib import Path
 
 import psutil
 import yaml
+import zmq
+
+context = zmq.Context()
 
 
 def spawn_cmd(cmd: list[str], logger: Logger) -> None:

@@ -24,6 +24,7 @@ import zmq
 import tomato.daemon.drvdb as drvdb
 from tomato import tomato
 from tomato.models import Component, DrvState, Reply
+from tomato.utils import context
 
 RCVTIMEO = 3000
 
@@ -32,11 +33,8 @@ def _name_to_cmp(
     name: str,
     port: int,
     timeout: int,
-    context: zmq.Context,
 ) -> tuple[Component, DrvState] | Reply:
-    ret = tomato.status(
-        port=port, timeout=timeout, context=context, stgrp="tomato", yaml=True
-    )
+    ret = tomato.status(port=port, timeout=timeout, stgrp="tomato", yaml=True)
     if ret.success is False or ret.data is None:
         return ret
     daemon = ret.data
@@ -58,11 +56,10 @@ def _running_or_force(
     name: str,
     port: int,
     timeout: int,
-    context: zmq.Context,
     force: bool,
 ) -> Reply:
     if not force:
-        ret = status(port=port, timeout=timeout, context=context, name=name)
+        ret = status(port=port, timeout=timeout, name=name)
         if not ret.success or ret.data is None:
             return Reply(
                 success=False,
@@ -82,11 +79,10 @@ def status(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
@@ -110,11 +106,10 @@ def register(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
@@ -137,11 +132,10 @@ def attrs(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
@@ -166,11 +160,10 @@ def capabilities(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
@@ -195,11 +188,10 @@ def constants(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
@@ -223,13 +215,12 @@ def constants(
 def get_attrs(
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     attrs: list[str],
     yaml: bool = False,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
@@ -266,21 +257,20 @@ def get_attrs(
 def set_attr(
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     attr: str,
     val: Any,
     force: bool = False,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    ret = _running_or_force(name, port, timeout, context, force)
+    ret = _running_or_force(name, port, timeout, force)
     if not ret.success:
         return ret
 
@@ -304,19 +294,18 @@ def reset(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     force: bool = False,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    ret = _running_or_force(name, port, timeout, context, force)
+    ret = _running_or_force(name, port, timeout, force)
     if not ret.success:
         return ret
 
@@ -338,11 +327,10 @@ def get_last_data(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret
@@ -367,11 +355,10 @@ def measure(
     *,
     port: int,
     timeout: int,
-    context: zmq.Context,
     name: str,
     **_: dict,
 ) -> Reply:
-    ret = _name_to_cmp(name, port, timeout, context)
+    ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
     cmp, drv = ret

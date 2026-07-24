@@ -23,8 +23,10 @@ import tomato.utils
 from tomato.daemon import lpp
 from tomato.drivers import ModelInterface, driver_to_interface
 from tomato.models import Daemon, DrvState, Reply
+from tomato.utils import context
 
 logger = logging.getLogger(__name__)
+
 IDLE_MEASUREMENT_INTERVAL = None
 MAX_REGISTER_RETRIES = 3
 
@@ -114,7 +116,7 @@ def perform_idle_measurements(
     return t_now
 
 
-def stop_tomato_driver(port: int, context) -> Reply:
+def stop_tomato_driver(port: int) -> Reply:
     """
     The default mechanism for stopping tomato drivers.
 
@@ -203,7 +205,6 @@ def tomato_driver() -> None:
     )
 
     # PORTS
-    context = zmq.Context()
     rep = context.socket(zmq.REP)
     port = rep.bind_to_random_port("tcp://127.0.0.1")
     req = context.socket(zmq.REQ)
@@ -333,7 +334,6 @@ def manager(port: int, timeout: int = 1000):
     This manager ensures individual driver processes are (re-)spawned and instructed to quit as necessary. The drivers are periodically checked using the ``HEARTBEAT`` constant as the interval. All changes are stored in the drivers table.
     """
     sender = f"{__name__}.manager"
-    context = zmq.Context()
     logger = logging.getLogger(sender)
     thread = current_thread()
     logger.info("launched successfully")
@@ -341,7 +341,6 @@ def manager(port: int, timeout: int = 1000):
     req.connect(f"tcp://127.0.0.1:{port}")
     lppargs = dict(
         endpoint=f"tcp://127.0.0.1:{port}",
-        context=context,
         sender=sender,
         timeout=timeout,
     )
@@ -367,7 +366,7 @@ def manager(port: int, timeout: int = 1000):
             if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
                     logger.warning("%s: stopping driver", d.name)
-                    ret = stop_tomato_driver(d.port, context)
+                    ret = stop_tomato_driver(d.port)
                     if not ret.success:
                         logger.warning("%s: failed to stop driver: %s", d.name, ret.msg)
                 ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
@@ -449,4 +448,4 @@ def manager(port: int, timeout: int = 1000):
             kill_tomato_driver(d.pid)
         else:
             logger.info("%s: stopping driver - 'stop' on port %d", d.name, d.port)
-            stop_tomato_driver(d.port, context)
+            stop_tomato_driver(d.port)

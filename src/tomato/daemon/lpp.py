@@ -11,6 +11,7 @@ from typing import Any, Optional
 import zmq
 
 from tomato.models import Reply
+from tomato.utils import context
 
 REQ_TIMEOUT = 1000
 REQ_RETRIES = 3
@@ -20,7 +21,6 @@ def comm(
     req: zmq.Socket,
     data: Any,
     endpoint: str,
-    context: zmq.Context,
     retries: int = REQ_RETRIES,
     timeout: int = REQ_TIMEOUT,
     sender: Optional[str] = None,
