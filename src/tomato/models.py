@@ -53,6 +53,7 @@ class Job(BaseModel):
     snappath: Optional[str] = None
 
     @field_validator("payload", mode="before")
+    @classmethod
     def coerce_payload(cls, v):
         if isinstance(v, bytes):
             v = pickle.loads(v)

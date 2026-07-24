@@ -383,6 +383,8 @@ class ModelInterface(metaclass=ABCMeta):
             msg = f"unknown task {task.technique_name!r} requested"
             return (False, msg, None)
         attrs = self.devmap[key].attrs(**kwargs)
+        if task.task_params is None:
+            return (True, "task has no parameters to validate", None)
         for attr, val in task.task_params.items():
             if val is None:
                 msg = f"val of attr {attr!r} cannot be None"
@@ -501,8 +503,8 @@ class ModelDevice(metaclass=ABCMeta):
         self.key = key
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
-        self.thread.do_run = True
-        self.thread.do_run_task = False
+        setattr(self.thread, "do_run", True)
+        setattr(self.thread, "do_run_task", False)
         self.thread.start()
         self.data = None
         self.last_data = None
@@ -524,33 +526,33 @@ class ModelDevice(metaclass=ABCMeta):
         The :obj:`self.thread` is reset to None.
         """
         thread = current_thread()
-        while thread.do_run:
+        while getattr(thread, "do_run"):
             try:
                 task: Task = self.task_list.get(timeout=1)
             except queue.Empty:
                 continue
             except Exception as e:
                 logger.critical(e, exc_info=True)
-                thread.do_run = False
+                setattr(thread, "do_run", False)
                 break
 
             self.running = task
             try:
-                thread.do_run_task = False
+                setattr(thread, "do_run_task", False)
                 if isinstance(task, Task):
                     self.prepare_task(task=task)
-                    thread.do_run_task = True
+                    setattr(thread, "do_run_task", True)
                     t_0 = time.perf_counter()
                     t_p = t_0
                     self.data = None
-                    while thread.do_run_task and thread.do_run:
+                    while getattr(thread, "do_run_task") and getattr(thread, "do_run"):
                         t_n = time.perf_counter()
                         if t_n - t_p > task.sampling_interval:
                             with self.datalock:
                                 self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)
                             t_p += task.sampling_interval
                         if t_n - t_0 > task.max_duration:
-                            thread.do_run_task = False
+                            setattr(thread, "do_run_task", False)
                             break
                         # We want the inner task loop to run every 10 - 200 ms,
                         # so that cancelled tasks can be processed quickly
@@ -565,12 +567,12 @@ class ModelDevice(metaclass=ABCMeta):
                     logger.debug("measurement on component %s is done", self.key)
                 else:
                     logger.critical("Unknown task received: '%s'", task)
-                    thread.do_run = False
+                    setattr(thread, "do_run", False)
                     break
                 self.task_list.task_done()
             except Exception as e:
                 logger.critical(e, exc_info=True)
-                thread.do_run = False
+                setattr(thread, "do_run", False)
                 break
             self.running = False
         logger.warning("task runner is quitting")
@@ -615,7 +617,7 @@ class ModelDevice(metaclass=ABCMeta):
         """Stops the currently running task."""
         logger.info("stopping running task on component %s", self.key)
         if hasattr(self.thread, "do_run_task"):
-            self.thread.do_run_task = False
+            setattr(self.thread, "do_run_task", False)
         else:
             logger.warning("attempted to stop a task without 'thread.do_run_task'")
 
@@ -636,7 +638,7 @@ class ModelDevice(metaclass=ABCMeta):
         """Reads the value of the specified :class:`Attr`."""
         pass
 
-    def get_data(self, **kwargs: dict) -> xr.Dataset:
+    def get_data(self, **kwargs: dict) -> xr.Dataset | None:
         """
         Returns the cached :obj:`self.data` as a :class:`xarray.Dataset` before
         clearing the cache.
@@ -646,17 +648,17 @@ class ModelDevice(metaclass=ABCMeta):
             self.data = None
         return ret
 
-    def get_last_data(self, **kwargs: dict) -> xr.Dataset:
+    def get_last_data(self, **kwargs: dict) -> xr.Dataset | None:
         """Returns the :obj:`last_data` object as a :class:`xarray.Dataset`."""
         return self.last_data
 
     @abstractmethod
-    def attrs(**kwargs) -> dict[str, Attr]:
+    def attrs(self, **kwargs) -> dict[str, Attr]:
         """Returns a :class:`dict` of all available :class:`Attrs`."""
         pass
 
     @abstractmethod
-    def capabilities(**kwargs) -> set:
+    def capabilities(self, **kwargs) -> set:
         """Returns a :class:`set` of all supported techniques."""
         pass
 
@@ -679,7 +681,7 @@ class ModelDevice(metaclass=ABCMeta):
         """
         logger.info("resetting component %s", self.key)
         if hasattr(self.thread, "do_run"):
-            self.thread.do_run = False
+            setattr(self.thread, "do_run", False)
         logger.info("component %s is waiting for task thread", self.key)
         self.thread.join()
         logger.info("component %s is continuing with reset", self.key)
@@ -688,7 +690,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.datalock = RLock()
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
-        self.thread.do_run = do_run
-        self.thread.do_run_task = False
+        setattr(self.thread, "do_run", do_run)
+        setattr(self.thread, "do_run_task", False)
         self.thread.start()
         logger.info("reset of component %s done", self.key)

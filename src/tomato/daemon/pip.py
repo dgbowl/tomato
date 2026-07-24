@@ -31,7 +31,7 @@ def manager(port: int, timeout: int = 500):
     lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
     while getattr(thread, "do_run"):
         msg = dict(cmd="status", sender=f"{__name__}.manager")
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
             break
         elif ret.success is False or ret.data is None:

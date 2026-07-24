@@ -23,6 +23,7 @@ from datetime import datetime, timedelta, timezone
 from importlib import metadata
 from pathlib import Path
 from threading import Thread, current_thread
+from typing import Sequence
 
 import psutil
 import xarray as xr
@@ -51,7 +52,7 @@ JOB_INFO_INTERVAL = 5
 
 
 def method_validate(
-    method: list[Task],
+    method: Sequence[Task],
     pip: Pipeline,
     daemon: Daemon,
     context: zmq.Context,
@@ -86,7 +87,7 @@ def method_validate(
 
 def find_matching_pipelines(
     daemon: Daemon,
-    method: list[Task],
+    method: Sequence[Task],
     context: zmq.Context,
 ) -> list[str]:
     req_roles = set([item.component_role for item in method])
@@ -544,7 +545,7 @@ def job_thread(
             )
             msg = dict(cmd="task_status", params={**kwargs})
             ret, req = lpp.comm(req, msg, **lppargs)
-            if ret.success and ret.data["can_submit"]:
+            if ret.success and ret.data is not None and ret.data["can_submit"]:
                 break
             elif req.closed:
                 setattr(thread, "crashed", True)
@@ -571,12 +572,17 @@ def job_thread(
             if req.closed:
                 setattr(thread, "crashed", True)
                 sys.exit()
-            elif ret.success and ret.data["running"] is False:
+            elif ret.success and ret.data is not None and ret.data["running"] is False:
                 logger.warning(
                     "%s: task was submitted %f s ago but is not yet running", taskid, dt
                 )
                 pass
-            elif ret.success and "task" in ret.data and ret.data["task"] != task:
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] != task
+            ):
                 logger.warning(
                     "%s: task was submitted %f s ago but another task is running: %s",
                     taskid,
@@ -584,9 +590,14 @@ def job_thread(
                     ret.data["task"],
                 )
                 pass
-            elif ret.success and "task" in ret.data and ret.data["task"] == task:
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] == task
+            ):
                 break
-            elif ret.success and "task" not in ret.data:
+            elif ret.success and ret.data is not None and "task" not in ret.data:
                 break
             if dt > MAX_TASK_WAIT:
                 logger.critical(
@@ -608,7 +619,7 @@ def job_thread(
                 msg = dict(cmd="task_data", params={**kwargs})
                 ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
                 if req.closed:
-                    thread.crashed = True
+                    setattr(thread, "crashed", True)
                     sys.exit()
                 elif ret.success and ret.data is not None:
                     logger.debug("%s: pickling received data", taskid)
@@ -622,12 +633,17 @@ def job_thread(
             msg = dict(cmd="task_status", params={**kwargs})
             ret, req = lpp.comm(req, msg, **lppargs)
             if req.closed:
-                thread.crashed = True
+                setattr(thread, "crashed", True)
                 sys.exit()
-            elif ret.success and not ret.data["running"]:
+            elif ret.success and ret.data is not None and not ret.data["running"]:
                 logger.info("%s: task no longer running, break", taskid)
                 break
-            elif ret.success and "task" in ret.data and ret.data["task"] != task:
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] != task
+            ):
                 logger.critical("%s: wront task running, break", taskid)
                 logger.debug("%s: expected task: %s", taskid, task)
                 logger.debug("%s: executed task: %s", taskid, ret.data["task"])
@@ -639,13 +655,13 @@ def job_thread(
             # Stop task if stop trigger condition met, save to pickle
             if (
                 task.stop_with_task_name is not None
-                and task.stop_with_task_name in thread.started_task_names
+                and task.stop_with_task_name in getattr(thread, "started_task_names")
             ):
                 logger.info("%s: task stop trigger met", taskid)
                 msg = dict(cmd="task_stop", params={**kwargs})
                 ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
                 if req.closed:
-                    thread.crashed = True
+                    setattr(thread, "crashed", True)
                     sys.exit()
                 elif ret.success and ret.data is not None:
                     logger.debug("%s: pickling received data", taskid)
@@ -661,7 +677,7 @@ def job_thread(
         msg = dict(cmd="task_data", params={**kwargs})
         ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
         if req.closed:
-            thread.crashed = True
+            setattr(thread, "crashed", True)
             sys.exit()
         elif ret.success and ret.data is not None:
             logger.debug("%s: pickling received data", taskid)
@@ -676,7 +692,7 @@ def job_thread(
     msg = dict(cmd="cmp_reset", params={**kwargs})
     ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
     if req.closed:
-        thread.crashed = True
+        setattr(thread, "crashed", True)
         sys.exit()
     elif not ret.success:
         logger.warning("%s: could not reset component %s", role, ret.msg)
@@ -778,8 +794,10 @@ def job_main_loop(
                 started_task_names.add(current_task.task_name)
         for t in threads.values():
             t.started_task_names.update(started_task_names)
-        crashed = [t.crashed for t in threads.values()]
-        joined = [t.is_alive() is False or t.crashed for t in threads.values()]
+        crashed = [getattr(t, "crashed") for t in threads.values()]
+        joined = [
+            t.is_alive() is False or getattr(t, "crashed") for t in threads.values()
+        ]
         if tN - tD > JOB_INFO_INTERVAL:
             logger.info("started task names are: %s", started_task_names)
             logger.info("joined threads are: %s", joined)

@@ -25,6 +25,7 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
     using the Component `role` as the group label.
     """
     logger = logging.getLogger(f"{__name__}.merge_netcdf")
+    assert job.jobpath is not None
     logger.debug("opening datasets in '%s'", job.jobpath)
     datasets = []
     for fn in Path(job.jobpath).glob("*.pkl"):
@@ -40,7 +41,9 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
         "tomato_Job": job.model_dump_json(),
     }
     dt.attrs = root_attrs
-    outpath = Path(job.snappath if snapshot else job.respath).resolve()
+    outstr = job.snappath if snapshot else job.respath
+    assert outstr is not None
+    outpath = Path(outstr).resolve()
     logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
     dt.to_netcdf(outpath, engine="h5netcdf")
     dt.close()

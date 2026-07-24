@@ -33,7 +33,7 @@ from packaging.version import Version
 
 import tomato.daemon.jobdb as jobdb
 from tomato.daemon.io import merge_netcdfs
-from tomato.models import Daemon, Job, Reply
+from tomato.models import Daemon, Job, Payload, Reply
 
 log = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ def submit(
         else:
             return Reply(success=False, msg="payload must be a yaml or a json file")
 
-    payload = to_payload(**pldict)
+    payload: Payload = to_payload(**pldict)
     maxver = Version(__latest_payload__)
     while hasattr(payload, "update"):
         temp = payload.update()

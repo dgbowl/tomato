@@ -1,7 +1,9 @@
-import zmq
-from tomato.models import Reply
-from typing import Any
 import logging
+from typing import Any, Optional
+
+import zmq
+
+from tomato.models import Reply
 
 REQ_TIMEOUT = 1000
 REQ_RETRIES = 3
@@ -14,7 +16,7 @@ def comm(
     context: zmq.Context,
     retries: int = REQ_RETRIES,
     timeout: int = REQ_TIMEOUT,
-    sender: str = None,
+    sender: Optional[str] = None,
 ) -> tuple[Reply, zmq.Socket]:
     if sender is None:
         logger = logging.getLogger(__name__)
