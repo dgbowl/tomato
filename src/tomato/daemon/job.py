@@ -684,7 +684,8 @@ def job_thread(
             ds: xr.Dataset = ret.data
             ds.attrs["tomato_Component"] = component.model_dump_json()
             data_to_pickle(ds, datapath, role=role)
-        thread.completed_tasks.append(task)
+        ct = getattr(thread, "completed_tasks").append(task)
+        setattr(thread, "completed_tasks", ct)
         setattr(thread, "current_task", None)
 
     # Reset component at the end of the job
@@ -793,7 +794,9 @@ def job_main_loop(
             if current_task is not None and current_task.task_name is not None:
                 started_task_names.add(current_task.task_name)
         for t in threads.values():
-            t.started_task_names.update(started_task_names)
+            stn = getattr(t, "started_task_names")
+            stn.update(started_task_names)
+            setattr(t, "started_task_names", stn)
         crashed = [getattr(t, "crashed") for t in threads.values()]
         joined = [
             t.is_alive() is False or getattr(t, "crashed") for t in threads.values()
