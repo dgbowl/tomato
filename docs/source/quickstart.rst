@@ -29,22 +29,49 @@ Where *appdir* is ``/home/kraus/.config/tomato/1.0a1/``. A custom *appdir* can b
 
 **tomato** program flowchart
 ````````````````````````````
-**tomato** currently contains two command line user-facing utilities/executables:
+**tomato** currently contains three command line user-facing utilities/executables:
 
-- :mod:`~tomato.tomato`, responsible for management of the daemon process, and
-- :mod:`~tomato.ketchup`, responsible for job submission and management.
+- :mod:`~tomato.tomato`, responsible for management of the daemon process,
+- :mod:`~tomato.ketchup`, responsible for job submission and management, and
+- :mod:`~tomato.passata`, providing an interface to the hardware via drivers and components.
 
-These two executables then internally spawn other processes, including the state daemon process ``tomato-daemon``, a ``tomato-job`` process for every running job, and a ``tomato-driver`` process for each driver type, managing all devices of a that type.
+These executables then internally spawn other processes, including the state daemon process ``tomato-daemon``, a ``tomato-job`` process for every running job, and a ``tomato-driver`` process for each driver type, managing all devices of a that type.
 
 .. mermaid::
 
   flowchart TB
       subgraph daemon[tomato-daemon]
-          cmd{{port:cmd}} ==> st[(state)]
-          st --> jm([job manager])
-          st --> dm([driver manager])
-          st <--> io[state io]
+          cmd{{port:cmd}} <==> cfg[(config)]
+          cfg --> jm([job manager])
+          cfg --> pm([pip manager])
+          cfg --> dm([driver manager])
+
       end
+
+      jm -.-> job
+
+      subgraph job[tomato-job]
+          mp([main loop]) --> tp>task process]
+      end
+
+      jm <-.-> jobdb[(job db\nsqlite)]
+      mp -.-> jobdb
+
+      jm <-.-> pipdb[(pip db\nsqlite)]
+      pm <-.-> pipdb
+      mp -.-> pipdb
+
+      dm <-.-> drvdb[(drv db\nsqlite)]
+      drvdb <-.-> dst
+
+      setf[settings file\ndevices file] ---> cfg
+
+      t>tomato] -.-> cmd
+      k>ketchup] -.-> cmd
+
+      dst -.-> driver
+      dm -..-> driver
+      tp -.-> dcmd
 
       subgraph driver[tomato-driver]
           dcmd{{port:cmd}} ==>  dst[(state)]
@@ -52,21 +79,12 @@ These two executables then internally spawn other processes, including the state
 
       dst o-.-o h1[hardware]
 
-      subgraph job[tomato-job]
-          mp([main loop]) --> tp>task process]
-      end
+      p>passata] -.-> cmd
+      p -.-> dcmd
 
-      cmd ==> db[(job db\nsqlite)]
-      jm -.-> db
-      mp -.-> db
+.. note::
 
-      t>tomato] -.-> cmd
-      k>ketchup] -.-> cmd
-
-      jm -.-> job
-      dst -.-> driver
-      dm -..-> driver
-      tp -.-> dcmd
+    Note that the :mod:`tomato.daemon` process is stateless, only responsible for reading of the configuration files and spawning the *job*, *driver* and *pipeline*--management threads. All configuration and state information that should be persistently stored (i.e. survive restart of the components) is stored in a :mod:`sqlite3` database.
 
 .. _concepts:
 
@@ -344,7 +362,3 @@ As of ``tomato-2.0``, the :obj:`task_params` specified in the *payload* are vali
 
 .. autopydantic_model:: dgbowl_schemas.tomato.payload.Task
   :no-index:
-
-.. |devfile| replace:: *devices file*
-
-.. _devfile: quickstart.html#devices-file

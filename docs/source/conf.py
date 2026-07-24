@@ -88,3 +88,13 @@ intersphinx_mapping = {
     "dgbowl_schemas": ("https://dgbowl.github.io/dgbowl-schemas/main", None),
     "xarray": ("https://docs.xarray.dev/en/stable", None),
 }
+
+rst_epilog = """
+.. |setfile| replace:: *settings file*
+
+.. _setfile: quickstart.html#settings-file
+
+.. |devfile| replace:: *devices file*
+
+.. _devfile: quickstart.html#devices-file
+"""
