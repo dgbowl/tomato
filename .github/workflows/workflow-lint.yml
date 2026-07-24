@@ -8,7 +8,10 @@ jobs:
    runs-on: ubuntu-latest
    steps:
      - uses: actions/checkout@v4
-     - name: Run ruff
-       uses: astral-sh/ruff-action@v3
+     - name: Run ruff check
+       uses: astral-sh/ruff-action@v4
+       with:
+         version: "<0.16"
+       run: ruff check
      - name: Run ruff format
        run: ruff format --check
