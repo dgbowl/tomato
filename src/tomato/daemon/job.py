@@ -329,7 +329,7 @@ def manager(port: int, timeout: int = 500):
     lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
     while getattr(thread, "do_run"):
         msg = dict(cmd="status", sender=f"{__name__}.manager")
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
             break
         elif ret.success is False or ret.data is None:
@@ -544,7 +544,7 @@ def job_thread(
                 "%s: polling component %s for task readiness", taskid, component.name
             )
             msg = dict(cmd="task_status", params={**kwargs})
-            ret, req = lpp.comm(req, msg, **lppargs)
+            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
             if ret.success and ret.data is not None and ret.data["can_submit"]:
                 break
             elif req.closed:
@@ -559,7 +559,7 @@ def job_thread(
         logger.info("%s: sending task to component %s", taskid, component.name)
         t0 = time.perf_counter()
         msg = dict(cmd="task_start", params={"task": task, **kwargs})
-        ret, req = lpp.comm(req, msg, **lppargs)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
             setattr(thread, "crashed", True)
             sys.exit()
@@ -568,7 +568,7 @@ def job_thread(
         while True:
             dt = time.perf_counter() - t0
             msg = dict(cmd="task_status", params={**kwargs})
-            ret, req = lpp.comm(req, msg, **lppargs)
+            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
             if req.closed:
                 setattr(thread, "crashed", True)
                 sys.exit()
@@ -617,7 +617,7 @@ def job_thread(
             if tN - tP > device.pollrate:
                 logger.debug("%s: polling task for data", taskid)
                 msg = dict(cmd="task_data", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
                 if req.closed:
                     setattr(thread, "crashed", True)
                     sys.exit()
@@ -631,7 +631,7 @@ def job_thread(
             # Poll for completion and correct task status
             logger.debug("%s: polling task for completion", taskid)
             msg = dict(cmd="task_status", params={**kwargs})
-            ret, req = lpp.comm(req, msg, **lppargs)
+            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
             if req.closed:
                 setattr(thread, "crashed", True)
                 sys.exit()
@@ -659,7 +659,7 @@ def job_thread(
             ):
                 logger.info("%s: task stop trigger met", taskid)
                 msg = dict(cmd="task_stop", params={**kwargs})
-                ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
                 if req.closed:
                     setattr(thread, "crashed", True)
                     sys.exit()
@@ -675,7 +675,7 @@ def job_thread(
         # Store final task data, housekeeping.
         logger.info("%s: task fetching final data", taskid)
         msg = dict(cmd="task_data", params={**kwargs})
-        ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
         if req.closed:
             setattr(thread, "crashed", True)
             sys.exit()
@@ -685,12 +685,12 @@ def job_thread(
             ds.attrs["tomato_Component"] = component.model_dump_json()
             data_to_pickle(ds, datapath, role=role)
         thread.completed_tasks.append(task)
-        thread.current_task = None
+        setattr(thread, "current_task", None)
 
     # Reset component at the end of the job
     logger.info("%s: all tasks done on component %s, resetting", role, component.name)
     msg = dict(cmd="cmp_reset", params={**kwargs})
-    ret, req = lpp.comm(req, msg, **lppargs)  # , timeout=5000)
+    ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
     if req.closed:
         setattr(thread, "crashed", True)
         sys.exit()
@@ -720,7 +720,7 @@ def job_main_loop(
     lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}", context=context)
 
     while True:
-        ret, req = lpp.comm(req, dict(cmd="status", sender=sender), **lppargs)
+        ret, req = lpp.comm(req, dict(cmd="status", sender=sender), **lppargs)  # ty: ignore[invalid-argument-type]
         if ret.success and ret.data is not None:
             daemon: Daemon = ret.data
             dbpath = daemon.settings["jobs"]["dbpath"]

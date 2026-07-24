@@ -326,7 +326,7 @@ def start(
     )
 
     kwargs = dict(port=port, timeout=max(timeout, 5000), context=context)
-    return status(**kwargs)
+    return status(**kwargs)  # ty: ignore[invalid-argument-type]
 
 
 def stop(
@@ -490,7 +490,7 @@ def reload(
         )
 
     logger.debug("status")
-    ret = status(**kwargs)
+    ret = status(**kwargs)  # ty: ignore[invalid-argument-type]
     if not ret.success:
         return ret
 

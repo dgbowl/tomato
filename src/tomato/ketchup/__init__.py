@@ -97,7 +97,7 @@ def submit(
     payload: Payload = to_payload(**pldict)
     maxver = Version(__latest_payload__)
     while hasattr(payload, "update"):
-        temp = payload.update()
+        temp: Payload = payload.update()  # ty: ignore[call-non-callable]
         if hasattr(temp, "version"):
             if Version(temp.version) > maxver:
                 break
@@ -121,7 +121,7 @@ def submit(
     dbpath = daemon.settings["jobs"]["dbpath"]
     dt = str(datetime.now(timezone.utc))
     params = dict(payload=payload, jobname=jobname, submitted_at=dt)
-    job = jobdb.insert_job(job=Job(id=0, **params), dbpath=dbpath)
+    job = jobdb.insert_job(job=Job(id=0, **params), dbpath=dbpath)  # ty: ignore[invalid-argument-type]
 
     msg = f"job submitted successfully with jobid {job.id}"
     if job.jobname is not None:

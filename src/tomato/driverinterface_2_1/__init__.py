@@ -108,7 +108,7 @@ class ModelInterface(metaclass=ABCMeta):
     @to_reply
     def cmp_register(
         self, address: str, channel: str, **kwargs: dict
-    ) -> tuple[bool, str, set]:
+    ) -> tuple[bool, str, set | None]:
         """
         Register a new device component in this driver.
 
@@ -496,7 +496,7 @@ class ModelDevice(metaclass=ABCMeta):
     task_list: queue.Queue
     """A :class:`~queue.Queue` used to pass :class:`Tasks` to the worker :class:`Thread`."""
 
-    running: bool
+    running: bool | Task
 
     def __init__(self, driver, key, **kwargs) -> None:
         self.driver = driver
@@ -549,7 +549,7 @@ class ModelDevice(metaclass=ABCMeta):
                         t_n = time.perf_counter()
                         if t_n - t_p > task.sampling_interval:
                             with self.datalock:
-                                self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)
+                                self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)  # ty: ignore[invalid-argument-type]
                             t_p += task.sampling_interval
                         if t_n - t_0 > task.max_duration:
                             setattr(thread, "do_run_task", False)

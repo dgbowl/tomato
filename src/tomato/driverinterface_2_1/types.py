@@ -1,6 +1,7 @@
-from typing import TypeAlias, TypeVar
+from typing import TypeAlias, Union
+
 import pint
 
 Type: TypeAlias = type
-Val = TypeVar("Val", str, int, float, pint.Quantity)
+Val = Union[str, int, float, pint.Quantity]
 Key: TypeAlias = tuple[str, str]
