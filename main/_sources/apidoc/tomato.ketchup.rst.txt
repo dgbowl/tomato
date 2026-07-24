@@ -1,5 +1,5 @@
-tomato.ketchup package
-======================
+**tomato.ketchup**: CLI and API for the tomato job queue
+========================================================
 
 .. automodule:: tomato.ketchup
    :members:

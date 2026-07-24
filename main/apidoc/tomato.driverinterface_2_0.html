@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.driverinterface_2_0 package &mdash; tomato 2.2.post1 documentation</title>
+  <title>tomato.DriverInterface: version 2.0 &mdash; tomato 2.2.post2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,14 +16,14 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ee150b31"></script>
+        <script src="../_static/documentation_options.js?v=d9ed815b"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="tomato.driverinterface_2_1 package" href="tomato.driverinterface_2_1.html" />
-    <link rel="prev" title="tomato.daemon package" href="tomato.daemon.html" /> 
+    <link rel="next" title="tomato.DriverInterface: version 2.1" href="tomato.driverinterface_2_1.html" />
+    <link rel="prev" title="tomato.daemon: Functions and modules comprising the tomato daemon" href="tomato.daemon.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2.post1
+                2.2.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -75,9 +75,8 @@
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_ketchup"><code class="docutils literal notranslate"><span class="pre">run_ketchup()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_passata"><code class="docutils literal notranslate"><span class="pre">run_passata()</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.driverinterface_2_0 package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#driverinterface-2-0"><strong>DriverInterface-2.0</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html"><strong>tomato.daemon</strong>: Functions and modules comprising the tomato daemon</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><strong>tomato.DriverInterface</strong>: version 2.0</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.driverinterface_2_0.in_devmap"><code class="docutils literal notranslate"><span class="pre">in_devmap()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.driverinterface_2_0.to_reply"><code class="docutils literal notranslate"><span class="pre">to_reply()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.driverinterface_2_0.log_errors"><code class="docutils literal notranslate"><span class="pre">log_errors()</span></code></a></li>
@@ -148,10 +147,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_1.html">tomato.driverinterface_2_1 package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.passata.html">tomato.passata package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_1.html"><strong>tomato.DriverInterface</strong>: version 2.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html"><strong>tomato.ketchup</strong>: CLI and API for the tomato job queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.passata.html"><strong>tomato.passata</strong>: CLI and API for tomato drivers and components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html"><strong>tomato.tomato</strong>: CLI and API for the tomato daemon</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#module-tomato.drivers">Submodules</a></li>
@@ -174,7 +173,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="tomato.html">tomato package</a></li>
-      <li class="breadcrumb-item active">tomato.driverinterface_2_0 package</li>
+      <li class="breadcrumb-item active"><strong>tomato.DriverInterface</strong>: version 2.0</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/apidoc/tomato.driverinterface_2_0.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -185,11 +184,8 @@
            <div itemprop="articleBody">
              
   <section id="module-tomato.driverinterface_2_0">
-<span id="tomato-driverinterface-2-0-package"></span><h1>tomato.driverinterface_2_0 package<a class="headerlink" href="#module-tomato.driverinterface_2_0" title="Link to this heading"></a></h1>
-<section id="driverinterface-2-0">
-<h2><strong>DriverInterface-2.0</strong><a class="headerlink" href="#driverinterface-2-0" title="Link to this heading"></a></h2>
+<span id="tomato-driverinterface-version-2-0"></span><h1><strong>tomato.DriverInterface</strong>: version 2.0<a class="headerlink" href="#module-tomato.driverinterface_2_0" title="Link to this heading"></a></h1>
 <p><em>Code author: Peter Kraus</em></p>
-</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.in_devmap">
 <span class="sig-prename descclassname"><span class="pre">tomato.driverinterface_2_0.</span></span><span class="sig-name descname"><span class="pre">in_devmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.driverinterface_2_0.in_devmap" title="Link to this definition"></a></dt>
@@ -517,20 +513,20 @@ identified by <code class="xref py py-obj docutils literal notranslate"><span cl
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.status">
-<span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.status" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.status" title="Link to this definition"></a></dt>
 <dd><p>Returns the driver status. Currently that is the names of the components in
 the <cite>devmap</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.quit">
-<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.quit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.quit" title="Link to this definition"></a></dt>
 <dd><p>Passthrough to <a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.reset" title="tomato.driverinterface_2_0.ModelInterface.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a> for foward compatibility.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_2_0.ModelInterface.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.reset" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.driverinterface_2_0.ModelInterface.reset" title="Link to this definition"></a></dt>
 <dd><p>Resets the driver.</p>
 <p>Called when the driver process is quitting. Instructs all remaining tasks to
 stop. Warns when devices linger. Passes through to <a class="reference internal" href="#tomato.driverinterface_2_0.ModelInterface.cmp_reset" title="tomato.driverinterface_2_0.ModelInterface.cmp_reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_reset()</span></code></a>. This is
@@ -723,8 +719,8 @@ clearing the cache.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tomato.daemon.html" class="btn btn-neutral float-left" title="tomato.daemon package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="tomato.driverinterface_2_1.html" class="btn btn-neutral float-right" title="tomato.driverinterface_2_1 package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tomato.daemon.html" class="btn btn-neutral float-left" title="tomato.daemon: Functions and modules comprising the tomato daemon" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tomato.driverinterface_2_1.html" class="btn btn-neutral float-right" title="tomato.DriverInterface: version 2.1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
@@ -746,7 +742,7 @@ clearing the cache.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2.post1
+      v: 2.2.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

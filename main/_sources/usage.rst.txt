@@ -216,11 +216,3 @@ While the *job* is running, access to an up-to-date snapshot of the data is prov
     >>> ketchup snapshot <jobid>
 
 This will create an up-to-date ``snapshot.<jobid>.nc`` file in the current working dir. The files are overwritten on subsequent invocations of ``ketchup snapshot``. An automated, periodic snapshotting stored in a custom location can be further configured within the *payload* of the *job*.
-
-.. |setfile| replace:: *settings file*
-
-.. _setfile: quickstart.html#settings-file
-
-.. |devfile| replace:: *devices file*
-
-.. _devfile: quickstart.html#devices-file

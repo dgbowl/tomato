@@ -1,5 +1,5 @@
-tomato.driverinterface\_2\_1 package
-====================================
+**tomato.DriverInterface**: version 2.1
+=======================================
 
 .. automodule:: tomato.driverinterface_2_1
    :members:

@@ -1,5 +1,5 @@
-tomato.passata package
-======================
+**tomato.passata**: CLI and API for tomato drivers and components
+=================================================================
 
 .. automodule:: tomato.passata
    :members:

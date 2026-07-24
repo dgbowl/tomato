@@ -1,5 +1,5 @@
-tomato.tomato package
-=====================
+**tomato.tomato**: CLI and API for the tomato daemon
+====================================================
 
 .. automodule:: tomato.tomato
    :members:

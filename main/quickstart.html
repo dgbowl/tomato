@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 2.2.post1 documentation</title>
+  <title>Quick start guide &mdash; tomato 2.2.post2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=ee150b31"></script>
+        <script src="_static/documentation_options.js?v=d9ed815b"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
@@ -41,7 +41,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2.post1
+                2.2.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -66,7 +66,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#devices-file">Devices file</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1"><strong>devices</strong> section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><strong>devices</strong> section</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pipelines-section"><strong>pipelines</strong> section</a></li>
 </ul>
 </li>
@@ -137,20 +137,47 @@
 </section>
 <section id="tomato-program-flowchart">
 <h2><strong>tomato</strong> program flowchart<a class="headerlink" href="#tomato-program-flowchart" title="Link to this heading"></a></h2>
-<p><strong>tomato</strong> currently contains two command line user-facing utilities/executables:</p>
+<p><strong>tomato</strong> currently contains three command line user-facing utilities/executables:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>, responsible for management of the daemon process, and</p></li>
-<li><p><a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>, responsible for job submission and management.</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>, responsible for management of the daemon process,</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>, responsible for job submission and management, and</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.passata.html#module-tomato.passata" title="tomato.passata"><code class="xref py py-mod docutils literal notranslate"><span class="pre">passata</span></code></a>, providing an interface to the hardware via drivers and components.</p></li>
 </ul>
-<p>These two executables then internally spawn other processes, including the state daemon process <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process for every running job, and a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process for each driver type, managing all devices of a that type.</p>
+<p>These executables then internally spawn other processes, including the state daemon process <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process for every running job, and a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process for each driver type, managing all devices of a that type.</p>
 <div class="mermaid">
             flowchart TB
     subgraph daemon[tomato-daemon]
-        cmd{{port:cmd}} ==&gt; st[(state)]
-        st --&gt; jm([job manager])
-        st --&gt; dm([driver manager])
-        st &lt;--&gt; io[state io]
+        cmd{{port:cmd}} &lt;==&gt; cfg[(config)]
+        cfg --&gt; jm([job manager])
+        cfg --&gt; pm([pip manager])
+        cfg --&gt; dm([driver manager])
+
     end
+
+    jm -.-&gt; job
+
+    subgraph job[tomato-job]
+        mp([main loop]) --&gt; tp&gt;task process]
+    end
+
+    jm &lt;-.-&gt; jobdb[(job db\nsqlite)]
+    mp -.-&gt; jobdb
+
+    jm &lt;-.-&gt; pipdb[(pip db\nsqlite)]
+    pm &lt;-.-&gt; pipdb
+    mp -.-&gt; pipdb
+
+    dm &lt;-.-&gt; drvdb[(drv db\nsqlite)]
+    drvdb &lt;-.-&gt; dst
+
+    setf[settings file\ndevices file] ---&gt; cfg
+
+    t&gt;tomato] -.-&gt; cmd
+    k&gt;ketchup] -.-&gt; cmd
+
+    dst -.-&gt; driver
+    dm -..-&gt; driver
+    tp -.-&gt; dcmd
 
     subgraph driver[tomato-driver]
         dcmd{{port:cmd}} ==&gt;  dst[(state)]
@@ -158,22 +185,13 @@
 
     dst o-.-o h1[hardware]
 
-    subgraph job[tomato-job]
-        mp([main loop]) --&gt; tp&gt;task process]
-    end
-
-    cmd ==&gt; db[(job db\nsqlite)]
-    jm -.-&gt; db
-    mp -.-&gt; db
-
-    t&gt;tomato] -.-&gt; cmd
-    k&gt;ketchup] -.-&gt; cmd
-
-    jm -.-&gt; job
-    dst -.-&gt; driver
-    dm -..-&gt; driver
-    tp -.-&gt; dcmd
-        </div></section>
+    p&gt;passata] -.-&gt; cmd
+    p -.-&gt; dcmd
+        </div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> process is stateless, only responsible for reading of the configuration files and spawning the <em>job</em>, <em>driver</em> and <em>pipeline</em>–management threads. All configuration and state information that should be persistently stored (i.e. survive restart of the components) is stored in a <code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite3</span></code> database.</p>
+</div>
+</section>
 <section id="tomato-concepts-flowchart">
 <span id="concepts"></span><h2><strong>tomato</strong> concepts flowchart<a class="headerlink" href="#tomato-concepts-flowchart" title="Link to this heading"></a></h2>
 <p>The following concepts are used in <strong>tomato</strong>:</p>
@@ -245,7 +263,7 @@
     pip3[pipeline 3] -.-&gt; c3
         </div></section>
 <section id="settings-file">
-<h2>Settings file<a class="headerlink" href="#settings-file" title="Link to this heading"></a></h2>
+<span id="id1"></span><h2>Settings file<a class="headerlink" href="#settings-file" title="Link to this heading"></a></h2>
 <p>The <em>settings file</em> contains the basic information required to start the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>. The filename is hard-coded to be a <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> file, which has to be located in the <em>appdir</em>. The default file generated by <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> looks similar to the below example:</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="n">datadir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.local/share/tomato/1.0a1&#39;</span>
 <span class="linenos"> 2</span><span class="w"> </span><span class="n">logdir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;/home/kraus/.cache/tomato/1.0a1/log&#39;</span>
@@ -310,11 +328,11 @@
 </section>
 </section>
 <section id="devices-file">
-<h2>Devices file<a class="headerlink" href="#devices-file" title="Link to this heading"></a></h2>
+<span id="id2"></span><h2>Devices file<a class="headerlink" href="#devices-file" title="Link to this heading"></a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">yaml</span></code>-formatted file contains information about each <em>device</em>, corresponding to an individual piece of hardware managed by <strong>tomato</strong>, as well as information about the organisation of the individually-addressable <em>components</em> of those <em>devices</em> into <em>pipelines</em>.</p>
 <p>When the <em>devices file</em> is not present, the default file shipped with <strong>tomato</strong> will be used instead:</p>
-<section id="id1">
-<h3><strong>devices</strong> section<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<section id="id3">
+<h3><strong>devices</strong> section<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">devices</span></code> section of the default <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a> is shown below:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
 <span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
@@ -1053,7 +1071,7 @@ will be stopped</p>
 
 <dl class="py method pydantic_validator">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a></dt>
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126rc1.dev2)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1088,7 +1106,7 @@ will be stopped</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2.post1
+      v: 2.2.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

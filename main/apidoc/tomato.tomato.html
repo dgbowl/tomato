@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.tomato package &mdash; tomato 2.2.post1 documentation</title>
+  <title>tomato.tomato: CLI and API for the tomato daemon &mdash; tomato 2.2.post2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,13 +16,13 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ee150b31"></script>
+        <script src="../_static/documentation_options.js?v=d9ed815b"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="tomato.passata package" href="tomato.passata.html" /> 
+    <link rel="prev" title="tomato.passata: CLI and API for tomato drivers and components" href="tomato.passata.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,7 +38,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2.post1
+                2.2.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -74,13 +74,12 @@
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_ketchup"><code class="docutils literal notranslate"><span class="pre">run_ketchup()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_passata"><code class="docutils literal notranslate"><span class="pre">run_passata()</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html">tomato.driverinterface_2_0 package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_1.html">tomato.driverinterface_2_1 package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html">tomato.ketchup package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.passata.html">tomato.passata package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.tomato package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#tomato-tomato-command-line-interface-to-the-tomato-daemon"><strong>tomato.tomato</strong>: command line interface to the tomato daemon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html"><strong>tomato.daemon</strong>: Functions and modules comprising the tomato daemon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html"><strong>tomato.DriverInterface</strong>: version 2.0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_1.html"><strong>tomato.DriverInterface</strong>: version 2.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html"><strong>tomato.ketchup</strong>: CLI and API for the tomato job queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.passata.html"><strong>tomato.passata</strong>: CLI and API for tomato drivers and components</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><strong>tomato.tomato</strong>: CLI and API for the tomato daemon</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.tomato.set_loglevel"><code class="docutils literal notranslate"><span class="pre">set_loglevel()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.tomato.make_padded_lines"><code class="docutils literal notranslate"><span class="pre">make_padded_lines()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.tomato.format_msg"><code class="docutils literal notranslate"><span class="pre">format_msg()</span></code></a></li>
@@ -116,7 +115,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="tomato.html">tomato package</a></li>
-      <li class="breadcrumb-item active">tomato.tomato package</li>
+      <li class="breadcrumb-item active"><strong>tomato.tomato</strong>: CLI and API for the tomato daemon</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/apidoc/tomato.tomato.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -127,9 +126,7 @@
            <div itemprop="articleBody">
              
   <section id="module-tomato.tomato">
-<span id="tomato-tomato-package"></span><h1>tomato.tomato package<a class="headerlink" href="#module-tomato.tomato" title="Link to this heading"></a></h1>
-<section id="tomato-tomato-command-line-interface-to-the-tomato-daemon">
-<h2><strong>tomato.tomato</strong>: command line interface to the tomato daemon<a class="headerlink" href="#tomato-tomato-command-line-interface-to-the-tomato-daemon" title="Link to this heading"></a></h2>
+<span id="tomato-tomato-cli-and-api-for-the-tomato-daemon"></span><h1><strong>tomato.tomato</strong>: CLI and API for the tomato daemon<a class="headerlink" href="#module-tomato.tomato" title="Link to this heading"></a></h1>
 <p><em>Code author: Peter Kraus</em></p>
 <p>Module of functions to interact with tomato. Includes basic tomato daemon functions:</p>
 <ul class="simple">
@@ -145,7 +142,6 @@
 <li><p><a class="reference internal" href="#tomato.tomato.pipeline_eject" title="tomato.tomato.pipeline_eject"><code class="xref py py-func docutils literal notranslate"><span class="pre">pipeline_eject()</span></code></a> to eject any sample from a pipeline</p></li>
 <li><p><a class="reference internal" href="#tomato.tomato.pipeline_ready" title="tomato.tomato.pipeline_ready"><code class="xref py py-func docutils literal notranslate"><span class="pre">pipeline_ready()</span></code></a> to mark a pipeline as ready</p></li>
 </ul>
-</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.set_loglevel">
 <span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">set_loglevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tomato.tomato.set_loglevel" title="Link to this definition"></a></dt>
@@ -163,7 +159,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.status">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stgrp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'tomato'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaml</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.status" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stgrp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'tomato'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaml</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.status" title="Link to this definition"></a></dt>
 <dd><p>Get status of the tomato daemon.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Status with a running daemon</span>
@@ -176,27 +172,34 @@
 <span class="go">Failure: tomato not running on port 1234</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Status of a running daemon with data</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Status of a running daemon with yaml data</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tomato</span> <span class="n">status</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
-<span class="go">  appdir: /home/kraus/.config/tomato/1.0rc2.dev2</span>
-<span class="go">  cmps:</span>
-<span class="go">    [...]</span>
-<span class="go">  devs:</span>
-<span class="go">    [...]</span>
-<span class="go">  drvs:</span>
-<span class="go">    [...]</span>
-<span class="go">  jobs:</span>
-<span class="go">    [...]</span>
-<span class="go">  logdir: /home/kraus/.cache/tomato/1.0rc2.dev2/log</span>
-<span class="go">  nextjob: 1</span>
-<span class="go">  pips:</span>
-<span class="go">    [...]</span>
-<span class="go">  port: 1234</span>
-<span class="go">  settings:</span>
-<span class="go">    [...]</span>
-<span class="go">  status: running</span>
-<span class="go">  verbosity: 20</span>
+<span class="go">    appdir: .config/tomato/2.2rc3</span>
+<span class="go">    devicefile:</span>
+<span class="go">        components:</span>
+<span class="go">            [...]</span>
+<span class="go">        devices:</span>
+<span class="go">            [...]</span>
+<span class="go">        drivers:</span>
+<span class="go">            [...]</span>
+<span class="go">        pipelines:</span>
+<span class="go">            [...]</span>
+<span class="go">        filename: .config/tomato/2.2rc3/devices.yml</span>
+<span class="go">    port: 1234</span>
+<span class="go">    settings:</span>
+<span class="go">        datadir: .config/tomato/2.2rc3/</span>
+<span class="go">        devices:</span>
+<span class="go">            config: .config/tomato/2.2rc3/devices.yml</span>
+<span class="go">        drivers:</span>
+<span class="go">            [...]</span>
+<span class="go">        jobs:</span>
+<span class="go">            dbpath: .config/tomato/2.2rc3/Jobs/dbpath.sqlite</span>
+<span class="go">            storage: .config/tomato/2.2rc3/Jobs/</span>
+<span class="go">        logdir: .config/tomato/2.2rc3/</span>
+<span class="go">        repositories: {}</span>
+<span class="go">    status: running</span>
+<span class="go">    verbosity: 20</span>
 <span class="go">msg: tomato running on port 1234</span>
 <span class="go">success: true</span>
 </pre></div>
@@ -210,7 +213,7 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Status of all configured drivers</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tomato</span> <span class="n">status</span> <span class="n">drivers</span>
 <span class="go">Success: tomato running on port 1234 with the following drivers:</span>
-<span class="go">     name:example_counter   port:34747      pid:192318</span>
+<span class="go">     name:example_counter   port:34747  pid:192318  version: 2.1    heartbeat: 4.4 s</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Status of all configured devices</span>
@@ -222,14 +225,14 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Status of all configured components:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tomato</span> <span class="n">status</span> <span class="n">components</span>
 <span class="go">Success: tomato running on port 1234 with the following components:</span>
-<span class="go">     name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      role:counter</span>
+<span class="go">     name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      capabilities:{&#39;random&#39;, &#39;count&#39;}</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.start">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.start" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.start" title="Link to this definition"></a></dt>
 <dd><p>Start the tomato daemon.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Start tomato</span>
@@ -251,7 +254,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.stop">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.stop" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.stop" title="Link to this definition"></a></dt>
 <dd><p>Stop a running tomato daemon.</p>
 <p>Will not stop the daemon if any jobs are running. Will create a state snapshot.</p>
 <p class="rubric">Examples</p>
@@ -274,7 +277,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.init">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datadir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.init" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datadir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.init" title="Link to this definition"></a></dt>
 <dd><p>Create a default settings.toml file.</p>
 <p>Will overwrite any existing settings.toml file.</p>
 <p class="rubric">Examples</p>
@@ -286,7 +289,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.reload">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">reload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.reload" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">reload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.reload" title="Link to this definition"></a></dt>
 <dd><p>Reload settings.toml and devices.yaml files and reconfigure tomato daemon.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Reload with compatible changes</span>
@@ -298,7 +301,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.pipeline_load">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.pipeline_load" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.pipeline_load" title="Link to this definition"></a></dt>
 <dd><p>Load a sample into a pipeline. Usage:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>pipeline<span class="w"> </span>load<span class="w"> </span>&lt;pipeline&gt;<span class="w"> </span>&lt;sampleid&gt;
 </pre></div>
@@ -307,7 +310,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.pipeline_eject">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_eject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.pipeline_eject" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_eject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.pipeline_eject" title="Link to this definition"></a></dt>
 <dd><p>Eject any sample present in a pipeline. Usage:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>pipeline<span class="w"> </span>eject<span class="w"> </span>&lt;pipeline&gt;
 </pre></div>
@@ -316,9 +319,9 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.tomato.pipeline_ready">
-<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.tomato.pipeline_ready" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.tomato.</span></span><span class="sig-name descname"><span class="pre">pipeline_ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.tomato.pipeline_ready" title="Link to this definition"></a></dt>
 <dd><p>Mark pipeline as ready. Usage:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pipeline<span class="w"> </span>ready<span class="w"> </span>&lt;pipeline&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tomato<span class="w"> </span>pipeline<span class="w"> </span>ready<span class="w"> </span>&lt;pipeline&gt;
 </pre></div>
 </div>
 </dd></dl>
@@ -329,7 +332,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tomato.passata.html" class="btn btn-neutral float-left" title="tomato.passata package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tomato.passata.html" class="btn btn-neutral float-left" title="tomato.passata: CLI and API for tomato drivers and components" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
@@ -351,7 +354,7 @@
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2.post1
+      v: 2.2.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

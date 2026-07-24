@@ -1,5 +1,5 @@
-tomato.daemon package
-=====================
+**tomato.daemon**: Functions and modules comprising the tomato daemon
+=====================================================================
 
 .. automodule:: tomato.daemon
    :members:
@@ -22,7 +22,19 @@ Submodules
    :show-inheritance:
 
 
+.. automodule:: tomato.daemon.db
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 .. automodule:: tomato.daemon.driver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.drvdb
    :members:
    :undoc-members:
    :show-inheritance:
@@ -47,6 +59,18 @@ Submodules
 
 
 .. automodule:: tomato.daemon.lpp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.pip
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+.. automodule:: tomato.daemon.pipdb
    :members:
    :undoc-members:
    :show-inheritance:

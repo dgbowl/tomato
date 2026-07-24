@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.ketchup package &mdash; tomato 2.2.post1 documentation</title>
+  <title>tomato.ketchup: CLI and API for the tomato job queue &mdash; tomato 2.2.post2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,14 +16,14 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=ee150b31"></script>
+        <script src="../_static/documentation_options.js?v=d9ed815b"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="tomato.passata package" href="tomato.passata.html" />
-    <link rel="prev" title="tomato.driverinterface_2_1 package" href="tomato.driverinterface_2_1.html" /> 
+    <link rel="next" title="tomato.passata: CLI and API for tomato drivers and components" href="tomato.passata.html" />
+    <link rel="prev" title="tomato.DriverInterface: version 2.1" href="tomato.driverinterface_2_1.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                2.2.post1
+                2.2.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -75,11 +75,10 @@
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_ketchup"><code class="docutils literal notranslate"><span class="pre">run_ketchup()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#tomato.run_passata"><code class="docutils literal notranslate"><span class="pre">run_passata()</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="tomato.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html">tomato.daemon package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html">tomato.driverinterface_2_0 package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_1.html">tomato.driverinterface_2_1 package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">tomato.ketchup package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#tomato-ketchup-command-line-interface-to-the-tomato-job-queue"><strong>tomato.ketchup</strong>: command line interface to the tomato job queue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html"><strong>tomato.daemon</strong>: Functions and modules comprising the tomato daemon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_0.html"><strong>tomato.DriverInterface</strong>: version 2.0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_1.html"><strong>tomato.DriverInterface</strong>: version 2.1</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><strong>tomato.ketchup</strong>: CLI and API for the tomato job queue</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.ketchup.submit"><code class="docutils literal notranslate"><span class="pre">submit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.ketchup.status"><code class="docutils literal notranslate"><span class="pre">status()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.ketchup.cancel"><code class="docutils literal notranslate"><span class="pre">cancel()</span></code></a></li>
@@ -87,8 +86,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.ketchup.search"><code class="docutils literal notranslate"><span class="pre">search()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.passata.html">tomato.passata package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html">tomato.tomato package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.passata.html"><strong>tomato.passata</strong>: CLI and API for tomato drivers and components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html"><strong>tomato.tomato</strong>: CLI and API for the tomato daemon</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="tomato.html#module-tomato.drivers">Submodules</a></li>
@@ -111,7 +110,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="tomato.html">tomato package</a></li>
-      <li class="breadcrumb-item active">tomato.ketchup package</li>
+      <li class="breadcrumb-item active"><strong>tomato.ketchup</strong>: CLI and API for the tomato job queue</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/apidoc/tomato.ketchup.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -122,12 +121,9 @@
            <div itemprop="articleBody">
              
   <section id="module-tomato.ketchup">
-<span id="tomato-ketchup-package"></span><h1>tomato.ketchup package<a class="headerlink" href="#module-tomato.ketchup" title="Link to this heading"></a></h1>
-<section id="tomato-ketchup-command-line-interface-to-the-tomato-job-queue">
-<h2><strong>tomato.ketchup</strong>: command line interface to the tomato job queue<a class="headerlink" href="#tomato-ketchup-command-line-interface-to-the-tomato-job-queue" title="Link to this heading"></a></h2>
+<span id="tomato-ketchup-cli-and-api-for-the-tomato-job-queue"></span><h1><strong>tomato.ketchup</strong>: CLI and API for the tomato job queue<a class="headerlink" href="#module-tomato.ketchup" title="Link to this heading"></a></h1>
 <p><em>Code author: Peter Kraus</em></p>
-<p>Module of functions to manage the job queue of <a class="reference internal" href="tomato.html#module-tomato" title="tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>. Includes job management
-functions:</p>
+<p>Module of functions to manage the job queue of <a class="reference internal" href="tomato.html#module-tomato" title="tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>. Includes job management functions:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#tomato.ketchup.submit" title="tomato.ketchup.submit"><code class="xref py py-func docutils literal notranslate"><span class="pre">submit()</span></code></a> to submit a <em>job</em> to <em>queue</em></p></li>
 <li><p><a class="reference internal" href="#tomato.ketchup.status" title="tomato.ketchup.status"><code class="xref py py-func docutils literal notranslate"><span class="pre">status()</span></code></a> to query the status of tomato’s <em>queue</em>, or a <em>job</em></p></li>
@@ -137,15 +133,11 @@ functions:</p>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This module should interact with the job sqlite database only via the <code class="docutils literal notranslate"><span class="pre">tomato.daemon.cmd</span></code>
-interface functions <code class="docutils literal notranslate"><span class="pre">set_job()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_jobs()</span></code>, <strong>not via the ``jobdb`` module</strong>.
-This is necessary to ensure users that don’t have write access to the job database can
-still submit/manage their jobs.</p>
+<p>This module interacts with the job sqlite database directly. This means that users submitting jobs to tomato must have write access to the job database file.</p>
 </div>
-</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.submit">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Daemon</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.ketchup.submit" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.ketchup.submit" title="Link to this definition"></a></dt>
 <dd><p>Job submission function.</p>
 <p>Attempts to open the <code class="docutils literal notranslate"><span class="pre">yaml/json</span></code> file specified in the <code class="docutils literal notranslate"><span class="pre">payload</span></code> argument,
 and submit it to tomato’s queue.</p>
@@ -164,13 +156,12 @@ and submit it to tomato’s queue.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job with yaml output:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="n">counter_15_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
-<span class="go">    completed_at: null</span>
-<span class="go">    launched_at: null</span>
-<span class="go">    connected_at: null</span>
-<span class="go">    id: 1</span>
-<span class="go">    [...]</span>
-<span class="go">    status: q</span>
-<span class="go">    submitted_at: &#39;2024-11-17 19:39:16.972593+00:00&#39;</span>
+<span class="go">  completed_at: null</span>
+<span class="go">  connected_at: null</span>
+<span class="go">  id: 1</span>
+<span class="go">  [...]</span>
+<span class="go">  status: q</span>
+<span class="go">  submitted_at: &#39;2024-11-17 19:39:16.972593+00:00&#39;</span>
 <span class="go">msg: job submitted successfully with jobid 1</span>
 <span class="go">success: true</span>
 </pre></div>
@@ -179,7 +170,7 @@ and submit it to tomato’s queue.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.status">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.ketchup.status" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.ketchup.status" title="Link to this definition"></a></dt>
 <dd><p>Job status query function.</p>
 <p>Reply contains information about all matched jobs.</p>
 <div class="admonition note">
@@ -207,13 +198,12 @@ and submit it to tomato’s queue.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get a status of a job with yaml output</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
-<span class="go">  - completed_at: null</span>
-<span class="go">    launched_at: null</span>
-<span class="go">    connected_at: null</span>
-<span class="go">    id: 1</span>
-<span class="go">    [...]</span>
-<span class="go">    status: qw</span>
-<span class="go">    submitted_at: &#39;2024-11-17 17:53:46.133355+00:00&#39;</span>
+<span class="go">- completed_at: null</span>
+<span class="go">  connected_at: null</span>
+<span class="go">  id: 1</span>
+<span class="go">  [...]</span>
+<span class="go">  status: qw</span>
+<span class="go">  submitted_at: &#39;2024-11-17 17:53:46.133355+00:00&#39;</span>
 <span class="go">msg: found 1 job with status [&#39;qw&#39;]</span>
 <span class="go">success: true</span>
 </pre></div>
@@ -222,7 +212,7 @@ and submit it to tomato’s queue.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.cancel">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.ketchup.cancel" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.ketchup.cancel" title="Link to this definition"></a></dt>
 <dd><p>Job cancellation function.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -239,13 +229,12 @@ job to <code class="docutils literal notranslate"><span class="pre">rd</span></c
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cancel a job with yaml output:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">cancel</span> <span class="mi">2</span> <span class="o">-</span><span class="n">y</span>
 <span class="go">data:</span>
-<span class="go">  - completed_at: null</span>
-<span class="go">    launched_at: null</span>
-<span class="go">    connected_at: null</span>
-<span class="go">    id: 2</span>
-<span class="go">    [...]</span>
-<span class="go">    status: cd</span>
-<span class="go">    submitted_at: &#39;2024-03-03 15:23:50.702504+00:00&#39;</span>
+<span class="go">- completed_at: null</span>
+<span class="go">  connected_at: null</span>
+<span class="go">  id: 2</span>
+<span class="go">  [...]</span>
+<span class="go">  status: cd</span>
+<span class="go">  submitted_at: &#39;2024-03-03 15:23:50.702504+00:00&#39;</span>
 <span class="go">msg: job [2] cancelled successfully</span>
 <span class="go">success: true</span>
 </pre></div>
@@ -254,7 +243,7 @@ job to <code class="docutils literal notranslate"><span class="pre">rd</span></c
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.snapshot">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.ketchup.snapshot" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.ketchup.snapshot" title="Link to this definition"></a></dt>
 <dd><p>Create a snapshot of job data.</p>
 <p>Requests an up-to-date snapshot of the data of the job identified by <code class="docutils literal notranslate"><span class="pre">jobid</span></code>.
 Checks whether the job is running, raises a warning if job has been finished.</p>
@@ -264,11 +253,18 @@ Checks whether the job is running, raises a warning if job has been finished.</p
 <span class="go">Success: snapshot for job [3] created successfully</span>
 </pre></div>
 </div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With yaml output:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">snapshot</span> <span class="mi">1</span> <span class="o">-</span><span class="n">y</span>
+<span class="go">data: null</span>
+<span class="go">msg: snapshot for job [1] created successfully</span>
+<span class="go">success: true</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tomato.ketchup.search">
-<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Reply</span></span></span><a class="headerlink" href="#tomato.ketchup.search" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">tomato.ketchup.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daemon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tomato.html#tomato.models.Daemon" title="tomato.models.Daemon"><span class="pre">Daemon</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tomato.html#tomato.models.Reply" title="tomato.models.Reply"><span class="pre">Reply</span></a></span></span><a class="headerlink" href="#tomato.ketchup.search" title="Link to this definition"></a></dt>
 <dd><p>Search the queue for a job that matches a given jobname.</p>
 <p>Searches the queue for a job that matches the <code class="docutils literal notranslate"><span class="pre">jobname</span></code>, returns the
 job status and <code class="docutils literal notranslate"><span class="pre">jobid</span></code>.</p>
@@ -291,8 +287,8 @@ job status and <code class="docutils literal notranslate"><span class="pre">jobi
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tomato.driverinterface_2_1.html" class="btn btn-neutral float-left" title="tomato.driverinterface_2_1 package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="tomato.passata.html" class="btn btn-neutral float-right" title="tomato.passata package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tomato.driverinterface_2_1.html" class="btn btn-neutral float-left" title="tomato.DriverInterface: version 2.1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tomato.passata.html" class="btn btn-neutral float-right" title="tomato.passata: CLI and API for tomato drivers and components" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
@@ -314,7 +310,7 @@ job status and <code class="docutils literal notranslate"><span class="pre">jobi
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 2.2.post1
+      v: 2.2.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
