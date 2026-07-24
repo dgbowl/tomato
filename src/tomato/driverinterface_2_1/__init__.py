@@ -1,10 +1,6 @@
 """
-**DriverInterface-2.1**
------------------------
 .. codeauthor::
     Peter Kraus
-
-
 """
 
 import atexit

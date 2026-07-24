@@ -8,16 +8,28 @@
 import logging
 import pickle
 from pathlib import Path
-from typing import Any, Literal, Optional, Sequence, Union
+from typing import Annotated, Any, Literal, Optional, Sequence, Union
 
 import toml
 import yaml
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Payload, Task
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, PlainSerializer, field_validator, model_validator
 from typing_extensions import Self
 
-__all__ = ["Task"]
+__all__ = [
+    "Task",
+    "PipState",
+    "DrvState",
+    "Job",
+    "Daemon",
+    "Reply",
+    "Pipeline",
+    "Component",
+    "Device",
+    "Driver",
+    "DeviceFile",
+]
 logger = logging.getLogger(__name__)
 
 
@@ -132,7 +144,7 @@ class Driver(BaseModel):
 
 
 class DeviceFile(BaseModel):
-    filename: Path
+    filename: Annotated[Path, PlainSerializer(str)]
     components: dict[str, Component] = Field(default_factory=dict)
     devices: dict[str, Device] = Field(default_factory=dict)
     drivers: dict[str, Driver] = Field(default_factory=dict)
@@ -162,6 +174,7 @@ class DeviceFile(BaseModel):
         # populate devices
         self.devices = {d["name"]: Device(**d) for d in devices}
 
+        # populate pipelines and components
         for pip in pipelines:
             if pip["name"].endswith("*"):
                 assert len(pip["devices"]) == 1, (

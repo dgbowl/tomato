@@ -1,3 +1,10 @@
+"""
+**tomato.daemon.pip**: the pipeline manager of tomato daemon
+------------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+"""
+
 import logging
 import time
 from datetime import datetime, timedelta
@@ -18,9 +25,7 @@ def manager(port: int, timeout: int = 500):
     """
     The pipeline manager thread of `tomato-daemon`.
 
-    This manager ensures the job queue is iterated over and pipelines are managed/reset.
-    Note that we poll the `tomato-daemon` for status only once per iteration of the main
-    loop.
+    This manager ensures the job queue is iterated over and pipelines are managed/reset. Note that we poll the `tomato-daemon` for status only once per iteration of the main loop.
     """
     context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")

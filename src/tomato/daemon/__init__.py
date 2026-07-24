@@ -1,6 +1,4 @@
 """
-**tomato.daemon**: module of functions comprising the tomato daemon
--------------------------------------------------------------------
 .. codeauthor::
     Peter Kraus
 
@@ -24,8 +22,7 @@ logger = logging.getLogger(__name__)
 
 def setup_logging(daemon: Daemon):
     """
-    Helper function to set up logging (folder, filename, verbosity, format) based on
-    the passed daemon state.
+    Helper function to set up logging (folder, filename, verbosity, format) based on the passed daemon state.
     """
     logdir = Path(daemon.settings["logdir"])
     logdir.mkdir(parents=True, exist_ok=True)
@@ -39,12 +36,9 @@ def setup_logging(daemon: Daemon):
 
 def tomato_daemon():
     """
-    The function called when `tomato-daemon` is executed.
+    The function called when :obj:`tomato-daemon` is executed.
 
-    Manages the state of the tomato daemon, including recovery of state via
-    :mod:`~tomato.daemon.io`, processing state updates via :mod:`~tomato.daemon.cmd`,
-    and the manager threads for both jobs (:mod:`~tomato.daemon.job`) and drivers
-    (:mod:`~tomato.daemon.driver`).
+    Manages the state of the tomato daemon, spawning manager threads for jobs (:mod:`~tomato.daemon.job`), drivers (:mod:`~tomato.daemon.driver`), and pipelines (:mod:`~tomato.daemon.pip`). Parses the configuration in the :ref:`settings file <settings-file>` and :ref:`devices file <devices-file>`.
     """
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--port", "-p", type=int, default=1234)
@@ -57,8 +51,7 @@ def tomato_daemon():
     setup_logging(daemon)
     logger.info("logging set up with verbosity %s", daemon.verbosity)
 
-    # TODO: setup should not be a thing really.
-    cmd.setup(msg={}, daemon=daemon)
+    cmd.reload(msg={}, daemon=daemon)
     context = zmq.Context()
     rep = context.socket(zmq.REP)
     logger.debug("binding zmq.REP socket on port %d", daemon.port)
@@ -80,15 +73,15 @@ def tomato_daemon():
         socks = dict(poller.poll(1000))
         if rep in socks:
             msg = rep.recv_pyobj()
-            logger.debug(f"received {msg=}")
+            logger.debug("received msg: %s", msg)
             if "cmd" not in msg:
-                logger.error(f"received msg without cmd: {msg=}")
+                logger.error("received msg without cmd: %s", msg)
                 ret = Reply(success=False, msg="received msg without cmd", data=msg)
             elif hasattr(cmd, msg["cmd"]):
                 ret = getattr(cmd, msg["cmd"])(msg, daemon)
             else:
-                logger.error(f"received msg with an invalid cmd: {msg=}")
-            logger.debug(f"reply with {ret=}")
+                logger.error("received msg with an invalid cmd: %s", msg["cmd"])
+            logger.debug("reply: %s", ret)
             rep.send_pyobj(ret)
         if daemon.status == "stop":
             end = True

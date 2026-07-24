@@ -1,6 +1,6 @@
 """
-**tomato.daemon.io**: functions for storing and loading data
-------------------------------------------------------------
+**tomato.daemon.io**: functions for storing job data
+----------------------------------------------------
 .. codeauthor::
     Peter Kraus
 
@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 
 def merge_netcdfs(job: Job, snapshot=False) -> str:
     """
-    Merges the individual pickled :class:`xr.Datasets` of each Component found in :obj:`job.jobpath`
-    into a single :class:`xr.DataTree`, which is then stored in the NetCDF file,
-    using the Component `role` as the group label.
+    Merges all of the individual pickled :class:`~xarray.Dataset` files from each component found in :obj:`job.jobpath` into a single :class:`~xarray.DataTree`, which is then stored in the NetCDF file. The role of each component is used as the group label.
     """
     logger = logging.getLogger(f"{__name__}.merge_netcdf")
     assert job.jobpath is not None
@@ -52,8 +50,7 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
 
 def data_to_pickle(ds: xr.Dataset, path: Path, role: str):
     """
-    Dumps the data provided as :class:`xr.Dataset` into a ``pickle``. Concatenates with
-    any existing data stored in the ``pickle``.
+    Dumps the data provided as :class:`~xarray.Dataset` using :mod:`pickle`. Concatenates the new data with any existing data stored in the existing ``.pkl`` file.
     """
     logger = logging.getLogger(f"{__name__}.data_to_pickle")
     ds.attrs["role"] = role

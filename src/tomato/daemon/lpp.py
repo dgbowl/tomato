@@ -1,3 +1,10 @@
+"""
+**tomato.daemon.lpp**: a lazy pirate pattern implementation
+-----------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+"""
+
 import logging
 from typing import Any, Optional
 
@@ -18,6 +25,11 @@ def comm(
     timeout: int = REQ_TIMEOUT,
     sender: Optional[str] = None,
 ) -> tuple[Reply, zmq.Socket]:
+    """
+    Communication function based on `the lazy pirate pattern <https://zguide.zeromq.org/docs/chapter4/#Client-Side-Reliability-Lazy-Pirate-Pattern>`__.
+
+    This is a more robust version of the classic request--reply pattern, as the reply has a timeout (by default set to the ``REQ_TIMEOUT`` constant). The request--reply pattern is retried several times (by default ``REQ_RETRIES`` times), closing the connection between each retry.
+    """
     if sender is None:
         logger = logging.getLogger(__name__)
     else:

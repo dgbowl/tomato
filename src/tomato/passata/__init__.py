@@ -1,3 +1,22 @@
+"""
+.. codeauthor::
+    Peter Kraus
+
+Module of functions to interact with drivers and components of :mod:`tomato`. Includes the following functions:
+
+- :func:`status` to query the status of a tomato component
+- :func:`register` to register an individual component on a tomato driver
+- :func:`attrs` to query attribute information on a component
+- :func:`capabilities` to query capabilities of a component
+- :func:`constants` to query constants on a component
+- :func:`get_attrs` to query values of attributes on a component
+- :func:`set_attr` to set value of an attribute on a component
+- :func:`reset` to reset a component
+- :func:`get_last_data` to retrieve the last recorded datapoint from a component
+- :func:`measure` to trigger an idle measurement on a component
+
+"""
+
 from typing import Any
 
 import zmq

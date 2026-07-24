@@ -1,11 +1,8 @@
 """
-**tomato.ketchup**: command line interface to the tomato job queue
-------------------------------------------------------------------
 .. codeauthor::
     Peter Kraus
 
-Module of functions to manage the job queue of :mod:`tomato`. Includes job management
-functions:
+Module of functions to manage the job queue of :mod:`tomato`. Includes job management functions:
 
 - :func:`submit` to submit a *job* to *queue*
 - :func:`status` to query the status of tomato's *queue*, or a *job*
@@ -15,10 +12,7 @@ functions:
 
 .. warning::
 
-    This module should interact with the job sqlite database only via the ``tomato.daemon.cmd``
-    interface functions ``set_job()`` and ``get_jobs()``, **not via the ``jobdb`` module**.
-    This is necessary to ensure users that don't have write access to the job database can
-    still submit/manage their jobs.
+    This module interacts with the job sqlite database directly. This means that users submitting jobs to tomato must have write access to the job database file.
 
 """
 
@@ -69,13 +63,12 @@ def submit(
     >>> # Submit a job with yaml output:
     >>> ketchup submit counter_15_0.1.yml -y
     data:
-        completed_at: null
-        launched_at: null
-        connected_at: null
-        id: 1
-        [...]
-        status: q
-        submitted_at: '2024-11-17 19:39:16.972593+00:00'
+      completed_at: null
+      connected_at: null
+      id: 1
+      [...]
+      status: q
+      submitted_at: '2024-11-17 19:39:16.972593+00:00'
     msg: job submitted successfully with jobid 1
     success: true
 
@@ -164,13 +157,12 @@ def status(
     >>> # Get a status of a job with yaml output
     >>> ketchup status 1 -y
     data:
-      - completed_at: null
-        launched_at: null
-        connected_at: null
-        id: 1
-        [...]
-        status: qw
-        submitted_at: '2024-11-17 17:53:46.133355+00:00'
+    - completed_at: null
+      connected_at: null
+      id: 1
+      [...]
+      status: qw
+      submitted_at: '2024-11-17 17:53:46.133355+00:00'
     msg: found 1 job with status ['qw']
     success: true
 
@@ -233,13 +225,12 @@ def cancel(
     >>> # Cancel a job with yaml output:
     >>> ketchup cancel 2 -y
     data:
-      - completed_at: null
-        launched_at: null
-        connected_at: null
-        id: 2
-        [...]
-        status: cd
-        submitted_at: '2024-03-03 15:23:50.702504+00:00'
+    - completed_at: null
+      connected_at: null
+      id: 2
+      [...]
+      status: cd
+      submitted_at: '2024-03-03 15:23:50.702504+00:00'
     msg: job [2] cancelled successfully
     success: true
 
@@ -291,6 +282,12 @@ def snapshot(
     >>> # Create a snapshot in current working directory:
     >>> ketchup snapshot 3
     Success: snapshot for job [3] created successfully
+
+    >>> # With yaml output:
+    >>> ketchup snapshot 1 -y
+    data: null
+    msg: snapshot for job [1] created successfully
+    success: true
 
     """
     dbpath = daemon.settings["jobs"]["dbpath"]

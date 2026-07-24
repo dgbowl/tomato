@@ -1,3 +1,10 @@
+"""
+**tomato.daemon.db**: shared functions using :mod:`sqlite3`
+-----------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+"""
+
 import logging
 import os
 import sqlite3

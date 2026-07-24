@@ -4,9 +4,7 @@
 .. codeauthor::
     Peter Kraus
 
-All functions in this module expect a :class:`dict` containing the command specification
-and a :class:`~tomato.models.Daemon` object as arguments. The :class:`Daemon` object is
-altered by the command.
+All functions in this module expect a :class:`dict` containing the command specification and a :class:`~tomato.models.Daemon` object as arguments. The :class:`~tomato.models.Daemon` object may be altered by the command.
 
 All functions in this module return a :class:`~tomato.models.Reply`.
 
@@ -27,10 +25,12 @@ logger = logging.getLogger(__name__)
 
 
 def status(msg: dict, daemon: Daemon) -> Reply:
+    """Return daemon status, containing the current tomato configuration."""
     return Reply(success=True, msg=daemon.status, data=daemon)
 
 
 def stop(msg: dict, daemon: Daemon) -> Reply:
+    """Stop the tomato daemon."""
     logger = logging.getLogger(f"{__name__}.stop")
     logger.debug("%s", msg)
     dbpath = daemon.settings["jobs"]["dbpath"]
@@ -44,9 +44,16 @@ def stop(msg: dict, daemon: Daemon) -> Reply:
         return Reply(success=True, msg="daemon set to stop")
 
 
-def setup(msg: dict, daemon: Daemon) -> Reply:
-    logger = logging.getLogger(f"{__name__}.setup")
+def reload(msg: dict, daemon: Daemon) -> Reply:
+    """
+    Set-up or reload the tomato daemon using its configuration files.
 
+    .. note::
+
+        When reloading settings, tomato checks whether any running jobs use resources (i.e. drivers, pipelines, components) that would be removed if the new configuration were to be applied. If this is the case, the configuration **will not be updated**.
+
+    """
+    logger = logging.getLogger(f"{__name__}.setup")
     if daemon.status == "bootstrap":
         dbpath = daemon.settings["jobs"]["dbpath"]
         drvs = []
@@ -82,7 +89,6 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
                 success=False,
                 msg="could not parse updated settings",
             )
-        logger.debug(f"{nd=}")
         ndf = nd.devicefile
         # First, check that we're not touching anything associated with a running job
         check_components = set()
@@ -148,9 +154,4 @@ def setup(msg: dict, daemon: Daemon) -> Reply:
         daemon.devicefile = ndf
         logger.info("reload successful with pipelines: '%s'", ndf.pipelines.keys())
 
-    return Reply(success=True, msg="setup successful", data=daemon)
-
-
-def reload(msg: dict, daemon: Daemon, **kwargs: dict) -> Reply:
-    # daemon.settings = toml.load(Path(daemon.appdir) / "settings.toml")
-    return Reply(success=True, msg="daemon settings reloaded", data=daemon.settings)
+    return Reply(success=True, msg="reload successful", data=daemon)

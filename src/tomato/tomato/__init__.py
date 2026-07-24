@@ -1,6 +1,4 @@
 """
-**tomato.tomato**: command line interface to the tomato daemon
---------------------------------------------------------------
 .. codeauthor::
     Peter Kraus
 
@@ -129,27 +127,34 @@ def status(
     >>> tomato status
     Failure: tomato not running on port 1234
 
-    >>> # Status of a running daemon with data
+    >>> # Status of a running daemon with yaml data
     >>> tomato status -y
     data:
-      appdir: /home/kraus/.config/tomato/1.0rc2.dev2
-      cmps:
-        [...]
-      devs:
-        [...]
-      drvs:
-        [...]
-      jobs:
-        [...]
-      logdir: /home/kraus/.cache/tomato/1.0rc2.dev2/log
-      nextjob: 1
-      pips:
-        [...]
-      port: 1234
-      settings:
-        [...]
-      status: running
-      verbosity: 20
+        appdir: .config/tomato/2.2rc3
+        devicefile:
+            components:
+                [...]
+            devices:
+                [...]
+            drivers:
+                [...]
+            pipelines:
+                [...]
+            filename: .config/tomato/2.2rc3/devices.yml
+        port: 1234
+        settings:
+            datadir: .config/tomato/2.2rc3/
+            devices:
+                config: .config/tomato/2.2rc3/devices.yml
+            drivers:
+                [...]
+            jobs:
+                dbpath: .config/tomato/2.2rc3/Jobs/dbpath.sqlite
+                storage: .config/tomato/2.2rc3/Jobs/
+            logdir: .config/tomato/2.2rc3/
+            repositories: {}
+        status: running
+        verbosity: 20
     msg: tomato running on port 1234
     success: true
 
@@ -161,7 +166,7 @@ def status(
     >>> # Status of all configured drivers
     >>> tomato status drivers
     Success: tomato running on port 1234 with the following drivers:
-         name:example_counter   port:34747      pid:192318
+         name:example_counter   port:34747  pid:192318  version: 2.1    heartbeat: 4.4 s
 
     >>> # Status of all configured devices
     >>> tomato status devices
@@ -171,7 +176,7 @@ def status(
     >>> # Status of all configured components:
     >>> tomato status components
     Success: tomato running on port 1234 with the following components:
-         name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      role:counter
+         name:example_counter:(example-addr,1)  driver:example_counter  device:dev-counter      capabilities:{'random', 'count'}
 
     """
     logger = logging.getLogger(f"{__name__}.status")
@@ -190,7 +195,7 @@ def status(
         if stgrp == "tomato":
             return Reply(
                 success=True,
-                msg=f"tomato running on port {daemon.port}",
+                msg=msg,
                 data=daemon,
             )
         elif stgrp == "devices":
@@ -211,7 +216,7 @@ def status(
                 data=rets,
             )
         elif stgrp == "components":
-            keys = ["name", "driver", "device", "role", "capabilities"]
+            keys = ["name", "driver", "device", "capabilities"]
             rets = {k: v.model_dump() for k, v in daemon.devicefile.components.items()}
             for ckey, cval in rets.items():
                 drv = drvdb.get_drv(name=cval["driver"], dbpath=dbpath)
@@ -225,7 +230,6 @@ def status(
                     rets[ckey]["capabilities"] = dret.data
                 else:
                     rets[ckey]["capabilities"] = None
-                rets[ckey]["role"] = None
                 dreq.close()
             return Reply(
                 success=True,
@@ -497,18 +501,10 @@ def reload(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
 
-    logger.debug("reload")
     req.send_pyobj(dict(cmd="reload", sender=f"{__name__}.reload"))
     ret = req.recv_pyobj()
     if ret.success is False:
         return ret
-
-    logger.debug("setup")
-    req.send_pyobj(dict(cmd="setup", sender=f"{__name__}.reload"))
-    ret = req.recv_pyobj()
-    if ret.success is False:
-        return ret
-    logger.debug("done")
 
     return Reply(
         success=True,
@@ -616,7 +612,7 @@ def pipeline_ready(
 
     .. code:: bash
 
-        pipeline ready <pipeline>
+        tomato pipeline ready <pipeline>
 
     """
     # logger = logging.getLogger(f"{__name__}.pipeline_ready")

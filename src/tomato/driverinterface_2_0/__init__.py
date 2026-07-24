@@ -1,25 +1,23 @@
 """
-**DriverInterface-2.0**
------------------------
 .. codeauthor::
     Peter Kraus
-
-
 """
 
-from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Any, Union, TypeAlias, Optional
-from pydantic import BaseModel, Field
-from threading import Thread, current_thread, RLock
-from queue import Queue
-from tomato.models import Reply, Task
-import logging
-from functools import wraps
-import xarray as xr
-import time
 import atexit
-import pint
+import logging
 import sys
+import time
+from abc import ABCMeta, abstractmethod
+from functools import wraps
+from queue import Queue
+from threading import RLock, Thread, current_thread
+from typing import Any, Optional, TypeAlias, TypeVar, Union
+
+import pint
+import xarray as xr
+from pydantic import BaseModel, Field
+
+from tomato.models import Reply, Task
 
 logger = logging.getLogger(__name__)
 

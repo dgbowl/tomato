@@ -141,6 +141,7 @@ The following concepts are used in **tomato**:
 
       pip3[pipeline 3] -.-> c3
 
+.. _settings-file:
 
 Settings file
 `````````````
@@ -211,6 +212,8 @@ Additional, *driver*-specific settings may be provided in this section. Each *dr
 - ``drivers.<driver_name>.lpp_timeout`` for configuring the timeout for communication between **tomato** and the *driver* process, in seconds
 
 Further *driver*-specific settings, such as ``dllpath`` or ``calibration``, can be specified here. All of these *driver*-specific settings are passed to each *driver* when its process is launched and the :class:`DriverInterface` is initialised, and can therefore contain paths to various libraries or other files necessary for the *driver* to function.
+
+.. _devices-file:
 
 Devices file
 ````````````

@@ -34,8 +34,19 @@ HEARTBEAT = 5.0
 
 
 def tomato_driver_bootstrap(
-    req: zmq.Socket, logger: logging.Logger, interface: ModelInterface, driver: str
+    req: zmq.Socket,
+    logger: logging.Logger,
+    interface: ModelInterface,
+    driver: str,
 ):
+    """
+    Function that attempts to register all configured components for this driver.
+
+    This helper function is executed when the ``register`` command is set to the driver process. The daemon is first polled for up-to-date configuration, and then each of the returned components is registered, if necessary, using :func:`cmp_register` of the driver interface.
+
+    In case the registration fails, a limited number of retries (as specified by the ``MAX_REGISTER_RETRIES`` constant) can be attempted on subsequent runs of this function.
+
+    """
     logger.debug("getting daemon status")
     req.send_pyobj(dict(cmd="status"))
     daemon: Daemon = req.recv_pyobj().data
@@ -73,6 +84,16 @@ def tomato_driver_bootstrap(
 def perform_idle_measurements(
     interface: ModelInterface, t_last: Union[float, None]
 ) -> Union[float, None]:
+    """
+    Function running idle measurements on the driver.
+
+    This function periodically runs the :func:`cmp_measure` on each component on the driver. The interval is determined from driver configuration using the ``"idle_measurement_interval"`` setting, driver defaults using the :obj:`interface.idle_measurement_interval` object, or tomato default (``IDLE_MEASUREMENT_INTERVAL``).
+
+    .. note::
+
+        How idle measurements are handled is up to the individual driver. By default, the :func:`cmp_measure` function will not submit new measurements when a task or a measurement is already running.
+
+    """
     if not hasattr(interface, "cmp_measure"):
         return t_last
 
@@ -93,17 +114,29 @@ def perform_idle_measurements(
     return t_now
 
 
+def stop_tomato_driver(port: int, context) -> Reply:
+    """
+    The default mechanism for stopping tomato drivers.
+
+    This function is used by the tomato driver manager to gracefully stop the driver, if an existing driver port is known.
+    """
+    req = context.socket(zmq.REQ)
+    req.connect(f"tcp://127.0.0.1:{port}")
+    req.send_pyobj(dict(cmd="stop", sender=f"{__name__}.stop_tomato_driver"))
+    return req.recv_pyobj()
+
+
 def kill_tomato_driver(pid: int):
     """
-    Wrapper around :func:`psutil.terminate`.
+    The backup mechanism for stoping tomato drivers.
 
-    Here we kill the (grand)children of the process with the name of `tomato-job`,
-    i.e. the individual task functions. This allows the `tomato-job` process to exit
-    gracefully once the task functions join.
+    This function is useful if the driver port is unknown or not responsive.
 
-    Note that on Windows, the `tomato-job.exe` process has two children: a `python.exe`
-    which is the actual process running the job, and `conhost.exe`, which we want to
-    avoid killing.
+    Wrapper around :func:`psutil.terminate`. Here we kill the (grand)children of the process with the name of `tomato-job`, i.e. the individual task functions. This allows the `tomato-job` process to exit gracefully once the task functions join.
+
+    .. note::
+
+        On Windows, the `tomato-job.exe` process has two children: a `python.exe` process which is the actual process running the job, and `conhost.exe` process, which we want to avoid killing.
 
     """
     proc = psutil.Process(pid)
@@ -121,17 +154,11 @@ def tomato_driver() -> None:
     """
     The function called when `tomato-driver` is executed.
 
-    This function is responsible for managing all activities involving devices of a
-    single driver type.
+    This function is responsible for managing all activities involving devices of a single driver type.
 
-    First, the list of devices (and their channel/address) for the specified driver is
-    fetched from the `tomato-daemon`. Then, a new instance of the specified driver is
-    spawned, populating its device map using the above list. If successful, the current
-    process information is fed back to the `tomato-daemon`.
+    First, the list of devices (and their channel/address) for the specified driver is fetched from the `tomato-daemon`. Then, a new instance of the specified driver is spawned, populating its device map using the above list. The state of the driver is stored .
 
-    Afterwards, the main loop handles all requests related to each of the devices
-    managed by this driver process, including job commands. Finally, if the driver is
-    instructed to stop, it attempts to perform a teardown before exiting.
+    Afterwards, the main loop handles all requests related to each of the devices managed by this driver process, including job commands. Finally, if the driver is instructed to stop, it attempts to perform a teardown before exiting.
     """
     # ARGUMENT PARSING
     parser = argparse.ArgumentParser()
@@ -299,19 +326,11 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is quitting", args.driver)
 
 
-def stop_tomato_driver(port: int, context) -> Reply:
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="stop", sender=f"{__name__}.stop_tomato_driver"))
-    return req.recv_pyobj()
-
-
 def manager(port: int, timeout: int = 1000):
     """
     The driver manager thread of `tomato-daemon`.
 
-    This manager ensures individual driver processes are (re-)spawned and instructed to
-    quit as necessary.
+    This manager ensures individual driver processes are (re-)spawned and instructed to quit as necessary. The drivers are periodically checked using the ``HEARTBEAT`` constant as the interval. All changes are stored in the drivers table.
     """
     sender = f"{__name__}.manager"
     context = zmq.Context()

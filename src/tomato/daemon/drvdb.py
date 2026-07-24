@@ -1,6 +1,6 @@
 """
 **tomato.daemon.drvdb**: the sqlite database for drivers in tomato
---------------------------------------------------------------------
+------------------------------------------------------------------
 .. codeauthor::
     Peter Kraus
 

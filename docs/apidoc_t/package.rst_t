@@ -15,10 +15,18 @@
 
 {%- if is_namespace %}
 {{- [pkgname, "namespace"] | join(" ") | e | heading }}
-{% elif 'tomato.drivers.dummy' == pkgname %}
-{{- "**dummy**: A dummy driver module" | heading }}
-{% elif 'tomato.drivers.biologic' == pkgname %}
-{{- "**biologic**: Driver for BioLogic potentiostats" | heading }}
+{% elif 'tomato.daemon' == pkgname %}
+{{- "**tomato.daemon**: Functions and modules comprising the tomato daemon" | heading }}
+{% elif 'tomato.driverinterface_2_0' == pkgname %}
+{{- "**tomato.DriverInterface**: version 2.0" | heading }}
+{% elif 'tomato.driverinterface_2_1' == pkgname %}
+{{- "**tomato.DriverInterface**: version 2.1" | heading }}
+{% elif 'tomato.ketchup' == pkgname %}
+{{- "**tomato.ketchup**: CLI and API for the tomato job queue" | heading }}
+{% elif 'tomato.tomato' == pkgname %}
+{{- "**tomato.tomato**: CLI and API for the tomato daemon" | heading }}
+{% elif 'tomato.passata' == pkgname %}
+{{- "**tomato.passata**: CLI and API for tomato drivers and components" | heading }}
 {% else %}
 {{- [pkgname, "package"] | join(" ") | e | heading }}
 {% endif %}

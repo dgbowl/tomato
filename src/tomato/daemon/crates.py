@@ -1,3 +1,10 @@
+"""
+**tomato.daemon.crates**: functions for creating RO-crates
+----------------------------------------------------------
+.. codeauthor::
+    Peter Kraus
+"""
+
 import logging
 from typing import Union
 

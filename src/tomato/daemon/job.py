@@ -3,13 +3,6 @@
 -------------------------------------------------------
 .. codeauthor::
     Peter Kraus
-
-.. note::
-
-    Functions in this module that receive the :class:`~tomato.models.Daemon` state
-    object should be acting on a copy. All changes to the :class:`Daemon` state have to
-    be propagated via the :class:`tomato.daemon.cmd` set of functions.
-
 """
 
 import argparse
@@ -56,7 +49,17 @@ def method_validate(
     pip: Pipeline,
     daemon: Daemon,
     context: zmq.Context,
-):
+) -> bool:
+    """
+    Function for validating :class:`Task` parameters against components.
+
+    This function finds a component on the pipeline that matches the role of each :class:`Task`, and passes each :class:`Task` to the :func:`task_validate` function of that component.
+
+    .. note::
+
+        This function should be used to theck the method only after a matching pipeline has been identified, e.g. using :func:`find_matching_pipelines`.
+
+    """
     dbpath = daemon.settings["jobs"]["dbpath"]
     for task in method:
         for crole, cname in pip.components.items():
@@ -66,11 +69,7 @@ def method_validate(
                 assert drv is not None
                 req: zmq.Socket = context.socket(zmq.REQ)
                 req.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = dict(
-                    task=task,
-                    address=cmp.address,
-                    channel=cmp.channel,
-                )
+                params = dict(task=task, address=cmp.address, channel=cmp.channel)
                 ret, req = lpp.comm(
                     req,
                     dict(cmd="task_validate", params=params),
@@ -90,6 +89,11 @@ def find_matching_pipelines(
     method: Sequence[Task],
     context: zmq.Context,
 ) -> list[str]:
+    """
+    Function for finding the names of pipelines that match the provided method.
+
+    The matching is performed using the required roles of the method as well as using the required capabilities of the method. The role-matching can be checked statically against the :obj:`daemon.devicefile`; the latter is checked dynamically by polling each component for its capabilities using :func:`cmp_capabilities`.
+    """
     req_roles = set([item.component_role for item in method])
     req_capabs = set([item.technique_name for item in method])
     dbpath = daemon.settings["jobs"]["dbpath"]
@@ -121,13 +125,11 @@ def kill_tomato_job(process: psutil.Process):
     """
     Wrapper around :func:`psutil.terminate`.
 
-    Here we kill the (grand)children of the process with the name of `tomato-job`,
-    i.e. the individual task functions. This allows the `tomato-job` process to exit
-    gracefully once the task functions join.
+    Here we kill the (grand)children of the process with the name of `tomato-job`, i.e. the individual task functions. This allows the `tomato-job` process to exit gracefully once the task functions join.
 
-    Note that on Windows, the `tomato-job.exe` process has two children: a `python.exe`
-    which is the actual process running the job, and `conhost.exe`, which we want to
-    avoid killing.
+    .. note::
+
+        On Windows, the `tomato-job.exe` process has two children: a `python.exe` process, which is the actual process running the job, and `conhost.exe` process, which we want to avoid killing.
 
     """
     logger = logging.getLogger(f"{__name__}.kill_tomato_job")
@@ -148,14 +150,13 @@ def kill_tomato_job(process: psutil.Process):
 
 def manage_running(daemon: Daemon, context: zmq.Context):
     """
-    Function that manages jobs and `tomato-daemon` pipelines.
+    Function that manages jobs within the tomato job manager.
 
-    The function only affects pipelines marked as running, i.e. with a set ``jobid``.
-    Jobs scheduled for killing (i.e. ``status == "rd"``) are terminated. Jobs that
-    are supposed to be running but have crashed are given appropriate status (``"ce"``).
-    Pipelines of both are reset.
+    The function only affects jobs marked as running, i.e. with a set ``pid``. Jobs scheduled for killing (i.e. ``status == "rd"``) are terminated. Jobs that are supposed to be running but have crashed are given appropriate status (``"ce"``).
 
-    Successful job completions are not processed here, but within the job process.
+    .. note ::
+
+        Successful job completions are not processed here, but within the job process.
 
     """
     logger = logging.getLogger(f"{__name__}.manage_running")
@@ -217,10 +218,9 @@ def check_queued(
     context: zmq.Context,
 ) -> dict[int, list[str]]:
     """
-    Function to check whether the queued jobs can be submitted onto any pipeline.
+    Function to check whether the queued jobs can be submitted onto any configured pipeline.
 
-    Returns a :class:`dict` containing the jobids as keys and lists of matched
-    :class:`Pipelines` as values.
+    Returns a :class:`dict` containing the jobids as keys and lists of matched :class:`Pipelines` as values.
     """
     logger = logging.getLogger(f"{__name__}.check_queued")
     matched = {}
@@ -245,9 +245,16 @@ def action_queued(
     context: zmq.Context,
 ):
     """
-    Function that assigns jobs if a matched pipeline contains the requested sample.
+    Function that assigns jobs if the pipeline is ready and contains the requested sample.
 
-    The `tomato-job` process is launched from this function.
+    .. warning::
+
+        No validation except checking the sample name and readiness is performed. A matching and validated pipeline has to be previously identified, using e.g. the :func:`check_queued` function.
+
+    .. note::
+
+        The `tomato-job` process is launched from this function.
+
     """
     dbpath = daemon.settings["jobs"]["dbpath"]
     logger = logging.getLogger(f"{__name__}.action_queued")
@@ -317,8 +324,11 @@ def manager(port: int, timeout: int = 500):
     The job manager thread of `tomato-daemon`.
 
     This manager ensures the job queue is iterated over and jobs are submitted to pipelines.
-    Note that we poll the `tomato-daemon` for status only once per iteration of the main
-    loop.
+
+    .. note::
+
+        Note that we poll the `tomato-daemon` for configuration only once per iteration of the main loop.
+
     """
     context = zmq.Context()
     logger = logging.getLogger(f"{__name__}.manager")
@@ -348,10 +358,8 @@ def tomato_job() -> None:
     """
     The function called when `tomato-job` is executed.
 
-    This function is responsible for managing all activities of a single job, including
-    contacting the daemon about job pid, spawning of sub-processes to run tasks on each
-    Component of the Pipeline, merging data at the end of the job, and reporting back
-    to the daemon once the job is successfully finished.
+    This function is responsible for managing all activities of a single job, including updating the queue table with the job pid, spawning of sub-processes to run tasks on each component of the pipeline, merging data at the end of the job, and updating the state of the pipeline once the job is successfully finished.
+
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -495,12 +503,14 @@ def job_thread(
     logpath: Path,
 ):
     """
-    A subthread of `tomato-job`, responsible for tasks on one Component of a Pipeline.
+    A subthread of `tomato-job`, responsible for tasks on one component of a pipeline.
 
-    For each task in tasks, starts the task, then monitors the Component status and polls
-    for data, and moves on to the next task as instructed in the payload.
+    For each :class:`Task`, this thread starts the task at an appropriate moment, then monitors the component status and polls periodically for data, and moves on to the next task as instructed in the task list.
 
-    Stores the data for that Component as a `pickle` of a :class:`xr.Dataset`.
+    .. note::
+
+        The data from all tasks for that component is stored using the :func:`tomato.daemon.io.data_to_pickle` function.
+
     """
     thread = current_thread()
     sender = f"{__name__}.job_thread({thread.ident:5d})"
