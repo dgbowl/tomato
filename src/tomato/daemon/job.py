@@ -22,9 +22,7 @@ import psutil
 import xarray as xr
 import zmq
 
-import tomato.daemon.drvdb as drvdb
-import tomato.daemon.pipdb as pipdb
-from tomato.daemon import jobdb, lpp
+from tomato.daemon import drvdb, jobdb, lpp, pipdb
 from tomato.daemon.crates import to_rocrate
 from tomato.daemon.io import data_to_pickle, merge_netcdfs
 from tomato.models import (
@@ -323,7 +321,7 @@ def action_queued(
             break
 
 
-def manager(port: int, timeout: int = 500):
+def manager(timeout: int = 500):
     """
     The job manager thread of `tomato-daemon`.
 
@@ -338,11 +336,11 @@ def manager(port: int, timeout: int = 500):
     thread = current_thread()
     logger.info("launched successfully")
     req: zmq.Socket = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}")
+    req.connect("inproc://daemon")
     while getattr(thread, "do_run"):
         msg = dict(cmd="status", sender=f"{__name__}.manager")
-        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
+        req.send_pyobj(msg)
+        ret = req.recv_pyobj()
         if req.closed:
             break
         elif ret.success is False or ret.data is None:

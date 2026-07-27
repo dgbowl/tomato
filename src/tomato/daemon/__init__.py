@@ -11,10 +11,10 @@ from threading import Thread
 
 import zmq
 
-import tomato.daemon.cmd as cmd
 import tomato.daemon.driver
 import tomato.daemon.job
 import tomato.daemon.pip
+from tomato.daemon import cmd
 from tomato.models import Daemon, Reply
 from tomato.utils import context
 
@@ -56,18 +56,19 @@ def tomato_daemon():
     rep = context.socket(zmq.REP)
     logger.debug("binding zmq.REP socket on port %d", daemon.port)
     rep.bind(f"tcp://127.0.0.1:{daemon.port}")
+    rep.bind("inproc://daemon")
     poller = zmq.Poller()
     poller.register(rep, zmq.POLLIN)
 
     logger.debug("entering main loop")
-    pmgr = Thread(target=tomato.daemon.pip.manager, args=(daemon.port,), daemon=True)
-    setattr(pmgr, "do_run", True)
+    pmgr = Thread(target=tomato.daemon.pip.manager, daemon=True)
+    setattr(pmgr, "do_run", True)  # noqa:B010
     pmgr.start()
-    jmgr = Thread(target=tomato.daemon.job.manager, args=(daemon.port,), daemon=True)
-    setattr(jmgr, "do_run", True)
+    jmgr = Thread(target=tomato.daemon.job.manager, daemon=True)
+    setattr(jmgr, "do_run", True)  # noqa:B010
     jmgr.start()
-    dmgr = Thread(target=tomato.daemon.driver.manager, args=(daemon.port,), daemon=True)
-    setattr(dmgr, "do_run", True)
+    dmgr = Thread(target=tomato.daemon.driver.manager, daemon=True)
+    setattr(dmgr, "do_run", True)  # noqa:B010
     dmgr.start()
     while True:
         socks = dict(poller.poll(1000))
@@ -86,9 +87,9 @@ def tomato_daemon():
         if daemon.status == "stop":
             end = True
             for mgr, label in [(jmgr, "job"), (dmgr, "driver"), (pmgr, "pip")]:
-                if getattr(mgr, "do_run"):
+                if getattr(mgr, "do_run"):  # noqa:B009
                     logger.debug("stopping %s manager thread", label)
-                    setattr(mgr, "do_run", False)
+                    setattr(mgr, "do_run", False)  # noqa:B010
                 if mgr.is_alive():
                     end = False
             if end:

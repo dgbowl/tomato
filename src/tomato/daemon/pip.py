@@ -14,15 +14,14 @@ from threading import current_thread
 import psutil
 import zmq
 
-import tomato.daemon.drvdb as drvdb
-from tomato.daemon import jobdb, lpp, pipdb
+from tomato.daemon import drvdb, jobdb, pipdb
 from tomato.models import Daemon
 from tomato.utils import context
 
 MAX_JOB_NOPID = 10
 
 
-def manager(port: int, timeout: int = 500):
+def manager(timeout: int = 500):
     """
     The pipeline manager thread of `tomato-daemon`.
 
@@ -32,11 +31,12 @@ def manager(port: int, timeout: int = 500):
     thread = current_thread()
     logger.info("launched successfully")
     req: zmq.Socket = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = dict(endpoint=f"tcp://127.0.0.1:{port}")
-    while getattr(thread, "do_run"):
-        msg = dict(cmd="status", sender=f"{__name__}.manager")
-        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
+    # req.connect(f"tcp://127.0.0.1:{port}")
+    req.connect("inproc://daemon")
+    while getattr(thread, "do_run"):  # noqa: B009
+        msg = {"cmd": "status", "sender": f"{__name__}.manager"}
+        req.send_pyobj(msg)
+        ret = req.recv_pyobj()
         if req.closed:
             break
         elif ret.success is False or ret.data is None:
@@ -59,9 +59,7 @@ def manager(port: int, timeout: int = 500):
                     pass
                 else:
                     continue
-            elif job.pid is None:
-                continue
-            elif (
+            elif job.pid is None or (
                 psutil.pid_exists(job.pid)
                 and psutil.Process(job.pid).status() is not psutil.STATUS_ZOMBIE
             ):
@@ -75,15 +73,15 @@ def manager(port: int, timeout: int = 500):
                 logger.warning("%s: resetting component '%s'", pip.name, cn)
                 dreq = context.socket(zmq.REQ)
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = dict(address=cmp.address, channel=cmp.channel)
-                dreq.send_pyobj(dict(cmd="cmp_reset", params=params))
+                params = {"address": cmp.address, "channel": cmp.channel}
+                dreq.send_pyobj({"cmd": "cmp_reset", "params": params})
                 dret = dreq.recv_pyobj()
                 if dret.success is False:
                     logger.warning(
                         "%s: reset of component '%s' failed: %s", pip.name, cn, dret.msg
                     )
             logger.debug("%s: clearing pipeline jobid", pip.name)
-            params = dict(jobid=None, ready=False)
+            params = {"jobid": None, "ready": False}
             pipdb.update_pip(name=pip.name, params=params, dbpath=dbpath)
         time.sleep(timeout / 1e3)
     req.close()
