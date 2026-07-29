@@ -55,23 +55,19 @@ def stop_tomato_daemon(port: int = 12345):
     print("stop_tomato_daemon")
     subprocess.run(["tomato", "stop", "-p", f"{port}"], check=True)
     if psutil.WINDOWS:
-        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"], check=True)
-        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-job.exe"], check=True)
-        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"], check=True)
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"],
+            check=False,
+        )
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-job.exe"],
+            check=False,
+        )
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"],
+            check=False,
+        )
     else:
-        subprocess.run(["killall", "tomato-daemon"], check=True)
-        subprocess.run(["killall", "tomato-job"], check=True)
-        subprocess.run(["killall", "tomato-driver"], check=True)
-
-    procs = []
-    for p in psutil.process_iter(["name"]):
-        for name in ["tomato-daemon", "tomato-job", "tomato-driver"]:
-            if name in p.info["name"]:
-                try:
-                    pc = p.children()
-                    pc.append(p)
-                    procs += pc
-                    pc[-1].terminate()
-                except psutil.NoSuchProcess:
-                    pass
-    psutil.wait_procs(procs, timeout=1)
+        subprocess.run(["killall", "tomato-daemon"], check=False)
+        subprocess.run(["killall", "tomato-job"], check=False)
+        subprocess.run(["killall", "tomato-driver"], check=False)
