@@ -1,7 +1,7 @@
-from typing import TypeAlias, Union
+from typing import TypeAlias
 
 import pint
 
 Type: TypeAlias = type
-Val = Union[str, int, float, pint.Quantity]
+Val = str | int | float | pint.Quantity
 Key: TypeAlias = tuple[str, str]

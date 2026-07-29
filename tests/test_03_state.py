@@ -11,24 +11,28 @@ from . import utils
 PORT = 12345
 WAIT = 10000
 
-kwargs = dict(port=PORT, timeout=1000)
+kwargs = {"port": PORT, "timeout": 1000}
 
 
 def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", daemon=daemon)
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", daemon=daemon)
 
-    tomato.stop(**kwargs)
+    tomato.stop(**kwargs)  # ty: ignore[invalid-argument-type]
     assert utils.wait_until_tomato_stopped(port=PORT, timeout=5000)
-    ret = tomato.start(**kwargs, appdir=Path(), verbosity=0)
+    ret = tomato.start(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        appdir=Path(),
+        verbosity=0,
+    )
     print(f"{ret=}")
     assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
 
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
     ret = ketchup.status(jobids=[], daemon=daemon)
     print(f"{ret=}")
@@ -39,15 +43,22 @@ def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon)
 
 def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", daemon=daemon)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
-    tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
+    tomato.pipeline_load(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+        sampleid="counter_5_0.2",
+    )
+    tomato.pipeline_ready(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+    )
     assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
 
-    ret = tomato.stop(**kwargs)
+    ret = tomato.stop(**kwargs)  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success is False
     assert "jobs are running" in ret.msg
@@ -55,19 +66,30 @@ def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon
 
 def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ketchup.submit(payload="counter_20_5.yml", jobname="job-1", daemon=daemon)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_20_5")
-    tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
+    tomato.pipeline_load(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+        sampleid="counter_20_5",
+    )
+    tomato.pipeline_ready(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+    )
     assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
 
     utils.kill_tomato_daemon(port=PORT)
 
-    tomato.start(**kwargs, appdir=Path(), verbosity=0)
+    tomato.start(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        appdir=Path(),
+        verbosity=0,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
     ret = ketchup.status(jobids=[], daemon=daemon)
     print(f"{ret=}")
@@ -87,22 +109,36 @@ def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_dae
 
 def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", daemon=daemon)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
-    tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
+    tomato.pipeline_load(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+        sampleid="counter_5_0.2",
+    )
+    tomato.pipeline_ready(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+    )
     assert utils.wait_until_ketchup_status(1, "r", PORT, timeout=WAIT)
 
     utils.kill_tomato_daemon(port=PORT)
 
     time.sleep(5)
-    tomato.start(**kwargs, appdir=Path(), verbosity=0)
+    tomato.start(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        appdir=Path(),
+        verbosity=0,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_ketchup_status(1, "c", PORT, 5000)
 
-    ret = tomato.status(**kwargs, stgrp="pipelines")
+    ret = tomato.status(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        stgrp="pipelines",
+    )
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
@@ -112,16 +148,24 @@ def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_da
 
 def test_restart_with_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ketchup.submit(payload="counter_20_5.yml", jobname="job-1", daemon=daemon)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_20_5")
-    tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
+    tomato.pipeline_load(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+        sampleid="counter_20_5",
+    )
+    tomato.pipeline_ready(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+    )
     assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
 
     ret = ketchup.status(jobids=[1], daemon=daemon)
     print(f"{ret=}")
+    assert ret.data is not None
     pid = ret.data[0].pid
 
     utils.kill_tomato_daemon(port=PORT)
@@ -129,21 +173,30 @@ def test_restart_with_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_dae
     proc.terminate()
     psutil.wait_procs([proc], timeout=3)
 
-    tomato.start(**kwargs, appdir=Path(), verbosity=0)
+    tomato.start(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        appdir=Path(),
+        verbosity=0,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
     assert utils.wait_until_ketchup_status(1, "ce", PORT, 5000)
 
-    ret = tomato.status(**kwargs, stgrp="pipelines")
+    ret = tomato.status(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        stgrp="pipelines",
+    )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert ret.data["pip-counter"]["jobid"] is None
     assert ret.data["pip-counter"]["sampleid"] == "counter_20_5"
 
 
 def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    ret = tomato.status(**kwargs, stgrp="drivers")
+    ret = tomato.status(**kwargs, stgrp="drivers")  # ty: ignore[invalid-argument-type]
     assert ret.success
+    assert ret.data is not None
     print(f"{ret.data=}")
 
     pid = ret.data["example_counter"]["pid"]
@@ -154,24 +207,33 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
     print(f"{alive=}")
     time.sleep(5)
 
-    ret = tomato.status(**kwargs, stgrp="drivers")
+    ret = tomato.status(**kwargs, stgrp="drivers")  # ty: ignore[invalid-argument-type]
     assert ret.success
     print(f"{ret.data=}")
+    assert ret.data is not None
     assert pid != ret.data["example_counter"]["pid"]
 
 
 def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    daemon = tomato.status(**kwargs).data
+    daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-1", daemon=daemon)
-    tomato.pipeline_load(**kwargs, pipeline="pip-counter", sampleid="counter_5_0.2")
-    tomato.pipeline_ready(**kwargs, pipeline="pip-counter")
+    tomato.pipeline_load(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+        sampleid="counter_5_0.2",
+    )
+    tomato.pipeline_ready(
+        **kwargs,  # ty: ignore[invalid-argument-type]
+        pipeline="pip-counter",
+    )
     assert utils.wait_until_ketchup_status(1, "r", PORT, WAIT)
 
-    ret = tomato.status(**kwargs, stgrp="drivers")
+    ret = tomato.status(**kwargs, stgrp="drivers")  # ty: ignore[invalid-argument-type]
     assert ret.success
+    assert ret.data is not None
     print(f"{ret.data=}")
     pid = ret.data["example_counter"]["pid"]
     p = psutil.Process(pid)

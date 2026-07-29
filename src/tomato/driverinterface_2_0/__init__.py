@@ -11,7 +11,7 @@ from abc import ABCMeta, abstractmethod
 from functools import wraps
 from queue import Queue
 from threading import RLock, Thread, current_thread
-from typing import Any, Optional, TypeAlias, TypeVar, Union
+from typing import Any, TypeAlias, TypeVar
 
 import pint
 import xarray as xr
@@ -81,7 +81,7 @@ def log_errors(func):
             return func(self, **kwargs)
         except Exception as e:
             logger.critical(e, exc_info=True)
-            sys.exit(e)
+            sys.exit(str(e))
 
     return wrapper
 
@@ -98,13 +98,13 @@ class Attr(BaseModel, arbitrary_types_allowed=True):
     status: bool = False
     """Should the attribute be included in component status?"""
 
-    units: str = None
+    units: str | None = None
     """Default units for the attribute, optional."""
 
-    maximum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
+    maximum: float | pint.Quantity | None = Field(None, union_mode="left_to_right")
     """Maximum value for the attribute, optional."""
 
-    minimum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
+    minimum: float | pint.Quantity | None = Field(None, union_mode="left_to_right")
     """Minimum value for the attribute, optional."""
 
 
@@ -130,7 +130,7 @@ class ModelInterface(metaclass=ABCMeta):
     version: str = "2.0"
     """Version of the :obj:`DriverInterface`."""
 
-    idle_measurement_interval: Union[int, None] = None
+    idle_measurement_interval: int | None = None
     """The interval (in seconds) after which :func:`self.cmp_measure` will be executed, when idle."""
 
     # Instance attributes
@@ -154,7 +154,6 @@ class ModelInterface(metaclass=ABCMeta):
         A factory function which is used to pass this instance of the :class:`ModelInterface`
         to the new :class:`ModelDevice` instance.
         """
-        pass
 
     @log_errors
     @to_reply
@@ -302,7 +301,7 @@ class ModelInterface(metaclass=ABCMeta):
     @in_devmap
     def cmp_last_data(
         self, key: Key, **kwargs: dict
-    ) -> tuple[bool, str, Union[None, xr.Dataset]]:
+    ) -> tuple[bool, str, None | xr.Dataset]:
         """
         Fetch the last stored data on the component.
 
@@ -337,7 +336,7 @@ class ModelInterface(metaclass=ABCMeta):
     @in_devmap
     def task_start(
         self, key: Key, task: Task, **kwargs
-    ) -> tuple[bool, str, Union[set, Task]]:
+    ) -> tuple[bool, str, set | Task]:
         """
         Submit a :class:`Task` onto the specified device component.
 
@@ -367,7 +366,7 @@ class ModelInterface(metaclass=ABCMeta):
         :class:`Task` can be queued onto the device component already.
         """
         running = self.devmap[key].running
-        data = dict(running=running, can_submit=not running)
+        data = {"running": running, "can_submit": not running}
         if running:
             return (True, "running", data)
         else:
@@ -376,9 +375,7 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def task_stop(
-        self, key: Key, **kwargs
-    ) -> tuple[bool, str, Union[xr.Dataset, None]]:
+    def task_stop(self, key: Key, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
         """
         Stops a running task and returns any collected data.
 
@@ -400,9 +397,7 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def task_data(
-        self, key: Key, **kwargs
-    ) -> tuple[bool, str, Union[xr.Dataset, None]]:
+    def task_data(self, key: Key, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
         """
         Return cached task data on the device component and clean the cache.
 
@@ -433,6 +428,8 @@ class ModelInterface(metaclass=ABCMeta):
             msg = f"unknown task {task.technique_name!r} requested"
             return (False, msg, None)
         attrs = self.devmap[key].attrs(**kwargs)
+        if task.task_params is None:
+            return (True, "task has no parameters to validate", None)
         for par, val in task.task_params.items():
             if par not in attrs:
                 msg = f"unknown attribute {par!r} cannot be set"
@@ -451,7 +448,7 @@ class ModelInterface(metaclass=ABCMeta):
                 if val.dimensionless and props.units is not None:
                     val = pint.Quantity(val.m, props.units)
                 if val.dimensionality != pint.Quantity(props.units).dimensionality:
-                    msg = f"attribute {par!r} has the wrong dimensionality {str(val.dimensionality)}"
+                    msg = f"attribute {par!r} has the wrong dimensionality {val.dimensionality!s}"
                     return (False, msg, None)
             if props.minimum is not None and val < props.minimum:
                 msg = f"attr {par!r} is smaller than {props.minimum}"
@@ -495,7 +492,7 @@ class ModelInterface(metaclass=ABCMeta):
         for key, dev in self.devmap.items():
             if dev.thread.is_alive():
                 logger.warning("stopping task on component %s", key)
-                setattr(dev.thread, "do_run", False)
+                setattr(dev.thread, "do_run", False)  # noqa: B010
                 dev.thread.join(timeout=1)
             if dev.thread.is_alive():
                 logger.error("task on component %s is still running", key)
@@ -523,10 +520,10 @@ class ModelDevice(metaclass=ABCMeta):
     constants: dict[str, Any]
     """Constant metadata of this component."""
 
-    data: Union[xr.Dataset, None]
+    data: xr.Dataset | None
     """Container for cached data on this component."""
 
-    last_data: Union[xr.Dataset, None]
+    last_data: xr.Dataset | None
     """Container for last datapoint on this component."""
 
     datalock: RLock
@@ -552,18 +549,18 @@ class ModelDevice(metaclass=ABCMeta):
         self.last_data = None
         self.running = False
         self.datalock = RLock()
-        self.constants = dict()
+        self.constants = {}
         atexit.register(self.reset)
 
     def run(self) -> None:
         """Helper function for starting the :obj:`self.thread` as a task."""
-        self.thread.do_run = True
+        setattr(self.thread, "do_run", True)  # noqa: B010
         self.thread.start()
 
     def measure(self) -> None:
         """Helper function for starting the :obj:`self.thread` as a measurement."""
         self.thread = Thread(target=self.meas_runner, daemon=True)
-        self.thread.do_run = True
+        setattr(self.thread, "do_run", True)  # noqa: B010
         self.thread.start()
 
     def task_runner(self) -> None:
@@ -587,20 +584,25 @@ class ModelDevice(metaclass=ABCMeta):
             self.prepare_task(task=task)
         except Exception as e:
             logger.critical(e, exc_info=True)
-            thread.do_run = False
+            setattr(self.thread, "do_run", False)  # noqa: B010
 
         t_start = time.perf_counter()
         t_prev = t_start
         self.data = None
-        while getattr(thread, "do_run"):
+        while getattr(thread, "do_run"):  # noqa: B009
             t_now = time.perf_counter()
             if t_now - t_prev > task.sampling_interval:
                 with self.datalock:
                     try:
-                        self.do_task(task, t_start=t_start, t_now=t_now, t_prev=t_prev)
+                        self.do_task(
+                            task,
+                            t_start=t_start,  # ty: ignore[invalid-argument-type]
+                            t_now=t_now,  # ty: ignore[invalid-argument-type]
+                            t_prev=t_prev,  # ty: ignore[invalid-argument-type]
+                        )
                     except Exception as e:
                         logger.critical(e, exc_info=True)
-                        thread.do_run = False
+                        setattr(thread, "do_run", False)  # noqa: B010
                 t_prev += task.sampling_interval
             if t_now - t_start > task.max_duration:
                 break
@@ -650,6 +652,8 @@ class ModelDevice(metaclass=ABCMeta):
         self.do_measure(**kwargs)
         if self.data is None:
             self.data = self.last_data
+        elif self.last_data is None:
+            pass
         else:
             self.data = xr.concat(
                 [self.data, self.last_data], dim="uts", data_vars="minimal"
@@ -663,12 +667,11 @@ class ModelDevice(metaclass=ABCMeta):
         This function is performs a measurement using the current configuration of
         :obj:`self.attrs`, and stores the result in :obj:`self.last_data`.
         """
-        pass
 
     def stop_task(self, **kwargs: dict) -> None:
         """Stops the currently running task."""
         logger.info("stopping running task on component %s", self.key)
-        setattr(self.thread, "do_run", False)
+        setattr(self.thread, "do_run", True)  # noqa: B010
 
     @abstractmethod
     def set_attr(self, attr: str, val: Val, **kwargs: dict) -> Val:
@@ -680,14 +683,12 @@ class ModelDevice(metaclass=ABCMeta):
 
         Returns the coerced value corresponding to :obj:`val`.
         """
-        pass
 
     @abstractmethod
     def get_attr(self, attr: str, **kwargs: dict) -> Val:
         """Reads the value of the specified :class:`Attr`."""
-        pass
 
-    def get_data(self, **kwargs: dict) -> xr.Dataset:
+    def get_data(self, **kwargs: dict) -> xr.Dataset | None:
         """
         Returns the cached :obj:`self.data` as a :class:`xarray.Dataset` before
         clearing the cache.
@@ -697,19 +698,17 @@ class ModelDevice(metaclass=ABCMeta):
             self.data = None
         return ret
 
-    def get_last_data(self, **kwargs: dict) -> xr.Dataset:
+    def get_last_data(self, **kwargs: dict) -> xr.Dataset | None:
         """Returns the :obj:`last_data` object as a :class:`xarray.Dataset`."""
         return self.last_data
 
     @abstractmethod
-    def attrs(**kwargs) -> dict[str, Attr]:
+    def attrs(self, **kwargs) -> dict[str, Attr]:
         """Returns a :class:`dict` of all available :class:`Attrs`."""
-        pass
 
     @abstractmethod
-    def capabilities(**kwargs) -> set:
+    def capabilities(self, **kwargs) -> set:
         """Returns a :class:`set` of all supported techniques."""
-        pass
 
     def status(self, **kwargs) -> dict[str, Val]:
         """Compiles a status report from :class:`Attrs` marked as `status=True`."""

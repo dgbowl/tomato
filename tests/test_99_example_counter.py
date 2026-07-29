@@ -55,7 +55,10 @@ def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daem
     utils.run_casenames([casename], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
 
-    subprocess.run(["ketchup", "cancel", "-p", "12345", "1"])
+    subprocess.run(
+        ["ketchup", "cancel", "-p", "12345", "1"],
+        check=True,
+    )
     assert utils.wait_until_ketchup_status(1, "cd", PORT, 5000)
 
 
@@ -73,7 +76,10 @@ def test_counter_snapshot_metadata(
     utils.run_casenames([casename], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
     if external:
-        subprocess.run(["ketchup", "snapshot", "-p", "12345", "1"])
+        subprocess.run(
+            ["ketchup", "snapshot", "-p", "12345", "1"],
+            check=True,
+        )
 
     assert utils.wait_until_ketchup_status(1, "c", PORT, 30000)
 
@@ -99,8 +105,14 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
-    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
+    subprocess.run(
+        ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
+        check=True,
+    )
+    subprocess.run(
+        ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
+        check=True,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
@@ -123,7 +135,7 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
 
 def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    kwargs = dict(port=PORT, timeout=1000)
+    kwargs = {"port": PORT, "timeout": 1000}
     ret = tomato.passata.measure(name="example_counter:(example-addr,1)", **kwargs)
     assert ret.success
 

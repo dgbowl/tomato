@@ -8,17 +8,16 @@
 
 import importlib
 import logging
-from typing import Union
 
 from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
 from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
 
-ModelInterface = Union[MI_2_0, MI_2_1]
+ModelInterface = MI_2_0 | MI_2_1
 
 logger = logging.getLogger(__name__)
 
 
-def driver_to_interface(drivername: str) -> Union[None, ModelInterface]:
+def driver_to_interface(drivername: str) -> None | ModelInterface:
     modname = f"tomato_{drivername.replace('-', '_')}"
 
     try:
@@ -28,6 +27,6 @@ def driver_to_interface(drivername: str) -> Union[None, ModelInterface]:
         return None
     else:
         if hasattr(mod, "DriverInterface"):
-            return getattr(mod, "DriverInterface")
+            return mod.DriverInterface
         else:
             return None

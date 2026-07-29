@@ -30,8 +30,7 @@ from pathlib import Path
 import toml
 import zmq
 
-import tomato.daemon.drvdb as drvdb
-import tomato.daemon.pipdb as pipdb
+from tomato.daemon import drvdb, pipdb
 from tomato.daemon.db import setup_db
 from tomato.models import Daemon, Reply
 from tomato.utils import context, spawn_cmd
@@ -49,8 +48,8 @@ def set_loglevel(delta: int):
 
 def make_padded_lines(data: dict, keys: list) -> list:
     temp = defaultdict(list)
-    maxlen = dict()
-    lines = list()
+    maxlen = {}
+    lines = []
     tN = time.perf_counter()
     for obj in data.values():
         for key in keys:
@@ -58,7 +57,7 @@ def make_padded_lines(data: dict, keys: list) -> list:
                 if isinstance(obj, dict):
                     val = f"{tN - obj['heartbeat_time']:<.1f} s"
                 else:
-                    val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+                    val = f"{tN - obj.heartbeat_time:<.1f} s"
             else:
                 if isinstance(obj, dict):
                     val = str(obj[key])
@@ -74,7 +73,7 @@ def make_padded_lines(data: dict, keys: list) -> list:
                 if isinstance(obj, dict):
                     val = f"{tN - obj['heartbeat_time']:<.1f} s"
                 else:
-                    val = f"{tN - getattr(obj, 'heartbeat_time'):<.1f} s"
+                    val = f"{tN - obj.heartbeat_time:<.1f} s"
             else:
                 if isinstance(obj, dict):
                     val = str(obj[key])
@@ -182,7 +181,7 @@ def status(
     logger.debug("checking status of tomato on port %d", port)
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="status", sender=f"{__name__}.status"))
+    req.send_pyobj({"cmd": "status", "sender": f"{__name__}.status"})
     poller = zmq.Poller()
     poller.register(req, zmq.POLLIN)
     events = dict(poller.poll(timeout))
@@ -222,8 +221,8 @@ def status(
                 assert drv is not None
                 dreq = context.socket(zmq.REQ)
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = dict(address=cval["address"], channel=cval["channel"])
-                dreq.send_pyobj(dict(cmd="cmp_capabilities", params=params))
+                params = {"address": cval["address"], "channel": cval["channel"]}
+                dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
                 dret = dreq.recv_pyobj()
                 if dret.success and dret.data is not None and len(dret.data) > 0:
                     rets[ckey]["capabilities"] = dret.data
@@ -238,7 +237,7 @@ def status(
         elif stgrp == "pipelines":
             keys = ["name", "ready", "sampleid", "jobid"]
             rets = {}
-            for pname in daemon.devicefile.pipelines.keys():
+            for pname in daemon.devicefile.pipelines:
                 pip = pipdb.get_pip(name=pname, dbpath=dbpath)
                 rets[pname] = {**vars(pip)}
             return Reply(
@@ -327,7 +326,7 @@ def start(
         logger=logger,
     )
 
-    kwargs = dict(port=port, timeout=max(timeout, 5000))
+    kwargs = {"port": port, "timeout": max(timeout, 5000)}
     return status(**kwargs)  # ty: ignore[invalid-argument-type]
 
 
@@ -363,7 +362,7 @@ def stop(
     if stat.success:
         req = context.socket(zmq.REQ)
         req.connect(f"tcp://127.0.0.1:{port}")
-        req.send_pyobj(dict(cmd="stop"))
+        req.send_pyobj({"cmd": "stop"})
         rep = req.recv_pyobj()
         if rep.success:
             return Reply(success=True, msg=f"tomato on port {port} closed successfully")
@@ -401,7 +400,7 @@ def init(
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
-        # Generated on {str(datetime.now(timezone.utc))}
+        # Generated on {datetime.now(timezone.utc)!s}
         datadir = '{datadir}'
         logdir = '{logdir}'
 
@@ -479,7 +478,7 @@ def reload(
 
     """
     logger = logging.getLogger(f"{__name__}.reload")
-    kwargs = dict(port=port, timeout=timeout)
+    kwargs = {"port": port, "timeout": timeout}
     logger.debug("Loading settings.toml file from %s.", appdir)
     try:
         toml.load(Path(appdir) / "settings.toml")
@@ -497,7 +496,7 @@ def reload(
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
 
-    req.send_pyobj(dict(cmd="reload", sender=f"{__name__}.reload"))
+    req.send_pyobj({"cmd": "reload", "sender": f"{__name__}.reload"})
     ret = req.recv_pyobj()
     if ret.success is False:
         return ret
@@ -543,7 +542,7 @@ def pipeline_load(
             data=pip,
         )
 
-    params = dict(sampleid=sampleid, ready=False)
+    params = {"sampleid": sampleid, "ready": False}
     pip = pipdb.update_pip(name=pipeline, params=params, dbpath=dbpath)
     return Reply(success=True, msg=f"loaded {sampleid!r} into {pipeline!r}", data=pip)
 
@@ -588,7 +587,7 @@ def pipeline_eject(
             data=pip,
         )
 
-    params = dict(sampleid=None, ready=False)
+    params = {"sampleid": None, "ready": False}
     pip = pipdb.update_pip(name=pipeline, params=params, dbpath=dbpath)
     return Reply(success=True, msg=f"ejected sample from {pipeline!r}", data=pip)
 
@@ -633,6 +632,6 @@ def pipeline_ready(
             data=pip,
         )
 
-    params = dict(ready=True)
+    params = {"ready": True}
     pip = pipdb.update_pip(name=pipeline, params=params, dbpath=dbpath)
     return Reply(success=True, msg=f"pipeline {pipeline!r} set as ready", data=pip)

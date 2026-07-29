@@ -61,7 +61,7 @@ def log_errors(func):
         # These should be then caught in the tomato-driver process.
         except (ValueError, AttributeError) as e:
             logger.critical(e, exc_info=True)
-            raise e
+            raise e  # noqa: TRY201
         # Other kinds of errors we abort the driver process
         except Exception as e:
             logger.critical(e, exc_info=True)

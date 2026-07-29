@@ -1,7 +1,10 @@
 import os
-import pytest
 import subprocess
+
+import pytest
+
 from tomato.daemon.crates import to_rocrate
+
 from . import utils
 
 try:
@@ -52,13 +55,19 @@ def test_to_rocrate(datapath, make_child, datadir):
 )
 def test_job_rocrate(casename, par, datadir, tmpdir, stop_tomato_daemon):
     os.chdir(tmpdir)
-    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
+    subprocess.run(
+        ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
+        check=True,
+    )
     with open("settings.toml", "r") as inp:
         settings = inp.read().replace("# default", "default")
     with open("settings.toml", "w") as out:
         out.write(settings)
 
-    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
+    subprocess.run(
+        ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
+        check=True,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)

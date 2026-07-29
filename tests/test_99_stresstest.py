@@ -20,17 +20,32 @@ PORT = 12345
 )
 def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
     os.chdir(datadir)
-    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
-    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", "."])
+    subprocess.run(
+        ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
+        check=True,
+    )
+    subprocess.run(
+        ["tomato", "start", "-p", f"{PORT}", "-A", "."],
+        check=True,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
 
-    subprocess.run(["tomato", "pipeline", "load", "-p", f"{PORT}", "pip-counter", case])
+    subprocess.run(
+        ["tomato", "pipeline", "load", "-p", f"{PORT}", "pip-counter", case],
+        check=True,
+    )
     for i in range(nreps):
-        subprocess.run(["ketchup", "submit", "-p", f"{PORT}", f"{case}.yml"])
+        subprocess.run(
+            ["ketchup", "submit", "-p", f"{PORT}", f"{case}.yml"],
+            check=True,
+        )
 
-    subprocess.run(["tomato", "pipeline", "ready", "-p", f"{PORT}", "pip-counter"])
+    subprocess.run(
+        ["tomato", "pipeline", "ready", "-p", f"{PORT}", "pip-counter"],
+        check=True,
+    )
 
     utils.wait_until_ketchup_status(jobid=nreps, status="c", port=PORT, timeout=40000)
 
