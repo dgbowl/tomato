@@ -3,40 +3,45 @@ import random
 import subprocess
 import time
 
-
 import tomato
 
 from . import utils
 
 PORT = 12345
 TIME = 1000
-kwargs = dict(port=PORT, timeout=TIME)
+kwargs = {"port": PORT, "timeout": TIME}
 
 
 def test_passata_api_status(start_tomato_daemon, stop_tomato_daemon):
-    ret = tomato.passata.status(name="example_counter:(example-addr,1)", **kwargs)
+    ret = tomato.passata.status(
+        name="example_counter:(example-addr,1)",
+        **kwargs,  # ty: ignore[invalid-argument-type]
+    )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert "running" in ret.data
 
 
 def test_passata_api_attrs(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.attrs(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert "max" in ret.data
 
 
 def test_passata_api_capabs(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.capabilities(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert "count" in ret.data
 
 
@@ -44,10 +49,11 @@ def test_passata_api_get_attrs(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.get_attrs(
         name="example_counter:(example-addr,1)",
         attrs=["max", "min"],
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert "max" in ret.data
     assert "min" in ret.data
 
@@ -58,7 +64,7 @@ def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
         name="example_counter:(example-addr,1)",
         attr="max",
         val=val,
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
@@ -66,17 +72,18 @@ def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.get_attrs(
         name="example_counter:(example-addr,1)",
         attrs=["max"],
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert ret.data["max"] == val
 
 
 def test_passata_api_reset(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.reset(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
@@ -90,52 +97,56 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
 
     ret = tomato.passata.status(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert ret.data["running"]
 
     ret = tomato.passata.reset(
         name="example_counter:(example-addr,1)",
         force=True,
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
 
     ret = tomato.passata.status(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert ret.data["running"] is False
 
 
 def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.constants(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert ret.data["example_meta"] == "example string"
 
 
 def test_passata_api_measure_last_data(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.measure(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     assert ret.success
 
     ret = tomato.passata.get_last_data(
         name="example_counter:(example-addr,1)",
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
+    assert ret.data is not None
     assert "uts" in ret.data.coords
 
 
@@ -150,7 +161,7 @@ def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
         attr="max",
         val=15,
         force=False,
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     assert ret.success is False
     assert "running component" in ret.msg
@@ -160,7 +171,7 @@ def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
         attr="max",
         val=15,
         force=True,
-        **kwargs,
+        **kwargs,  # ty: ignore[invalid-argument-type]
     )
     assert ret.success
     assert "set to 15.0" in ret.msg
@@ -177,6 +188,7 @@ def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
         ],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert "Success: component ('example-addr', '1')" in ret.stdout
@@ -191,6 +203,7 @@ def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
         ],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert "Success: attrs of component ('example-addr', '1') are" in ret.stdout
@@ -205,6 +218,7 @@ def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
         ],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert (
@@ -223,6 +237,7 @@ def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
         ],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert (
@@ -241,6 +256,7 @@ def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
         ],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert "Success: constants of component ('example-addr', '1') are" in ret.stdout

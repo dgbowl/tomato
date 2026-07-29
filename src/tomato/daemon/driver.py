@@ -13,14 +13,12 @@ import time
 from importlib import metadata
 from pathlib import Path
 from threading import current_thread
-from typing import Union
 
 import psutil
 import zmq
 
-import tomato.daemon.drvdb as drvdb
 import tomato.utils
-from tomato.daemon import lpp
+from tomato.daemon import drvdb
 from tomato.drivers import ModelInterface, driver_to_interface
 from tomato.models import Daemon, DrvState, Reply
 from tomato.utils import context
@@ -50,7 +48,7 @@ def tomato_driver_bootstrap(
 
     """
     logger.debug("getting daemon status")
-    req.send_pyobj(dict(cmd="status"))
+    req.send_pyobj({"cmd": "status"})
     daemon: Daemon = req.recv_pyobj().data
 
     logger.info("registering components for driver '%s'", driver)
@@ -84,8 +82,8 @@ def tomato_driver_bootstrap(
 
 
 def perform_idle_measurements(
-    interface: ModelInterface, t_last: Union[float, None]
-) -> Union[float, None]:
+    interface: ModelInterface, t_last: float | None
+) -> float | None:
     """
     Function running idle measurements on the driver.
 
@@ -111,7 +109,7 @@ def perform_idle_measurements(
     t_now = time.perf_counter()
     if t_last is not None and t_now - t_last < imi:
         return t_last
-    for key in interface.devmap.keys():
+    for key in interface.devmap:
         interface.cmp_measure(key=key)
     return t_now
 
@@ -124,7 +122,7 @@ def stop_tomato_driver(port: int) -> Reply:
     """
     req = context.socket(zmq.REQ)
     req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj(dict(cmd="stop", sender=f"{__name__}.stop_tomato_driver"))
+    req.send_pyobj({"cmd": "stop", "sender": f"{__name__}.stop_tomato_driver"})
     return req.recv_pyobj()
 
 
@@ -217,7 +215,7 @@ def tomato_driver() -> None:
         return
 
     logger.debug("getting daemon status")
-    req.send_pyobj(dict(cmd="status"))
+    req.send_pyobj({"cmd": "status"})
     daemon: Daemon = req.recv_pyobj().data
     dbpath = daemon.settings["jobs"]["dbpath"]
     settings = daemon.devicefile.drivers[args.driver].settings
@@ -257,7 +255,7 @@ def tomato_driver() -> None:
                     ret = Reply(success=False, msg="received msg without cmd", data=msg)
                 elif msg["cmd"] == "register":
                     tomato_driver_bootstrap(req, logger, interface, args.driver)
-                    if any([retry for retry in interface.retries.values()]):
+                    if any(interface.retries.values()):
                         ret = Reply(
                             success=False,
                             msg="some components not registered successfully",
@@ -274,7 +272,7 @@ def tomato_driver() -> None:
                     ret = Reply(
                         success=True,
                         msg=f"stopping driver {args.driver!r}",
-                        data=dict(status=status, driver=args.driver),
+                        data={"status": status, "driver": args.driver},
                     )
                 elif msg["cmd"] == "settings":
                     interface.settings = msg["params"]
@@ -287,18 +285,17 @@ def tomato_driver() -> None:
                     ret = interface.cmp_register(**msg["params"])
                     cname = f"{args.driver}:({msg['params']['address']},{msg['params']['channel']})"
                     if ret.success:
-                        params = dict(name=cname, capabilities=ret.data)
-                        req.send_pyobj(dict(cmd="component", params=params))
+                        params = {"name": cname, "capabilities": ret.data}
+                        req.send_pyobj({"cmd": "component", "params": params})
                         ret = req.recv_pyobj()
                 elif hasattr(interface, msg["cmd"]):
                     try:
-                        # ret = getattr(interface, msg["cmd"])(**msg["params"])
                         ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
                     except (ValueError, AttributeError) as e:
                         logger.info("above error caught by driver process")
                         ret = Reply(
                             success=False,
-                            msg=f"{type(e)}: {str(e)}",
+                            msg=f"{type(e)}: {e!r}",
                             data=None,
                         )
                 else:
@@ -319,7 +316,7 @@ def tomato_driver() -> None:
                     logger.info("above error caught by driver process")
     except Exception as e:
         logger.critical("uncaught exception %s", type(e), exc_info=True)
-        raise e
+        raise RuntimeError(str(e))
 
     logger.info("driver '%s' is beginning to quit", args.driver)
     interface.quit()
@@ -327,7 +324,7 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is quitting", args.driver)
 
 
-def manager(port: int, timeout: int = 1000):
+def manager(timeout: int = 1000):
     """
     The driver manager thread of `tomato-daemon`.
 
@@ -338,25 +335,18 @@ def manager(port: int, timeout: int = 1000):
     thread = current_thread()
     logger.info("launched successfully")
     req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = dict(
-        endpoint=f"tcp://127.0.0.1:{port}",
-        sender=sender,
-        timeout=timeout,
-    )
+    req.connect("inproc://daemon")
 
-    while getattr(thread, "do_run"):
+    while getattr(thread, "do_run"):  # noqa:B009
         spawned_drivers = set()
-        msg = dict(cmd="status", sender=sender)
-        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-        if req.closed:
-            setattr(thread, "do_run", False)
-            break
+        msg = {"cmd": "status", "sender": sender}
+        req.send_pyobj(msg)
+        ret = req.recv_pyobj()
         if ret.success and ret.data is not None:
             daemon: Daemon = ret.data
         else:
             logger.critical(ret.msg)
-            setattr(thread, "do_run", False)
+            setattr(thread, "do_run", False)  # noqa:B010
             break
 
         dbpath = daemon.settings["jobs"]["dbpath"]
@@ -383,11 +373,11 @@ def manager(port: int, timeout: int = 1000):
                         dreq = context.socket(zmq.REQ)
                         dreq.RCVTIMEO = 1000
                         dreq.connect(f"tcp://127.0.0.1:{d.port}")
-                        dreq.send_pyobj(dict(cmd="status"))
+                        dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()
                         if ret.success and len(ret.data) == 0:
                             logger.info("%s: registering components", d.name)
-                            dreq.send_pyobj(dict(cmd="register", sender=sender))
+                            dreq.send_pyobj({"cmd": "register", "sender": sender})
                             ret = dreq.recv_pyobj()
                             if ret.success:
                                 logger.info(
@@ -403,8 +393,8 @@ def manager(port: int, timeout: int = 1000):
                         params = vars(DrvState(name=d.name))
                         params.pop("name")
                     except Exception as e:
-                        logger.critical(e)
-                        raise e
+                        logger.critical("uncaught exception %s", type(e), exc_info=True)
+                        raise RuntimeError(str(e))
                     drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
             elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
                 logger.info("%s: spawning driver: retry %d", d.name, d.spawn_count)
@@ -435,7 +425,7 @@ def manager(port: int, timeout: int = 1000):
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
 
     logger.info("instructed to quit")
-    req.send_pyobj(dict(cmd="status", sender=sender))
+    req.send_pyobj({"cmd": "status", "sender": sender})
     daemon = req.recv_pyobj().data
     dbpath = daemon.settings["jobs"]["dbpath"]
     drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)

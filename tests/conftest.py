@@ -32,8 +32,14 @@ def datadir(tmpdir, request):
 def start_tomato_daemon(tmpdir: str, port: int = 12345):
     # setup_stuff
     os.chdir(tmpdir)
-    subprocess.run(["tomato", "init", "-p", f"{port}", "-A", ".", "-D", ".", "-L", "."])
-    subprocess.run(["tomato", "start", "-p", f"{port}", "-A", ".", "-vv"])
+    subprocess.run(
+        ["tomato", "init", "-p", f"{port}", "-A", ".", "-D", ".", "-L", "."],
+        check=True,
+    )
+    subprocess.run(
+        ["tomato", "start", "-p", f"{port}", "-A", ".", "-vv"],
+        check=True,
+    )
     assert utils.wait_until_tomato_running(port=port, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=port, timeout=3000)
     assert utils.wait_until_tomato_components(port=port, timeout=5000)
@@ -47,26 +53,21 @@ def stop_tomato_daemon(port: int = 12345):
     yield
     # teardown_stuff
     print("stop_tomato_daemon")
-    subprocess.run(["tomato", "stop", "-p", f"{port}"])
+    subprocess.run(["tomato", "stop", "-p", f"{port}"], check=True)
     if psutil.WINDOWS:
-        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"])
-        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-job.exe"])
-        subprocess.run(["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"])
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"],
+            check=False,
+        )
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-job.exe"],
+            check=False,
+        )
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"],
+            check=False,
+        )
     else:
-        subprocess.run(["killall", "tomato-daemon"])
-        subprocess.run(["killall", "tomato-job"])
-        subprocess.run(["killall", "tomato-driver"])
-
-    procs = []
-    for p in psutil.process_iter(["name"]):
-        for name in ["tomato-daemon", "tomato-job", "tomato-driver"]:
-            if name in p.info["name"]:
-                try:
-                    pc = p.children()
-                    pc.append(p)
-                    for proc in pc:
-                        procs.append(proc)
-                    proc.terminate()
-                except psutil.NoSuchProcess:
-                    pass
-    gone, alive = psutil.wait_procs(procs, timeout=1)
+        subprocess.run(["killall", "tomato-daemon"], check=False)
+        subprocess.run(["killall", "tomato-job"], check=False)
+        subprocess.run(["killall", "tomato-driver"], check=False)

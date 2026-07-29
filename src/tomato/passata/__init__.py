@@ -21,8 +21,8 @@ from typing import Any
 
 import zmq
 
-import tomato.daemon.drvdb as drvdb
 from tomato import tomato
+from tomato.daemon import drvdb
 from tomato.models import Component, DrvState, Reply
 from tomato.utils import context
 
@@ -89,11 +89,11 @@ def status(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_status", params={**kwargs}))
+    req.send_pyobj({"cmd": "cmp_status", "params": {**kwargs}})
     try:
         ret = req.recv_pyobj()
     except zmq.ZMQError:
@@ -114,11 +114,11 @@ def register(
         return ret
     cmp, drv = ret
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_register", params={**kwargs}))
+    req.send_pyobj({"cmd": "cmp_register", "params": kwargs})
 
     try:
         ret = req.recv_pyobj()
@@ -142,11 +142,11 @@ def attrs(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_attrs", params={**kwargs}))
+    req.send_pyobj({"cmd": "cmp_attrs", "params": kwargs})
 
     try:
         ret = req.recv_pyobj()
@@ -170,11 +170,11 @@ def capabilities(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_capabilities", params={**kwargs}))
+    req.send_pyobj({"cmd": "cmp_capabilities", "params": kwargs})
 
     try:
         ret = req.recv_pyobj()
@@ -198,11 +198,11 @@ def constants(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_constants", params={**kwargs}))
+    req.send_pyobj({"cmd": "cmp_constants", "params": kwargs})
 
     try:
         ret = req.recv_pyobj()
@@ -227,14 +227,14 @@ def get_attrs(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    data = dict()
+    data = {}
     msg = ""
     for attr in attrs:
-        req.send_pyobj(dict(cmd="cmp_get_attr", params={"attr": attr, **kwargs}))
+        req.send_pyobj({"cmd": "cmp_get_attr", "params": {"attr": attr, **kwargs}})
         try:
             ret = req.recv_pyobj()
         except zmq.ZMQError:
@@ -274,12 +274,12 @@ def set_attr(
     if not ret.success:
         return ret
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
     req.send_pyobj(
-        dict(cmd="cmp_set_attr", params={"attr": attr, "val": val, **kwargs})
+        {"cmd": "cmp_set_attr", "params": {"attr": attr, "val": val, **kwargs}}
     )
 
     try:
@@ -309,11 +309,11 @@ def reset(
     if not ret.success:
         return ret
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_reset", params=kwargs))
+    req.send_pyobj({"cmd": "cmp_reset", "params": kwargs})
 
     try:
         ret = req.recv_pyobj()
@@ -337,11 +337,11 @@ def get_last_data(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_last_data", params=kwargs))
+    req.send_pyobj({"cmd": "cmp_last_data", "params": kwargs})
 
     try:
         ret = req.recv_pyobj()
@@ -365,11 +365,11 @@ def measure(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = dict(channel=cmp.channel, address=cmp.address)
+    kwargs = {"channel": cmp.channel, "address": cmp.address}
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(dict(cmd="cmp_measure", params=kwargs))
+    req.send_pyobj({"cmd": "cmp_measure", "params": kwargs})
 
     try:
         ret = req.recv_pyobj()

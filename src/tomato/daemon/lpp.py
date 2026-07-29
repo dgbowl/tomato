@@ -6,7 +6,7 @@
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import zmq
 
@@ -23,7 +23,7 @@ def comm(
     endpoint: str,
     retries: int = REQ_RETRIES,
     timeout: int = REQ_TIMEOUT,
-    sender: Optional[str] = None,
+    sender: str | None = None,
 ) -> tuple[Reply, zmq.Socket]:
     """
     Communication function based on `the lazy pirate pattern <https://zguide.zeromq.org/docs/chapter4/#Client-Side-Reliability-Lazy-Pirate-Pattern>`__.

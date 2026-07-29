@@ -25,7 +25,7 @@ import yaml
 from dgbowl_schemas.tomato import to_payload
 from packaging.version import Version
 
-import tomato.daemon.jobdb as jobdb
+from tomato.daemon import jobdb
 from tomato.daemon.io import merge_netcdfs
 from tomato.models import Daemon, Job, Payload, Reply
 
@@ -37,7 +37,7 @@ __latest_payload__ = "2.2"
 def submit(
     *,
     payload: str | Path,
-    jobname: str,
+    jobname: str | None,
     daemon: Daemon,
     **_: dict,
 ) -> Reply:
@@ -91,17 +91,16 @@ def submit(
     maxver = Version(__latest_payload__)
     while hasattr(payload, "update"):
         temp: Payload = payload.update()  # ty: ignore[call-non-callable]
-        if hasattr(temp, "version"):
-            if Version(temp.version) > maxver:
-                break
+        if hasattr(temp, "version") and Version(temp.version) > maxver:
+            break
         payload = temp
 
     if payload.settings.output.path is None:
-        cwd = str(Path().resolve())
+        cwd = str(Path.cwd())
         log.info(f"Output path not set. Setting output path to {cwd}")
         payload.settings.output.path = cwd
     if payload.settings.snapshot is not None and payload.settings.snapshot.path is None:
-        cwd = str(Path().resolve())
+        cwd = str(Path.cwd())
         log.info(f"Snapshot path not set. Setting output path to {cwd}")
         payload.settings.snapshot.path = cwd
     if payload.settings.output.repositories != ["default"]:
@@ -113,7 +112,7 @@ def submit(
     log.debug("queueing 'payload' into 'queue'")
     dbpath = daemon.settings["jobs"]["dbpath"]
     dt = str(datetime.now(timezone.utc))
-    params = dict(payload=payload, jobname=jobname, submitted_at=dt)
+    params = {"payload": payload, "jobname": jobname, "submitted_at": dt}
     job = jobdb.insert_job(job=Job(id=0, **params), dbpath=dbpath)  # ty: ignore[invalid-argument-type]
 
     msg = f"job submitted successfully with jobid {job.id}"
@@ -247,9 +246,9 @@ def cancel(
     data = []
     for job in jobs:
         if job.status in {"q", "qw"}:
-            params = dict(status="cd")
+            params = {"status": "cd"}
         elif job.status in {"r"}:
-            params = dict(status="rd")
+            params = {"status": "rd"}
         elif job.status in {"cd", "ce", "c"}:
             continue
         job = jobdb.update_job_id(id=jobid, params=params, dbpath=dbpath)

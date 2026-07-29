@@ -9,11 +9,11 @@ from . import utils
 
 PORT = 12345
 timeout = 1000
-kwargs = dict(port=PORT, timeout=timeout)
+kwargs = {"port": PORT, "timeout": timeout}
 
 
 def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     assert ret.success
     assert ret.data is not None
     assert len(ret.data.devicefile.drivers) == 1
@@ -25,7 +25,7 @@ def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
 def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
     with open("settings.toml", "a") as inf:
         inf.write("example_counter.testparb = 1")
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
@@ -43,7 +43,7 @@ def test_reload_cmps_pips(datadir, start_tomato_daemon, stop_tomato_daemon):
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
 
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
@@ -59,7 +59,7 @@ def test_reload_devs(datadir, start_tomato_daemon, stop_tomato_daemon):
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
 
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
@@ -76,7 +76,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
 
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
@@ -86,7 +86,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.components) == 2
     assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    ret = tomato.status(**kwargs, appdir=Path())
+    ret = tomato.status(**kwargs)  # ty: ignore[invalid-argument-type]
     assert ret.success
     assert ret.data is not None
     assert len(ret.data.devicefile.drivers) == 2
@@ -97,7 +97,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
 
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
@@ -107,7 +107,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.components) == 4
     assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
 
-    ret = tomato.status(**kwargs, appdir=Path())
+    ret = tomato.status(**kwargs)  # ty: ignore[invalid-argument-type]
     assert ret.success
     assert ret.data is not None
     assert len(ret.data.devicefile.drivers) == 1
@@ -120,7 +120,7 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
     # Try modifying settings of a driver in use
     with open("settings.toml", "a") as inf:
         inf.write("example_counter.testparb = 1")
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success is False
     assert ret.msg is not None
@@ -131,7 +131,7 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
         lines = inf.readlines()
     with open("settings.toml", "w") as out:
         out.writelines(lines[:-1])
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success
 
@@ -140,7 +140,7 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success is False
     assert ret.msg is not None
@@ -151,7 +151,7 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success is False
     assert ret.msg is not None
@@ -162,7 +162,7 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success is False
     assert ret.msg is not None
@@ -173,7 +173,7 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success is False
     assert ret.msg is not None
@@ -184,7 +184,7 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    ret = tomato.reload(**kwargs, appdir=Path())
+    ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success is False
     assert ret.msg is not None

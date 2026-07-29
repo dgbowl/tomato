@@ -10,7 +10,7 @@ import time
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from threading import RLock, Thread, current_thread
-from typing import Any, Optional, Union
+from typing import Any
 
 import pint
 import xarray as xr
@@ -35,16 +35,16 @@ class Attr(BaseModel, arbitrary_types_allowed=True):
     status: bool = False
     """Should the attribute be included in component status?"""
 
-    units: Optional[str] = None
+    units: str | None = None
     """Default units for the attribute, optional."""
 
-    maximum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
+    maximum: float | pint.Quantity | None = Field(None, union_mode="left_to_right")
     """Maximum value for the attribute, optional."""
 
-    minimum: Optional[float | pint.Quantity] = Field(None, union_mode="left_to_right")
+    minimum: float | pint.Quantity | None = Field(None, union_mode="left_to_right")
     """Minimum value for the attribute, optional."""
 
-    options: Optional[set] = None
+    options: set | None = None
     """Allowed set of values for the attribute, optional."""
 
 
@@ -70,7 +70,7 @@ class ModelInterface(metaclass=ABCMeta):
     version: str = "2.1"
     """Version of the :obj:`DriverInterface`."""
 
-    idle_measurement_interval: Union[int, None] = None
+    idle_measurement_interval: int | None = None
     """The interval (in seconds) after which :func:`self.cmp_measure` will be executed, when idle."""
 
     # Instance attributes
@@ -98,7 +98,6 @@ class ModelInterface(metaclass=ABCMeta):
         A factory function which is used to pass this instance of the :class:`ModelInterface`
         to the new :class:`ModelDevice` instance.
         """
-        pass
 
     @log_errors
     @to_reply
@@ -122,7 +121,7 @@ class ModelInterface(metaclass=ABCMeta):
             return (True, f"device {key!r} registered", capabs)
         except RuntimeError as e:
             self.retries[key] += 1
-            return (False, f"failed to register {key!r}: {str(e)}", None)
+            return (False, f"failed to register {key!r}: {e!s}", None)
 
     @log_errors
     @to_reply
@@ -253,7 +252,7 @@ class ModelInterface(metaclass=ABCMeta):
     @in_devmap
     def cmp_last_data(
         self, key: Key, **kwargs: dict
-    ) -> tuple[bool, str, Union[None, xr.Dataset]]:
+    ) -> tuple[bool, str, None | xr.Dataset]:
         """
         Fetch the last stored data on the component.
 
@@ -290,7 +289,7 @@ class ModelInterface(metaclass=ABCMeta):
     @in_devmap
     def task_start(
         self, key: Key, task: Task, **kwargs
-    ) -> tuple[bool, str, Union[set, Task]]:
+    ) -> tuple[bool, str, set | Task]:
         """
         Submit a :class:`Task` onto the specified device component.
 
@@ -319,7 +318,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         running = self.devmap[key].running
         can_submit = not self.devmap[key].task_list.full()
-        data = dict(running=bool(running), can_submit=can_submit, task=running)
+        data = {"running": bool(running), "can_submit": can_submit, "task": running}
         if running is False:
             return (True, "component is idle", data)
         else:
@@ -328,9 +327,7 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def task_stop(
-        self, key: Key, **kwargs
-    ) -> tuple[bool, str, Union[xr.Dataset, None]]:
+    def task_stop(self, key: Key, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
         """
         Stops a running task and returns any collected data.
 
@@ -346,9 +343,7 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def task_data(
-        self, key: Key, **kwargs
-    ) -> tuple[bool, str, Union[xr.Dataset, None]]:
+    def task_data(self, key: Key, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
         """
         Return cached task data on the device component and clean the cache.
 
@@ -448,7 +443,7 @@ class ModelInterface(metaclass=ABCMeta):
 
         """
         logger.info("resetting all components on this driver")
-        for key, dev in self.devmap.items():
+        for key in self.devmap:
             logger.warning("stopping task on component %s", key)
             self.task_stop(key=key)
             logger.warning("resetting component %s", key)
@@ -474,10 +469,10 @@ class ModelDevice(metaclass=ABCMeta):
     constants: dict[str, Any]
     """Constant metadata of this component."""
 
-    data: Union[xr.Dataset, None]
+    data: xr.Dataset | None
     """Container for cached data on this component."""
 
-    last_data: Union[xr.Dataset, None]
+    last_data: xr.Dataset | None
     """Container for last datapoint on this component."""
 
     datalock: RLock
@@ -499,14 +494,14 @@ class ModelDevice(metaclass=ABCMeta):
         self.key = key
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
-        setattr(self.thread, "do_run", True)
-        setattr(self.thread, "do_run_task", False)
+        setattr(self.thread, "do_run", True)  # noqa: B010
+        setattr(self.thread, "do_run_task", False)  # noqa: B010
         self.thread.start()
         self.data = None
         self.last_data = None
         self.running = False
         self.datalock = RLock()
-        self.constants = dict()
+        self.constants = {}
         atexit.register(self.reset)
 
     def task_runner(self) -> None:
@@ -522,33 +517,33 @@ class ModelDevice(metaclass=ABCMeta):
         The :obj:`self.thread` is reset to None.
         """
         thread = current_thread()
-        while getattr(thread, "do_run"):
+        while getattr(thread, "do_run"):  # noqa: B009
             try:
                 task: Task = self.task_list.get(timeout=1)
             except queue.Empty:
                 continue
             except Exception as e:
                 logger.critical(e, exc_info=True)
-                setattr(thread, "do_run", False)
+                setattr(thread, "do_run", False)  # noqa: B010
                 break
 
             self.running = task
             try:
-                setattr(thread, "do_run_task", False)
+                setattr(thread, "do_run_task", False)  # noqa: B010
                 if isinstance(task, Task):
                     self.prepare_task(task=task)
-                    setattr(thread, "do_run_task", True)
+                    setattr(thread, "do_run_task", True)  # noqa: B010
                     t_0 = time.perf_counter()
                     t_p = t_0
                     self.data = None
-                    while getattr(thread, "do_run_task") and getattr(thread, "do_run"):
+                    while getattr(thread, "do_run_task") and getattr(thread, "do_run"):  # noqa: B009
                         t_n = time.perf_counter()
                         if t_n - t_p > task.sampling_interval:
                             with self.datalock:
                                 self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)  # ty: ignore[invalid-argument-type]
                             t_p += task.sampling_interval
                         if t_n - t_0 > task.max_duration:
-                            setattr(thread, "do_run_task", False)
+                            setattr(thread, "do_run_task", False)  # noqa: B010
                             break
                         # We want the inner task loop to run every 10 - 200 ms,
                         # so that cancelled tasks can be processed quickly
@@ -563,12 +558,12 @@ class ModelDevice(metaclass=ABCMeta):
                     logger.debug("measurement on component %s is done", self.key)
                 else:
                     logger.critical("Unknown task received: '%s'", task)
-                    setattr(thread, "do_run", False)
+                    thread.do_run = False
                     break
                 self.task_list.task_done()
             except Exception as e:
                 logger.critical(e, exc_info=True)
-                setattr(thread, "do_run", False)
+                setattr(thread, "do_run", False)  # noqa: B010
                 break
             self.running = False
         logger.warning("task runner is quitting")
@@ -594,6 +589,8 @@ class ModelDevice(metaclass=ABCMeta):
         self.do_measure(**kwargs)
         if self.data is None:
             self.data = self.last_data
+        elif self.last_data is None:
+            logger.warning("last data point is not set after measurement!")
         else:
             self.data = xr.concat(
                 [self.data, self.last_data], dim="uts", data_vars="minimal"
@@ -607,13 +604,12 @@ class ModelDevice(metaclass=ABCMeta):
         This function is performs a measurement using the current configuration of
         :obj:`self.attrs`, and stores the result in :obj:`self.last_data`.
         """
-        pass
 
     def stop_task(self, **kwargs: dict) -> None:
         """Stops the currently running task."""
         logger.info("stopping running task on component %s", self.key)
         if hasattr(self.thread, "do_run_task"):
-            setattr(self.thread, "do_run_task", False)
+            setattr(self.thread, "do_run_task", False)  # noqa: B010
         else:
             logger.warning("attempted to stop a task without 'thread.do_run_task'")
 
@@ -627,12 +623,10 @@ class ModelDevice(metaclass=ABCMeta):
 
         Returns the coerced value corresponding to :obj:`val`.
         """
-        pass
 
     @abstractmethod
     def get_attr(self, attr: str, **kwargs: dict) -> Val:
         """Reads the value of the specified :class:`Attr`."""
-        pass
 
     def get_data(self, **kwargs: dict) -> xr.Dataset | None:
         """
@@ -651,12 +645,10 @@ class ModelDevice(metaclass=ABCMeta):
     @abstractmethod
     def attrs(self, **kwargs) -> dict[str, Attr]:
         """Returns a :class:`dict` of all available :class:`Attrs`."""
-        pass
 
     @abstractmethod
     def capabilities(self, **kwargs) -> set:
         """Returns a :class:`set` of all supported techniques."""
-        pass
 
     def status(self, **kwargs) -> dict[str, Val]:
         """Compiles a status report from :class:`Attrs` marked as `status=True`."""
@@ -677,7 +669,7 @@ class ModelDevice(metaclass=ABCMeta):
         """
         logger.info("resetting component %s", self.key)
         if hasattr(self.thread, "do_run"):
-            setattr(self.thread, "do_run", False)
+            setattr(self.thread, "do_run", False)  # noqa: B010
         logger.info("component %s is waiting for task thread", self.key)
         self.thread.join()
         logger.info("component %s is continuing with reset", self.key)
@@ -686,7 +678,7 @@ class ModelDevice(metaclass=ABCMeta):
         self.datalock = RLock()
         self.task_list = queue.Queue()
         self.thread = Thread(target=self.task_runner, daemon=True)
-        setattr(self.thread, "do_run", do_run)
-        setattr(self.thread, "do_run_task", False)
+        setattr(self.thread, "do_run", do_run)  # noqa: B010
+        setattr(self.thread, "do_run_task", False)  # noqa: B010
         self.thread.start()
         logger.info("reset of component %s done", self.key)

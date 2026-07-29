@@ -7,8 +7,9 @@
 
 import logging
 import pickle
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Annotated, Any, Literal, Optional, Sequence, Union
+from typing import Annotated, Any, Literal
 
 import toml
 import yaml
@@ -18,17 +19,17 @@ from pydantic import BaseModel, Field, PlainSerializer, field_validator, model_v
 from typing_extensions import Self
 
 __all__ = [
-    "Task",
-    "PipState",
+    "Component",
+    "Daemon",
+    "Device",
+    "DeviceFile",
+    "Driver",
     "DrvState",
     "Job",
-    "Daemon",
-    "Reply",
+    "PipState",
     "Pipeline",
-    "Component",
-    "Device",
-    "Driver",
-    "DeviceFile",
+    "Reply",
+    "Task",
 ]
 logger = logging.getLogger(__name__)
 
@@ -36,15 +37,15 @@ logger = logging.getLogger(__name__)
 class PipState(BaseModel):
     name: str
     ready: bool = False
-    jobid: Optional[int] = None
-    sampleid: Optional[str] = None
+    jobid: int | None = None
+    sampleid: str | None = None
 
 
 class DrvState(BaseModel):
     name: str
-    port: Optional[int] = None
-    pid: Optional[int] = None
-    version: Optional[str] = None
+    port: int | None = None
+    pid: int | None = None
+    version: str | None = None
     spawn_time: float = 0.0
     spawn_count: int = 0
     heartbeat_time: float = 0.0
@@ -53,16 +54,16 @@ class DrvState(BaseModel):
 class Job(BaseModel):
     id: int
     payload: Payload
-    jobname: Optional[str] = None
-    pid: Optional[int] = None
+    jobname: str | None = None
+    pid: int | None = None
     status: Literal["q", "qw", "r", "rd", "c", "cd", "ce"] = "q"
-    submitted_at: Optional[str] = None
-    launched_at: Optional[str] = None
-    connected_at: Optional[str] = None
-    completed_at: Optional[str] = None
-    jobpath: Optional[str] = None
-    respath: Optional[str] = None
-    snappath: Optional[str] = None
+    submitted_at: str | None = None
+    launched_at: str | None = None
+    connected_at: str | None = None
+    completed_at: str | None = None
+    jobpath: str | None = None
+    respath: str | None = None
+    snappath: str | None = None
 
     @field_validator("payload", mode="before")
     @classmethod
@@ -113,7 +114,7 @@ class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
 class Reply(BaseModel):
     success: bool
     msg: str
-    data: Optional[Any] = None
+    data: Any | None = None
 
 
 class Pipeline(BaseModel):
@@ -127,7 +128,7 @@ class Component(BaseModel):
     device: str
     driver: str
     address: str
-    channel: Optional[str] = None
+    channel: str | None = None
 
 
 class Device(BaseModel):
@@ -152,7 +153,7 @@ class DeviceFile(BaseModel):
 
     @field_validator("filename", mode="before")
     @classmethod
-    def coerce_filename(cls, val: Union[str, Path]) -> Path:
+    def coerce_filename(cls, val: str | Path) -> Path:
         if isinstance(val, str):
             return Path(val)
         return val

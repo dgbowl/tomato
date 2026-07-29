@@ -27,8 +27,14 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
-    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
+    subprocess.run(
+        ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
+        check=True,
+    )
+    subprocess.run(
+        ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
+        check=True,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
@@ -48,8 +54,14 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
         yaml.dump(jsdata, ouf)
-    subprocess.run(["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."])
-    subprocess.run(["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"])
+    subprocess.run(
+        ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
+        check=True,
+    )
+    subprocess.run(
+        ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
+        check=True,
+    )
     assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
@@ -63,6 +75,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         ["passata", "status", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert "Success: component ('psutil-addr', '10') is not running" in ret.stdout
@@ -71,6 +84,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         ["passata", "attrs", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert "Success: attrs of component ('psutil-addr', '10') are" in ret.stdout
@@ -79,6 +93,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         ["passata", "constants", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
         capture_output=True,
         text=True,
+        check=True,
     )
     print(f"{ret=}")
     assert "Success: constants of component ('psutil-addr', '10') are" in ret.stdout

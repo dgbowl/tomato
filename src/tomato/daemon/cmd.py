@@ -12,8 +12,7 @@ All functions in this module return a :class:`~tomato.models.Reply`.
 
 import logging
 
-import tomato.daemon.drvdb as drvdb
-import tomato.daemon.pipdb as pipdb
+from tomato.daemon import drvdb, pipdb
 from tomato.models import (
     Daemon,
     DrvState,
@@ -57,7 +56,7 @@ def reload(msg: dict, daemon: Daemon) -> Reply:
     if daemon.status == "bootstrap":
         dbpath = daemon.settings["jobs"]["dbpath"]
         drvs = []
-        for dname in daemon.devicefile.drivers.keys():
+        for dname in daemon.devicefile.drivers:
             ds = DrvState(name=dname)
             drv = drvdb.get_drv(name=dname, dbpath=dbpath)
             if drv is None:
@@ -66,7 +65,7 @@ def reload(msg: dict, daemon: Daemon) -> Reply:
             drvs.append(drv.name)
 
         pips = []
-        for pname in daemon.devicefile.pipelines.keys():
+        for pname in daemon.devicefile.pipelines:
             ps = PipState(name=pname)
             pip = pipdb.get_pip(name=pname, dbpath=dbpath)
             if pip is None:

@@ -9,8 +9,8 @@ import logging
 from typing import Union
 
 try:
-    from rocrate.model import ContextEntity, Person  # ty: ignore[unresolved-import]
-    from rocrate.rocrate import ROCrate  # ty: ignore[unresolved-import]
+    from rocrate.model import ContextEntity, Person
+    from rocrate.rocrate import ROCrate
 
     _has_rocrate = True
 except ImportError:
