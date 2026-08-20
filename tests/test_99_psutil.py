@@ -79,7 +79,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         check=True,
     )
     print(f"{ret=}")
-    assert f"Success: component {NAME!r} is not running" in ret.stdout
+    assert "Success: component ('psutil-addr', '10') is not running" in ret.stdout
 
     ret = subprocess.run(
         ["passata", "attrs", NAME, "-p", f"{PORT}"],
@@ -88,7 +88,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         check=True,
     )
     print(f"{ret=}")
-    assert f"Success: attrs of component {NAME!r} are" in ret.stdout
+    assert "Success: attrs of component ('psutil-addr', '10') are" in ret.stdout
 
     ret = subprocess.run(
         ["passata", "constants", NAME, "-p", f"{PORT}"],
@@ -97,4 +97,4 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         check=True,
     )
     print(f"{ret=}")
-    assert f"Success: constants of component {NAME!r} are" in ret.stdout
+    assert "Success: constants of component ('psutil-addr', '10') are" in ret.stdout
