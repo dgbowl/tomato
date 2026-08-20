@@ -73,7 +73,7 @@ def manager(timeout: int = 500):
                 logger.warning("%s: resetting component '%s'", pip.name, cn)
                 dreq = context.socket(zmq.REQ)
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = {"address": cmp.address, "channel": cmp.channel}
+                params = cmp.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_reset", "params": params})
                 dret = dreq.recv_pyobj()
                 if dret.success is False:

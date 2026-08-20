@@ -57,7 +57,7 @@ def tomato_driver_bootstrap(
             if interface.version in {"2.1", "2.0"}:
                 key = (comp.address, comp.channel)
             else:
-                key = interface.args_to_name(comp.address, comp.channel)
+                key = comp.name
             if key in interface.devmap:
                 logger.debug(
                     "component %s already registered, skipping",
@@ -74,7 +74,9 @@ def tomato_driver_bootstrap(
                 )
                 continue
             logger.info("registering component %s", comp.name)
-            ret = interface.cmp_register(address=comp.address, channel=comp.channel)
+            ret = interface.cmp_register(
+                name=comp.name, address=comp.address, channel=comp.channel
+            )
             if ret.success:
                 logger.debug("registered component %s: %s", comp.name, ret.msg)
             else:

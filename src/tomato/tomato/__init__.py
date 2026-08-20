@@ -216,12 +216,13 @@ def status(
         elif stgrp == "components":
             keys = ["name", "driver", "device", "capabilities"]
             rets = {k: v.model_dump() for k, v in daemon.devicefile.components.items()}
-            for ckey, cval in rets.items():
-                drv = drvdb.get_drv(name=cval["driver"], dbpath=dbpath)
+            # for ckey, cval in rets.items():
+            for ckey, cval in daemon.devicefile.components.items():
+                drv = drvdb.get_drv(name=cval.driver, dbpath=dbpath)
                 assert drv is not None
                 dreq = context.socket(zmq.REQ)
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = {"address": cval["address"], "channel": cval["channel"]}
+                params = cval.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
                 dret = dreq.recv_pyobj()
                 if dret.success and dret.data is not None and len(dret.data) > 0:

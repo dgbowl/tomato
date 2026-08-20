@@ -100,21 +100,10 @@ class ModelInterface(metaclass=ABCMeta):
         mod = importlib.import_module(self.__module__)
         return mod.Component(self, name, **kwargs)
 
-    def args_to_name(self, address: str | None, channel: str | None) -> str:
-        if address is not None and channel is not None:
-            key = f"{self.name}:{address}:{channel}"
-        elif address is not None:
-            key = f"{self.name}:{address}"
-        elif channel is not None:
-            key = f"{self.name}::{channel}"
-        else:
-            key = f"{self.name}"
-        return key
-
     @log_errors
     @to_reply
     def cmp_register(
-        self, address: str | None, channel: str | None, **kwargs: dict
+        self, name: str, address: str | None, channel: str | None, **kwargs: dict
     ) -> tuple[bool, str, set | None]:
         """
         Register a new device component in this driver.
@@ -123,7 +112,6 @@ class ModelInterface(metaclass=ABCMeta):
 
         Returns the name of the registered component as the :obj:`Reply.data`.
         """
-        name = self.args_to_name(address, channel)
         try:
             self.devmap[name] = self.ComponentFactory(
                 address=address, channel=channel, name=name, **kwargs

@@ -67,7 +67,10 @@ def method_validate(
                 assert drv is not None
                 req: zmq.Socket = context.socket(zmq.REQ)
                 req.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = {"task": task, "address": cmp.address, "channel": cmp.channel}
+                params = {
+                    "task": task,
+                    **cmp.model_dump(),
+                }  # TODO: just name
                 ret, req = lpp.comm(
                     req,
                     {"cmd": "task_validate", "params": params},
@@ -106,7 +109,7 @@ def find_matching_pipelines(
             assert drv is not None
             dreq = context.socket(zmq.REQ)
             dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-            params = {"address": cmp.address, "channel": cmp.channel}
+            params = cmp.model_dump()
             dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
             dret = dreq.recv_pyobj()
             if dret.success and dret.data is not None:
@@ -529,7 +532,7 @@ def job_thread(
         logger.debug("%s: setting lpp_timeout to %d ms", role, lppargs["timeout"])
 
     logger.info("%s: job thread of %s attached to tomato-daemon", role, component.name)
-    kwargs = {"address": component.address, "channel": component.channel}
+    kwargs = component.model_dump()
 
     datapath = Path(jobpath) / f"{role}.pkl"
     logger.debug("%s: processing tasks on component %s", role, component.name)

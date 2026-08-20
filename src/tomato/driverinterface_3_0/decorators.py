@@ -15,8 +15,6 @@ def in_devmap(func):
     def wrapper(self, **kwargs):
         if "name" in kwargs:
             name = kwargs.pop("name")
-        elif "address" in kwargs and "channel" in kwargs:
-            name = self.args_to_name(kwargs.pop("address"), kwargs.pop("channel"))
         else:
             logger.critical(f"{kwargs=}")
 

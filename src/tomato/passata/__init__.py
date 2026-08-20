@@ -89,7 +89,7 @@ def status(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -114,7 +114,7 @@ def register(
         return ret
     cmp, drv = ret
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -142,7 +142,7 @@ def attrs(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -170,7 +170,7 @@ def capabilities(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -198,7 +198,7 @@ def constants(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -227,7 +227,7 @@ def get_attrs(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -274,7 +274,7 @@ def set_attr(
     if not ret.success:
         return ret
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -309,7 +309,7 @@ def reset(
     if not ret.success:
         return ret
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -337,7 +337,7 @@ def get_last_data(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
@@ -365,7 +365,7 @@ def measure(
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
-    kwargs = {"channel": cmp.channel, "address": cmp.address}
+    kwargs = cmp.model_dump()
     req: zmq.Socket = context.socket(zmq.REQ)
     req.RCVTIMEO = RCVTIMEO
     req.connect(f"tcp://127.0.0.1:{drv.port}")
