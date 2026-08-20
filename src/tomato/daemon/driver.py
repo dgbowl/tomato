@@ -54,7 +54,10 @@ def tomato_driver_bootstrap(
     logger.info("registering components for driver '%s'", driver)
     for comp in daemon.devicefile.components.values():
         if comp.driver == driver:
-            key = (comp.address, comp.channel)
+            if interface.version in {"2.1", "2.0"}:
+                key = (comp.address, comp.channel)
+            else:
+                key = interface.args_to_name(comp.address, comp.channel)
             if key in interface.devmap:
                 logger.debug(
                     "component %s already registered, skipping",
@@ -110,7 +113,10 @@ def perform_idle_measurements(
     if t_last is not None and t_now - t_last < imi:
         return t_last
     for key in interface.devmap:
-        interface.cmp_measure(key=key)
+        if interface.version in {"2.1", "2.0"}:
+            interface.cmp_measure(key=key)
+        else:
+            interface.cmp_measure(name=key)
     return t_now
 
 

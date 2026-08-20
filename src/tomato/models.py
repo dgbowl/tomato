@@ -191,7 +191,10 @@ class DeviceFile(BaseModel):
                     )
                     for ch in dev.channels:
                         pname = pip["name"].replace("*", ch)
-                        cname = f"{dev.driver}:({dev.address},{ch})"
+                        if dev.address is None:
+                            cname = f"{dev.driver}::{ch}"
+                        else:
+                            cname = f"{dev.driver}:{dev.address}:{ch}"
                         self.components[cname] = Component(
                             name=cname,
                             device=dev.name,
@@ -215,7 +218,14 @@ class DeviceFile(BaseModel):
                         f"channel {comp['channel']} is not among "
                         f"device channels {dev.channels}."
                     )
-                    cname = f"{dev.driver}:({dev.address},{comp['channel']})"
+                    if dev.address is not None and comp["channel"] is not None:
+                        cname = f"{dev.driver}:{dev.address}:{comp['channel']}"
+                    elif dev.address is None:
+                        cname = f"{dev.driver}::{comp['channel']}"
+                    elif comp["channel"] is None:
+                        cname = f"{dev.driver}:{dev.address}"
+                    else:
+                        cname = f"{dev.driver}"
                     self.components[cname] = Component(
                         name=cname,
                         device=dev.name,
