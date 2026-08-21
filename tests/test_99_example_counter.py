@@ -85,11 +85,11 @@ def test_counter_snapshot_metadata(
 
     assert os.path.exists("snapshot.1.nc")
     utils.sync_files()
-    with xr.open_datatree("snapshot.1.nc") as dt:
-        assert "tomato_version" in dt.attrs
-        assert "tomato_Job" in dt.attrs
-        for group in dt:
-            assert "tomato_Component" in dt[group].attrs
+    dt = xr.load_datatree("snapshot.1.nc")
+    assert "tomato_version" in dt.attrs
+    assert "tomato_Job" in dt.attrs
+    for group in dt:
+        assert "tomato_Component" in dt[group].attrs
 
 
 @pytest.mark.parametrize(

@@ -53,8 +53,8 @@ def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
     for i in range(nreps):
         i += 1
         assert os.path.exists(f"results.{i}.nc")
-        with xr.open_datatree(f"results.{i}.nc") as dt:
-            completed_at = Job.model_validate_json(dt.attrs["tomato_Job"]).completed_at
+        dt = xr.load_datatree(f"results.{i}.nc")
+        completed_at = Job.model_validate_json(dt.attrs["tomato_Job"]).completed_at
         assert completed_at is not None
         ti = datetime.fromisoformat(completed_at)
         if prev is not None:

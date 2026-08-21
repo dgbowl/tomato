@@ -43,8 +43,9 @@ def merge_netcdfs(job: Job, snapshot=False) -> str:
     assert outstr is not None
     outpath = Path(outstr).resolve()
     logger.debug("saving DataTree into a NetCDF file at '%s'", outpath)
-    dt.to_netcdf(outpath, engine="h5netcdf")
-    dt.close()
+    with outpath.open("w+b") as out:
+        dt.to_netcdf(out, engine="h5netcdf")
+        dt.close()
     return str(outpath)
 
 

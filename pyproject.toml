@@ -42,7 +42,8 @@ dependencies = [
 testing = [
     "pytest",
     "pytest-env",
-    "tomato-example-counter >= 2.0.0",
+    #"tomato-example-counter >= 2.0.0",
+    "tomato-example-counter @ git+https://github.com/dgbowl/tomato-example-counter@driverinterface_3.0",
     "tomato-psutil >= 2.1.0",
 ]
 docs = [
