@@ -41,6 +41,7 @@ dependencies = [
 [project.optional-dependencies]
 testing = [
     "pytest",
+    "pytest-env",
     "tomato-example-counter >= 2.0.0",
     "tomato-psutil >= 2.1.0",
 ]
@@ -77,3 +78,6 @@ dirty_template = "{tag}.post{ccount}+dirty"
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "DEBUG"
+env = [
+    "HDF5_USE_FILE_LOCKING=FALSE",
+]
