@@ -201,14 +201,12 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Get the status report from the specified device component.
 
-        Iterates over all :class:`Attrs` on the component that have ``status=True`` and returns their values in the :obj:`Reply.data` as a :class:`dict`.
-        """
-        ret = {}
-        for k, attr in self.devmap[name].attrs(**kwargs).items():
-            if attr.status:
-                ret[k] = self.devmap[name].get_attr(attr=k, **kwargs)
+        Returns a flag in :obj:`Reply.data['running']` indicating whether the component is running.
 
-        ret["running"] = self.devmap[name].running
+        Passthrough to :func:`ModelDevice.status`. Returns the :class:`dict` of attribute values marked as ``status=True``.
+        """
+        ret = self.devmap[name].status()
+        ret["running"] = self.devmap[name].running  # ty: ignore[invalid-assignment]
         msg = f"component {name!r} is{' ' if ret['running'] else ' not '}running"
         return (True, msg, ret)
 
@@ -641,7 +639,11 @@ class ModelComponent(metaclass=ABCMeta):
         """Returns a :class:`set` of all supported techniques."""
 
     def status(self, **kwargs) -> dict[str, Val]:
-        """Compiles a status report from :class:`Attrs` marked as `status=True`."""
+        """
+        Function indicating component status.
+
+        Compiles a status report from :class:`Attrs` marked as ``status=True``. The implementation of function in driver modules should also perform checks whether the component is still reachable.
+        """
         status = {}
         for attr, props in self.attrs().items():
             if props.status:
