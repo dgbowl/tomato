@@ -104,7 +104,7 @@ class ModelInterface(metaclass=ABCMeta):
     @to_reply
     def cmp_register(
         self, name: str, address: str | None, channel: str | None, **kwargs: dict
-    ) -> tuple[bool, str, set | None]:
+    ) -> tuple[bool, str, str | None]:
         """
         Register a new device component in this driver.
 
@@ -116,9 +116,8 @@ class ModelInterface(metaclass=ABCMeta):
             self.devmap[name] = self.ComponentFactory(
                 address=address, channel=channel, name=name, **kwargs
             )
-            capabs = self.devmap[name].capabilities()
             self.retries[name] = 0
-            return (True, f"device {name!r} registered", capabs)
+            return (True, f"component {name!r} registered", name)
         except RuntimeError as e:
             self.retries[name] += 1
             return (False, f"failed to register {name!r}: {e!s}", None)

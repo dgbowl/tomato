@@ -289,13 +289,6 @@ def tomato_driver() -> None:
                         msg="settings received",
                         data=msg.get("params"),
                     )
-                elif msg["cmd"] == "cmp_register":
-                    ret = interface.cmp_register(**msg["params"])
-                    cname = f"{args.driver}:({msg['params']['address']},{msg['params']['channel']})"
-                    if ret.success:
-                        params = {"name": cname, "capabilities": ret.data}
-                        req.send_pyobj({"cmd": "component", "params": params})
-                        ret = req.recv_pyobj()
                 elif hasattr(interface, msg["cmd"]):
                     try:
                         ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
