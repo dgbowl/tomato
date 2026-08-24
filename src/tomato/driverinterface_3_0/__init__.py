@@ -174,9 +174,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Set value of the :class:`Attr` of the specified device component.
 
-        Pass-through to the :func:`ModelDevice.set_attr` function. No type or
-        read-write validation performed here! Returns the validated or coerced
-        value as the :obj:`Reply.data`.
+        Pass-through to the :func:`ModelDevice.set_attr` function. No type or read-write validation performed here! Returns the validated or coerced value as the :obj:`Reply.data`.
         """
         ret = self.devmap[name].set_attr(attr=attr, val=val, **kwargs)
         return (True, f"attr {attr!r} of component {name!r} set to {ret}", ret)
@@ -190,8 +188,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Get value of the :class:`Attr` from the specified device component.
 
-        Pass-through to the :func:`ModelDevice.get_attr` function. No type
-        coercion is done here. Returns the value as the :obj:`Reply.data`.
+        Pass-through to the :func:`ModelDevice.get_attr` function. No type coercion is done here. Returns the value as the :obj:`Reply.data`.
 
         """
         ret = self.devmap[name].get_attr(attr=attr, **kwargs)
@@ -204,8 +201,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Get the status report from the specified device component.
 
-        Iterates over all :class:`Attrs` on the component that have ``status=True`` and
-        returns their values in the :obj:`Reply.data` as a :class:`dict`.
+        Iterates over all :class:`Attrs` on the component that have ``status=True`` and returns their values in the :obj:`Reply.data` as a :class:`dict`.
         """
         ret = {}
         for k, attr in self.devmap[name].attrs(**kwargs).items():
@@ -223,8 +219,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Returns the capabilities of the device component.
 
-        Pass-through to :func:`ModelDevice.capabilities`. Returns the :class:`set`
-        of capabilities in :obj:`Reply.data`.
+        Pass-through to :func:`ModelDevice.capabilities`. Returns the :class:`set` of capabilities in :obj:`Reply.data`.
         """
         ret = self.devmap[name].capabilities(**kwargs)
         return (True, f"capabilities supported by component {name!r} are: {ret}", ret)
@@ -236,8 +231,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Query available :class:`Attrs` on the specified device component.
 
-        Pass-through to the :func:`ModelDevice.attrs` function. Returns the
-        :class:`dict` of attributes as the :obj:`Reply.data`.
+        Pass-through to the :func:`ModelDevice.attrs` function. Returns the :class:`dict` of attributes as the :obj:`Reply.data`.
         """
         ret = self.devmap[name].attrs(**kwargs)
         return (True, f"attrs of component {name!r} are: {ret}", ret)
@@ -263,8 +257,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Fetch the last stored data on the component.
 
-        Passthrough to :func:`ModelDevice.get_last_data`. The data in the form of
-        a :class:`xarray.Dataset` is returned as the :obj:`Reply.data`.
+        Passthrough to :func:`ModelDevice.get_last_data`. The data in the form of a :class:`xarray.Dataset` is returned as the :obj:`Reply.data`.
         """
         ret = self.devmap[name].get_last_data(**kwargs)
         if ret is None:
@@ -277,8 +270,7 @@ class ModelInterface(metaclass=ABCMeta):
     @in_devmap
     def cmp_measure(self, name: str, **kwargs: dict) -> tuple[bool, str, None]:
         """
-        Do a single measurement on the component according to its current
-        configuration.
+        Do a single measurement on the component according to its current configuration.
 
         Fails if the component already has a running task / measurement.
 
@@ -300,9 +292,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Submit a :class:`Task` onto the specified device component.
 
-        Pushes the supplied :class:`Task` into the :class:`~queue.Queue` of the component,
-        then starts the worker thread (if not already started). Checks that the
-        :class:`Task` is among the capabilities of this component.
+        Pushes the supplied :class:`Task` into the :class:`~queue.Queue` of the component, then starts the worker thread (if not already started). Checks that the :class:`Task` is among the capabilities of this component.
         """
         ret = self.task_validate(name=name, task=task, **kwargs)
         if not ret.success:
@@ -319,9 +309,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Returns the task readiness status of the specified device component.
 
-        The `running` entry in the data slot of the :class:`Reply` indicates whether
-        a :class:`Task` is running. The `can_submit` entry indicates whether another
-        :class:`Task` can be queued onto the device component already.
+        The `running` entry in the data slot of the :class:`Reply` indicates whether a :class:`Task` is running. The `can_submit` entry indicates whether another :class:`Task` can be queued onto the device component already.
         """
         running = self.devmap[name].running
         can_submit = not self.devmap[name].task_list.full()
@@ -340,8 +328,7 @@ class ModelInterface(metaclass=ABCMeta):
 
         Pass-through to :func:`ModelComponent.stop_task` and :func:`ModelInterface.task_data`.
 
-        If there is any cached data, it is returned as a :class:`xarray.Dataset` in the
-        :obj:`Reply.data` and the cache is cleared.
+        If there is any cached data, it is returned as a :class:`xarray.Dataset` in the :obj:`Reply.data` and the cache is cleared.
         """
         self.devmap[name].stop_task(**kwargs)
         ret = self.task_data(name=name)
@@ -354,12 +341,9 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Return cached task data on the device component and clean the cache.
 
-        Pass-through for :func:`ModelDevice.get_data`, which should return a
-        :class:`xarray.Dataset` that is fully annotated.
+        Pass-through for :func:`ModelDevice.get_data`, which should return a :class:`xarray.Dataset` that is fully annotated.
 
-        This function gets called by the job thread every `device.pollrate`, it therefore
-        incurs some IPC cost.
-
+        This function gets called by the job thread every `device.pollrate`, it therefore incurs some IPC cost.
         """
         data = self.devmap[name].get_data(**kwargs)
         if data is None:
@@ -372,9 +356,7 @@ class ModelInterface(metaclass=ABCMeta):
     @in_devmap
     def task_validate(self, name: str, task: Task, **kwargs) -> tuple[bool, str, None]:
         """
-        Validate the provided :class:`Task` for submission on the component
-        identified by :obj:`key`.
-
+        Validate the provided :class:`Task` for submission on the component identified by :obj:`key`.
         """
         logger.info("validating task '%s' on component %s", task.technique_name, name)
         if task.technique_name not in self.devmap[name].capabilities(**kwargs):
@@ -422,9 +404,7 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     def status(self) -> Reply:
         """
-        Returns the driver status. Currently that is the names of the components in
-        the `devmap`.
-
+        Returns the driver status. Currently that is the names of the components in the `devmap`.
         """
         devkeys = list(self.devmap.keys())
         return Reply(
@@ -466,10 +446,7 @@ class ModelInterface(metaclass=ABCMeta):
         """
         Resets the driver.
 
-        Called when the driver process is quitting. Instructs all remaining tasks to
-        stop. Warns when devices linger. Passes through to :func:`cmp_reset`. This is
-        not a pass-through to :func:`cmp_teardown`.
-
+        Called when the driver process is quitting. Instructs all remaining tasks to stop. Warns when devices linger. Passes through to :func:`cmp_reset`. This is not a pass-through to :func:`cmp_teardown`.
         """
         logger.info("resetting all components on this driver")
         for name in list(self.devmap.keys()):
@@ -485,9 +462,7 @@ class ModelComponent(metaclass=ABCMeta):
     """
     An abstract base class specifying a manager for an individual component.
 
-    This class should handle determining attributes and capabilities of the component,
-    the reading/writing of those attributes, processing of tasks, and caching and
-    returning of task data.
+    This class should handle determining attributes and capabilities of the component, the reading/writing of those attributes, processing of tasks, and caching and returning of task data.
     """
 
     driver: ModelInterface
@@ -535,11 +510,7 @@ class ModelComponent(metaclass=ABCMeta):
         """
         Target function for the :obj:`self.thread` when handling :class:`Tasks`.
 
-        This function waits for a :class:`Task` passed using :obj:`self.task_list`,
-        then handles setting all :class:`Attrs` using the :func:`prepare_task`
-        function, and finally handles the main loop of the task, periodically running
-        the :func:`do_task` function (using `task.sampling_interval`) until the
-        maximum task duration (i.e. `task.max_duration`) is exceeded.
+        This function waits for a :class:`Task` passed using :obj:`self.task_list`, then handles setting all :class:`Attrs` using the :func:`prepare_task` function, and finally handles the main loop of the task, periodically running the :func:`do_task` function (using `task.sampling_interval`) until the maximum task duration (i.e. `task.max_duration`) is exceeded.
 
         The :obj:`self.thread` is reset to None.
         """
@@ -594,8 +565,7 @@ class ModelComponent(metaclass=ABCMeta):
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
         """
-        Given a :class:`Task`, prepare this component for execution by setting all
-        :class:`Attrs` as specified in the `task.task_params` dictionary.
+        Given a :class:`Task`, prepare this component for execution by setting all :class:`Attrs` as specified in the `task.task_params` dictionary.
         """
         if task.task_params is not None:
             for k, v in task.task_params.items():
@@ -607,9 +577,7 @@ class ModelComponent(metaclass=ABCMeta):
         """
         Periodically called task execution function.
 
-        This function is responsible for updating :obj:`self.data` with new data, i.e.
-        performing the measurement. It should also update the value of :obj:`self.last_data`,
-        so that the component status is consistent with the cached data.
+        This function is responsible for updating :obj:`self.data` with new data, i.e. performing the measurement. It should also update the value of :obj:`self.last_data`, so that the component status is consistent with the cached data.
         """
         self.do_measure(**kwargs)
         if self.data is None:
@@ -626,8 +594,7 @@ class ModelComponent(metaclass=ABCMeta):
         """
         One shot execution worker function.
 
-        This function is performs a measurement using the current configuration of
-        :obj:`self.attrs`, and stores the result in :obj:`self.last_data`.
+        This function is performs a measurement using the current configuration of :obj:`self.attrs`, and stores the result in :obj:`self.last_data`.
         """
 
     def stop_task(self, **kwargs: dict) -> None:
@@ -643,8 +610,7 @@ class ModelComponent(metaclass=ABCMeta):
         """
         Sets the specified :class:`Attr` to :obj:`val`.
 
-        This function should handle any data type coercion and validation
-        using e.g. :obj:`Attr.maximum` and :obj:`Attr.minimum`.
+        This function should handle any data type coercion and validation using e.g. :obj:`Attr.maximum` and :obj:`Attr.minimum`.
 
         Returns the coerced value corresponding to :obj:`val`.
         """
@@ -655,8 +621,7 @@ class ModelComponent(metaclass=ABCMeta):
 
     def get_data(self, **kwargs: dict) -> xr.Dataset | None:
         """
-        Returns the cached :obj:`self.data` as a :class:`xarray.Dataset` before
-        clearing the cache.
+        Returns the cached :obj:`self.data` as a :class:`xarray.Dataset` before clearing the cache.
         """
         with self.datalock:
             ret = self.data
@@ -710,7 +675,6 @@ class ModelComponent(metaclass=ABCMeta):
         Resets the component to an initial status.
 
         This function makes the component ready to accept new :class:`Task`. When accessed via the :func:`ModelInterface.cmp_reset`, it is always called after :func:`ModelComponent.stop`, therefore all :class:`Tasks` on the device can be assumed to be stopped.
-
         """
         logger.info("%s: resetting component", self.name)
         self.data = None
