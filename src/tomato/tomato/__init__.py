@@ -23,7 +23,7 @@ import os
 import textwrap
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from importlib import metadata
 from pathlib import Path
 
@@ -401,7 +401,7 @@ def init(
     defaults = textwrap.dedent(
         f"""\
         # Default settings for tomato-{VERSION}
-        # Generated on {datetime.now(timezone.utc)!s}
+        # Generated on {datetime.now(UTC)!s}
         datadir = '{datadir}'
         logdir = '{logdir}'
 

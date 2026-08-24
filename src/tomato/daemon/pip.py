@@ -7,8 +7,7 @@
 
 import logging
 import time
-from datetime import datetime, timedelta
-from datetime import timezone as tz
+from datetime import UTC, datetime, timedelta
 from threading import current_thread
 
 import psutil
@@ -54,7 +53,7 @@ def manager(timeout: int = 500):
                 pass
             elif job.pid is None and job.launched_at is not None:
                 # subprocess was started but job is not (yet) connected
-                td = datetime.now(tz.utc) - datetime.fromisoformat(job.launched_at)
+                td = datetime.now(UTC) - datetime.fromisoformat(job.launched_at)
                 if td > timedelta(MAX_JOB_NOPID):
                     pass
                 else:

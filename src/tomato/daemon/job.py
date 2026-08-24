@@ -13,7 +13,7 @@ import subprocess
 import sys
 import time
 from collections.abc import Sequence
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from importlib import metadata
 from pathlib import Path
 from threading import Thread, current_thread
@@ -169,7 +169,7 @@ def manage_running(daemon: Daemon):
             pidexists = False
         elif job.pid is None and job.launched_at is not None:
             # subprocess was started but job is not (yet) connected
-            td = datetime.now(timezone.utc) - datetime.fromisoformat(job.launched_at)
+            td = datetime.now(UTC) - datetime.fromisoformat(job.launched_at)
             if td > MAX_JOB_NOPID:
                 logger.error("job %d failed to register, aborting", job.id)
                 job.status = "rd"
@@ -207,7 +207,7 @@ def manage_running(daemon: Daemon):
 
         if update:
             logger.debug(f"job {job.id} will be updated to status {params['status']!r}")
-            params["completed_at"] = str(datetime.now(timezone.utc))
+            params["completed_at"] = str(datetime.now(UTC))
             jobdb.update_job_id(job.id, params, dbpath)
 
 
@@ -313,7 +313,7 @@ def action_queued(
                 subprocess.Popen(cmd, start_new_session=True)
 
             logger.debug("job %d: setting launched_at", job.id)
-            params = {"launched_at": str(datetime.now(timezone.utc))}
+            params = {"launched_at": str(datetime.now(UTC))}
             job = jobdb.update_job_id(jobid, params, dbpath)
             logger.info(
                 "job %d: launched on pip '%s' and path '%s'", job.id, pname, jpath
@@ -444,7 +444,7 @@ def tomato_job() -> None:
     params = {
         "pid": pid,
         "status": "r",
-        "connected_at": str(datetime.now(timezone.utc)),
+        "connected_at": str(datetime.now(UTC)),
     }
     jobdb.update_job_id(jobid, params, args.dbpath)
 
@@ -471,7 +471,7 @@ def tomato_job() -> None:
     ret = job_main_loop(args.port, job, pip, logpath)
     logger.info("==============================")
 
-    job.completed_at = str(datetime.now(timezone.utc))
+    job.completed_at = str(datetime.now(UTC))
 
     if ret is None:
         job.status = "c"

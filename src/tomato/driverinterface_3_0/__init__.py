@@ -75,7 +75,7 @@ class ModelInterface(metaclass=ABCMeta):
 
     # Instance attributes
     devmap: dict[str, "ModelComponent"]
-    """Map of registered device components, the tuple keys are `name = driver:(address,channel)`"""
+    """Map of registered device components, the keys are set from the :obj:`tomato.models.Component.name`."""
 
     retries: dict[str, int]
     """Map of components which failed to register, with number of retries as values."""
@@ -409,7 +409,7 @@ class ModelInterface(metaclass=ABCMeta):
             if isinstance(val, pint.Quantity):
                 if val.dimensionless and props.units is not None:
                     val = pint.Quantity(val.m, props.units)
-                if val.dimensionality != pint.Quantity(props.units).dimensionality:
+                if val.dimensionality != pint.Quantity(props.units).dimensionality:  # ty: ignore[no-matching-overload]
                     msg = f"val {val!r} has the wrong dimensionality"
                     return (False, msg, None)
             if props.minimum is not None and val < props.minimum:

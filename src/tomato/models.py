@@ -9,7 +9,7 @@ import logging
 import pickle
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Self
 
 import toml
 import yaml
@@ -23,7 +23,6 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from typing_extensions import Self
 
 __all__ = [
     "Component",
@@ -134,6 +133,7 @@ class Component(BaseModel):
     @computed_field
     @property
     def name(self) -> str:
+        """The component name, derived from the address, channel, and driver of this component."""
         if self.address is not None and self.channel is not None:
             key = f"{self.driver}:{self.address}:{self.channel}"
         elif self.address is not None:

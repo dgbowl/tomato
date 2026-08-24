@@ -18,7 +18,7 @@ Module of functions to manage the job queue of :mod:`tomato`. Includes job manag
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
@@ -111,7 +111,7 @@ def submit(
 
     log.debug("queueing 'payload' into 'queue'")
     dbpath = daemon.settings["jobs"]["dbpath"]
-    dt = str(datetime.now(timezone.utc))
+    dt = str(datetime.now(UTC))
     params = {"payload": payload, "jobname": jobname, "submitted_at": dt}
     job = jobdb.insert_job(job=Job(id=0, **params), dbpath=dbpath)  # ty: ignore[invalid-argument-type]
 

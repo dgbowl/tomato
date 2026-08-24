@@ -13,9 +13,14 @@
 
 Developed at the ConCat lab at TU Berlin.
 
+.. warning::
+
+   Minimum python version has been increased to ``python>=3.11`` in ``tomato-3.0``.
+
 Changes from ``tomato-2.2`` include:
 
 - The state of *drivers*, *components*, and *pipelines* is now stored in a :mod:`sqlite3` database for persistent storage.
+- Included a new :mod:`~tomato.driverinterface_3_0` module.
 
 
 .. codeauthor::
