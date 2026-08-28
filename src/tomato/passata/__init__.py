@@ -66,10 +66,10 @@ def _running_or_force(
                 msg="will not 'set_attr' on a component with invalid status",
                 data=None,
             )
-        if ret.data["running"]:
+        if ret.data.state not in {"idle", "meas"}:
             return Reply(
                 success=False,
-                msg=f"will not 'set_attr' on a running component {name!r}",
+                msg=f"will not 'set_attr' on a component with state {ret.data.state!r}",
                 data=None,
             )
     return Reply(success=True, msg="can 'set_attr'")

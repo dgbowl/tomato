@@ -21,7 +21,7 @@ def test_passata_api_status(start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert "running" in ret.data
+    assert ret.data.state is not None
 
 
 def test_passata_api_attrs(start_tomato_daemon, stop_tomato_daemon):

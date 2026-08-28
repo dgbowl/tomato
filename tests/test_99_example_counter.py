@@ -146,7 +146,7 @@ def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_
         **kwargs,
     )
     assert not ret.success
-    assert "measurement already running" in ret.msg
+    assert "is not idle" in ret.msg
 
     assert utils.wait_until_ketchup_status(1, "c", PORT, 10000)
     time.sleep(1)
