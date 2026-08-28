@@ -103,7 +103,7 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert ret.data["running"]
+    assert ret.data.state == "task"
 
     ret = tomato.passata.reset(
         name=NAME,
@@ -120,7 +120,7 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert ret.data["running"] is False
+    assert ret.data.state != "task"
 
 
 def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
