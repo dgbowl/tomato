@@ -165,7 +165,7 @@ def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     assert ret.success is False
-    assert "running component" in ret.msg
+    assert "on a component with state 'task'" in ret.msg
 
     ret = tomato.passata.set_attr(
         name=NAME,
