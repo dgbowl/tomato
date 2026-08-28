@@ -11,7 +11,7 @@ import time
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from threading import RLock, Thread, current_thread
-from typing import Any
+from typing import Any, Literal
 
 import pint
 import xarray as xr
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class Attr(BaseModel, arbitrary_types_allowed=True):
-    """A Pydantic :class:`BaseModel` used to describe device attributes."""
+    """A :class:`~pydantic.BaseModel` used to describe device attributes."""
 
     type: Type
     """Data type of the attribute"""
@@ -47,6 +47,30 @@ class Attr(BaseModel, arbitrary_types_allowed=True):
 
     options: set | None = None
     """Allowed set of values for the attribute, optional."""
+
+
+class Status(BaseModel):
+    """A :class:`~pydantic.BaseModel` used to describe component status."""
+
+    connected: bool
+    """Indicates whether component is communicating correctly."""
+
+    state: Literal["idle", "meas", "task", "stop"] | None
+    """
+    Indicates device state:
+
+        - ``idle`` when component is connected and idle,
+        - ``meas`` when component is doing an idle measurement,
+        - ``task`` when component has a running task,
+        - ``stop`` when component is being torn down or reset,
+        - None when component is not connected.
+    """
+
+    can_submit: bool
+    """Indicates whether a :class:`Task` can be sent to component queue."""
+
+    attrs: dict[str, Any] = Field(default_factory=dict)
+    """Container for any attrs that are returned as part of a status."""
 
 
 class ModelInterface(metaclass=ABCMeta):
@@ -197,7 +221,7 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def cmp_status(self, name: str, **kwargs: dict) -> tuple[bool, str, dict]:
+    def cmp_status(self, name: str, **kwargs: dict) -> tuple[bool, str, Status]:
         """
         Get the status report from the specified device component.
 
@@ -206,8 +230,7 @@ class ModelInterface(metaclass=ABCMeta):
         Passthrough to :func:`ModelDevice.status`. Returns the :class:`dict` of attribute values marked as ``status=True``.
         """
         ret = self.devmap[name].status()
-        ret["running"] = self.devmap[name].running  # ty: ignore[invalid-assignment]
-        msg = f"component {name!r} is{' ' if ret['running'] else ' not '}running"
+        msg = f"component {name!r} is{' ' if ret.connected else ' not '}connected"
         return (True, msg, ret)
 
     @log_errors
@@ -273,8 +296,8 @@ class ModelInterface(metaclass=ABCMeta):
         Fails if the component already has a running task / measurement.
 
         """
-        if self.devmap[name].running:
-            return (False, f"measurement already running on component {name!r}", None)
+        if self.devmap[name].state != "idle":
+            return (False, f"component {name!r} is not idle", None)
         elif not self.devmap[name].task_list.empty():
             return (False, f"task list component {name!r} not empty", None)
         else:
@@ -304,18 +327,16 @@ class ModelInterface(metaclass=ABCMeta):
     @to_reply
     @in_devmap
     def task_status(self, name: str, **kwargs: dict) -> tuple[bool, str, dict]:
-        """
-        Returns the task readiness status of the specified device component.
-
-        The `running` entry in the data slot of the :class:`Reply` indicates whether a :class:`Task` is running. The `can_submit` entry indicates whether another :class:`Task` can be queued onto the device component already.
-        """
-        running = self.devmap[name].running
-        can_submit = not self.devmap[name].task_list.full()
-        data = {"running": bool(running), "can_submit": can_submit, "task": running}
-        if running is False:
-            return (True, f"component {name!r} is idle", data)
+        status = self.devmap[name].status(**kwargs)
+        data = {
+            "running": status.state in {"task"},
+            "can_submit": status.can_submit,
+            "task": self.devmap[name].running_task,
+        }
+        if data["running"] is False:
+            return (True, "component is idle", data)
         else:
-            return (True, f"component {name!r} has a running task", data)
+            return (True, "component has a running task", data)
 
     @log_errors
     @to_reply
@@ -487,7 +508,10 @@ class ModelComponent(metaclass=ABCMeta):
     task_list: queue.Queue
     """A :class:`~queue.Queue` used to pass :class:`Tasks` to the worker :class:`Thread`."""
 
-    running: bool | Task | str
+    state: str | None = None
+    """A :class:`str` holding the component state."""
+
+    running_task: Task | None = None
 
     def __init__(self, driver, name, **kwargs) -> None:
         self.driver = driver
@@ -499,7 +523,8 @@ class ModelComponent(metaclass=ABCMeta):
         self.thread.start()
         self.data = None
         self.last_data = None
-        self.running = False
+        self.state = "idle"
+        self.running_task = None
         self.datalock = RLock()
         self.constants = {}
         atexit.register(self.reset)
@@ -523,10 +548,11 @@ class ModelComponent(metaclass=ABCMeta):
                 setattr(thread, "do_run", False)  # noqa: B010
                 break
 
-            self.running = task
             try:
                 setattr(thread, "do_run_task", False)  # noqa: B010
                 if isinstance(task, Task):
+                    self.state = "task"
+                    self.running_task = task
                     self.prepare_task(task=task)
                     setattr(thread, "do_run_task", True)  # noqa: B010
                     t_0 = time.perf_counter()
@@ -546,9 +572,11 @@ class ModelComponent(metaclass=ABCMeta):
                         time.sleep(min(0.2, max(0.01, task.sampling_interval / 20)))
                     logger.info("%s: task '%s' is done", self.name, task.technique_name)
                 elif task == "measure":
+                    self.state = "meas"
                     self.do_measure()
                     logger.debug("%s: measurement is done", self.name)
                 else:
+                    self.state = "idle"
                     logger.critical("%s: unknown task received: '%s'", self.name, task)
                     setattr(thread, "do_run", False)  # noqa: B010
                     break
@@ -557,8 +585,9 @@ class ModelComponent(metaclass=ABCMeta):
                 logger.critical(e, exc_info=True)
                 setattr(thread, "do_run", False)  # noqa: B010
                 break
-            self.running = False
-        self.running = False
+            self.state = "idle"
+            self.running_task = None
+        self.state = "stop"
         logger.warning("%s: task runner thread is quitting", self.name)
 
     def prepare_task(self, task: Task, **kwargs: dict) -> None:
@@ -638,17 +667,15 @@ class ModelComponent(metaclass=ABCMeta):
     def capabilities(self, **kwargs) -> set:
         """Returns a :class:`set` of all supported techniques."""
 
-    def status(self, **kwargs) -> dict[str, Val]:
+    @abstractmethod
+    def status(self, **kwargs) -> Status:
         """
         Function indicating component status.
 
-        Compiles a status report from :class:`Attrs` marked as ``status=True``. The implementation of function in driver modules should also perform checks whether the component is still reachable.
+        The implementation of this function in the driver module should perform checks whether the components is still reachable (:obj:`Status.connected`) and what state is the component in (:obj:`Status.state`).
+
+        The function should also compile a status report using :class:`Attrs` marked as ``status=True`` and return it as :obj:`Status.attrs`.
         """
-        status = {}
-        for attr, props in self.attrs().items():
-            if props.status:
-                status[attr] = self.get_attr(attr)
-        return status
 
     def stop(self, **kwargs) -> None:
         """
@@ -679,6 +706,7 @@ class ModelComponent(metaclass=ABCMeta):
         This function makes the component ready to accept new :class:`Task`. When accessed via the :func:`ModelInterface.cmp_reset`, it is always called after :func:`ModelComponent.stop`, therefore all :class:`Tasks` on the device can be assumed to be stopped.
         """
         logger.info("%s: resetting component", self.name)
+        self.state = "stop"
         self.data = None
         self.datalock = RLock()
         self.task_list = queue.Queue()
@@ -687,3 +715,4 @@ class ModelComponent(metaclass=ABCMeta):
         setattr(self.thread, "do_run_task", False)  # noqa: B010
         self.thread.start()
         logger.info("%s: reset of component is done", self.name)
+        self.state = "idle"
