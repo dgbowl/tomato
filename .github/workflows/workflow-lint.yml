@@ -9,6 +9,6 @@ jobs:
    steps:
      - uses: actions/checkout@v7
      - name: Run ruff check
-       uses: astral-sh/ruff-action@v4.0.0
+       uses: astral-sh/ruff-action@v4.1.0
      - name: Run ruff format
        run: ruff format --check
