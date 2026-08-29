@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.ketchup: CLI and API for the tomato job queue &mdash; tomato 3.0rc1.post1 documentation</title>
+  <title>tomato.ketchup: CLI and API for the tomato job queue &mdash; tomato 3.0rc1.post2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=9dac232a"></script>
+        <script src="../_static/documentation_options.js?v=aa54a940"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                3.0rc1.post1
+                3.0rc1.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -150,7 +150,7 @@ and submit it to tomato’s queue.</p>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job with a job name:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">submit</span> <span class="n">counter_15_0</span><span class="mf">.1</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">j</span> <span class="n">jobname_is_this</span>
-<span class="go">Success: job submitted successfully with jobid 1 and jobname &#39;jobname_is_this&#39;</span>
+<span class="go">Success: job submitted successfully with jobid 1 and jobname 'jobname_is_this'</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Submit a job with yaml output:</span>
@@ -161,7 +161,7 @@ and submit it to tomato’s queue.</p>
 <span class="go">  id: 1</span>
 <span class="go">  [...]</span>
 <span class="go">  status: q</span>
-<span class="go">  submitted_at: &#39;2024-11-17 19:39:16.972593+00:00&#39;</span>
+<span class="go">  submitted_at: '2024-11-17 19:39:16.972593+00:00'</span>
 <span class="go">msg: job submitted successfully with jobid 1</span>
 <span class="go">success: true</span>
 </pre></div>
@@ -181,13 +181,13 @@ and submit it to tomato’s queue.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of a given job</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span>
-<span class="go">Success: found 1 job with status &#39;qw&#39;: [1]</span>
+<span class="go">Success: found 1 job with status 'qw': [1]</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of multiple jobs</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">status</span> <span class="mi">1</span> <span class="mi">2</span>
-<span class="go">Success: found 2 job with status &#39;qw&#39;: [1]</span>
-<span class="go">         found 1 job with status &#39;c&#39; : [2]</span>
+<span class="go">Success: found 2 job with status 'qw': [1]</span>
+<span class="go">         found 1 job with status 'c' : [2]</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get status of non-existent job</span>
@@ -203,8 +203,8 @@ and submit it to tomato’s queue.</p>
 <span class="go">  id: 1</span>
 <span class="go">  [...]</span>
 <span class="go">  status: qw</span>
-<span class="go">  submitted_at: &#39;2024-11-17 17:53:46.133355+00:00&#39;</span>
-<span class="go">msg: found 1 job with status [&#39;qw&#39;]</span>
+<span class="go">  submitted_at: '2024-11-17 17:53:46.133355+00:00'</span>
+<span class="go">msg: found 1 job with status ['qw']</span>
 <span class="go">success: true</span>
 </pre></div>
 </div>
@@ -234,7 +234,7 @@ job to <code class="docutils literal notranslate"><span class="pre">rd</span></c
 <span class="go">  id: 2</span>
 <span class="go">  [...]</span>
 <span class="go">  status: cd</span>
-<span class="go">  submitted_at: &#39;2024-03-03 15:23:50.702504+00:00&#39;</span>
+<span class="go">  submitted_at: '2024-03-03 15:23:50.702504+00:00'</span>
 <span class="go">msg: job [2] cancelled successfully</span>
 <span class="go">success: true</span>
 </pre></div>
@@ -271,12 +271,12 @@ job status and <code class="docutils literal notranslate"><span class="pre">jobi
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Search for a valid jobname</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">search</span> <span class="n">counter</span>
-<span class="go">Success: job matching &#39;counter&#39; found: [1]</span>
+<span class="go">Success: job matching 'counter' found: [1]</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Search for an invalid jobname</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ketchup</span> <span class="n">search</span> <span class="n">nothing</span>
-<span class="go">Failure: no job matching &#39;nothing&#39; found</span>
+<span class="go">Failure: no job matching 'nothing' found</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -310,7 +310,7 @@ job status and <code class="docutils literal notranslate"><span class="pre">jobi
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 3.0rc1.post1
+      v: 3.0rc1.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
