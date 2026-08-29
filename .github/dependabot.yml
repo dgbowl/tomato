@@ -1,0 +1,9 @@
+---
+version: 2
+updates:
+    - package-ecosystem: github-actions
+      directory: "/"
+      schedule:
+          day: tuesday
+          interval: weekly
+      target-branch: main
