@@ -233,3 +233,6 @@ class DeviceFile(BaseModel):
         self.drivers = {d: Driver(name=d) for d in drivers_needed}
 
         return self
+
+
+Daemon.model_rebuild()
