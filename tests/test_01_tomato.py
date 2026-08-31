@@ -2,6 +2,7 @@ import os
 import subprocess
 from pathlib import Path
 
+import yaml
 import zmq
 
 from tomato import tomato
@@ -251,3 +252,17 @@ def test_tomato_component(start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success is False
     req.close()
+
+
+def test_tomato_cli_status(start_tomato_daemon, stop_tomato_daemon):
+    for stgrp in ["tomato", "pipelines", "drivers", "devices", "components"]:
+        ret = subprocess.run(
+            ["tomato", "status", stgrp, "--yaml", "-p", f"{PORT}"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        print(f"{ret=}")
+        assert "success: true" in ret.stdout
+        data = yaml.safe_load(ret.stdout)
+        assert data["success"]
