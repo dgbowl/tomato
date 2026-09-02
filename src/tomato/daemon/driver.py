@@ -54,7 +54,10 @@ def tomato_driver_bootstrap(
     logger.info("registering components for driver '%s'", driver)
     for comp in daemon.devicefile.components.values():
         if comp.driver == driver:
-            key = (comp.address, comp.channel)
+            if interface.version in {"2.1", "2.0"}:
+                key = (comp.address, comp.channel)
+            else:
+                key = comp.name
             if key in interface.devmap:
                 logger.debug(
                     "component %s already registered, skipping",
@@ -71,7 +74,9 @@ def tomato_driver_bootstrap(
                 )
                 continue
             logger.info("registering component %s", comp.name)
-            ret = interface.cmp_register(address=comp.address, channel=comp.channel)
+            ret = interface.cmp_register(
+                name=comp.name, address=comp.address, channel=comp.channel
+            )
             if ret.success:
                 logger.debug("registered component %s: %s", comp.name, ret.msg)
             else:
@@ -110,7 +115,10 @@ def perform_idle_measurements(
     if t_last is not None and t_now - t_last < imi:
         return t_last
     for key in interface.devmap:
-        interface.cmp_measure(key=key)
+        if interface.version in {"2.1", "2.0"}:
+            interface.cmp_measure(key=key)
+        else:
+            interface.cmp_measure(name=key)
     return t_now
 
 
@@ -281,13 +289,6 @@ def tomato_driver() -> None:
                         msg="settings received",
                         data=msg.get("params"),
                     )
-                elif msg["cmd"] == "cmp_register":
-                    ret = interface.cmp_register(**msg["params"])
-                    cname = f"{args.driver}:({msg['params']['address']},{msg['params']['channel']})"
-                    if ret.success:
-                        params = {"name": cname, "capabilities": ret.data}
-                        req.send_pyobj({"cmd": "component", "params": params})
-                        ret = req.recv_pyobj()
                 elif hasattr(interface, msg["cmd"]):
                     try:
                         ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))

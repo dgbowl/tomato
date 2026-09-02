@@ -9,14 +9,20 @@ import logging
 import pickle
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Self
 
 import toml
 import yaml
 from dgbowl_schemas.tomato import to_payload
 from dgbowl_schemas.tomato.payload import Payload, Task
-from pydantic import BaseModel, Field, PlainSerializer, field_validator, model_validator
-from typing_extensions import Self
+from pydantic import (
+    BaseModel,
+    Field,
+    PlainSerializer,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 
 __all__ = [
     "Component",
@@ -124,10 +130,23 @@ class Pipeline(BaseModel):
 
 
 class Component(BaseModel):
-    name: str
+    @computed_field
+    @property
+    def name(self) -> str:
+        """The component name, derived from the address, channel, and driver of this component."""
+        if self.address is not None and self.channel is not None:
+            key = f"{self.driver}:{self.address}:{self.channel}"
+        elif self.address is not None:
+            key = f"{self.driver}:{self.address}"
+        elif self.channel is not None:
+            key = f"{self.driver}::{self.channel}"
+        else:
+            key = f"{self.driver}"
+        return key
+
     device: str
     driver: str
-    address: str
+    address: str | None = None
     channel: str | None = None
 
 
@@ -191,17 +210,16 @@ class DeviceFile(BaseModel):
                     )
                     for ch in dev.channels:
                         pname = pip["name"].replace("*", ch)
-                        cname = f"{dev.driver}:({dev.address},{ch})"
-                        self.components[cname] = Component(
-                            name=cname,
+                        cobj = Component(
                             device=dev.name,
                             driver=dev.driver,
                             address=dev.address,
                             channel=ch,
                         )
+                        self.components[cobj.name] = cobj
                         self.pipelines[pname] = Pipeline(
                             name=pname,
-                            components={comp["role"]: cname},
+                            components={comp["role"]: cobj.name},
                         )
             else:
                 cmps = {}
@@ -215,15 +233,14 @@ class DeviceFile(BaseModel):
                         f"channel {comp['channel']} is not among "
                         f"device channels {dev.channels}."
                     )
-                    cname = f"{dev.driver}:({dev.address},{comp['channel']})"
-                    self.components[cname] = Component(
-                        name=cname,
+                    cobj = Component(
                         device=dev.name,
                         driver=dev.driver,
                         address=dev.address,
                         channel=comp["channel"],
                     )
-                    cmps[comp["role"]] = cname
+                    self.components[cobj.name] = cobj
+                    cmps[comp["role"]] = cobj.name
                 self.pipelines[pip["name"]] = Pipeline(
                     name=pip["name"],
                     components=cmps,

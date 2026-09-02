@@ -240,13 +240,13 @@ def test_tomato_component(start_tomato_daemon, stop_tomato_daemon):
     assert ret.success
     assert len(ret.data) == 1
 
-    params = {"channel": "1", "address": "example-addr"}
+    params = {"name": "example_counter:example-addr:1"}
     req.send_pyobj({"cmd": "cmp_status", "params": params})
     ret = req.recv_pyobj()
     print(f"{ret=}")
     assert ret.success
 
-    params = {"channel": "2", "address": "example-addr"}
+    params = {"name": "example_counter:example-addr:2"}
     req.send_pyobj({"cmd": "cmp_status", "params": params})
     ret = req.recv_pyobj()
     print(f"{ret=}")

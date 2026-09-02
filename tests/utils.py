@@ -166,12 +166,12 @@ def sync_files():
 def check_npoints_file(fn: str, npoints: dict[str, int]):
     sync_files()
     assert os.path.exists(fn)
-    with xr.open_datatree(fn) as dt:
-        assert "tomato_version" in dt.attrs
-        assert "tomato_Job" in dt.attrs
-        for group, points in npoints.items():
-            assert group in dt
-            print(f"{dt[group]['uts'].size=}")
-            assert dt[group]["uts"].size >= points
-            print(f"{dt[group].attrs=}")
-            assert "tomato_Component" in dt[group].attrs
+    dt = xr.load_datatree(fn)
+    assert "tomato_version" in dt.attrs
+    assert "tomato_Job" in dt.attrs
+    for group, points in npoints.items():
+        assert group in dt
+        print(f"{dt[group]['uts'].size=}")
+        assert dt[group]["uts"].size >= points
+        print(f"{dt[group].attrs=}")
+        assert "tomato_Component" in dt[group].attrs

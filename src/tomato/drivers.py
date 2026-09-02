@@ -11,8 +11,9 @@ import logging
 
 from tomato.driverinterface_2_0 import ModelInterface as MI_2_0
 from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
+from tomato.driverinterface_3_0 import ModelInterface as MI_3_0
 
-ModelInterface = MI_2_0 | MI_2_1
+ModelInterface = MI_2_0 | MI_2_1 | MI_3_0
 
 logger = logging.getLogger(__name__)
 

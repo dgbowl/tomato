@@ -7,8 +7,7 @@
 
 import logging
 import time
-from datetime import datetime, timedelta
-from datetime import timezone as tz
+from datetime import UTC, datetime, timedelta
 from threading import current_thread
 
 import psutil
@@ -54,7 +53,7 @@ def manager(timeout: int = 500):
                 pass
             elif job.pid is None and job.launched_at is not None:
                 # subprocess was started but job is not (yet) connected
-                td = datetime.now(tz.utc) - datetime.fromisoformat(job.launched_at)
+                td = datetime.now(UTC) - datetime.fromisoformat(job.launched_at)
                 if td > timedelta(MAX_JOB_NOPID):
                     pass
                 else:
@@ -73,7 +72,7 @@ def manager(timeout: int = 500):
                 logger.warning("%s: resetting component '%s'", pip.name, cn)
                 dreq = context.socket(zmq.REQ)
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = {"address": cmp.address, "channel": cmp.channel}
+                params = cmp.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_reset", "params": params})
                 dret = dreq.recv_pyobj()
                 if dret.success is False:

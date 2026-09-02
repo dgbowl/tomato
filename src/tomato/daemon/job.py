@@ -13,7 +13,7 @@ import subprocess
 import sys
 import time
 from collections.abc import Sequence
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from importlib import metadata
 from pathlib import Path
 from threading import Thread, current_thread
@@ -67,7 +67,10 @@ def method_validate(
                 assert drv is not None
                 req: zmq.Socket = context.socket(zmq.REQ)
                 req.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = {"task": task, "address": cmp.address, "channel": cmp.channel}
+                params = {
+                    "task": task,
+                    **cmp.model_dump(),
+                }  # TODO: just name
                 ret, req = lpp.comm(
                     req,
                     {"cmd": "task_validate", "params": params},
@@ -106,7 +109,7 @@ def find_matching_pipelines(
             assert drv is not None
             dreq = context.socket(zmq.REQ)
             dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-            params = {"address": cmp.address, "channel": cmp.channel}
+            params = cmp.model_dump()
             dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
             dret = dreq.recv_pyobj()
             if dret.success and dret.data is not None:
@@ -166,7 +169,7 @@ def manage_running(daemon: Daemon):
             pidexists = False
         elif job.pid is None and job.launched_at is not None:
             # subprocess was started but job is not (yet) connected
-            td = datetime.now(timezone.utc) - datetime.fromisoformat(job.launched_at)
+            td = datetime.now(UTC) - datetime.fromisoformat(job.launched_at)
             if td > MAX_JOB_NOPID:
                 logger.error("job %d failed to register, aborting", job.id)
                 job.status = "rd"
@@ -204,7 +207,7 @@ def manage_running(daemon: Daemon):
 
         if update:
             logger.debug(f"job {job.id} will be updated to status {params['status']!r}")
-            params["completed_at"] = str(datetime.now(timezone.utc))
+            params["completed_at"] = str(datetime.now(UTC))
             jobdb.update_job_id(job.id, params, dbpath)
 
 
@@ -310,7 +313,7 @@ def action_queued(
                 subprocess.Popen(cmd, start_new_session=True)
 
             logger.debug("job %d: setting launched_at", job.id)
-            params = {"launched_at": str(datetime.now(timezone.utc))}
+            params = {"launched_at": str(datetime.now(UTC))}
             job = jobdb.update_job_id(jobid, params, dbpath)
             logger.info(
                 "job %d: launched on pip '%s' and path '%s'", job.id, pname, jpath
@@ -441,7 +444,7 @@ def tomato_job() -> None:
     params = {
         "pid": pid,
         "status": "r",
-        "connected_at": str(datetime.now(timezone.utc)),
+        "connected_at": str(datetime.now(UTC)),
     }
     jobdb.update_job_id(jobid, params, args.dbpath)
 
@@ -468,7 +471,7 @@ def tomato_job() -> None:
     ret = job_main_loop(args.port, job, pip, logpath)
     logger.info("==============================")
 
-    job.completed_at = str(datetime.now(timezone.utc))
+    job.completed_at = str(datetime.now(UTC))
 
     if ret is None:
         job.status = "c"
@@ -529,7 +532,7 @@ def job_thread(
         logger.debug("%s: setting lpp_timeout to %d ms", role, lppargs["timeout"])
 
     logger.info("%s: job thread of %s attached to tomato-daemon", role, component.name)
-    kwargs = {"address": component.address, "channel": component.channel}
+    kwargs = component.model_dump()
 
     datapath = Path(jobpath) / f"{role}.pkl"
     logger.debug("%s: processing tasks on component %s", role, component.name)

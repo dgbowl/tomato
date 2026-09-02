@@ -17,14 +17,13 @@ readme = "README.md"
 license = "GPL-3.0-or-later"
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 dependencies = [
     "appdirs >= 1.4.0",
     "toml >= 0.10",
@@ -41,7 +40,9 @@ dependencies = [
 [project.optional-dependencies]
 testing = [
     "pytest",
-    "tomato-example-counter >= 2.0.0",
+    "pytest-env",
+    #"tomato-example-counter >= 2.0.0",
+    "tomato-example-counter @ git+https://github.com/dgbowl/tomato-example-counter@driverinterface_3.0",
     "tomato-psutil >= 2.1.0",
 ]
 docs = [
@@ -77,3 +78,6 @@ dirty_template = "{tag}.post{ccount}+dirty"
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "DEBUG"
+env = [
+    "HDF5_USE_FILE_LOCKING=FALSE",
+]

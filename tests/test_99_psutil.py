@@ -10,6 +10,7 @@ from tomato import tomato
 from . import utils
 
 PORT = 12345
+NAME = "psutil:psutil-addr:10"
 
 
 @pytest.mark.parametrize(
@@ -72,7 +73,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
     assert ret.data["psutil"]["version"] == "2.1"
 
     ret = subprocess.run(
-        ["passata", "status", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
+        ["passata", "status", NAME, "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,
@@ -81,7 +82,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
     assert "Success: component ('psutil-addr', '10') is not running" in ret.stdout
 
     ret = subprocess.run(
-        ["passata", "attrs", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
+        ["passata", "attrs", NAME, "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,
@@ -90,7 +91,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
     assert "Success: attrs of component ('psutil-addr', '10') are" in ret.stdout
 
     ret = subprocess.run(
-        ["passata", "constants", "psutil:(psutil-addr,10)", "-p", f"{PORT}"],
+        ["passata", "constants", NAME, "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,

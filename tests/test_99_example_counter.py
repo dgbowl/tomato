@@ -85,11 +85,11 @@ def test_counter_snapshot_metadata(
 
     assert os.path.exists("snapshot.1.nc")
     utils.sync_files()
-    with xr.open_datatree("snapshot.1.nc") as dt:
-        assert "tomato_version" in dt.attrs
-        assert "tomato_Job" in dt.attrs
-        for group in dt:
-            assert "tomato_Component" in dt[group].attrs
+    dt = xr.load_datatree("snapshot.1.nc")
+    assert "tomato_version" in dt.attrs
+    assert "tomato_Job" in dt.attrs
+    for group in dt:
+        assert "tomato_Component" in dt[group].attrs
 
 
 @pytest.mark.parametrize(
@@ -136,22 +136,22 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
 def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
     kwargs = {"port": PORT, "timeout": 1000}
-    ret = tomato.passata.measure(name="example_counter:(example-addr,1)", **kwargs)
+    ret = tomato.passata.measure(name="example_counter:example-addr:1", **kwargs)
     assert ret.success
 
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
     ret = tomato.passata.measure(
-        name="example_counter:(example-addr,1)",
+        name="example_counter:example-addr:1",
         **kwargs,
     )
     assert not ret.success
-    assert "measurement already running" in ret.msg
+    assert "is not idle" in ret.msg
 
     assert utils.wait_until_ketchup_status(1, "c", PORT, 10000)
     time.sleep(1)
     ret = tomato.passata.measure(
-        name="example_counter:(example-addr,1)",
+        name="example_counter:example-addr:1",
         **kwargs,
     )
     assert ret.success

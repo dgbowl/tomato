@@ -10,22 +10,23 @@ from . import utils
 PORT = 12345
 TIME = 1000
 kwargs = {"port": PORT, "timeout": TIME}
+NAME = "example_counter:example-addr:1"
 
 
 def test_passata_api_status(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.status(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert "running" in ret.data
+    assert ret.data.state is not None
 
 
 def test_passata_api_attrs(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.attrs(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
@@ -36,7 +37,7 @@ def test_passata_api_attrs(start_tomato_daemon, stop_tomato_daemon):
 
 def test_passata_api_capabs(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.capabilities(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
@@ -47,7 +48,7 @@ def test_passata_api_capabs(start_tomato_daemon, stop_tomato_daemon):
 
 def test_passata_api_get_attrs(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.get_attrs(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         attrs=["max", "min"],
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
@@ -61,7 +62,7 @@ def test_passata_api_get_attrs(start_tomato_daemon, stop_tomato_daemon):
 def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
     val = random.random() * 100
     ret = tomato.passata.set_attr(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         attr="max",
         val=val,
         **kwargs,  # ty: ignore[invalid-argument-type]
@@ -70,7 +71,7 @@ def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
     assert ret.success
     assert ret.data == val
     ret = tomato.passata.get_attrs(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         attrs=["max"],
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
@@ -82,7 +83,7 @@ def test_passata_api_set_attr(start_tomato_daemon, stop_tomato_daemon):
 
 def test_passata_api_reset(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.reset(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
@@ -96,16 +97,16 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
     time.sleep(1)  # Delay to make sure the job task on the driver is running
 
     ret = tomato.passata.status(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert ret.data["running"]
+    assert ret.data.state == "task"
 
     ret = tomato.passata.reset(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         force=True,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
@@ -113,18 +114,18 @@ def test_passata_api_reset_force(datadir, start_tomato_daemon, stop_tomato_daemo
     assert ret.success
 
     ret = tomato.passata.status(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert ret.data["running"] is False
+    assert ret.data.state != "task"
 
 
 def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.constants(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
@@ -135,13 +136,13 @@ def test_passata_api_constants(start_tomato_daemon, stop_tomato_daemon):
 
 def test_passata_api_measure_last_data(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.passata.measure(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     assert ret.success
 
     ret = tomato.passata.get_last_data(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     print(f"{ret=}")
@@ -157,17 +158,17 @@ def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
     time.sleep(1)  # Delay to make sure the job task on the driver is running
 
     ret = tomato.passata.set_attr(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         attr="max",
         val=15,
         force=False,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
     assert ret.success is False
-    assert "running component" in ret.msg
+    assert "on a component with state 'task'" in ret.msg
 
     ret = tomato.passata.set_attr(
-        name="example_counter:(example-addr,1)",
+        name=NAME,
         attr="max",
         val=15,
         force=True,
@@ -179,84 +180,46 @@ def test_passata_api_force(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 def test_passata_cli(start_tomato_daemon, stop_tomato_daemon):
     ret = subprocess.run(
-        [
-            "passata",
-            "status",
-            "example_counter:(example-addr,1)",
-            "-p",
-            f"{PORT}",
-        ],
+        ["passata", "status", NAME, "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,
     )
     print(f"{ret=}")
-    assert "Success: component ('example-addr', '1')" in ret.stdout
+    assert f"Success: component {NAME!r}" in ret.stdout
 
     ret = subprocess.run(
-        [
-            "passata",
-            "attrs",
-            "example_counter:(example-addr,1)",
-            "-p",
-            f"{PORT}",
-        ],
+        ["passata", "attrs", NAME, "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,
     )
     print(f"{ret=}")
-    assert "Success: attrs of component ('example-addr', '1') are" in ret.stdout
+    assert f"Success: attrs of component {NAME!r} are" in ret.stdout
 
     ret = subprocess.run(
-        [
-            "passata",
-            "capabilities",
-            "example_counter:(example-addr,1)",
-            "-p",
-            f"{PORT}",
-        ],
+        ["passata", "capabilities", NAME, "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,
     )
     print(f"{ret=}")
-    assert (
-        "Success: capabilities supported by component ('example-addr', '1') are"
-        in ret.stdout
-    )
+    assert f"Success: capabilities supported by component {NAME!r} are" in ret.stdout
 
     ret = subprocess.run(
-        [
-            "passata",
-            "get",
-            "example_counter:(example-addr,1)",
-            "max",
-            "-p",
-            f"{PORT}",
-        ],
+        ["passata", "get", NAME, "max", "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,
     )
     print(f"{ret=}")
-    assert (
-        "Success: attr 'max' of component 'example_counter:(example-addr,1)' is"
-        in ret.stdout
-    )
+    assert f"Success: attr 'max' of component {NAME!r} is" in ret.stdout
 
     ret = subprocess.run(
-        [
-            "passata",
-            "constants",
-            "example_counter:(example-addr,1)",
-            "max",
-            "-p",
-            f"{PORT}",
-        ],
+        ["passata", "constants", NAME, "max", "-p", f"{PORT}"],
         capture_output=True,
         text=True,
         check=True,
     )
     print(f"{ret=}")
-    assert "Success: constants of component ('example-addr', '1') are" in ret.stdout
+    assert f"Success: constants of component {NAME!r} are" in ret.stdout
