@@ -1,7 +1,7 @@
 Version history
 ===============
 
-.. include:: version.3.x.rst
+.. include:: version.3.0.rst
 
 .. include:: version.2.2.rst
 
