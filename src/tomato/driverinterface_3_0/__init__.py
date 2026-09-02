@@ -79,8 +79,6 @@ class ModelInterface(metaclass=ABCMeta):
 
     Individual driver modules should expose a :class:`DriverInterface` as a top-level import, which inherits from this abstract class. Only the methods of this class are used to interact with *drivers* and their *components*.
 
-    This class contains one abstract method, :func:`~ModelInterface.ComponentFactory`, that has to be re-implemented by the driver modules.
-
     All methods of this class should return :class:`Reply` objects (except the :func:`~ModelInterface.ComponentFactory` function). However, for better readability, a decorator function :func:`to_reply` is provided, so that the types of the return values can be explicitly defined here.
 
     """
@@ -527,7 +525,6 @@ class ModelComponent(metaclass=ABCMeta):
         self.running_task = None
         self.datalock = RLock()
         self.constants = {}
-        atexit.register(self.reset)
 
     def task_runner(self) -> None:
         """
