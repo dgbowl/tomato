@@ -51,7 +51,9 @@ The project is part of BATTERY 2030+, the large-scale European research initiati
    :caption: tomato driver library
 
    tomato-example-counter <https://github.com/dgbowl/tomato-example-counter>
+   tomato-example-trigr <https://github.com/dgbowl/tomato-example-trig>
    tomato-psutil <https://github.com/dgbowl/tomato-psutil>
+   tomato-alicat <https://github.com/dgbowl/tomato-alicat>
    tomato-bronkhorst <https://github.com/dgbowl/tomato-bronkhorst>
    tomato-jumo <https://github.com/dgbowl/tomato-jumo>
    tomato-mcc <https://github.com/dgbowl/tomato-mcc>
