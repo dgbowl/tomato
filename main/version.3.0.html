@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tomato-v3.0 &mdash; tomato 3.0rc1.post6 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5625b3e7"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tomato
+              <img src="_static/tomato.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                3.0rc1.post6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">tomato user manual</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-example-counter">tomato-example-counter</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-psutil">tomato-psutil</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-bronkhorst">tomato-bronkhorst</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-jumo">tomato-jumo</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-mcc">tomato-mcc</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-picovna">tomato-picovna</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.html">tomato package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tomato</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><strong>tomato</strong>-v3.0</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/version.3.0.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tomato-v3-0">
+<h1><strong>tomato</strong>-v3.0<a class="headerlink" href="#tomato-v3-0" title="Link to this heading"></a></h1>
+<p><em>Section author: Peter Kraus</em></p>
+<p>Developed at the ConCat lab at TU Berlin.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Minimum python version has been increased to <code class="docutils literal notranslate"><span class="pre">python&gt;=3.11</span></code> in <code class="docutils literal notranslate"><span class="pre">tomato-3.0</span></code>.</p>
+</div>
+<p>Changes from <code class="docutils literal notranslate"><span class="pre">tomato-2.2</span></code> include:</p>
+<ul>
+<li><p>The state of <em>drivers</em>, <em>components</em>, and <em>pipelines</em> is now stored in a <code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite3</span></code> database for persistent storage.</p></li>
+<li><p>The configuration files (<a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a>, <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a>) are now parsed by the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">daemon</span></code></a> into a new <a class="reference internal" href="apidoc/tomato.html#tomato.models.DeviceFile" title="tomato.models.DeviceFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">tomato.models.DeviceFile</span></code></a> model. This model holds the <a class="reference internal" href="apidoc/tomato.html#tomato.models.Component" title="tomato.models.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a>, <a class="reference internal" href="apidoc/tomato.html#tomato.models.Device" title="tomato.models.Device"><code class="xref py py-class docutils literal notranslate"><span class="pre">Device</span></code></a>, and <a class="reference internal" href="apidoc/tomato.html#tomato.models.Driver" title="tomato.models.Driver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a> models that are required to build the <a class="reference internal" href="apidoc/tomato.html#tomato.models.Pipeline" title="tomato.models.Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a> models.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As a consequence of this change, the <a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a> and <a class="reference internal" href="apidoc/tomato.passata.html#module-tomato.passata" title="tomato.passata"><code class="xref py py-mod docutils literal notranslate"><span class="pre">passata</span></code></a> API has changed.</p>
+</div>
+</li>
+<li><p>Included a new <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#module-tomato.driverinterface_3_0" title="tomato.driverinterface_3_0"><code class="xref py py-mod docutils literal notranslate"><span class="pre">driverinterface_3_0</span></code></a> module. The key changes here are:</p>
+<ul class="simple">
+<li><p>The abstract class representing the registered components is now called <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent" title="tomato.driverinterface_3_0.ModelComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelComponent</span></code></a>. The name <code class="docutils literal notranslate"><span class="pre">&quot;Component&quot;</span></code> (or <code class="docutils literal notranslate"><span class="pre">cmp</span></code>) should now be used consistently throughout instead of <code class="docutils literal notranslate"><span class="pre">&quot;Device&quot;</span></code>.</p></li>
+<li><p>The <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface.ComponentFactory" title="tomato.driverinterface_3_0.ModelInterface.ComponentFactory"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelInterface.ComponentFactory()</span></code></a> is no longer an abstract function. By default it attempts to instantiate the <code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code> class in the top level of the driver module. As a consequence, the <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface" title="tomato.driverinterface_3_0.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a> has no abstract methods/functions.</p></li>
+<li><p>The <a class="reference internal" href="apidoc/tomato.html#tomato.models.Component" title="tomato.models.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">tomato.models.Component</span></code></a> model now automatically generates its <a class="reference internal" href="apidoc/tomato.html#tomato.models.Component.name" title="tomato.models.Component.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Component.name</span></code></a>. As a consequence, the <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface.devmap" title="tomato.driverinterface_3_0.ModelInterface.devmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelInterface.devmap</span></code></a> has the <a class="reference internal" href="apidoc/tomato.html#tomato.models.Component.name" title="tomato.models.Component.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a> as a key and the correct <a class="reference internal" href="apidoc/tomato.html#tomato.models.Component.name" title="tomato.models.Component.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a> is returned appropriately throughout the code.</p></li>
+<li><p>Reworked <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.status" title="tomato.driverinterface_3_0.ModelComponent.status"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelComponent.status()</span></code></a>, which is now an abstract function, that should now return <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Status" title="tomato.driverinterface_3_0.Status"><code class="xref py py-class docutils literal notranslate"><span class="pre">Status</span></code></a> objects.</p></li>
+<li><p>Reworked <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.stop" title="tomato.driverinterface_3_0.ModelComponent.stop"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelComponent.stop()</span></code></a>, <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.reset" title="tomato.driverinterface_3_0.ModelComponent.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a>, and <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.quit" title="tomato.driverinterface_3_0.ModelComponent.quit"><code class="xref py py-func docutils literal notranslate"><span class="pre">quit()</span></code></a>:</p>
+<ul>
+<li><p><a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.stop" title="tomato.driverinterface_3_0.ModelComponent.stop"><code class="xref py py-func docutils literal notranslate"><span class="pre">stop()</span></code></a> is a helper function that should stop any activity on the component and bring it component into a safe state. It is called as part of <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface.cmp_stop" title="tomato.driverinterface_3_0.ModelInterface.cmp_stop"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelInterface.cmp_stop()</span></code></a>, <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface.cmp_reset" title="tomato.driverinterface_3_0.ModelInterface.cmp_reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_reset()</span></code></a>, and  <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface.cmp_quit" title="tomato.driverinterface_3_0.ModelInterface.cmp_quit"><code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_quit()</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.reset" title="tomato.driverinterface_3_0.ModelComponent.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a> is a helper function that should bring the component into a state ready for new <a class="reference internal" href="apidoc/tomato.html#tomato.models.Task" title="tomato.models.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code></a>. It is called after <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.stop" title="tomato.driverinterface_3_0.ModelComponent.stop"><code class="xref py py-func docutils literal notranslate"><span class="pre">stop()</span></code></a> in <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface.cmp_reset" title="tomato.driverinterface_3_0.ModelInterface.cmp_reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelInterface.cmp_reset()</span></code></a>, at the completion of every <code class="xref py py-class docutils literal notranslate"><span class="pre">Payload</span></code>.</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.quit" title="tomato.driverinterface_3_0.ModelComponent.quit"><code class="xref py py-func docutils literal notranslate"><span class="pre">quit()</span></code></a> is an abstract helper function that should ensure the component can be released by <strong>tomato</strong>. It is called after <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelComponent.stop" title="tomato.driverinterface_3_0.ModelComponent.stop"><code class="xref py py-func docutils literal notranslate"><span class="pre">stop()</span></code></a> in <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.ModelInterface.cmp_quit" title="tomato.driverinterface_3_0.ModelInterface.cmp_quit"><code class="xref py py-func docutils literal notranslate"><span class="pre">ModelInterface.cmp_quit()</span></code></a>, which is called whenever the driver process exits via an <code class="xref py py-mod docutils literal notranslate"><span class="pre">atexit</span></code> handler.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><em>Code author: Peter Kraus</em></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 - 2024, dgbowl authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Other Versions</span>
+      v: 3.0rc1.post6
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"> 
+      <script src="../versions.js"></script>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
