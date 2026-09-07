@@ -17,14 +17,18 @@ Module of functions to interact with drivers and components of :mod:`tomato`. In
 
 """
 
+import logging
 from typing import Any
 
 import zmq
 
 from tomato import tomato
 from tomato.daemon import drvdb
+from tomato.driverinterface_3_0 import Status
 from tomato.models import Component, DrvState, Reply
 from tomato.utils import context
+
+logger = logging.getLogger(__name__)
 
 RCVTIMEO = 3000
 
@@ -66,10 +70,13 @@ def _running_or_force(
                 msg="will not 'set_attr' on a component with invalid status",
                 data=None,
             )
-        if ret.data.state not in {"idle", "meas"}:
+        if (
+            isinstance(ret.data, Status) and ret.data.state not in {"idle", "meas"}
+        ) or (isinstance(ret.data, dict) and ret.data["running"]):
+            st = ret.data.state if isinstance(ret.data, Status) else "task"
             return Reply(
                 success=False,
-                msg=f"will not 'set_attr' on a component with state {ret.data.state!r}",
+                msg=f"will not 'set_attr' on a component with state {st!r}",
                 data=None,
             )
     return Reply(success=True, msg="can 'set_attr'")
