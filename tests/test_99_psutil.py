@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import os
 import subprocess
@@ -9,10 +10,17 @@ from tomato import tomato
 
 from . import utils
 
+ret = importlib.util.find_spec("tomato_psutil")
+if ret is None:
+    _has_psutil = False
+else:
+    _has_psutil = True
+
 PORT = 12345
 NAME = "psutil:psutil-addr:10"
 
 
+@pytest.mark.skipif(not _has_psutil, reason="requires tomato-psutil")
 @pytest.mark.parametrize(
     "casename, npoints",
     [
@@ -49,6 +57,7 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
     utils.check_npoints_file("results.1.nc", npoints)
 
 
+@pytest.mark.skipif(not _has_psutil, reason="requires tomato-psutil")
 def test_psutil_passata(datadir, stop_tomato_daemon):
     os.chdir(datadir)
     with open("devices_psutil.json", "r") as inf:
