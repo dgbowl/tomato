@@ -16,10 +16,10 @@ def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     assert ret.success
     assert ret.data is not None
-    assert len(ret.data.devicefile.drivers) == 1
-    assert len(ret.data.devicefile.devices) == 1
-    assert len(ret.data.devicefile.pipelines) == 1
-    assert len(ret.data.devicefile.components) == 1
+    assert len(ret.data.devicefile.drivers) == 2
+    assert len(ret.data.devicefile.devices) == 2
+    assert len(ret.data.devicefile.pipelines) == 2
+    assert len(ret.data.devicefile.components) == 2
 
 
 def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -29,10 +29,10 @@ def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert len(ret.data.devicefile.drivers) == 1
-    assert len(ret.data.devicefile.devices) == 1
-    assert len(ret.data.devicefile.pipelines) == 1
-    assert len(ret.data.devicefile.components) == 1
+    assert len(ret.data.devicefile.drivers) == 2
+    assert len(ret.data.devicefile.devices) == 2
+    assert len(ret.data.devicefile.pipelines) == 2
+    assert len(ret.data.devicefile.components) == 2
     assert ret.data.settings["drivers"]["example_counter"]["testparb"] == 1
     assert ret.data.devicefile.drivers["example_counter"].settings["testparb"] == 1
 
