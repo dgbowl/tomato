@@ -27,7 +27,7 @@ def test_tomato_status_up(start_tomato_daemon, stop_tomato_daemon):
     print(f"{ret=}")
     assert ret.success
     assert ret.data is not None
-    assert len(ret.data.devicefile.pipelines) == 1
+    assert len(ret.data.devicefile.pipelines) == 2
 
 
 def test_tomato_start_no_init(datadir, stop_tomato_daemon):

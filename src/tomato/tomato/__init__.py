@@ -434,12 +434,23 @@ def init(
             driver: example_counter
             address: example-addr
             channels: ["1"]
-            pollrate: 1.0
+          - name: dev-trig
+            driver: example_trig
+            address: example-addr
+            channels: ["1"]
         pipelines:
           - name: pip-counter
             devices:
               - role: counter
                 device: dev-counter
+                channel: "1"
+          - name: pip-both
+            devices:
+              - role: counter
+                device: dev-counter
+                channel: "1"
+              - role: trig
+                device: dev-trig
                 channel: "1"
         """
     )
