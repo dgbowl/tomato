@@ -198,7 +198,8 @@ def status(
             )
         elif stgrp == "devices":
             keys = ["name", "driver", "address", "channels"]
-            rets = daemon.devicefile.devices
+            devs = daemon.devicefile.devices
+            rets = {v.name: v.model_dump() for v in devs.values()}
             return Reply(
                 success=True,
                 msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
