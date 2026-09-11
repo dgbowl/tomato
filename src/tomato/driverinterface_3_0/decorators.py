@@ -1,8 +1,10 @@
+import ast
 import logging
 import sys
 from functools import wraps
 
 import pint
+from pydantic import BaseModel
 
 from tomato.driverinterface_3_0.types import Val
 from tomato.models import Reply
@@ -80,7 +82,7 @@ def coerce_val(func):
     """
 
     @wraps(func)
-    def wrapper(self, attr: str, val: Val, **kwargs: dict) -> Val:
+    def wrapper(self, attr: str, val: Val | None, **kwargs: dict) -> Val:
         if val is None:
             raise ValueError(f"attr {attr!r} cannot be None")
         if attr not in self.attrs():
@@ -90,8 +92,11 @@ def coerce_val(func):
             raise AttributeError(f"attr {attr!r} is read-only")
 
         if not isinstance(val, props.type):
-            # This may raise ValueError
-            val = props.type(val)
+            if issubclass(props.type, BaseModel) and isinstance(val, str):
+                val = props.type(**ast.literal_eval(val))
+            # This may raise ValueError or TypeError
+            else:
+                val = props.type(val)
         if props.options is not None and val not in props.options:
             raise ValueError(f"val {val!r} is not in allowed options {props.options}")
 
