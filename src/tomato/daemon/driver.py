@@ -18,7 +18,7 @@ import psutil
 import zmq
 
 import tomato.utils
-from tomato.daemon import drvdb
+from tomato.daemon import drvdb, lpp
 from tomato.drivers import ModelInterface, driver_to_interface
 from tomato.models import Daemon, DrvState, Reply
 from tomato.utils import context
@@ -129,9 +129,11 @@ def stop_tomato_driver(port: int) -> Reply:
     This function is used by the tomato driver manager to gracefully stop the driver, if an existing driver port is known.
     """
     req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj({"cmd": "stop", "sender": f"{__name__}.stop_tomato_driver"})
-    return req.recv_pyobj()
+    endpoint = f"tcp://127.0.0.1:{port}"
+    data = {"cmd": "stop", "sender": f"{__name__}.stop_tomato_driver"}
+    req.connect(endpoint)
+    ret, _ = lpp.comm(req, data, endpoint, retries=1)
+    return ret
 
 
 def kill_tomato_driver(pid: int):
@@ -352,6 +354,7 @@ def manager(timeout: int = 1000):
 
         dbpath = daemon.settings["jobs"]["dbpath"]
         drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+        logger.debug(f"{drivers=}")
         for d in drivers:
             tN = time.perf_counter()
             if d.name not in daemon.devicefile.drivers:
@@ -366,8 +369,10 @@ def manager(timeout: int = 1000):
                 else:
                     logger.error("%s: could not delete driver", d.name)
             elif d.port is not None:
-                if (tN - d.heartbeat_time > HEARTBEAT) or (
-                    d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY
+                if (
+                    (tN - d.heartbeat_time > HEARTBEAT)
+                    or (d.heartbeat_time > tN)  # can happen after reboot
+                    or (d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY)
                 ):
                     try:
                         logger.debug("%s: checking driver on port %d", d.name, d.port)
