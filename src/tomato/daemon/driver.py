@@ -370,8 +370,10 @@ def manager(timeout: int = 1000):
                 else:
                     logger.error("%s: could not delete driver", d.name)
             elif d.port is not None:
-                if (tN - d.heartbeat_time > HEARTBEAT) or (
-                    d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY
+                if (
+                    (tN - d.heartbeat_time > HEARTBEAT)
+                    or (d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY)
+                    or (d.heartbeat_time < tN)
                 ):
                     register = False
                     try:

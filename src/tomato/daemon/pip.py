@@ -84,7 +84,6 @@ def manager(timeout: int = 500):
                         "%s: could not communicate with driver '%s'", pip.name, drv.name
                     )
                     continue
-
                 if dret.success is False:
                     logger.warning(
                         "%s: reset of component '%s' failed: %s", pip.name, cn, dret.msg
