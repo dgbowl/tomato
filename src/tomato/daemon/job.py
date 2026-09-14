@@ -171,7 +171,7 @@ def manage_running(daemon: Daemon):
             # subprocess was started but job is not (yet) connected
             td = datetime.now(UTC) - datetime.fromisoformat(job.launched_at)
             if td > MAX_JOB_NOPID:
-                logger.error("job %d failed to register, aborting", job.id)
+                logger.error("%d: job failed to register, aborting", job.id)
                 job.status = "rd"
                 pidexists = False
             else:
@@ -206,7 +206,9 @@ def manage_running(daemon: Daemon):
             update = False
 
         if update:
-            logger.debug(f"job {job.id} will be updated to status {params['status']!r}")
+            logger.debug(
+                "%d: job will be updated to status '%s'", job.id, params["status"]
+            )
             params["completed_at"] = str(datetime.now(UTC))
             jobdb.update_job_id(job.id, params, dbpath)
 
@@ -225,7 +227,7 @@ def check_queued(daemon: Daemon) -> dict[int, list[str]]:
         matched[job.id] = find_matching_pipelines(daemon, job.payload.method)
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
-                "job %d can queue on pips: {%s}",
+                "%d: can queue on pips: {%s}",
                 job.id,
                 matched[job.id],
             )
@@ -267,13 +269,13 @@ def action_queued(
                 continue
             elif not ps.ready or ps.sampleid != job.payload.sample.identifier:
                 continue
-            logger.info("job %d: found a matched & ready pip '%s'", jobid, pname)
+            logger.info("%d: job found a matched & ready pip '%s'", jobid, pname)
 
-            logger.debug("job %d: making job directory", jobid)
+            logger.debug("%d: making job directory", jobid)
             root = Path(daemon.settings["jobs"]["storage"]) / str(jobid)
             os.makedirs(root)
 
-            logger.debug("job %d: storing jobdata.json", jobid)
+            logger.debug("%d: storing jobdata.json", jobid)
             jpath = root / "jobdata.json"
             repositories = {}
             for repo, repoparams in daemon.settings["repositories"].items():
@@ -288,13 +290,13 @@ def action_queued(
             with jpath.open("w", encoding="UTF-8") as of:
                 json.dump(jobargs, of, indent=1)
 
-            logger.debug("job %d: reserving pipeline %s", job.id, pname)
+            logger.debug("%d: reserving pipeline %s", job.id, pname)
             params = {"jobid": job.id, "ready": False}
             pipdb.update_pip(name=pname, params=params, dbpath=dbpath)
             # pop this pipeline to make sure we don't double submit
             avail_pips.pop(pname)
 
-            logger.debug("job %d: executing tomato-job", job.id)
+            logger.debug("%d: executing tomato-job", job.id)
             cmd = [
                 "tomato-job",
                 "--port",
@@ -312,11 +314,11 @@ def action_queued(
             elif psutil.POSIX:
                 subprocess.Popen(cmd, start_new_session=True)
 
-            logger.debug("job %d: setting launched_at", job.id)
+            logger.debug("%d: setting launched_at", job.id)
             params = {"launched_at": str(datetime.now(UTC))}
             job = jobdb.update_job_id(jobid, params, dbpath)
             logger.info(
-                "job %d: launched on pip '%s' and path '%s'", job.id, pname, jpath
+                "%d: job launched on pip '%s' and path '%s'", job.id, pname, jpath
             )
             break
 
