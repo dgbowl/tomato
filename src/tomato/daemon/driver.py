@@ -354,6 +354,7 @@ def manager(timeout: int = 1000):
         drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
         for d in drivers:
             tN = time.perf_counter()
+            logger.critical(f"{d=}")
             if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
                     logger.warning("%s: stopping driver", d.name)
