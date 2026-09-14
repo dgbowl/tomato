@@ -338,6 +338,7 @@ def manager(timeout: int = 1000):
     req = context.socket(zmq.REQ)
     req.connect("inproc://daemon")
 
+    first_loop = True
     while getattr(thread, "do_run"):  # noqa:B009
         spawned_drivers = set()
         msg = {"cmd": "status", "sender": sender}
@@ -355,6 +356,8 @@ def manager(timeout: int = 1000):
         for d in drivers:
             tN = time.perf_counter()
             logger.debug("%s: state: %s", d.name, d)
+            if first_loop:
+                d.spawn_count = 0
             if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
                     logger.warning("%s: stopping driver", d.name)
@@ -404,10 +407,6 @@ def manager(timeout: int = 1000):
                             logger.warning(
                                 "%s: component registration failed: %s", d.name, ret
                             )
-            elif d.port is None and d.heartbeat_time != 0:
-                logger.warning("%s: incorrectly killed driver found, resetting", d.name)
-                params = vars(DrvState(name=d.name))
-                params.pop("name")
             elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
                 logger.info("%s: spawning driver: retry %d", d.name, d.spawn_count)
                 cmd = [
@@ -435,6 +434,7 @@ def manager(timeout: int = 1000):
                 spawned_drivers.add(d.name)
 
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
+        first_loop = False
 
     logger.info("instructed to quit")
     req.send_pyobj({"cmd": "status", "sender": sender})
