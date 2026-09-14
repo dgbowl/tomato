@@ -405,6 +405,7 @@ def manager(timeout: int = 1000):
                         params = {"heartbeat_time": tN}
                         if ret.success and len(ret.data) == 0:
                             logger.info("%s: registering components", d.name)
+                            dreq.RCVTIMEO = -1
                             dreq.send_pyobj({"cmd": "register", "sender": sender})
                             ret = dreq.recv_pyobj()
                             if ret.success:
