@@ -224,17 +224,25 @@ def status(
                 if drv.port is None:
                     rets[ckey]["capabilities"] = None
                     continue
-                dreq = context.socket(zmq.REQ)
-                dreq.RCVTIMEO = timeout
-                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = cval.model_dump()
-                dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
-                dret = dreq.recv_pyobj()
+                try:
+                    dreq = context.socket(zmq.REQ)
+                    dreq.RCVTIMEO = timeout
+                    dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                    params = cval.model_dump()
+                    dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
+                    dret = dreq.recv_pyobj()
+                    dreq.close()
+                except zmq.error.Again:
+                    dreq.setsockopt(zmq.LINGER, 0)
+                    dreq.close()
+                    return Reply(
+                        success=False,
+                        msg=f"driver {drv.name} not responding on port {drv.port}",
+                    )
                 if dret.success and dret.data is not None and len(dret.data) > 0:
                     rets[ckey]["capabilities"] = dret.data
                 else:
                     rets[ckey]["capabilities"] = None
-                dreq.close()
             return Reply(
                 success=True,
                 msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
