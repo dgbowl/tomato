@@ -225,6 +225,7 @@ def status(
                     rets[ckey]["capabilities"] = None
                     continue
                 dreq = context.socket(zmq.REQ)
+                dreq.RCVTIMEO = timeout
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 params = cval.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
