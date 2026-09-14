@@ -373,7 +373,7 @@ def manager(timeout: int = 1000):
                 if (
                     (tN - d.heartbeat_time > HEARTBEAT)
                     or (d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY)
-                    or (d.heartbeat_time < tN)
+                    or (d.heartbeat_time > tN)
                 ):
                     register = False
                     try:
