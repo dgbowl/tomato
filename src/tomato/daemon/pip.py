@@ -70,11 +70,21 @@ def manager(timeout: int = 500):
                 drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
                 assert drv is not None
                 logger.warning("%s: resetting component '%s'", pip.name, cn)
-                dreq = context.socket(zmq.REQ)
-                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = cmp.model_dump()
-                dreq.send_pyobj({"cmd": "cmp_reset", "params": params})
-                dret = dreq.recv_pyobj()
+                try:
+                    dreq = context.socket(zmq.REQ)
+                    dreq.RCVTIMEO = 1000
+                    dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                    params = cmp.model_dump()
+                    dreq.send_pyobj({"cmd": "cmp_reset", "params": params})
+                    dret = dreq.recv_pyobj()
+                except zmq.error.Again:
+                    dreq.setsockopt(zmq.LINGER, 0)
+                    dreq.close()
+                    logger.error(
+                        "%s: could not communicate with driver '%s'", pip.name, drv.name
+                    )
+                    continue
+
                 if dret.success is False:
                     logger.warning(
                         "%s: reset of component '%s' failed: %s", pip.name, cn, dret.msg
