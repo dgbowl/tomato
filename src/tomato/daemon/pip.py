@@ -80,7 +80,7 @@ def manager(timeout: int = 500):
                 except zmq.error.Again:
                     dreq.setsockopt(zmq.LINGER, 0)
                     dreq.close()
-                    logger.error(
+                    logger.warning(
                         "%s: could not communicate with driver '%s'", pip.name, drv.name
                     )
                     continue
