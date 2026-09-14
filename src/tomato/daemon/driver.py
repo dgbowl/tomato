@@ -73,7 +73,7 @@ def tomato_driver_bootstrap(
                     comp.name,
                 )
                 continue
-            logger.info("registering component %s", comp.name)
+            logger.info("registering component '%s'", comp.name)
             ret = interface.cmp_register(
                 name=comp.name, address=comp.address, channel=comp.channel
             )
@@ -379,6 +379,7 @@ def manager(timeout: int = 1000):
                         ret = dreq.recv_pyobj()
                         if ret.success and len(ret.data) == 0:
                             logger.info("%s: registering components", d.name)
+                            dreq.RCVTIMEO = -1
                             dreq.send_pyobj({"cmd": "register", "sender": sender})
                             ret = dreq.recv_pyobj()
                             if ret.success:
