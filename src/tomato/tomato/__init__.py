@@ -221,6 +221,9 @@ def status(
             for ckey, cval in daemon.devicefile.components.items():
                 drv = drvdb.get_drv(name=cval.driver, dbpath=dbpath)
                 assert drv is not None
+                if drv.port is None:
+                    rets[ckey]["capabilities"] = None
+                    continue
                 dreq = context.socket(zmq.REQ)
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 params = cval.model_dump()
