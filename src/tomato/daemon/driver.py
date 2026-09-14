@@ -404,6 +404,10 @@ def manager(timeout: int = 1000):
                             logger.warning(
                                 "%s: component registration failed: %s", d.name, ret
                             )
+            elif d.port is None and d.heartbeat_time != 0:
+                logger.warning("%s: incorrectly killed driver found, resetting", d.name)
+                params = vars(DrvState(name=d.name))
+                params.pop("name")
             elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
                 logger.info("%s: spawning driver: retry %d", d.name, d.spawn_count)
                 cmd = [
