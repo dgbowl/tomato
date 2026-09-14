@@ -354,7 +354,7 @@ def manager(timeout: int = 1000):
         drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
         for d in drivers:
             tN = time.perf_counter()
-            logger.critical(f"{d=}")
+            logger.debug("%s: state: %s", d.name, d)
             if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
                     logger.warning("%s: stopping driver", d.name)
@@ -370,6 +370,7 @@ def manager(timeout: int = 1000):
                 if (tN - d.heartbeat_time > HEARTBEAT) or (
                     d.heartbeat_time == 0 and tN - d.spawn_time > SPAWN_DELAY
                 ):
+                    register = False
                     try:
                         logger.debug("%s: checking driver on port %d", d.name, d.port)
                         dreq = context.socket(zmq.REQ)
@@ -377,28 +378,32 @@ def manager(timeout: int = 1000):
                         dreq.connect(f"tcp://127.0.0.1:{d.port}")
                         dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()
+                        dreq.close()
                         if ret.success and len(ret.data) == 0:
-                            logger.info("%s: registering components", d.name)
-                            dreq.RCVTIMEO = -1
-                            dreq.send_pyobj({"cmd": "register", "sender": sender})
-                            ret = dreq.recv_pyobj()
-                            if ret.success:
-                                logger.info(
-                                    "%s: component registration successful", d.name
-                                )
-                            else:
-                                logger.warning(
-                                    "%s: component registration failed: %s", d.name, ret
-                                )
+                            register = True
                         params = {"heartbeat_time": tN}
                     except zmq.error.Again:
                         logger.warning("%s: check of driver failed, resetting", d.name)
                         params = vars(DrvState(name=d.name))
                         params.pop("name")
+                        register = False
                     except Exception as e:
                         logger.critical("uncaught exception %s", type(e), exc_info=True)
                         raise RuntimeError(str(e))
                     drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
+                    if register:
+                        logger.info("%s: registering components", d.name)
+                        dreq = context.socket(zmq.REQ)
+                        dreq.connect(f"tcp://127.0.0.1:{d.port}")
+                        dreq.send_pyobj({"cmd": "register", "sender": sender})
+                        ret = dreq.recv_pyobj()
+                        dreq.close()
+                        if ret.success:
+                            logger.info("%s: component registration successful", d.name)
+                        else:
+                            logger.warning(
+                                "%s: component registration failed: %s", d.name, ret
+                            )
             elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
                 logger.info("%s: spawning driver: retry %d", d.name, d.spawn_count)
                 cmd = [
