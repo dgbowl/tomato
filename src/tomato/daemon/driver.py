@@ -379,7 +379,8 @@ def manager(timeout: int = 1000):
                     try:
                         logger.debug("%s: checking driver on port %d", d.name, d.port)
                         dreq = context.socket(zmq.REQ)
-                        dreq.RCVTIMEO = 1000
+                        settings = daemon.devicefile.drivers[d.name].settings
+                        dreq.RCVTIMEO = settings.get("lpp_timeout", 1) * 1000
                         dreq.connect(f"tcp://127.0.0.1:{d.port}")
                         dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()
