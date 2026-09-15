@@ -410,7 +410,6 @@ def manager(timeout: int = 1000):
                         dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()
                         params = {"heartbeat_time": tN}
-                        drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
                         if ret.success and len(ret.data) == 0:
                             logger.info("%s: registering components", d.name)
                             dreq.send_pyobj({"cmd": "register", "sender": sender})
@@ -427,9 +426,9 @@ def manager(timeout: int = 1000):
                         logger.warning("%s: check of driver failed, resetting", d.name)
                         params = vars(DrvState(name=d.name))
                         params.pop("name")
-                        continue
                     finally:
                         dreq.close()
+                    drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
             elif tN - d.spawn_time > SPAWN_DELAY and d.spawn_count < SPAWN_RETRIES:
                 logger.info("%s: spawning driver: retry %d", d.name, d.spawn_count)
                 cmd = [
