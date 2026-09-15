@@ -13,9 +13,8 @@ from threading import current_thread
 import psutil
 import zmq
 
-from tomato.daemon import drvdb, jobdb, pipdb
+from tomato.daemon import drvdb, jobdb, lpp, pipdb
 from tomato.models import Daemon
-from tomato.utils import context
 
 MAX_JOB_NOPID = 10
 
@@ -29,17 +28,20 @@ def manager(timeout: int = 500):
     logger = logging.getLogger(f"{__name__}.manager")
     thread = current_thread()
     logger.info("launched successfully")
-    req: zmq.Socket = context.socket(zmq.REQ)
-    # req.connect(f"tcp://127.0.0.1:{port}")
+    req = lpp.socket(timeout)
     req.connect("inproc://daemon")
     while getattr(thread, "do_run"):  # noqa: B009
         msg = {"cmd": "status", "sender": f"{__name__}.manager"}
-        req.send_pyobj(msg)
-        ret = req.recv_pyobj()
-        if req.closed:
+        try:
+            req.send_pyobj(msg)
+            ret = req.recv_pyobj()
+        except zmq.Again as e:
+            logger.exception("could not contact tomato via inproc://daemon", exc_info=e)
+            setattr(thread, "do_run", False)  # noqa: B010
             break
-        elif ret.success is False or ret.data is None:
-            logger.critical("tomato-daemon is not running: %s", ret.msg)
+        if ret.success is False or ret.data is None:
+            logger.error("tomato-daemon is not running: %s", ret.msg)
+            setattr(thread, "do_run", False)  # noqa: B010
             break
         daemon: Daemon = ret.data
         dbpath = daemon.settings["jobs"]["dbpath"]
@@ -69,21 +71,21 @@ def manager(timeout: int = 500):
                 cmp = daemon.devicefile.components[cn]
                 drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
                 assert drv is not None
+                settings = daemon.devicefile.drivers[cmp.driver].settings
                 logger.warning("%s: resetting component '%s'", pip.name, cn)
                 try:
-                    dreq = context.socket(zmq.REQ)
-                    dreq.RCVTIMEO = 1000
+                    dreq = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
                     dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                     params = cmp.model_dump()
                     dreq.send_pyobj({"cmd": "cmp_reset", "params": params})
                     dret = dreq.recv_pyobj()
-                except zmq.error.Again:
-                    dreq.setsockopt(zmq.LINGER, 0)
-                    dreq.close()
+                except zmq.Again:
                     logger.warning(
                         "%s: could not communicate with driver '%s'", pip.name, drv.name
                     )
                     continue
+                finally:
+                    dreq.close()
                 if dret.success is False:
                     logger.warning(
                         "%s: reset of component '%s' failed: %s", pip.name, cn, dret.msg
