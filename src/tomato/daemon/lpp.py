@@ -6,6 +6,8 @@
 """
 
 import logging
+from collections.abc import Generator
+from contextlib import contextmanager
 from typing import Any
 
 import zmq
@@ -58,3 +60,14 @@ def comm(
             req.connect(endpoint)
             req.send_pyobj(data)
     return ret, req
+
+
+@contextmanager
+def socket(timeout: int = 1000) -> Generator[zmq.Socket]:
+    sock = context.socket(zmq.REQ)
+    sock.setsockopt(zmq.LINGER, 0)
+    sock.setsockopt(zmq.RCVTIMEO, timeout)
+    try:
+        yield sock
+    finally:
+        sock.close()

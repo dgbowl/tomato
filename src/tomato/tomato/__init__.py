@@ -30,7 +30,7 @@ from pathlib import Path
 import toml
 import zmq
 
-from tomato.daemon import drvdb, pipdb
+from tomato.daemon import drvdb, lpp, pipdb
 from tomato.daemon.db import setup_db
 from tomato.models import Daemon, Reply
 from tomato.utils import context, spawn_cmd
@@ -179,95 +179,90 @@ def status(
     """
     logger = logging.getLogger(f"{__name__}.status")
     logger.debug("checking status of tomato on port %d", port)
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    req.send_pyobj({"cmd": "status", "sender": f"{__name__}.status"})
-    poller = zmq.Poller()
-    poller.register(req, zmq.POLLIN)
-    events = dict(poller.poll(timeout))
-    if req in events:
-        rep = req.recv_pyobj()
-        daemon: Daemon = rep.data
-        dbpath = daemon.settings["jobs"]["dbpath"]
-        msg = f"tomato running on port {daemon.port}"
-        if stgrp == "tomato":
+    with lpp.socket(timeout) as req:
+        try:
+            req.connect(f"tcp://127.0.0.1:{port}")
+            req.send_pyobj({"cmd": "status", "sender": f"{__name__}.status"})
+            rep = req.recv_pyobj()
+        except zmq.Again:
             return Reply(
-                success=True,
-                msg=msg,
-                data=daemon,
+                success=False,
+                msg=f"tomato not running on port {port}",
             )
-        elif stgrp == "devices":
-            keys = ["name", "driver", "address", "channels"]
-            devs = daemon.devicefile.devices
-            rets = {v.name: v.model_dump() for v in devs.values()}
-            return Reply(
-                success=True,
-                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
-                data=rets,
-            )
-        elif stgrp == "drivers":
-            keys = ["name", "port", "pid", "version", "heartbeat"]
-            drvs = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
-            rets = {v.name: v.model_dump() for v in drvs}
-            return Reply(
-                success=True,
-                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
-                data=rets,
-            )
-        elif stgrp == "components":
-            keys = ["name", "driver", "device", "capabilities"]
-            rets = {k: v.model_dump() for k, v in daemon.devicefile.components.items()}
-            # for ckey, cval in rets.items():
-            for ckey, cval in daemon.devicefile.components.items():
-                drv = drvdb.get_drv(name=cval.driver, dbpath=dbpath)
-                assert drv is not None
-                if drv.port is None:
-                    rets[ckey]["capabilities"] = None
-                    continue
-                try:
-                    dreq = context.socket(zmq.REQ)
-                    dreq.RCVTIMEO = timeout
-                    dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-                    params = cval.model_dump()
-                    dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
-                    dret = dreq.recv_pyobj()
-                    dreq.close()
-                except zmq.error.Again:
-                    dreq.setsockopt(zmq.LINGER, 0)
-                    dreq.close()
-                    return Reply(
-                        success=False,
-                        msg=f"driver {drv.name} not responding on port {drv.port}",
-                    )
-                if dret.success and dret.data is not None and len(dret.data) > 0:
-                    rets[ckey]["capabilities"] = dret.data
-                else:
-                    rets[ckey]["capabilities"] = None
-            return Reply(
-                success=True,
-                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
-                data=rets,
-            )
-        elif stgrp == "pipelines":
-            keys = ["name", "ready", "sampleid", "jobid"]
-            rets = {}
-            for pname in daemon.devicefile.pipelines:
-                pip = pipdb.get_pip(name=pname, dbpath=dbpath)
-                rets[pname] = {**vars(pip)}
-            return Reply(
-                success=True,
-                msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
-                data=rets,
-            )
-        else:
-            return Reply(success=False, msg=f"unknown stgrp: {stgrp!r}")
-    else:
-        req.setsockopt(zmq.LINGER, 0)
-        req.close()
+    daemon: Daemon = rep.data
+    dbpath = daemon.settings["jobs"]["dbpath"]
+    msg = f"tomato running on port {daemon.port}"
+    if stgrp == "tomato":
         return Reply(
-            success=False,
-            msg=f"tomato not running on port {port}",
+            success=True,
+            msg=msg,
+            data=daemon,
         )
+    elif stgrp == "devices":
+        keys = ["name", "driver", "address", "channels"]
+        devs = daemon.devicefile.devices
+        rets = {v.name: v.model_dump() for v in devs.values()}
+        return Reply(
+            success=True,
+            msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+            data=rets,
+        )
+    elif stgrp == "drivers":
+        keys = ["name", "port", "pid", "version", "heartbeat"]
+        drvs = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+        rets = {v.name: v.model_dump() for v in drvs}
+        return Reply(
+            success=True,
+            msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+            data=rets,
+        )
+    elif stgrp == "components":
+        keys = ["name", "driver", "device", "capabilities"]
+        rets = {k: v.model_dump() for k, v in daemon.devicefile.components.items()}
+        # for ckey, cval in rets.items():
+        for ckey, cval in daemon.devicefile.components.items():
+            drv = drvdb.get_drv(name=cval.driver, dbpath=dbpath)
+            assert drv is not None
+            if drv.port is None:
+                rets[ckey]["capabilities"] = None
+                continue
+            try:
+                dreq = context.socket(zmq.REQ)
+                dreq.RCVTIMEO = timeout
+                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                params = cval.model_dump()
+                dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
+                dret = dreq.recv_pyobj()
+                dreq.close()
+            except zmq.error.Again:
+                dreq.setsockopt(zmq.LINGER, 0)
+                dreq.close()
+                return Reply(
+                    success=False,
+                    msg=f"driver {drv.name} not responding on port {drv.port}",
+                )
+            if dret.success and dret.data is not None and len(dret.data) > 0:
+                rets[ckey]["capabilities"] = dret.data
+            else:
+                rets[ckey]["capabilities"] = None
+        return Reply(
+            success=True,
+            msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+            data=rets,
+        )
+    elif stgrp == "pipelines":
+        keys = ["name", "ready", "sampleid", "jobid"]
+        rets = {}
+        for pname in daemon.devicefile.pipelines:
+            pip = pipdb.get_pip(name=pname, dbpath=dbpath)
+            rets[pname] = {**vars(pip)}
+        return Reply(
+            success=True,
+            msg=format_msg(msg=msg, objs=stgrp, yml=yaml, keys=keys, data=rets),
+            data=rets,
+        )
+    else:
+        return Reply(success=False, msg=f"unknown stgrp: {stgrp!r}")
 
 
 def start(
