@@ -179,16 +179,15 @@ def status(
     """
     logger = logging.getLogger(f"{__name__}.status")
     logger.debug("checking status of tomato on port %d", port)
-    with lpp.socket(timeout) as req:
-        try:
-            req.connect(f"tcp://127.0.0.1:{port}")
-            req.send_pyobj({"cmd": "status", "sender": f"{__name__}.status"})
-            rep = req.recv_pyobj()
-        except zmq.Again:
-            return Reply(
-                success=False,
-                msg=f"tomato not running on port {port}",
-            )
+    try:
+        req = lpp.socket(timeout)
+        req.connect(f"tcp://127.0.0.1:{port}")
+        req.send_pyobj({"cmd": "status", "sender": f"{__name__}.status"})
+        rep = req.recv_pyobj()
+    except zmq.Again:
+        return Reply(success=False, msg=f"tomato not running on port {port}")
+    finally:
+        req.close()
     daemon: Daemon = rep.data
     dbpath = daemon.settings["jobs"]["dbpath"]
     msg = f"tomato running on port {daemon.port}"
@@ -219,28 +218,26 @@ def status(
     elif stgrp == "components":
         keys = ["name", "driver", "device", "capabilities"]
         rets = {k: v.model_dump() for k, v in daemon.devicefile.components.items()}
-        # for ckey, cval in rets.items():
         for ckey, cval in daemon.devicefile.components.items():
             drv = drvdb.get_drv(name=cval.driver, dbpath=dbpath)
             assert drv is not None
             if drv.port is None:
                 rets[ckey]["capabilities"] = None
                 continue
+            settings = daemon.devicefile.drivers[cval.driver].settings
             try:
-                dreq = context.socket(zmq.REQ)
-                dreq.RCVTIMEO = timeout
+                dreq = lpp.socket(settings.get("lpp_timeout", timeout))
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 params = cval.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
                 dret = dreq.recv_pyobj()
-                dreq.close()
-            except zmq.error.Again:
-                dreq.setsockopt(zmq.LINGER, 0)
-                dreq.close()
+            except zmq.Again:
                 return Reply(
                     success=False,
                     msg=f"driver {drv.name} not responding on port {drv.port}",
                 )
+            finally:
+                dreq.close()
             if dret.success and dret.data is not None and len(dret.data) > 0:
                 rets[ckey]["capabilities"] = dret.data
             else:
@@ -296,17 +293,17 @@ def start(
     logger.debug("checking for availability of port %d", port)
     try:
         rep = context.socket(zmq.REP)
+        rep.setsockopt(zmq.LINGER, 0)
         rep.bind(f"tcp://127.0.0.1:{port}")
         stat = status(port=port, timeout=1000)
         rep.unbind(f"tcp://127.0.0.1:{port}")
-        rep.setsockopt(zmq.LINGER, 0)
         rep.close()
         if stat.success:
             return Reply(
                 success=False,
                 msg=f"tomato-daemon already running on port {port}",
             )
-    except zmq.error.ZMQError:
+    except zmq.ZMQError:
         return Reply(
             success=False,
             msg=f"required port {port} is already in use, choose a different one",
@@ -369,10 +366,18 @@ def stop(
     # logger = logging.getLogger(f"{__name__}.stop")
     stat = status(port=port, timeout=timeout)
     if stat.success:
-        req = context.socket(zmq.REQ)
-        req.connect(f"tcp://127.0.0.1:{port}")
-        req.send_pyobj({"cmd": "stop"})
-        rep = req.recv_pyobj()
+        try:
+            req = lpp.socket(timeout)
+            req.connect(f"tcp://127.0.0.1:{port}")
+            req.send_pyobj({"cmd": "stop"})
+            rep = req.recv_pyobj()
+        except zmq.Again:
+            return Reply(
+                success=False,
+                msg=f"communication with tomato on port {port} failed",
+            )
+        finally:
+            req.close()
         if rep.success:
             return Reply(success=True, msg=f"tomato on port {port} closed successfully")
         else:
@@ -513,14 +518,20 @@ def reload(
     if not ret.success:
         return ret
 
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-
-    req.send_pyobj({"cmd": "reload", "sender": f"{__name__}.reload"})
-    ret = req.recv_pyobj()
+    try:
+        req = lpp.socket(timeout)
+        req.connect(f"tcp://127.0.0.1:{port}")
+        req.send_pyobj({"cmd": "reload", "sender": f"{__name__}.reload"})
+        ret = req.recv_pyobj()
+    except zmq.Again:
+        return Reply(
+            success=False,
+            msg=f"communication with tomato on port {port} failed",
+        )
+    finally:
+        req.close()
     if ret.success is False:
         return ret
-
     return Reply(
         success=True,
         msg=f"tomato on port {port} reloaded with settings from {appdir}",
