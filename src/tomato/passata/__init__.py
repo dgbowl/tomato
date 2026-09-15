@@ -23,10 +23,9 @@ from typing import Any
 import zmq
 
 from tomato import tomato
-from tomato.daemon import drvdb
+from tomato.daemon import drvdb, lpp
 from tomato.driverinterface_3_0 import Status
 from tomato.models import Component, DrvState, Reply
-from tomato.utils import context
 
 logger = logging.getLogger(__name__)
 
@@ -97,15 +96,15 @@ def status(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_status", "params": {**kwargs}})
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_status", "params": {**kwargs}})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -122,16 +121,15 @@ def register(
     cmp, drv = ret
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_register", "params": kwargs})
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_register", "params": kwargs})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -150,16 +148,15 @@ def attrs(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_attrs", "params": kwargs})
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_attrs", "params": kwargs})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -178,16 +175,15 @@ def capabilities(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_capabilities", "params": kwargs})
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_capabilities", "params": kwargs})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -206,16 +202,15 @@ def constants(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_constants", "params": kwargs})
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_constants", "params": kwargs})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -235,21 +230,22 @@ def get_attrs(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    data = {}
-    msg = ""
-    for attr in attrs:
-        req.send_pyobj({"cmd": "cmp_get_attr", "params": {"attr": attr, **kwargs}})
-        try:
+    try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        data = {}
+        msg = ""
+        for attr in attrs:
+            req.send_pyobj({"cmd": "cmp_get_attr", "params": {"attr": attr, **kwargs}})
             ret = req.recv_pyobj()
-        except zmq.ZMQError:
-            return Reply(success=False, msg="ZMQ timeout reached")
-        if ret is None or not ret.success:
-            return ret
-        data[attr] = ret.data
-        msg += f"attr {attr!r} of component {name!r} is: {ret.data}\n         "
+            if ret is None or not ret.success:
+                return ret
+            data[attr] = ret.data
+            msg += f"attr {attr!r} of component {name!r} is: {ret.data}\n         "
+    except zmq.Again:
+        return Reply(success=False, msg="ZMQ timeout reached")
+    finally:
+        req.close()
     if yaml:
         msg = f"attrs {list(data.keys())} of component {name!r} retrieved"
     else:
@@ -282,18 +278,17 @@ def set_attr(
         return ret
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj(
-        {"cmd": "cmp_set_attr", "params": {"attr": attr, "val": val, **kwargs}}
-    )
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj(
+            {"cmd": "cmp_set_attr", "params": {"attr": attr, "val": val, **kwargs}}
+        )
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -317,16 +312,15 @@ def reset(
         return ret
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_reset", "params": kwargs})
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_reset", "params": kwargs})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -345,16 +339,15 @@ def get_last_data(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_last_data", "params": kwargs})
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_last_data", "params": kwargs})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
 
 
@@ -373,14 +366,13 @@ def measure(
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
-    req: zmq.Socket = context.socket(zmq.REQ)
-    req.RCVTIMEO = RCVTIMEO
-    req.connect(f"tcp://127.0.0.1:{drv.port}")
-    req.send_pyobj({"cmd": "cmp_measure", "params": kwargs})
-
     try:
+        req = lpp.socket(RCVTIMEO)
+        req.connect(f"tcp://127.0.0.1:{drv.port}")
+        req.send_pyobj({"cmd": "cmp_measure", "params": kwargs})
         ret = req.recv_pyobj()
-    except zmq.ZMQError:
+    except zmq.Again:
         return Reply(success=False, msg="ZMQ timeout reached")
-    req.close()
+    finally:
+        req.close()
     return ret
