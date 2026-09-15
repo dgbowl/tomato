@@ -707,10 +707,7 @@ def job_thread(
         logger.info("%s: task fetching final data", taskid)
         msg = {"cmd": "task_data", "params": {**kwargs}}
         ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
-        if req.closed:
-            setattr(thread, "crashed", True)  # noqa: B010
-            sys.exit()
-        elif ret.success and ret.data is not None:
+        if ret.success and ret.data is not None:
             logger.debug("%s: pickling received data", taskid)
             ds: xr.Dataset = ret.data
             ds.attrs["tomato_Component"] = component.model_dump_json()
@@ -723,10 +720,7 @@ def job_thread(
     logger.info("%s: all tasks done on component %s, resetting", role, component.name)
     msg = {"cmd": "cmp_reset", "params": {**kwargs}}
     ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
-    if req.closed:
-        setattr(thread, "crashed", True)  # noqa: B010
-        sys.exit()
-    elif not ret.success:
+    if not ret.success:
         logger.warning("%s: could not reset component %s", role, ret.msg)
     else:
         logger.info("%s: reset of component %s done", role, component.name)
