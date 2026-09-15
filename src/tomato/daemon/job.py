@@ -34,7 +34,6 @@ from tomato.models import (
     Task,
     to_payload,
 )
-from tomato.utils import context
 
 logger = logging.getLogger(__name__)
 
@@ -65,20 +64,21 @@ def method_validate(
                 cmp = daemon.devicefile.components[cname]
                 drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
                 assert drv is not None
-                req: zmq.Socket = context.socket(zmq.REQ)
-                req.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = {
-                    "task": task,
-                    **cmp.model_dump(),
-                }  # TODO: just name
-                ret, req = lpp.comm(
-                    req,
-                    {"cmd": "task_validate", "params": params},
-                    f"tcp://127.0.0.1:{drv.port}",
-                )
-                if ret.success:
+                settings = daemon.devicefile.drivers[cmp.driver].settings
+                try:
+                    req = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                    req.connect(f"tcp://127.0.0.1:{drv.port}")
+                    params = {"task": task, **cmp.model_dump()}  # TODO: just name
+                    req.send_pyobj({"cmd": "task_validate", "params": params})
+                    ret = req.recv_pyobj()
+                    if ret.success:
+                        break
+                except zmq.Again as e:
+                    logger.exception(
+                        "timeout in communication with driver %s", drv.name, exc_info=e
+                    )
+                finally:
                     req.close()
-                    break
         else:
             return False
     return True
@@ -107,13 +107,21 @@ def find_matching_pipelines(
             cmp = daemon.devicefile.components[cname]
             drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
             assert drv is not None
-            dreq = context.socket(zmq.REQ)
-            dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-            params = cmp.model_dump()
-            dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
-            dret = dreq.recv_pyobj()
-            if dret.success and dret.data is not None:
-                capabs.update(dret.data)
+            settings = daemon.devicefile.drivers[cmp.driver].settings
+            try:
+                dreq = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                params = cmp.model_dump()
+                dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
+                dret = dreq.recv_pyobj()
+                if dret.success and dret.data is not None:
+                    capabs.update(dret.data)
+            except zmq.Again as e:
+                logger.exception(
+                    "timeout in communication with driver %s", drv.name, exc_info=e
+                )
+            finally:
+                dreq.close()
         if req_capabs.issubset(capabs) and method_validate(method, pip, daemon):
             candidates.append(pip.name)
     return candidates
@@ -337,16 +345,20 @@ def manager(timeout: int = 500):
     logger = logging.getLogger(f"{__name__}.manager")
     thread = current_thread()
     logger.info("launched successfully")
-    req: zmq.Socket = context.socket(zmq.REQ)
+    req = lpp.socket(timeout)
     req.connect("inproc://daemon")
     while getattr(thread, "do_run"):  # noqa: B009
         msg = {"cmd": "status", "sender": f"{__name__}.manager"}
-        req.send_pyobj(msg)
-        ret = req.recv_pyobj()
-        if req.closed:
+        try:
+            req.send_pyobj(msg)
+            ret = req.recv_pyobj()
+        except zmq.Again as e:
+            logger.exception("could not contact tomato via inproc://daemon", exc_info=e)
+            setattr(thread, "do_run", False)  # noqa:B010
             break
-        elif ret.success is False or ret.data is None:
+        if ret.success is False or ret.data is None:
             logger.critical("tomato-daemon is not running: %s", ret.msg)
+            setattr(thread, "do_run", False)  # noqa:B010
             break
         daemon: Daemon = ret.data
         manage_running(daemon)
@@ -525,13 +537,7 @@ def job_thread(
     thread = current_thread()
     sender = f"{__name__}.job_thread({thread.ident:5d})"
     logger = logging.getLogger(sender)
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{dport}")
-    lppargs = {"endpoint": f"tcp://127.0.0.1:{dport}", "sender": sender}
-
-    if "lpp_timeout" in dsettings:
-        lppargs["timeout"] = dsettings["lpp_timeout"] * 1000
-        logger.debug("%s: setting lpp_timeout to %d ms", role, lppargs["timeout"])
+    timeout = dsettings.get("lpp_timeout", 1) * 1000
 
     logger.info("%s: job thread of %s attached to tomato-daemon", role, component.name)
     kwargs = component.model_dump()
@@ -540,6 +546,7 @@ def job_thread(
     logger.debug("%s: processing tasks on component %s", role, component.name)
     for ti, task in enumerate(tasks):
         taskid = f"{role}:{ti}"
+        exc_msg = f"{taskid}: could not communicate with driver on port {dport}"
         if task.task_name is not None:
             taskid += f":{task.task_name!r}"
         setattr(thread, "current_task", task)  # noqa: B010
@@ -564,12 +571,9 @@ def job_thread(
             logger.debug(
                 "%s: polling component %s for task readiness", taskid, component.name
             )
-            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
+            ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
             if ret.success and ret.data is not None and ret.data["can_submit"]:
                 break
-            elif req.closed:
-                setattr(thread, "crashed", True)  # noqa: B010
-                sys.exit()
             logger.warning(
                 "%s: cannot submit onto component %s, waiting", taskid, component.name
             )
@@ -578,21 +582,40 @@ def job_thread(
         # Send task to component
         logger.info("%s: sending task to component %s", taskid, component.name)
         t0 = time.perf_counter()
+        req = lpp.socket(timeout)
+        req.connect(f"tcp://127.0.0.1:{dport}")
         msg = {"cmd": "task_start", "params": {"task": task, **kwargs}}
-        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-        if req.closed:
+        try:
+            req.send_pyobj(msg)
+            ret = req.recv_pyobj()
+            if ret.success:
+                logger.debug("%s: task_start sent successfully", taskid)
+        except zmq.Again as e:
+            logger.exception(
+                "%s: could not communicate with driver on port %d",
+                taskid,
+                dport,
+                exc_info=e,
+            )
             setattr(thread, "crashed", True)  # noqa: B010
             sys.exit()
-
         # Wait until the correct task is running, or MAX_TASK_WAIT
         msg = {"cmd": "task_status", "params": {**kwargs}}
         while True:
             dt = time.perf_counter() - t0
-            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-            if req.closed:
+            try:
+                req.send_pyobj(msg)
+                ret = req.recv_pyobj()
+            except zmq.Again as e:
+                logger.exception(
+                    "%s: could not communicate with driver on port %d",
+                    taskid,
+                    dport,
+                    exc_info=e,
+                )
                 setattr(thread, "crashed", True)  # noqa: B010
                 sys.exit()
-            elif ret.success and ret.data is not None and ret.data["running"] is False:
+            if ret.success and ret.data is not None and ret.data["running"] is False:
                 logger.warning(
                     "%s: task was submitted %f s ago but is not yet running", taskid, dt
                 )
@@ -623,6 +646,7 @@ def job_thread(
                 sys.exit()
             time.sleep(0.1)
         logger.info("%s: correct task running on component %s", taskid, role)
+        req.close()
 
         # Main task loop
         tP = time.perf_counter()
@@ -633,11 +657,8 @@ def job_thread(
             if tN - tP > device.pollrate:
                 logger.debug("%s: polling task for data", taskid)
                 msg = {"cmd": "task_data", "params": {**kwargs}}
-                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-                if req.closed:
-                    setattr(thread, "crashed", True)  # noqa: B010
-                    sys.exit()
-                elif ret.success and ret.data is not None:
+                ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
+                if ret.success and ret.data is not None:
                     logger.debug("%s: pickling received data", taskid)
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
@@ -647,11 +668,8 @@ def job_thread(
             # Poll for completion and correct task status
             logger.debug("%s: polling task for completion", taskid)
             msg = {"cmd": "task_status", "params": {**kwargs}}
-            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-            if req.closed:
-                setattr(thread, "crashed", True)  # noqa: B010
-                sys.exit()
-            elif ret.success and ret.data is not None and not ret.data["running"]:
+            ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
+            if ret.success and ret.data is not None and not ret.data["running"]:
                 logger.info("%s: task no longer running, break", taskid)
                 break
             elif (
@@ -675,11 +693,8 @@ def job_thread(
             ):
                 logger.info("%s: task stop trigger met", taskid)
                 msg = {"cmd": "task_stop", "params": {**kwargs}}
-                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-                if req.closed:
-                    setattr(thread, "crashed", True)  # noqa: B010
-                    sys.exit()
-                elif ret.success and ret.data is not None:
+                ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
+                if ret.success and ret.data is not None:
                     logger.debug("%s: pickling received data", taskid)
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
@@ -691,7 +706,7 @@ def job_thread(
         # Store final task data, housekeeping.
         logger.info("%s: task fetching final data", taskid)
         msg = {"cmd": "task_data", "params": {**kwargs}}
-        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
+        ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
         if req.closed:
             setattr(thread, "crashed", True)  # noqa: B010
             sys.exit()
@@ -707,7 +722,7 @@ def job_thread(
     # Reset component at the end of the job
     logger.info("%s: all tasks done on component %s, resetting", role, component.name)
     msg = {"cmd": "cmp_reset", "params": {**kwargs}}
-    ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
+    ret = lpp.comm_or_exit(msg, dport, logger, exc_msg, timeout)
     if req.closed:
         setattr(thread, "crashed", True)  # noqa: B010
         sys.exit()
@@ -731,26 +746,20 @@ def job_main_loop(
     logger = logging.getLogger(sender)
     logger.debug("process started")
 
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = {"endpoint": f"tcp://127.0.0.1:{port}"}
-
     while True:
-        ret, req = lpp.comm(req, {"cmd": "status", "sender": sender}, **lppargs)  # ty: ignore[invalid-argument-type]
+        msg = {"cmd": "status", "sender": sender}
+        exc_msg = f"could not communicate with tomato daemon on port {port}"
+        ret = lpp.comm_or_exit(msg, port, logger, exc_msg)
         if ret.success and ret.data is not None:
             daemon: Daemon = ret.data
             dbpath = daemon.settings["jobs"]["dbpath"]
-        else:
-            sys.exit()
         drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
         if all(drv.port is not None for drv in drivers):
             break
         else:
             logger.debug("not all tomato-drivers have a port, waiting")
             time.sleep(1)
-    req.close()
 
-    # pipeline = daemon.pips[pipname]
     pipeline = daemon.devicefile.pipelines[pipname]
     logger.debug(f"{pipeline=}")
     logger.debug(f"{job=}")

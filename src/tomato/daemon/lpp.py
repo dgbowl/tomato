@@ -6,6 +6,7 @@
 """
 
 import logging
+import sys
 from typing import Any
 
 import zmq
@@ -65,3 +66,22 @@ def socket(timeout: int = 1000) -> zmq.Socket:
     sock.setsockopt(zmq.LINGER, 0)
     sock.setsockopt(zmq.RCVTIMEO, timeout)
     return sock
+
+
+def comm_or_exit(
+    pyobj: dict,
+    port: int,
+    logger: logging.Logger,
+    exc_msg: str,
+    timeout: int = 1000,
+) -> Reply:
+    try:
+        req = socket(timeout)
+        req.connect(f"tcp://127.0.0.1:{port}")
+        req.send_pyobj(pyobj)
+        return req.recv_pyobj()
+    except zmq.Again as e:
+        logger.exception(exc_msg, exc_info=e)
+        sys.exit()
+    finally:
+        req.close()

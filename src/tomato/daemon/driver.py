@@ -222,17 +222,10 @@ def tomato_driver() -> None:
         return
 
     logger.debug("getting daemon status")
-    try:
-        req = lpp.socket()
-        req.connect(f"tcp://127.0.0.1:{args.port}")
-        req.send_pyobj({"cmd": "status"})
-        daemon: Daemon = req.recv_pyobj().data
-    except zmq.Again:
-        logger.error("could not connect to tomato on port %d", args.port)
-        return
-    finally:
-        req.close()
-
+    exc_msg = f"could not connect to tomato on port {args.port}"
+    ret = lpp.comm_or_exit({"cmd": "status"}, args.port, logger, exc_msg)
+    assert ret.data is not None
+    daemon: Daemon = ret.data
     dbpath = daemon.settings["jobs"]["dbpath"]
     settings = daemon.devicefile.drivers[args.driver].settings
     try:
