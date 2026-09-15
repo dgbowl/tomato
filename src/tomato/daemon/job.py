@@ -568,6 +568,12 @@ def tomato_job() -> None:
         time.sleep(1.0 - tN % 1)
 
     logger.info("==============================")
+    job.completed_at = str(datetime.now(UTC))
+    if any(crashed):
+        job.status = "ce"
+    else:
+        job.status = "c"
+
     logger.info("writing final data to a NetCDF file")
     outpath = merge_netcdfs(job)
     if len(jsdata["repositories"]) > 0:
@@ -580,11 +586,6 @@ def tomato_job() -> None:
             make_child=job.payload.sample.sample_is_parent,
         )
 
-    job.completed_at = str(datetime.now(UTC))
-    if any(crashed):
-        job.status = "ce"
-    else:
-        job.status = "c"
     logger.info("job finished with status '%s', updating job db", job.status)
     params = {"status": job.status, "completed_at": job.completed_at}
     job = jobdb.update_job_id(job.id, params, args.dbpath)
