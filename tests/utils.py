@@ -67,11 +67,12 @@ def wait_until_tomato_drivers(port: int, timeout: int):
         )
         logger.debug("\n" + ret.stdout)
         yml = yaml.safe_load(ret.stdout)
-        for drv in yml["data"].values():
-            if drv["port"] is None:
-                break
-        else:
-            return True
+        if yml["data"] is not None:
+            for drv in yml["data"].values():
+                if drv["port"] is None:
+                    break
+            else:
+                return True
         time.sleep(0.1)
     return False
 
@@ -87,11 +88,12 @@ def wait_until_tomato_components(port: int, timeout: int):
         )
         logger.debug("\n" + ret.stdout)
         yml = yaml.safe_load(ret.stdout)
-        for cmp in yml["data"].values():
-            if cmp["capabilities"] is None:
-                break
-        else:
-            return True
+        if yml["data"] is not None:
+            for cmp in yml["data"].values():
+                if cmp["capabilities"] is None:
+                    break
+            else:
+                return True
         time.sleep(0.1)
     return False
 
