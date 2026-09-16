@@ -10,7 +10,6 @@ import json
 import logging
 import os
 import subprocess
-import sys
 import time
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
@@ -34,7 +33,6 @@ from tomato.models import (
     Task,
     to_payload,
 )
-from tomato.utils import context
 
 logger = logging.getLogger(__name__)
 
@@ -65,20 +63,21 @@ def method_validate(
                 cmp = daemon.devicefile.components[cname]
                 drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
                 assert drv is not None
-                req: zmq.Socket = context.socket(zmq.REQ)
-                req.connect(f"tcp://127.0.0.1:{drv.port}")
-                params = {
-                    "task": task,
-                    **cmp.model_dump(),
-                }  # TODO: just name
-                ret, req = lpp.comm(
-                    req,
-                    {"cmd": "task_validate", "params": params},
-                    f"tcp://127.0.0.1:{drv.port}",
-                )
-                if ret.success:
+                settings = daemon.devicefile.drivers[cmp.driver].settings
+                try:
+                    req = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                    req.connect(f"tcp://127.0.0.1:{drv.port}")
+                    params = {"task": task, **cmp.model_dump()}  # TODO: just name
+                    req.send_pyobj({"cmd": "task_validate", "params": params})
+                    ret = req.recv_pyobj()
+                    if ret.success:
+                        break
+                except zmq.Again as e:
+                    logger.exception(
+                        "timeout in communication with driver %s", drv.name, exc_info=e
+                    )
+                finally:
                     req.close()
-                    break
         else:
             return False
     return True
@@ -107,13 +106,21 @@ def find_matching_pipelines(
             cmp = daemon.devicefile.components[cname]
             drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
             assert drv is not None
-            dreq = context.socket(zmq.REQ)
-            dreq.connect(f"tcp://127.0.0.1:{drv.port}")
-            params = cmp.model_dump()
-            dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
-            dret = dreq.recv_pyobj()
-            if dret.success and dret.data is not None:
-                capabs.update(dret.data)
+            settings = daemon.devicefile.drivers[cmp.driver].settings
+            try:
+                dreq = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                dreq.connect(f"tcp://127.0.0.1:{drv.port}")
+                params = cmp.model_dump()
+                dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
+                dret = dreq.recv_pyobj()
+                if dret.success and dret.data is not None:
+                    capabs.update(dret.data)
+            except zmq.Again as e:
+                logger.exception(
+                    "timeout in communication with driver %s", drv.name, exc_info=e
+                )
+            finally:
+                dreq.close()
         if req_capabs.issubset(capabs) and method_validate(method, pip, daemon):
             candidates.append(pip.name)
     return candidates
@@ -171,7 +178,7 @@ def manage_running(daemon: Daemon):
             # subprocess was started but job is not (yet) connected
             td = datetime.now(UTC) - datetime.fromisoformat(job.launched_at)
             if td > MAX_JOB_NOPID:
-                logger.error("job %d failed to register, aborting", job.id)
+                logger.error("%d: job failed to register, aborting", job.id)
                 job.status = "rd"
                 pidexists = False
             else:
@@ -206,7 +213,9 @@ def manage_running(daemon: Daemon):
             update = False
 
         if update:
-            logger.debug(f"job {job.id} will be updated to status {params['status']!r}")
+            logger.debug(
+                "%d: job will be updated to status '%s'", job.id, params["status"]
+            )
             params["completed_at"] = str(datetime.now(UTC))
             jobdb.update_job_id(job.id, params, dbpath)
 
@@ -225,7 +234,7 @@ def check_queued(daemon: Daemon) -> dict[int, list[str]]:
         matched[job.id] = find_matching_pipelines(daemon, job.payload.method)
         if len(matched[job.id]) > 0 and job.status == "q":
             logger.info(
-                "job %d can queue on pips: {%s}",
+                "%d: can queue on pips: {%s}",
                 job.id,
                 matched[job.id],
             )
@@ -267,13 +276,13 @@ def action_queued(
                 continue
             elif not ps.ready or ps.sampleid != job.payload.sample.identifier:
                 continue
-            logger.info("job %d: found a matched & ready pip '%s'", jobid, pname)
+            logger.info("%d: job found a matched & ready pip '%s'", jobid, pname)
 
-            logger.debug("job %d: making job directory", jobid)
+            logger.debug("%d: making job directory", jobid)
             root = Path(daemon.settings["jobs"]["storage"]) / str(jobid)
             os.makedirs(root)
 
-            logger.debug("job %d: storing jobdata.json", jobid)
+            logger.debug("%d: storing jobdata.json", jobid)
             jpath = root / "jobdata.json"
             repositories = {}
             for repo, repoparams in daemon.settings["repositories"].items():
@@ -288,13 +297,13 @@ def action_queued(
             with jpath.open("w", encoding="UTF-8") as of:
                 json.dump(jobargs, of, indent=1)
 
-            logger.debug("job %d: reserving pipeline %s", job.id, pname)
+            logger.debug("%d: reserving pipeline %s", job.id, pname)
             params = {"jobid": job.id, "ready": False}
             pipdb.update_pip(name=pname, params=params, dbpath=dbpath)
             # pop this pipeline to make sure we don't double submit
             avail_pips.pop(pname)
 
-            logger.debug("job %d: executing tomato-job", job.id)
+            logger.debug("%d: executing tomato-job", job.id)
             cmd = [
                 "tomato-job",
                 "--port",
@@ -312,11 +321,11 @@ def action_queued(
             elif psutil.POSIX:
                 subprocess.Popen(cmd, start_new_session=True)
 
-            logger.debug("job %d: setting launched_at", job.id)
+            logger.debug("%d: setting launched_at", job.id)
             params = {"launched_at": str(datetime.now(UTC))}
             job = jobdb.update_job_id(jobid, params, dbpath)
             logger.info(
-                "job %d: launched on pip '%s' and path '%s'", job.id, pname, jpath
+                "%d: job launched on pip '%s' and path '%s'", job.id, pname, jpath
             )
             break
 
@@ -335,16 +344,20 @@ def manager(timeout: int = 500):
     logger = logging.getLogger(f"{__name__}.manager")
     thread = current_thread()
     logger.info("launched successfully")
-    req: zmq.Socket = context.socket(zmq.REQ)
+    req = lpp.socket(timeout)
     req.connect("inproc://daemon")
     while getattr(thread, "do_run"):  # noqa: B009
         msg = {"cmd": "status", "sender": f"{__name__}.manager"}
-        req.send_pyobj(msg)
-        ret = req.recv_pyobj()
-        if req.closed:
+        try:
+            req.send_pyobj(msg)
+            ret = req.recv_pyobj()
+        except zmq.Again as e:
+            logger.exception("could not contact tomato via inproc://daemon", exc_info=e)
+            setattr(thread, "do_run", False)  # noqa:B010
             break
-        elif ret.success is False or ret.data is None:
+        if ret.success is False or ret.data is None:
             logger.critical("tomato-daemon is not running: %s", ret.msg)
+            setattr(thread, "do_run", False)  # noqa:B010
             break
         daemon: Daemon = ret.data
         manage_running(daemon)
@@ -465,293 +478,24 @@ def tomato_job() -> None:
         "jobpath": str(jobpath),
     }
     job = jobdb.update_job_id(jobid, params, args.dbpath)
+    logger.debug("job=%s", job)
 
-    logger.info("handing off to 'job_main_loop'")
-    logger.info("==============================")
-    ret = job_main_loop(args.port, job, pip, logpath)
-    logger.info("==============================")
-
-    job.completed_at = str(datetime.now(UTC))
-
-    if ret is None:
-        job.status = "c"
-    else:
-        job.status = "ce"
-    logger.info("writing final data to a NetCDF file")
-    outpath = merge_netcdfs(job)
-    if len(jsdata["repositories"]) > 0:
-        logger.debug(
-            "job configured with repositories: '%s'", list(repositories.keys())
-        )
-        logger.info("writing final RO-crate")
-        to_rocrate(
-            datapath=outpath,
-            userid=job.payload.user.identifier,
-            sampleid=job.payload.sample.identifier,
-            make_child=job.payload.sample.sample_is_parent,
-        )
-    logger.info("job finished with status '%s', updating job db", job.status)
-    params = {"status": job.status, "completed_at": job.completed_at}
-    job = jobdb.update_job_id(job.id, params, args.dbpath)
-    logger.debug(f"{job=}")
-    params = {"jobid": None, "ready": job.payload.settings.unlock_when_done}
-    pip = pipdb.update_pip(name=pip, params=params, dbpath=args.dbpath)
-    logger.debug(f"{pip=}")
-    logger.info("exiting tomato-job")
-
-
-def job_thread(
-    role: str,
-    tasks: list[Task],
-    component: Component,
-    device: Device,
-    dport: int,
-    dsettings: dict,
-    jobpath: Path,
-    logpath: Path,
-):
-    """
-    A subthread of `tomato-job`, responsible for tasks on one component of a pipeline.
-
-    For each :class:`Task`, this thread starts the task at an appropriate moment, then monitors the component status and polls periodically for data, and moves on to the next task as instructed in the task list.
-
-    .. note::
-
-        The data from all tasks for that component is stored using the :func:`tomato.daemon.io.data_to_pickle` function.
-
-    """
-    thread = current_thread()
-    sender = f"{__name__}.job_thread({thread.ident:5d})"
-    logger = logging.getLogger(sender)
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{dport}")
-    lppargs = {"endpoint": f"tcp://127.0.0.1:{dport}", "sender": sender}
-
-    if "lpp_timeout" in dsettings:
-        lppargs["timeout"] = dsettings["lpp_timeout"] * 1000
-        logger.debug("%s: setting lpp_timeout to %d ms", role, lppargs["timeout"])
-
-    logger.info("%s: job thread of %s attached to tomato-daemon", role, component.name)
-    kwargs = component.model_dump()
-
-    datapath = Path(jobpath) / f"{role}.pkl"
-    logger.debug("%s: processing tasks on component %s", role, component.name)
-    for ti, task in enumerate(tasks):
-        taskid = f"{role}:{ti}"
-        if task.task_name is not None:
-            taskid += f":{task.task_name!r}"
-        setattr(thread, "current_task", task)  # noqa: B010
-        logger.info("%s: processing task", taskid)
-
-        # Hold while start contidions are not met
-        while True:
-            if (
-                task.start_with_task_name is None
-                or task.start_with_task_name in getattr(thread, "started_task_names")  # noqa: B009
-            ):
-                break
-            else:
-                logger.debug(
-                    "%s: waiting for task_name '%s'", taskid, task.start_with_task_name
-                )
-                time.sleep(0.1)
-
-        # Hold while component task_list is not ready
-        msg = {"cmd": "task_status", "params": {**kwargs}}
-        while True:
-            logger.debug(
-                "%s: polling component %s for task readiness", taskid, component.name
-            )
-            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-            if ret.success and ret.data is not None and ret.data["can_submit"]:
-                break
-            elif req.closed:
-                setattr(thread, "crashed", True)  # noqa: B010
-                sys.exit()
-            logger.warning(
-                "%s: cannot submit onto component %s, waiting", taskid, component.name
-            )
-            time.sleep(0.1)
-
-        # Send task to component
-        logger.info("%s: sending task to component %s", taskid, component.name)
-        t0 = time.perf_counter()
-        msg = {"cmd": "task_start", "params": {"task": task, **kwargs}}
-        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-        if req.closed:
-            setattr(thread, "crashed", True)  # noqa: B010
-            sys.exit()
-
-        # Wait until the correct task is running, or MAX_TASK_WAIT
-        msg = {"cmd": "task_status", "params": {**kwargs}}
-        while True:
-            dt = time.perf_counter() - t0
-            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-            if req.closed:
-                setattr(thread, "crashed", True)  # noqa: B010
-                sys.exit()
-            elif ret.success and ret.data is not None and ret.data["running"] is False:
-                logger.warning(
-                    "%s: task was submitted %f s ago but is not yet running", taskid, dt
-                )
-            elif (
-                ret.success
-                and ret.data is not None
-                and "task" in ret.data
-                and ret.data["task"] != task
-            ):
-                logger.warning(
-                    "%s: task was submitted %f s ago but another task is running: %s",
-                    taskid,
-                    dt,
-                    ret.data["task"],
-                )
-            elif (
-                ret.success
-                and ret.data is not None
-                and "task" in ret.data
-                and ret.data["task"] == task
-            ) or (ret.success and ret.data is not None and "task" not in ret.data):
-                break
-            if dt > MAX_TASK_WAIT:
-                logger.critical(
-                    "%s: task was submitted, but is not executed, aborting", taskid
-                )
-                setattr(thread, "crashed", True)  # noqa: B010
-                sys.exit()
-            time.sleep(0.1)
-        logger.info("%s: correct task running on component %s", taskid, role)
-
-        # Main task loop
-        tP = time.perf_counter()
-        while True:
-            tN = time.perf_counter()
-
-            # Poll for data every device.pollrate, save to pickle
-            if tN - tP > device.pollrate:
-                logger.debug("%s: polling task for data", taskid)
-                msg = {"cmd": "task_data", "params": {**kwargs}}
-                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-                if req.closed:
-                    setattr(thread, "crashed", True)  # noqa: B010
-                    sys.exit()
-                elif ret.success and ret.data is not None:
-                    logger.debug("%s: pickling received data", taskid)
-                    ds: xr.Dataset = ret.data
-                    ds.attrs["tomato_Component"] = component.model_dump_json()
-                    data_to_pickle(ds, datapath, role=role)
-                tP += device.pollrate
-
-            # Poll for completion and correct task status
-            logger.debug("%s: polling task for completion", taskid)
-            msg = {"cmd": "task_status", "params": {**kwargs}}
-            ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-            if req.closed:
-                setattr(thread, "crashed", True)  # noqa: B010
-                sys.exit()
-            elif ret.success and ret.data is not None and not ret.data["running"]:
-                logger.info("%s: task no longer running, break", taskid)
-                break
-            elif (
-                ret.success
-                and ret.data is not None
-                and "task" in ret.data
-                and ret.data["task"] != task
-            ):
-                logger.critical("%s: wront task running, break", taskid)
-                logger.debug("%s: expected task: %s", taskid, task)
-                logger.debug("%s: executed task: %s", taskid, ret.data["task"])
-                break
-            elif ret.success is False:
-                logger.critical(f"{ret=}")
-                break
-
-            # Stop task if stop trigger condition met, save to pickle
-            if (
-                task.stop_with_task_name is not None
-                and task.stop_with_task_name in getattr(thread, "started_task_names")  # noqa: B009
-            ):
-                logger.info("%s: task stop trigger met", taskid)
-                msg = {"cmd": "task_stop", "params": {**kwargs}}
-                ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-                if req.closed:
-                    setattr(thread, "crashed", True)  # noqa: B010
-                    sys.exit()
-                elif ret.success and ret.data is not None:
-                    logger.debug("%s: pickling received data", taskid)
-                    ds: xr.Dataset = ret.data
-                    ds.attrs["tomato_Component"] = component.model_dump_json()
-                    data_to_pickle(ds, datapath, role=role)
-                break
-
-            time.sleep(max(1e-1, (device.pollrate - (tN - tP)) / 2))
-
-        # Store final task data, housekeeping.
-        logger.info("%s: task fetching final data", taskid)
-        msg = {"cmd": "task_data", "params": {**kwargs}}
-        ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-        if req.closed:
-            setattr(thread, "crashed", True)  # noqa: B010
-            sys.exit()
-        elif ret.success and ret.data is not None:
-            logger.debug("%s: pickling received data", taskid)
-            ds: xr.Dataset = ret.data
-            ds.attrs["tomato_Component"] = component.model_dump_json()
-            data_to_pickle(ds, datapath, role=role)
-        ct = getattr(thread, "completed_tasks").append(task)  # noqa: B009
-        setattr(thread, "completed_tasks", ct)  # noqa: B010
-        setattr(thread, "current_task", None)  # noqa: B010
-
-    # Reset component at the end of the job
-    logger.info("%s: all tasks done on component %s, resetting", role, component.name)
-    msg = {"cmd": "cmp_reset", "params": {**kwargs}}
-    ret, req = lpp.comm(req, msg, **lppargs)  # ty: ignore[invalid-argument-type]
-    if req.closed:
-        setattr(thread, "crashed", True)  # noqa: B010
-        sys.exit()
-    elif not ret.success:
-        logger.warning("%s: could not reset component %s", role, ret.msg)
-    else:
-        logger.info("%s: reset of component %s done", role, component.name)
-    req.close()
-
-
-def job_main_loop(
-    port: int,
-    job: Job,
-    pipname: str,
-    logpath: Path,
-) -> int | None:
-    """
-    The main loop function of `tomato-job`, split for better readability.
-    """
-    sender = f"{__name__}.job_main_loop"
-    logger = logging.getLogger(sender)
-    logger.debug("process started")
-
-    req = context.socket(zmq.REQ)
-    req.connect(f"tcp://127.0.0.1:{port}")
-    lppargs = {"endpoint": f"tcp://127.0.0.1:{port}"}
-
+    logger.info("waiting for all drivers")
     while True:
-        ret, req = lpp.comm(req, {"cmd": "status", "sender": sender}, **lppargs)  # ty: ignore[invalid-argument-type]
-        if ret.success and ret.data is not None:
-            daemon: Daemon = ret.data
-            dbpath = daemon.settings["jobs"]["dbpath"]
-        else:
-            sys.exit()
-        drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
+        drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=args.dbpath)
         if all(drv.port is not None for drv in drivers):
             break
         else:
             logger.debug("not all tomato-drivers have a port, waiting")
             time.sleep(1)
-    req.close()
 
-    # pipeline = daemon.pips[pipname]
-    pipeline = daemon.devicefile.pipelines[pipname]
-    logger.debug(f"{pipeline=}")
-    logger.debug(f"{job=}")
+    logger.info("getting devicefile from tomato daemon")
+    exc_msg = f"could not communicate with tomato daemon on port {args.port}"
+    ret = lpp.comm_or_exit({"cmd": "status"}, args.port, logger, exc_msg)
+    assert ret.success and ret.data is not None
+    daemon: Daemon = ret.data
+    pipeline = daemon.devicefile.pipelines[pip]
+    logger.debug("pipeline=%s", pipeline)
 
     # collate steps by role
     plan = {}
@@ -759,20 +503,20 @@ def job_main_loop(
         if step.component_role not in plan:
             plan[step.component_role] = []
         plan[step.component_role].append(step)
-    logger.debug(f"{plan=}")
+    logger.debug("plan=%s", plan)
 
     # distribute plan into threads
     threads = {}
     for crole, cname in pipeline.components.items():
         cmp = daemon.devicefile.components[cname]
-        logger.debug(f"{cmp=}")
+        logger.debug("cmp=%s", cmp)
         if crole not in plan:
             continue
         tasks = plan[crole]
         logger.debug(" tasks=%s", tasks)
         device = daemon.devicefile.devices[cmp.device]
         logger.debug(" device=%s", device)
-        drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
+        drv = drvdb.get_drv(name=cmp.driver, dbpath=args.dbpath)
         assert drv is not None
         dsettings = daemon.devicefile.drivers[cmp.driver].settings
         logger.debug(" settings=%s", dsettings)
@@ -811,22 +555,292 @@ def job_main_loop(
             stn.update(started_task_names)
             setattr(t, "started_task_names", stn)  # noqa: B010
         crashed = [getattr(t, "crashed") for t in threads.values()]  # noqa: B009
-        joined = [
-            t.is_alive() is False or getattr(t, "crashed")  # noqa: B009
-            for t in threads.values()
-        ]
+        joined = [t.is_alive() is False for t in threads.values()]
         if tN - tD > JOB_INFO_INTERVAL:
             logger.info("started task names are: %s", started_task_names)
             logger.info("joined threads are: %s", joined)
             logger.info("crashed threads are: %s", crashed)
             tD += JOB_INFO_INTERVAL
         if all(joined):
+            logger.info("all threads have joined")
             break
         # We'd like to execute this loop exactly once every second
         time.sleep(1.0 - tN % 1)
 
-    logger.info("all threads have joined")
+    logger.info("==============================")
+    job.completed_at = str(datetime.now(UTC))
     if any(crashed):
-        return 1
+        job.status = "ce"
     else:
-        return None
+        job.status = "c"
+
+    logger.info("writing final data to a NetCDF file")
+    outpath = merge_netcdfs(job)
+    if len(jsdata["repositories"]) > 0:
+        logger.debug("job configured with repositories: '%s'", list(repositories))
+        logger.info("writing final RO-crate")
+        to_rocrate(
+            datapath=outpath,
+            userid=job.payload.user.identifier,
+            sampleid=job.payload.sample.identifier,
+            make_child=job.payload.sample.sample_is_parent,
+        )
+
+    logger.info("job finished with status '%s', updating job db", job.status)
+    params = {"status": job.status, "completed_at": job.completed_at}
+    job = jobdb.update_job_id(job.id, params, args.dbpath)
+    logger.debug("job=%s", job)
+    params = {"jobid": None, "ready": job.payload.settings.unlock_when_done}
+    pip = pipdb.update_pip(name=pip, params=params, dbpath=args.dbpath)
+    logger.debug("pip=%s", pip)
+    logger.info("exiting tomato-job")
+
+
+def job_thread(
+    role: str,
+    tasks: list[Task],
+    component: Component,
+    device: Device,
+    dport: int,
+    dsettings: dict,
+    jobpath: Path,
+    logpath: Path,
+):
+    """
+    A subthread of `tomato-job`, responsible for tasks on one component of a pipeline.
+
+    For each :class:`Task`, this thread starts the task at an appropriate moment, then monitors the component status and polls periodically for data, and moves on to the next task as instructed in the task list.
+
+    .. note::
+
+        The data from all tasks for that component is stored using the :func:`tomato.daemon.io.data_to_pickle` function.
+
+    """
+    thread = current_thread()
+    sender = f"{__name__}.job_thread({thread.ident:5d})"
+    logger = logging.getLogger(sender)
+    timeout = dsettings.get("lpp_timeout", 1) * 1000
+
+    logger.info("%s: job thread of %s attached to tomato-daemon", role, component.name)
+    kwargs = component.model_dump()
+
+    datapath = Path(jobpath) / f"{role}.pkl"
+    logger.debug("%s: processing tasks on component %s", role, component.name)
+    for ti, task in enumerate(tasks):
+        taskid = f"{role}:{ti}"
+        exc_msg = f"{taskid}: could not communicate with driver on port {dport}"
+        if task.task_name is not None:
+            taskid += f":{task.task_name!r}"
+        setattr(thread, "current_task", task)  # noqa: B010
+        logger.info("%s: processing task", taskid)
+
+        req = lpp.socket(timeout)
+        req.connect(f"tcp://127.0.0.1:{dport}")
+
+        # Hold while start contidions are not met
+        while True:
+            if (
+                task.start_with_task_name is None
+                or task.start_with_task_name in getattr(thread, "started_task_names")  # noqa: B009
+            ):
+                break
+            else:
+                logger.debug(
+                    "%s: waiting for task_name '%s'", taskid, task.start_with_task_name
+                )
+                time.sleep(0.1)
+
+        # Hold while component task_list is not ready
+        msg = {"cmd": "task_status", "params": {**kwargs}}
+        while True:
+            logger.debug(
+                "%s: polling component %s for task readiness", taskid, component.name
+            )
+            try:
+                req.send_pyobj(msg)
+                ret = req.recv_pyobj()
+            except zmq.Again as e:
+                logger.exception(exc_msg, exc_info=e)
+                setattr(thread, "crashed", True)  # noqa: B010
+                req.close()
+                return
+            if ret.success and ret.data is not None and ret.data["can_submit"]:
+                break
+            logger.warning(
+                "%s: cannot submit onto component %s, waiting", taskid, component.name
+            )
+            time.sleep(0.1)
+
+        # Send task to component
+        logger.info("%s: sending task to component %s", taskid, component.name)
+        t0 = time.perf_counter()
+        req = lpp.socket(timeout)
+        req.connect(f"tcp://127.0.0.1:{dport}")
+        msg = {"cmd": "task_start", "params": {"task": task, **kwargs}}
+        try:
+            req.send_pyobj(msg)
+            ret = req.recv_pyobj()
+        except zmq.Again as e:
+            logger.exception(exc_msg, exc_info=e)
+            setattr(thread, "crashed", True)  # noqa: B010
+            req.close()
+            return
+        if ret.success:
+            logger.debug("%s: task_start sent successfully", taskid)
+
+        # Wait until the correct task is running, or MAX_TASK_WAIT
+        msg = {"cmd": "task_status", "params": {**kwargs}}
+        while True:
+            dt = time.perf_counter() - t0
+            try:
+                req.send_pyobj(msg)
+                ret = req.recv_pyobj()
+            except zmq.Again as e:
+                logger.exception(exc_msg, exc_info=e)
+                setattr(thread, "crashed", True)  # noqa: B010
+                req.close()
+                return
+            if ret.success and ret.data is not None and ret.data["running"] is False:
+                logger.warning(
+                    "%s: task was submitted %f s ago but is not yet running", taskid, dt
+                )
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] != task
+            ):
+                logger.warning(
+                    "%s: task was submitted %f s ago but another task is running: %s",
+                    taskid,
+                    dt,
+                    ret.data["task"],
+                )
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] == task
+            ) or (ret.success and ret.data is not None and "task" not in ret.data):
+                break
+            if dt > MAX_TASK_WAIT:
+                logger.critical(
+                    "%s: task was submitted, but is not executed, aborting", taskid
+                )
+                setattr(thread, "crashed", True)  # noqa: B010
+                req.close()
+                return
+            time.sleep(0.1)
+        logger.info("%s: correct task running on component %s", taskid, role)
+
+        # Main task loop
+        tP = time.perf_counter()
+        while True:
+            tN = time.perf_counter()
+            # Poll for data every device.pollrate, save to pickle
+            if tN - tP > device.pollrate:
+                logger.debug("%s: polling task for data", taskid)
+                msg = {"cmd": "task_data", "params": {**kwargs}}
+                try:
+                    req.send_pyobj(msg)
+                    ret = req.recv_pyobj()
+                except zmq.Again as e:
+                    logger.exception(exc_msg, exc_info=e)
+                    setattr(thread, "crashed", True)  # noqa: B010
+                    req.close()
+                    return
+                if ret.success and ret.data is not None:
+                    logger.debug("%s: pickling received data", taskid)
+                    ds: xr.Dataset = ret.data
+                    ds.attrs["tomato_Component"] = component.model_dump_json()
+                    data_to_pickle(ds, datapath, role=role)
+                tP += device.pollrate
+
+            # Poll for completion and correct task status
+            logger.debug("%s: polling task for completion", taskid)
+            msg = {"cmd": "task_status", "params": {**kwargs}}
+            try:
+                req.send_pyobj(msg)
+                ret = req.recv_pyobj()
+            except zmq.Again as e:
+                logger.exception(exc_msg, exc_info=e)
+                setattr(thread, "crashed", True)  # noqa: B010
+                req.close()
+                return
+            if ret.success and ret.data is not None and not ret.data["running"]:
+                logger.info("%s: task no longer running, break", taskid)
+                break
+            elif (
+                ret.success
+                and ret.data is not None
+                and "task" in ret.data
+                and ret.data["task"] != task
+            ):
+                logger.critical("%s: wront task running, break", taskid)
+                logger.debug("%s: expected task: %s", taskid, task)
+                logger.debug("%s: executed task: %s", taskid, ret.data["task"])
+                break
+            elif ret.success is False:
+                logger.error("%s: unknown error, break: %s", taskid, ret)
+                break
+
+            # Stop task if stop trigger condition met, save to pickle
+            if (
+                task.stop_with_task_name is not None
+                and task.stop_with_task_name in getattr(thread, "started_task_names")  # noqa: B009
+            ):
+                logger.info("%s: task stop trigger met", taskid)
+                msg = {"cmd": "task_stop", "params": {**kwargs}}
+                try:
+                    req.send_pyobj(msg)
+                    ret = req.recv_pyobj()
+                except zmq.Again as e:
+                    logger.exception(exc_msg, exc_info=e)
+                    setattr(thread, "crashed", True)  # noqa: B010
+                    req.close()
+                    return
+                if ret.success and ret.data is not None:
+                    logger.debug("%s: pickling received data", taskid)
+                    ds: xr.Dataset = ret.data
+                    ds.attrs["tomato_Component"] = component.model_dump_json()
+                    data_to_pickle(ds, datapath, role=role)
+                break
+
+            time.sleep(max(1e-1, (device.pollrate - (tN - tP)) / 2))
+
+        # Store final task data, housekeeping.
+        logger.info("%s: task fetching final data", taskid)
+        msg = {"cmd": "task_data", "params": {**kwargs}}
+        try:
+            req.send_pyobj(msg)
+            ret = req.recv_pyobj()
+        except zmq.Again as e:
+            logger.exception(exc_msg, exc_info=e)
+            setattr(thread, "crashed", True)  # noqa: B010
+            req.close()
+            return
+        if ret.success and ret.data is not None:
+            logger.debug("%s: pickling received data", taskid)
+            ds: xr.Dataset = ret.data
+            ds.attrs["tomato_Component"] = component.model_dump_json()
+            data_to_pickle(ds, datapath, role=role)
+        ct = getattr(thread, "completed_tasks").append(task)  # noqa: B009
+        setattr(thread, "completed_tasks", ct)  # noqa: B010
+        setattr(thread, "current_task", None)  # noqa: B010
+
+    # Reset component at the end of the job
+    logger.info("%s: all tasks done on component %s, resetting", role, component.name)
+    msg = {"cmd": "cmp_reset", "params": {**kwargs}}
+    try:
+        req.send_pyobj(msg)
+        ret = req.recv_pyobj()
+    except zmq.Again as e:
+        logger.exception(exc_msg, exc_info=e)
+        setattr(thread, "crashed", True)  # noqa: B010
+        return
+    finally:
+        req.close()
+    if not ret.success:
+        logger.warning("%s: could not reset component %s", role, ret.msg)
+    else:
+        logger.info("%s: reset of component %s done", role, component.name)
