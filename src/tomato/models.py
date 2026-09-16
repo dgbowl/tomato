@@ -185,7 +185,7 @@ class DeviceFile(BaseModel):
 
     @model_validator(mode="after")
     def populate_attrs(self) -> Self:
-        with self.filename.open("r") as inf:
+        with self.filename.open("r", encoding="utf-8-sig") as inf:
             jsdata = yaml.safe_load(inf)
 
         devices = jsdata.get("devices", {})
