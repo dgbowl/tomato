@@ -127,9 +127,9 @@ def run_tomato():
         )
         p.add_argument(
             "--timeout",
-            help="Timeout for the tomato command, in milliseconds",
+            help="Timeout for the tomato command, in seconds",
             type=int,
-            default=3000,
+            default=3,
         )
         p.add_argument(
             "--yaml",

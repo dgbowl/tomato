@@ -68,14 +68,14 @@ def test_job_rocrate(casename, par, datadir, tmpdir, stop_tomato_daemon):
         ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
         check=True,
     )
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5)
 
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 20)
 
     assert os.path.exists("results.1.zip")
     crate = ROCrate("results.1.zip")

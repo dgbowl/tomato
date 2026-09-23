@@ -13,6 +13,7 @@ import tomato
 from . import utils
 
 PORT = 12345
+TOUT = 1
 
 
 @pytest.mark.parametrize(
@@ -30,8 +31,8 @@ def test_counter_npoints_metadata(
 ):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 20)
 
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
@@ -53,13 +54,13 @@ def test_counter_npoints_metadata(
 def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
 
     subprocess.run(
         ["ketchup", "cancel", "-p", "12345", "1"],
         check=True,
     )
-    assert utils.wait_until_ketchup_status(1, "cd", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "cd", PORT, 5)
 
 
 @pytest.mark.parametrize(
@@ -74,14 +75,14 @@ def test_counter_snapshot_metadata(
 ):
     os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
     if external:
         subprocess.run(
             ["ketchup", "snapshot", "-p", "12345", "1"],
             check=True,
         )
 
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 30000)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 30)
 
     assert os.path.exists("snapshot.1.nc")
     utils.sync_files()
@@ -113,13 +114,13 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
         ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
         check=True,
     )
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5)
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 10000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 10)
 
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
@@ -135,12 +136,12 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
 
 def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):
     os.chdir(datadir)
-    kwargs = {"port": PORT, "timeout": 1000}
+    kwargs = {"port": PORT, "timeout": TOUT}
     ret = tomato.passata.measure(name="example_counter:example-addr:1", **kwargs)
     assert ret.success
 
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
     ret = tomato.passata.measure(
         name="example_counter:example-addr:1",
         **kwargs,
@@ -148,7 +149,7 @@ def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_
     assert not ret.success
     assert "is not idle" in ret.msg
 
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 10000)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 10)
     time.sleep(1)
     ret = tomato.passata.measure(
         name="example_counter:example-addr:1",

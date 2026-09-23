@@ -19,6 +19,7 @@ import zmq
 
 import tomato.utils
 from tomato.daemon import drvdb, lpp
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.drivers import ModelInterface, driver_to_interface
 from tomato.models import Daemon, DrvState, Reply
 from tomato.utils import context
@@ -340,7 +341,7 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is quitting", args.driver)
 
 
-def manager(timeout: int = 1000):
+def manager(timeout: int = 1):
     """
     The driver manager thread of `tomato-daemon`.
 
@@ -398,7 +399,7 @@ def manager(timeout: int = 1000):
                     logger.debug("%s: checking driver on port %d", d.name, d.port)
                     settings = daemon.devicefile.drivers[d.name].settings
                     try:
-                        dreq = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                        dreq = lpp.socket(settings.get("lpp_timeout", REQ_TIMEOUT))
                         dreq.connect(f"tcp://127.0.0.1:{d.port}")
                         dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()

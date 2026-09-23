@@ -17,6 +17,7 @@ else:
     _has_psutil = True
 
 PORT = 12345
+TOUT = 1
 NAME = "psutil:psutil-addr:10"
 
 
@@ -44,12 +45,12 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
         ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
         check=True,
     )
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=TOUT)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5)
 
     utils.run_casenames([casename], [None], ["pip-multidev"])
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 20000)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 20)
 
     files = os.listdir(os.path.join(".", "Jobs", "1"))
     assert "jobdata.json" in files
@@ -72,11 +73,11 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         ["tomato", "start", "-p", f"{PORT}", "-A", ".", "-vv"],
         check=True,
     )
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=TOUT)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5)
 
-    ret = tomato.status(port=PORT, timeout=1000, stgrp="drivers")
+    ret = tomato.status(port=PORT, timeout=TOUT, stgrp="drivers")
     assert ret.success
     assert ret.data is not None
     assert ret.data["psutil"]["version"] == "2.1"

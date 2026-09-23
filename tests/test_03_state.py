@@ -9,9 +9,10 @@ from tomato import ketchup, tomato
 from . import utils
 
 PORT = 12345
-WAIT = 10000
+WAIT = 10
+TOUT = 1
 
-kwargs = {"port": PORT, "timeout": 1000}
+kwargs = {"port": PORT, "timeout": TOUT}
 
 
 def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -23,7 +24,7 @@ def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon)
     ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", daemon=daemon)
 
     tomato.stop(**kwargs)  # ty: ignore[invalid-argument-type]
-    assert utils.wait_until_tomato_stopped(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_stopped(port=PORT, timeout=5)
     ret = tomato.start(
         **kwargs,  # ty: ignore[invalid-argument-type]
         appdir=Path(),
@@ -98,7 +99,7 @@ def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_dae
     assert len(ret.data) == 1
     assert ret.data[0].status == "r"
 
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 25000)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 25)
     ret = ketchup.status(jobids=[1], daemon=daemon)
     print(f"{ret=}")
     assert ret.success
@@ -132,8 +133,8 @@ def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_da
         appdir=Path(),
         verbosity=0,
     )
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=TOUT)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 5)
 
     ret = tomato.status(
         **kwargs,  # ty: ignore[invalid-argument-type]
@@ -179,7 +180,7 @@ def test_restart_with_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_dae
         verbosity=0,
     )
     assert utils.wait_until_tomato_running(port=PORT, timeout=WAIT)
-    assert utils.wait_until_ketchup_status(1, "ce", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "ce", PORT, 5)
 
     ret = tomato.status(
         **kwargs,  # ty: ignore[invalid-argument-type]
@@ -243,4 +244,4 @@ def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daem
     print(f"{alive=}")
 
     # The wait here has to be quite long - polling task_data has a 3 x 5s timeout
-    assert utils.wait_until_ketchup_status(1, "ce", PORT, 20000)
+    assert utils.wait_until_ketchup_status(1, "ce", PORT, 20)
