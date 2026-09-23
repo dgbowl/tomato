@@ -41,7 +41,7 @@ def test_ketchup_submit_two(datadir, start_tomato_daemon, stop_tomato_daemon):
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", daemon=daemon)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", daemon=daemon)
-    assert utils.wait_until_ketchup_status(2, "qw", PORT, TOUT)
+    assert utils.wait_until_ketchup_status(2, "qw", PORT, 2)
 
     print(f"{ret=}")
     assert ret.success
