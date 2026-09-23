@@ -296,7 +296,7 @@ def start(
         rep = context.socket(zmq.REP)
         rep.setsockopt(zmq.LINGER, 0)
         rep.bind(f"tcp://127.0.0.1:{port}")
-        stat = status(port=port, timeout=1000)
+        stat = status(port=port, timeout=timeout)
         rep.unbind(f"tcp://127.0.0.1:{port}")
         rep.close()
         if stat.success:
@@ -332,9 +332,7 @@ def start(
         ],
         logger=logger,
     )
-
-    kwargs = {"port": port, "timeout": max(timeout, 5000)}
-    return status(**kwargs)  # ty: ignore[invalid-argument-type]
+    return status(port=port, timeout=timeout)
 
 
 def stop(
