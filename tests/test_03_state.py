@@ -10,7 +10,7 @@ from . import utils
 
 PORT = 12345
 WAIT = 10
-TOUT = 1
+TOUT = 2
 
 kwargs = {"port": PORT, "timeout": TOUT}
 

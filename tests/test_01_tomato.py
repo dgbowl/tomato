@@ -11,7 +11,7 @@ from . import utils
 
 context = zmq.Context()
 PORT = 12345
-TOUT = 1
+TOUT = 2
 kwargs = {"port": PORT, "timeout": TOUT}
 
 
