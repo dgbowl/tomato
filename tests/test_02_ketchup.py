@@ -200,7 +200,7 @@ def test_ketchup_snapshot(datadir, start_tomato_daemon, stop_tomato_daemon):
     utils.run_casenames(["counter_60_0.1"], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
 
-    assert utils.wait_until_pickle(jobid=1, timeout=2)
+    assert utils.wait_until_pickle(jobid=1, timeout=TOUT)
 
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None

@@ -206,7 +206,7 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
     gone, alive = psutil.wait_procs([p], timeout=5)
     print(f"{gone=}")
     print(f"{alive=}")
-    time.sleep(1)
+    time.sleep(TOUT)
 
     ret = tomato.status(**kwargs, stgrp="drivers")  # ty: ignore[invalid-argument-type]
     assert ret.success
