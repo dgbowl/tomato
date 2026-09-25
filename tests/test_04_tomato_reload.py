@@ -1,11 +1,19 @@
+import importlib.util
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 from tomato import tomato
 
 from . import utils
+
+ret = importlib.util.find_spec("tomato_psutil")
+if ret is None:
+    _has_psutil = False
+else:
+    _has_psutil = True
 
 PORT = 12345
 TOUT = 1
@@ -69,6 +77,7 @@ def test_reload_devs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.components) == 3
 
 
+@pytest.mark.skipif(not _has_psutil, reason="requires tomato-psutil")
 def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     # Let's add psutil driver / device
     with open("devices_psutil.json", "r") as inf:
