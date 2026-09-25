@@ -234,11 +234,7 @@ def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daem
     assert ret.data is not None
     print(f"{ret.data=}")
     pid = ret.data["example_counter"]["pid"]
-    p = psutil.Process(pid)
-    p.terminate()
-    gone, alive = psutil.wait_procs([p], timeout=5)
-    print(f"{gone=}")
-    print(f"{alive=}")
+    kill_tomato_driver(pid)
 
     # The wait here has to be quite long - polling task_data has a 3 x 5s timeout
     assert utils.wait_until_ketchup_status(1, "ce", PORT, 20)

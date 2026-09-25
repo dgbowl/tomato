@@ -159,7 +159,7 @@ def kill_tomato_driver(pid: int):
     to_kill.append(proc)
     logger.warning("killing process '%s' with pid %d", proc.name(), proc.pid)
     proc.terminate()
-    gone, alive = psutil.wait_procs([to_kill], timeout=1)
+    gone, alive = psutil.wait_procs(to_kill, timeout=1)
     logger.debug(f"{gone=}")
     logger.debug(f"{alive=}")
 
