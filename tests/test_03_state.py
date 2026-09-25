@@ -5,6 +5,7 @@ from pathlib import Path
 import psutil
 
 from tomato import ketchup, tomato
+from tomato.daemon.driver import kill_tomato_driver
 
 from . import utils
 
@@ -201,11 +202,7 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
     print(f"{ret.data=}")
 
     pid = ret.data["example_counter"]["pid"]
-    p = psutil.Process(pid)
-    p.terminate()
-    gone, alive = psutil.wait_procs([p], timeout=5)
-    print(f"{gone=}")
-    print(f"{alive=}")
+    kill_tomato_driver(pid)
     time.sleep(TOUT)
 
     ret = tomato.status(**kwargs, stgrp="drivers")  # ty: ignore[invalid-argument-type]
