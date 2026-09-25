@@ -69,7 +69,7 @@ def get_drvs_where(where: str, dbpath: str) -> list[DrvState]:
 
 def del_drv(name: str, dbpath: str) -> DrvState | None:
     conn, cur = connect_db(dbpath)
-    cur.execute(f"DELETE FROM drivers WHERE name = '{name}';", (name,))
+    cur.execute(f"DELETE FROM drivers WHERE name = '{name}';")
     conn.commit()
     conn.close()
     return get_drv(name, dbpath)

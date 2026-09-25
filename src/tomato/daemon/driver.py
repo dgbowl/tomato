@@ -381,6 +381,20 @@ def manager(timeout: int = 1):
             logger.debug("%s: state: %s", d.name, d)
             if first_loop:
                 d.spawn_count = 0
+            if d.pid is not None:
+                dproc = psutil.Process(d.pid)
+                dstat = dproc.status()
+                if dstat in {psutil.STATUS_ZOMBIE}:
+                    logger.warning("%s: driver pid is '%s', reaping", d.name, dstat)
+                    dproc.wait(timeout=1)
+                    ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
+                    if ret is None:
+                        logger.info("%s: driver removed from db", d.name)
+                    else:
+                        logger.error("%s: could not delete driver", d.name)
+                    continue
+                elif dstat in {psutil.STATUS_DEAD, psutil.STATUS_STOPPED}:
+                    logger.error("%s: driver pid is '%s', this is a bug", d.name, dstat)
             if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
                     logger.warning("%s: stopping driver", d.name)
@@ -389,7 +403,7 @@ def manager(timeout: int = 1):
                         logger.warning("%s: failed to stop driver: %s", d.name, ret.msg)
                 ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
                 if ret is None:
-                    logger.warning("%s: removed driver", d.name)
+                    logger.warning("%s: driver removed from db", d.name)
                 else:
                     logger.error("%s: could not delete driver", d.name)
             elif d.port is not None:
@@ -451,6 +465,14 @@ def manager(timeout: int = 1):
                 }
                 drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
                 spawned_drivers.add(d.name)
+
+        for dname in daemon.devicefile.drivers:
+            ds = DrvState(name=dname)
+            drv = drvdb.get_drv(name=dname, dbpath=dbpath)
+            if drv is None:
+                drv = drvdb.insert_drv(drv=ds, dbpath=dbpath)
+                logger.info("%s: inserted driver into db", dname)
+            assert drv is not None
 
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
         first_loop = False
