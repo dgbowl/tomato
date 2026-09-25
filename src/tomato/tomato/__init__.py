@@ -32,6 +32,7 @@ import zmq
 
 from tomato.daemon import drvdb, lpp, pipdb
 from tomato.daemon.db import setup_db
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.models import Daemon, Reply
 from tomato.utils import context, spawn_cmd
 
@@ -226,7 +227,7 @@ def status(
                 continue
             settings = daemon.devicefile.drivers[cval.driver].settings
             try:
-                dreq = lpp.socket(settings.get("lpp_timeout", timeout))
+                dreq = lpp.socket(settings.get("lpp_timeout", REQ_TIMEOUT))
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 params = cval.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
@@ -295,7 +296,7 @@ def start(
         rep = context.socket(zmq.REP)
         rep.setsockopt(zmq.LINGER, 0)
         rep.bind(f"tcp://127.0.0.1:{port}")
-        stat = status(port=port, timeout=1000)
+        stat = status(port=port, timeout=timeout)
         rep.unbind(f"tcp://127.0.0.1:{port}")
         rep.close()
         if stat.success:
@@ -331,9 +332,7 @@ def start(
         ],
         logger=logger,
     )
-
-    kwargs = {"port": port, "timeout": max(timeout, 5000)}
-    return status(**kwargs)  # ty: ignore[invalid-argument-type]
+    return status(port=port, timeout=timeout)
 
 
 def stop(

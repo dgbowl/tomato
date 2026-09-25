@@ -24,6 +24,7 @@ import zmq
 from tomato.daemon import drvdb, jobdb, lpp, pipdb
 from tomato.daemon.crates import to_rocrate
 from tomato.daemon.io import data_to_pickle, merge_netcdfs
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.models import (
     Component,
     Daemon,
@@ -65,7 +66,7 @@ def method_validate(
                 assert drv is not None
                 settings = daemon.devicefile.drivers[cmp.driver].settings
                 try:
-                    req = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                    req = lpp.socket(settings.get("lpp_timeout", REQ_TIMEOUT))
                     req.connect(f"tcp://127.0.0.1:{drv.port}")
                     params = {"task": task, **cmp.model_dump()}  # TODO: just name
                     req.send_pyobj({"cmd": "task_validate", "params": params})
@@ -108,7 +109,7 @@ def find_matching_pipelines(
             assert drv is not None
             settings = daemon.devicefile.drivers[cmp.driver].settings
             try:
-                dreq = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                dreq = lpp.socket(settings.get("lpp_timeout", REQ_TIMEOUT))
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 params = cmp.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
@@ -330,7 +331,7 @@ def action_queued(
             break
 
 
-def manager(timeout: int = 500):
+def manager(timeout: int = 1):
     """
     The job manager thread of `tomato-daemon`.
 
@@ -347,6 +348,7 @@ def manager(timeout: int = 500):
     req = lpp.socket(timeout)
     req.connect("inproc://daemon")
     while getattr(thread, "do_run"):  # noqa: B009
+        tN = time.perf_counter()
         msg = {"cmd": "status", "sender": f"{__name__}.manager"}
         try:
             req.send_pyobj(msg)
@@ -363,7 +365,7 @@ def manager(timeout: int = 500):
         manage_running(daemon)
         matched_pips = check_queued(daemon)
         action_queued(daemon, matched_pips)
-        time.sleep(timeout / 1e3)
+        time.sleep(1.0 - tN % 1)
     req.close()
     logger.info("instructed to quit")
 
@@ -619,7 +621,7 @@ def job_thread(
     thread = current_thread()
     sender = f"{__name__}.job_thread({thread.ident:5d})"
     logger = logging.getLogger(sender)
-    timeout = dsettings.get("lpp_timeout", 1) * 1000
+    timeout = dsettings.get("lpp_timeout", REQ_TIMEOUT)
 
     logger.info("%s: job thread of %s attached to tomato-daemon", role, component.name)
     kwargs = component.model_dump()
@@ -691,7 +693,8 @@ def job_thread(
         # Wait until the correct task is running, or MAX_TASK_WAIT
         msg = {"cmd": "task_status", "params": {**kwargs}}
         while True:
-            dt = time.perf_counter() - t0
+            tN = time.perf_counter()
+            dt = tN - t0
             try:
                 req.send_pyobj(msg)
                 ret = req.recv_pyobj()
@@ -730,7 +733,7 @@ def job_thread(
                 setattr(thread, "crashed", True)  # noqa: B010
                 req.close()
                 return
-            time.sleep(0.1)
+            time.sleep(1.0 - tN % 1)
         logger.info("%s: correct task running on component %s", taskid, role)
 
         # Main task loop

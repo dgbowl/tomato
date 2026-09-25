@@ -30,6 +30,7 @@ def datadir(tmpdir, request):
 
 @pytest.fixture(scope="function")
 def start_tomato_daemon(tmpdir: str, port: int = 12345):
+    kill_tomato_procs()
     # setup_stuff
     os.chdir(tmpdir)
     subprocess.run(
@@ -40,9 +41,9 @@ def start_tomato_daemon(tmpdir: str, port: int = 12345):
         ["tomato", "start", "-p", f"{port}", "-A", ".", "-vv"],
         check=True,
     )
-    assert utils.wait_until_tomato_running(port=port, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=port, timeout=3000)
-    assert utils.wait_until_tomato_components(port=port, timeout=5000)
+    assert utils.wait_until_tomato_running(port=port, timeout=3)
+    assert utils.wait_until_tomato_drivers(port=port, timeout=3)
+    assert utils.wait_until_tomato_components(port=port, timeout=5)
     yield
     # teardown_stuff
 
@@ -54,6 +55,10 @@ def stop_tomato_daemon(port: int = 12345):
     # teardown_stuff
     print("stop_tomato_daemon")
     subprocess.run(["tomato", "stop", "-p", f"{port}"], check=True)
+    kill_tomato_procs()
+
+
+def kill_tomato_procs():
     if psutil.WINDOWS:
         subprocess.run(
             ["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"],

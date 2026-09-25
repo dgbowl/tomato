@@ -28,9 +28,9 @@ def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
         ["tomato", "start", "-p", f"{PORT}", "-A", "."],
         check=True,
     )
-    assert utils.wait_until_tomato_running(port=PORT, timeout=1000)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
-    assert utils.wait_until_tomato_components(port=PORT, timeout=5000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=1)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3)
+    assert utils.wait_until_tomato_components(port=PORT, timeout=5)
 
     subprocess.run(
         ["tomato", "pipeline", "load", "-p", f"{PORT}", "pip-counter", case],
@@ -47,7 +47,7 @@ def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
         check=True,
     )
 
-    utils.wait_until_ketchup_status(jobid=nreps, status="c", port=PORT, timeout=40000)
+    utils.wait_until_ketchup_status(jobid=nreps, status="c", port=PORT, timeout=40)
 
     prev = None
     for i in range(nreps):

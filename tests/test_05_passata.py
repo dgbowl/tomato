@@ -10,8 +10,8 @@ import tomato
 from . import utils
 
 PORT = 12345
-TIME = 1000
-kwargs = {"port": PORT, "timeout": TIME}
+TOUT = 1
+kwargs = {"port": PORT, "timeout": TOUT}
 
 
 @pytest.mark.parametrize(
@@ -146,7 +146,7 @@ def test_passata_api_reset_force(
 ):
     os.chdir(datadir)
     utils.run_casenames([case], [None], [pip])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 10000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
     time.sleep(1)  # Delay to make sure the job task on the driver is running
 
     ret = tomato.passata.status(
@@ -231,7 +231,7 @@ def test_passata_api_force(
 ):
     os.chdir(datadir)
     utils.run_casenames([case], [None], [pip])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
     time.sleep(1)  # Delay to make sure the job task on the driver is running
 
     ret = tomato.passata.set_attr(

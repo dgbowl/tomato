@@ -1,15 +1,23 @@
+import importlib.util
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
 from tomato import tomato
 
 from . import utils
 
+ret = importlib.util.find_spec("tomato_psutil")
+if ret is None:
+    _has_psutil = False
+else:
+    _has_psutil = True
+
 PORT = 12345
-timeout = 1000
-kwargs = {"port": PORT, "timeout": timeout}
+TOUT = 1
+kwargs = {"port": PORT, "timeout": TOUT}
 
 
 def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
@@ -69,6 +77,7 @@ def test_reload_devs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.components) == 3
 
 
+@pytest.mark.skipif(not _has_psutil, reason="requires tomato-psutil")
 def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     # Let's add psutil driver / device
     with open("devices_psutil.json", "r") as inf:
@@ -84,8 +93,8 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.devices) == 2
     assert len(ret.data.devicefile.pipelines) == 1
     assert len(ret.data.devicefile.components) == 2
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
-    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3000)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=TOUT)
+    assert utils.wait_until_tomato_drivers(port=PORT, timeout=3)
     ret = tomato.status(**kwargs)  # ty: ignore[invalid-argument-type]
     assert ret.success
     assert ret.data is not None
@@ -105,7 +114,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.devices) == 1
     assert len(ret.data.devicefile.pipelines) == 4
     assert len(ret.data.devicefile.components) == 4
-    assert utils.wait_until_tomato_running(port=PORT, timeout=timeout)
+    assert utils.wait_until_tomato_running(port=PORT, timeout=TOUT)
 
     ret = tomato.status(**kwargs)  # ty: ignore[invalid-argument-type]
     assert ret.success
@@ -115,7 +124,7 @@ def test_reload_drvs(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
     utils.run_casenames(["counter_20_5"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
 
     # Try modifying settings of a driver in use
     with open("settings.toml", "a") as inf:

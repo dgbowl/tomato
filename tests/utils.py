@@ -42,7 +42,7 @@ def job_status(jobid):
 
 def wait_until_tomato_running(port: int, timeout: int):
     t0 = time.perf_counter()
-    while (time.perf_counter() - t0) < (timeout / 1000):
+    while (time.perf_counter() - t0) < timeout:
         ret = subprocess.run(
             ["tomato", "status", "-p", f"{port}"],
             capture_output=True,
@@ -58,7 +58,7 @@ def wait_until_tomato_running(port: int, timeout: int):
 
 def wait_until_tomato_drivers(port: int, timeout: int):
     t0 = time.perf_counter()
-    while (time.perf_counter() - t0) < (timeout / 1000):
+    while (time.perf_counter() - t0) < timeout:
         ret = subprocess.run(
             ["tomato", "status", "drivers", "-y", "-p", f"{port}"],
             capture_output=True,
@@ -79,7 +79,7 @@ def wait_until_tomato_drivers(port: int, timeout: int):
 
 def wait_until_tomato_components(port: int, timeout: int):
     t0 = time.perf_counter()
-    while (time.perf_counter() - t0) < (timeout / 1000):
+    while (time.perf_counter() - t0) < timeout:
         ret = subprocess.run(
             ["tomato", "status", "components", "-y", "-p", f"{port}"],
             capture_output=True,
@@ -100,7 +100,7 @@ def wait_until_tomato_components(port: int, timeout: int):
 
 def wait_until_tomato_stopped(port: int, timeout: int):
     t0 = time.perf_counter()
-    while (time.perf_counter() - t0) < (timeout / 1000):
+    while (time.perf_counter() - t0) < timeout:
         ret = subprocess.run(
             ["tomato", "status", "-p", f"{port}"],
             capture_output=True,
@@ -115,7 +115,7 @@ def wait_until_tomato_stopped(port: int, timeout: int):
 
 def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
     t0 = time.perf_counter()
-    while (time.perf_counter() - t0) < (timeout / 1000):
+    while (time.perf_counter() - t0) < timeout:
         ret = subprocess.run(
             ["ketchup", "status", "-p", f"{port}", f"{jobid}"],
             capture_output=True,
@@ -131,7 +131,7 @@ def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
 
 def wait_until_pickle(jobid: int, timeout: int):
     t0 = time.perf_counter()
-    while (time.perf_counter() - t0) < (timeout / 1000):
+    while (time.perf_counter() - t0) < timeout:
         files = os.listdir(os.path.join(os.getcwd(), "Jobs", f"{jobid}"))
         for file in files:
             if file.endswith(".pkl"):
