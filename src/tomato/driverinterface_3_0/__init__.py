@@ -72,6 +72,9 @@ class Status(BaseModel):
     attrs: dict[str, Any] = Field(default_factory=dict)
     """Container for any attrs that are returned as part of a status."""
 
+    task: Task | None = None
+    """Information about the current task. Should be None when ``state != "meas"``."""
+
 
 class ModelInterface(metaclass=ABCMeta):
     """
