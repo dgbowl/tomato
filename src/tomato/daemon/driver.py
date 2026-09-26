@@ -310,7 +310,7 @@ def tomato_driver() -> None:
                 elif hasattr(interface, msg["cmd"]):
                     try:
                         ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
-                    except (ValueError, AttributeError) as e:
+                    except (ValueError, AttributeError, TypeError) as e:
                         logger.info("above error caught by driver process")
                         ret = Reply(
                             success=False,
