@@ -382,8 +382,12 @@ def manager(timeout: int = 1):
             if first_loop:
                 d.spawn_count = 0
             if d.pid is not None:
-                dproc = psutil.Process(d.pid)
-                dstat = dproc.status()
+                try:
+                    dproc = psutil.Process(d.pid)
+                    dstat = dproc.status()
+                except psutil.NoSuchProcess:
+                    logger.warning("%s: driver pid %d does not exist", d.name, d.pid)
+                    dstat = psutil.STATUS_ZOMBIE
                 if dstat in {psutil.STATUS_ZOMBIE}:
                     logger.warning("%s: driver pid is '%s', reaping", d.name, dstat)
                     dproc.wait(timeout=1)
