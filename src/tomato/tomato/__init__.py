@@ -332,7 +332,7 @@ def start(
         ],
         logger=logger,
     )
-    return status(port=port, timeout=timeout)
+    return status(port=port, timeout=max(timeout, 3))
 
 
 def stop(
