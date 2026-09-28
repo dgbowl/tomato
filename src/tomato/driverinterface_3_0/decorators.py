@@ -60,12 +60,12 @@ def log_errors(func):
             return func(self, **kwargs)
         # We want to preserve TypeErrors, ValueErrors and AttributeErrors for testing.
         # These should be then caught in the tomato-driver process.
-        except (ValueError, AttributeError) as e:
-            logger.critical(e, exc_info=True)
+        except (ValueError, AttributeError, TypeError) as e:
+            logger.exception("caught below Error, continuing", exc_info=e)
             raise e  # noqa: TRY201
         # Other kinds of errors we abort the driver process
         except Exception as e:
-            logger.critical(e, exc_info=True)
+            logger.exception("caught below Error, quitting", exc_info=e)
             sys.exit(str(e))
 
     return wrapper
@@ -92,6 +92,8 @@ def coerce_val(func):
             raise AttributeError(f"attr {attr!r} is read-only")
 
         if not isinstance(val, props.type):
+            if issubclass(props.type, bool) and not isinstance(val, int):
+                raise TypeError(f"val {val!r} is not of type 'bool' or 'int'")
             if issubclass(props.type, BaseModel) and isinstance(val, str):
                 val = props.type(**ast.literal_eval(val))
             # This may raise ValueError or TypeError

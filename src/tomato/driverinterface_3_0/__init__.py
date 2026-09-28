@@ -21,6 +21,7 @@ from tomato.driverinterface_3_0.decorators import in_devmap, log_errors, to_repl
 from tomato.driverinterface_3_0.types import Type, Val
 from tomato.models import Reply, Task
 
+pint.set_application_registry(pint.UnitRegistry(autoconvert_offset_to_baseunit=True))
 logger = logging.getLogger(__name__)
 
 
@@ -71,6 +72,9 @@ class Status(BaseModel):
 
     attrs: dict[str, Any] = Field(default_factory=dict)
     """Container for any attrs that are returned as part of a status."""
+
+    task: Task | None = None
+    """Information about the current task. Should be None when ``state != "meas"``."""
 
 
 class ModelInterface(metaclass=ABCMeta):
@@ -324,21 +328,6 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def task_status(self, name: str, **kwargs: dict) -> tuple[bool, str, dict]:
-        status = self.devmap[name].status(**kwargs)
-        data = {
-            "running": status.state in {"task"},
-            "can_submit": status.can_submit,
-            "task": self.devmap[name].running_task,
-        }
-        if data["running"] is False:
-            return (True, "component is idle", data)
-        else:
-            return (True, "component has a running task", data)
-
-    @log_errors
-    @to_reply
-    @in_devmap
     def task_stop(self, name: str, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
         """
         Stops a running task and returns any collected data.
@@ -570,10 +559,12 @@ class ModelComponent(metaclass=ABCMeta):
                     logger.info("%s: task '%s' is done", self.name, task.technique_name)
                 elif task == "measure":
                     self.state = "meas"
+                    self.running_task = None
                     self.do_measure()
                     logger.debug("%s: measurement is done", self.name)
                 else:
                     self.state = "idle"
+                    self.running_task = None
                     logger.critical("%s: unknown task received: '%s'", self.name, task)
                     setattr(thread, "do_run", False)  # noqa: B010
                     break

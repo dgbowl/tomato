@@ -25,6 +25,7 @@ from tomato.daemon import drvdb, jobdb, lpp, pipdb
 from tomato.daemon.crates import to_rocrate
 from tomato.daemon.io import data_to_pickle, merge_netcdfs
 from tomato.daemon.lpp import REQ_TIMEOUT
+from tomato.driverinterface_3_0 import Status
 from tomato.models import (
     Component,
     Daemon,
@@ -653,7 +654,7 @@ def job_thread(
                 time.sleep(0.1)
 
         # Hold while component task_list is not ready
-        msg = {"cmd": "task_status", "params": {**kwargs}}
+        msg = {"cmd": "cmp_status", "params": {**kwargs}}
         while True:
             logger.debug(
                 "%s: polling component %s for task readiness", taskid, component.name
@@ -666,8 +667,16 @@ def job_thread(
                 setattr(thread, "crashed", True)  # noqa: B010
                 req.close()
                 return
-            if ret.success and ret.data is not None and ret.data["can_submit"]:
-                break
+            except Exception as e:
+                logger.exception("unknown error:", exc_info=e)
+                raise
+            if ret.success and ret.data is not None:
+                if isinstance(ret.data, Status):
+                    if ret.data.can_submit:
+                        break
+                else:
+                    if not ret.data.running:
+                        break
             logger.warning(
                 "%s: cannot submit onto component %s, waiting", taskid, component.name
             )
@@ -691,7 +700,7 @@ def job_thread(
             logger.debug("%s: task_start sent successfully", taskid)
 
         # Wait until the correct task is running, or MAX_TASK_WAIT
-        msg = {"cmd": "task_status", "params": {**kwargs}}
+        msg = {"cmd": "cmp_status", "params": {**kwargs}}
         while True:
             tN = time.perf_counter()
             dt = tN - t0
@@ -703,29 +712,39 @@ def job_thread(
                 setattr(thread, "crashed", True)  # noqa: B010
                 req.close()
                 return
-            if ret.success and ret.data is not None and ret.data["running"] is False:
-                logger.warning(
-                    "%s: task was submitted %f s ago but is not yet running", taskid, dt
-                )
-            elif (
-                ret.success
-                and ret.data is not None
-                and "task" in ret.data
-                and ret.data["task"] != task
-            ):
-                logger.warning(
-                    "%s: task was submitted %f s ago but another task is running: %s",
-                    taskid,
-                    dt,
-                    ret.data["task"],
-                )
-            elif (
-                ret.success
-                and ret.data is not None
-                and "task" in ret.data
-                and ret.data["task"] == task
-            ) or (ret.success and ret.data is not None and "task" not in ret.data):
-                break
+            if ret.success and ret.data is not None:
+                if isinstance(ret.data, Status):
+                    if ret.data.state != "task":
+                        logger.warning(
+                            "%s: task submitted %f s ago but is not yet running",
+                            taskid,
+                            dt,
+                        )
+                    elif ret.data.task != task:
+                        logger.warning(
+                            "%s: task submitted %f s ago but another task is running: %s",
+                            taskid,
+                            dt,
+                            ret.data.task,
+                        )
+                    else:
+                        break
+                else:
+                    if ret.data["running"] is False:
+                        logger.warning(
+                            "%s: task submitted %f s ago but is not yet running",
+                            taskid,
+                            dt,
+                        )
+                    elif ret.data["running"] != task:
+                        logger.warning(
+                            "%s: task submitted %f s ago but another task is running: %s",
+                            taskid,
+                            dt,
+                            ret.data["task"],
+                        )
+                    else:
+                        break
             if dt > MAX_TASK_WAIT:
                 logger.critical(
                     "%s: task was submitted, but is not executed, aborting", taskid
@@ -761,7 +780,7 @@ def job_thread(
 
             # Poll for completion and correct task status
             logger.debug("%s: polling task for completion", taskid)
-            msg = {"cmd": "task_status", "params": {**kwargs}}
+            msg = {"cmd": "cmp_status", "params": {**kwargs}}
             try:
                 req.send_pyobj(msg)
                 ret = req.recv_pyobj()
@@ -770,19 +789,25 @@ def job_thread(
                 setattr(thread, "crashed", True)  # noqa: B010
                 req.close()
                 return
-            if ret.success and ret.data is not None and not ret.data["running"]:
-                logger.info("%s: task no longer running, break", taskid)
-                break
-            elif (
-                ret.success
-                and ret.data is not None
-                and "task" in ret.data
-                and ret.data["task"] != task
-            ):
-                logger.critical("%s: wront task running, break", taskid)
-                logger.debug("%s: expected task: %s", taskid, task)
-                logger.debug("%s: executed task: %s", taskid, ret.data["task"])
-                break
+            if ret.success and ret.data is not None:
+                if isinstance(ret.data, Status):
+                    if ret.data.state != "task":
+                        logger.info("%s: task no longer running, break", taskid)
+                        break
+                    elif ret.data.task != task:
+                        logger.critical("%s: wront task running, break", taskid)
+                        logger.debug("%s: expected task: %s", taskid, task)
+                        logger.debug("%s: executed task: %s", taskid, ret.data["task"])
+                        break
+                else:
+                    if not ret.data["running"]:
+                        logger.info("%s: task no longer running, break", taskid)
+                        break
+                    elif "task" in ret.data and ret.data["task"] != task:
+                        logger.critical("%s: wront task running, break", taskid)
+                        logger.debug("%s: expected task: %s", taskid, task)
+                        logger.debug("%s: executed task: %s", taskid, ret.data["task"])
+                        break
             elif ret.success is False:
                 logger.error("%s: unknown error, break: %s", taskid, ret)
                 break

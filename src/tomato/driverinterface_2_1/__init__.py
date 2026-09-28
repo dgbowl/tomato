@@ -20,6 +20,7 @@ from tomato.driverinterface_2_1.decorators import in_devmap, log_errors, to_repl
 from tomato.driverinterface_2_1.types import Key, Type, Val
 from tomato.models import Reply, Task
 
+pint.set_application_registry(pint.UnitRegistry(autoconvert_offset_to_baseunit=True))
 logger = logging.getLogger(__name__)
 
 
