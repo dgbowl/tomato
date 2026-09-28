@@ -667,6 +667,9 @@ def job_thread(
                 setattr(thread, "crashed", True)  # noqa: B010
                 req.close()
                 return
+            except Exception as e:
+                logger.exception("unknown error:", exc_info=e)
+                raise
             if ret.success and ret.data is not None:
                 if isinstance(ret.data, Status):
                     if ret.data.can_submit:

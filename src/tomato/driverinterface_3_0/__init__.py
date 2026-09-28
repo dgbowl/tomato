@@ -21,6 +21,7 @@ from tomato.driverinterface_3_0.decorators import in_devmap, log_errors, to_repl
 from tomato.driverinterface_3_0.types import Type, Val
 from tomato.models import Reply, Task
 
+pint.set_application_registry(pint.UnitRegistry(autoconvert_offset_to_baseunit=True))
 logger = logging.getLogger(__name__)
 
 
@@ -558,10 +559,12 @@ class ModelComponent(metaclass=ABCMeta):
                     logger.info("%s: task '%s' is done", self.name, task.technique_name)
                 elif task == "measure":
                     self.state = "meas"
+                    self.running_task = None
                     self.do_measure()
                     logger.debug("%s: measurement is done", self.name)
                 else:
                     self.state = "idle"
+                    self.running_task = None
                     logger.critical("%s: unknown task received: '%s'", self.name, task)
                     setattr(thread, "do_run", False)  # noqa: B010
                     break
