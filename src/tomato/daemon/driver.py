@@ -63,7 +63,7 @@ def tomato_driver_bootstrap(
                 continue
             elif (
                 hasattr(interface, "retries")
-                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES  # ty: ignore[unresolved-attribute]
+                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES
             ):
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
