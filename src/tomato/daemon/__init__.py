@@ -61,15 +61,8 @@ def tomato_daemon():
     poller.register(rep, zmq.POLLIN)
 
     logger.debug("entering main loop")
-    pmgr = Thread(target=tomato.daemon.pip.manager, daemon=True)
-    setattr(pmgr, "do_run", True)  # noqa:B010
-    pmgr.start()
-    jmgr = Thread(target=tomato.daemon.job.manager, daemon=True)
-    setattr(jmgr, "do_run", True)  # noqa:B010
-    jmgr.start()
-    dmgr = Thread(target=tomato.daemon.driver.manager, daemon=True)
-    setattr(dmgr, "do_run", True)  # noqa:B010
-    dmgr.start()
+    threads = {}
+    managers = {"pip", "job", "driver"}
     while True:
         socks = dict(poller.poll(1000))
         if rep in socks:
@@ -84,18 +77,30 @@ def tomato_daemon():
                 logger.error("received msg with an invalid cmd: %s", msg["cmd"])
             logger.debug("reply: %s", ret)
             rep.send_pyobj(ret)
+
         if daemon.status == "stop":
             end = True
-            for mgr, label in [(jmgr, "job"), (dmgr, "driver"), (pmgr, "pip")]:
-                if getattr(mgr, "do_run"):  # noqa:B009
-                    logger.debug("stopping %s manager thread", label)
-                    setattr(mgr, "do_run", False)  # noqa:B010
-                if mgr.is_alive():
+            for mgr, thread in threads.items():
+                if getattr(thread, "do_run"):  # noqa:B009
+                    logger.debug("stopping %s manager thread", mgr)
+                    setattr(thread, "do_run", False)  # noqa:B010
+                if mgr is not None and thread.is_alive():
                     end = False
             if end:
-                assert dmgr.is_alive() is False
-                assert jmgr.is_alive() is False
-                assert pmgr.is_alive() is False
+                for mgr in threads.values():
+                    assert mgr.is_alive() is False
                 logger.info("all manager threads joined")
                 break
+        else:
+            for mgr in managers:
+                thread = threads.get(mgr)
+                if thread is None or not thread.is_alive():
+                    if thread is None:
+                        logger.info("starting %s manager thread", mgr)
+                    else:
+                        logger.warning("restarting %s manager thread", mgr)
+                    target = getattr(tomato.daemon, mgr).manager
+                    threads[mgr] = Thread(target=target, daemon=True)
+                    setattr(threads[mgr], "do_run", True)  # noqa: B010
+                    threads[mgr].start()
     logger.critical("tomato-daemon on port %d is exiting", daemon.port)
