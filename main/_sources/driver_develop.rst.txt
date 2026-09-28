@@ -62,6 +62,19 @@ Best Practices when developing a *driver*
 
   Other types of Exceptions are not caught and **will** cause the ``tomato-driver`` process to crash.
 
+
+DriverInterface ver. 3.0
+````````````````````````
+
+.. autoclass:: tomato.driverinterface_3_0.ModelInterface
+    :no-index:
+    :members:
+
+.. autoclass:: tomato.driverinterface_3_0.ModelComponent
+    :no-index:
+    :members:
+
+
 DriverInterface ver. 2.1
 ````````````````````````
 
@@ -74,17 +87,5 @@ DriverInterface ver. 2.1
     :members:
 
 .. autoclass:: tomato.driverinterface_2_1.Attr
-    :no-index:
-    :members:
-
-
-DriverInterface ver. 2.0
-````````````````````````
-
-.. autoclass:: tomato.driverinterface_2_0.ModelInterface
-    :no-index:
-    :members:
-
-.. autoclass:: tomato.driverinterface_2_0.ModelDevice
     :no-index:
     :members:
