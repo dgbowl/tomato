@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato.driverinterface_3_0 package &mdash; tomato 3.0rc3.post3 documentation</title>
+  <title>tomato.driverinterface_3_0 package &mdash; tomato 3.0rc3.post4 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2ea65cc5"></script>
+        <script src="../_static/documentation_options.js?v=e52fcc08"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                3.0rc3.post3
+                3.0rc3.post4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -96,6 +96,7 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.Status.state"><code class="docutils literal notranslate"><span class="pre">Status.state</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.Status.can_submit"><code class="docutils literal notranslate"><span class="pre">Status.can_submit</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.Status.attrs"><code class="docutils literal notranslate"><span class="pre">Status.attrs</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.Status.task"><code class="docutils literal notranslate"><span class="pre">Status.task</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface"><code class="docutils literal notranslate"><span class="pre">ModelInterface</span></code></a><ul>
@@ -120,7 +121,6 @@
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface.cmp_last_data"><code class="docutils literal notranslate"><span class="pre">ModelInterface.cmp_last_data()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface.cmp_measure"><code class="docutils literal notranslate"><span class="pre">ModelInterface.cmp_measure()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface.task_start"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_start()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface.task_status"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_status()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface.task_stop"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_stop()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface.task_data"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_data()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#tomato.driverinterface_3_0.ModelInterface.task_validate"><code class="docutils literal notranslate"><span class="pre">ModelInterface.task_validate()</span></code></a></li>
@@ -387,6 +387,109 @@
 <span class="w">         </span><span class="nt">"additionalProperties"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Attrs"</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"task"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"$ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"#/$defs/Task"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">"$defs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"Task"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">"additionalProperties"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The :class:`Task` is a driver/device-independent abstraction describing the\nmeasurement steps. The driver-specific information for the :class:`Task` can be\nprovided via the :obj:`technique_name` and :obj:`task_params` parameters."</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"component_role"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Component Role"</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"max_duration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max Duration"</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"number"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"sampling_interval"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sampling Interval"</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"number"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"polling_interval"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"number"</span>
+<span class="w">                  </span><span class="p">},</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
+<span class="w">                  </span><span class="p">}</span>
+<span class="w">               </span><span class="p">],</span>
+<span class="w">               </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Polling Interval"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"technique_name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Technique Name"</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"task_name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
+<span class="w">                  </span><span class="p">},</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
+<span class="w">                  </span><span class="p">}</span>
+<span class="w">               </span><span class="p">],</span>
+<span class="w">               </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Task Name"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"task_params"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"additionalProperties"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
+<span class="w">                  </span><span class="p">},</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
+<span class="w">                  </span><span class="p">}</span>
+<span class="w">               </span><span class="p">],</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Task Params"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"start_with_task_name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
+<span class="w">                  </span><span class="p">},</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
+<span class="w">                  </span><span class="p">}</span>
+<span class="w">               </span><span class="p">],</span>
+<span class="w">               </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Start With Task Name"</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"stop_with_task_name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
+<span class="w">                  </span><span class="p">},</span>
+<span class="w">                  </span><span class="p">{</span>
+<span class="w">                     </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
+<span class="w">                  </span><span class="p">}</span>
+<span class="w">               </span><span class="p">],</span>
+<span class="w">               </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Stop With Task Name"</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">"component_role"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"max_duration"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"sampling_interval"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"technique_name"</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Task"</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">},</span>
 <span class="w">   </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -428,6 +531,12 @@
 <dt class="sig sig-object py" id="tomato.driverinterface_3_0.Status.attrs">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">attrs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Optional]</span></em><a class="headerlink" href="#tomato.driverinterface_3_0.Status.attrs" title="Link to this definition"></a></dt>
 <dd><p>Container for any attrs that are returned as part of a status.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="tomato.driverinterface_3_0.Status.task">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">task</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="tomato.html#tomato.models.Task" title="dgbowl_schemas.tomato.payload_2_2.task.Task"><span class="pre">Task</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tomato.driverinterface_3_0.Status.task" title="Link to this definition"></a></dt>
+<dd><p>Information about the current task. Should be None when <code class="docutils literal notranslate"><span class="pre">state</span> <span class="pre">!=</span> <span class="pre">&quot;meas&quot;</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -581,11 +690,6 @@
 <dd><p>Submit a <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> onto the specified device component.</p>
 <p>Pushes the supplied <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> into the <code class="xref py py-class docutils literal notranslate"><span class="pre">Queue</span></code> of the component, then starts the worker thread (if not already started). Checks that the <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> is among the capabilities of this component.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tomato.driverinterface_3_0.ModelInterface.task_status">
-<span class="sig-name descname"><span class="pre">task_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tomato.driverinterface_3_0.ModelInterface.task_status" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tomato.driverinterface_3_0.ModelInterface.task_stop">
@@ -864,7 +968,7 @@ unit.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 3.0rc3.post3
+      v: 3.0rc3.post4
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
