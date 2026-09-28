@@ -327,21 +327,6 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def task_status(self, name: str, **kwargs: dict) -> tuple[bool, str, dict]:
-        status = self.devmap[name].status(**kwargs)
-        data = {
-            "running": status.state in {"task"},
-            "can_submit": status.can_submit,
-            "task": self.devmap[name].running_task,
-        }
-        if data["running"] is False:
-            return (True, "component is idle", data)
-        else:
-            return (True, "component has a running task", data)
-
-    @log_errors
-    @to_reply
-    @in_devmap
     def task_stop(self, name: str, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
         """
         Stops a running task and returns any collected data.
