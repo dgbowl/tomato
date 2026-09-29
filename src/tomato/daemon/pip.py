@@ -14,6 +14,7 @@ import psutil
 import zmq
 
 from tomato.daemon import drvdb, jobdb, lpp, pipdb
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.models import Daemon
 
 MAX_JOB_NOPID = 10
@@ -74,7 +75,7 @@ def manager(timeout: int = 500):
                 settings = daemon.devicefile.drivers[cmp.driver].settings
                 logger.warning("%s: resetting component '%s'", pip.name, cn)
                 try:
-                    dreq = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                    dreq = lpp.socket(settings.get("lpp_timeout", REQ_TIMEOUT))
                     dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                     params = cmp.model_dump()
                     dreq.send_pyobj({"cmd": "cmp_reset", "params": params})

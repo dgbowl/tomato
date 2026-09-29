@@ -10,7 +10,7 @@ Since ``tomato-1.0``, all device *drivers* are developed as separate Python pack
 
 Bootstrapping a *driver* process
 ````````````````````````````````
-When the *driver* process is launched (as a ``tomato-driver``), it's given information about how to connect to the ``tomato-daemon`` process and which device *driver* to spawn. Once a connection to the ``tomato-daemon`` is established, the *driver* settings (from the |setfile|_) are fetched, and the :class:`DriverInterface` is instantiated passing any settings to the constructor. By default, these settings are stored under :obj:`DriverInterface.settings`. Finally, all *components* on all *devices* of this *driver* type that are known to ``tomato-daemon`` are registered using the :func:`cmp_register` function.
+When the *driver* process is launched (as a ``tomato-driver``), it's given information about how to connect to the ``tomato-daemon`` process and which device *driver* to spawn. Once a connection to the ``tomato-daemon`` is established, the *driver* settings (from the |setfile|_) are fetched, and the :class:`DriverInterface` is instantiated passing any settings to the constructor. By default, these settings are stored as a :class:`Settings` object under :obj:`DriverInterface.settings`. Finally, all *components* on all *devices* of this *driver* type that are known to ``tomato-daemon`` are registered using the :func:`cmp_register` function.
 
 .. note::
 
@@ -20,7 +20,7 @@ When the *driver* process is launched (as a ``tomato-driver``), it's given infor
 ``````````````````````````
 The following keywords in the driver-specific settings in the |setfile|_ are reserved for use by **tomato**:
 
-- ``idle_measurement_interval``: Specifies the interval (in seconds) after which the :func:`cmp_measure` function of all *components* registered on the *driver* should be called. The :func:`cmp_measure` checks that *components* are idle, i.e. without a running :class:`Task`. Overrides any :obj:`DriverInterface.idle_measurement_interval`.
+- ``idle_measurement_interval``: Specifies the interval (in seconds) after which the :func:`cmp_measure` function of all *components* registered on the *driver* should be called. The :func:`cmp_measure` checks that *components* are idle, i.e. without a running :class:`Task`. Defaults to ``None``, meaning that no idle measurements will be performed.
 - ``lpp_timeout``: Specifies the timeout (in seconds) after which the communication with this *driver* interface will be retried. When unset, defaults to :obj:`tomato.daemon.lpp.REQ_TIMEOUT` (in seconds).
 
 
