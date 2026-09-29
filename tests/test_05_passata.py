@@ -207,7 +207,9 @@ def test_passata_api_measure_last_data(
         name=name,
         **kwargs,  # ty: ignore[invalid-argument-type]
     )
+    print(f"{ret=}")
     assert ret.success
+    time.sleep(0.1)
 
     ret = tomato.passata.get_last_data(
         name=name,
