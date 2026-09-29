@@ -38,6 +38,7 @@ Changes from ``tomato-2.2`` include:
     - :func:`~tomato.driverinterface_3_0.ModelComponent.reset` is a helper function that should bring the component into a state ready for new :class:`Tasks <tomato.models.Task>`. It is called after :func:`~tomato.driverinterface_3_0.ModelComponent.stop` in :func:`ModelInterface.cmp_reset() <tomato.driverinterface_3_0.ModelInterface.cmp_reset>`, at the completion of every :class:`~tomato.models.Payload`.
     - :func:`~tomato.driverinterface_3_0.ModelComponent.quit` is an abstract helper function that should ensure the component can be released by **tomato**. It is called after :func:`~tomato.driverinterface_3_0.ModelComponent.stop` in :func:`ModelInterface.cmp_quit() <tomato.driverinterface_3_0.ModelInterface.cmp_quit>`, which is called whenever the driver process exits via an :mod:`atexit` handler.
 
+- Reworked the passing of settings. Each driver should expose a :class:`Settings` class, inheriting from :class:`tomato.driverinterface_3_0.Settings`, in order to document and provide default values for any settings.
 
 .. codeauthor::
     Peter Kraus
