@@ -98,11 +98,10 @@ def perform_idle_measurements(
     """
     if not hasattr(interface, "cmp_measure"):
         return t_last
-
-    if "idle_measurement_interval" in interface.settings:
-        imi = interface.settings["idle_measurement_interval"]
-    elif hasattr(interface, "idle_measurement_interval"):
-        imi = interface.idle_measurement_interval
+    if interface.version in {"3.0"}:
+        imi = interface.settings.idle_measurement_interval  # ty: ignore[unresolved-attribute]
+    elif interface.version in {"2.0", "2.1"}:
+        imi = interface.idle_measurement_interval  # ty: ignore[unresolved-attribute]
     else:
         imi = IDLE_MEASUREMENT_INTERVAL
     if imi is None:
@@ -202,6 +201,12 @@ def tomato_driver() -> None:
         type=str,
     )
     parser.add_argument(
+        "--timeout",
+        help="Timeout for the tomato daemon, in seconds",
+        default=3,
+        type=int,
+    )
+    parser.add_argument(
         "driver",
         type=str,
         help="Name of the driver module.",
@@ -268,7 +273,7 @@ def tomato_driver() -> None:
                     ret = Reply(success=False, msg="received msg without cmd", data=msg)
                 elif msg["cmd"] == "register":
                     try:
-                        req = lpp.socket()
+                        req = lpp.socket(args.timeout)
                         req.connect(f"tcp://127.0.0.1:{args.port}")
                         req.send_pyobj({"cmd": "status"})
                         daemon: Daemon = req.recv_pyobj().data
@@ -301,7 +306,10 @@ def tomato_driver() -> None:
                         data={"status": status, "driver": args.driver},
                     )
                 elif msg["cmd"] == "settings":
-                    interface.settings = msg["params"]
+                    if interface.version in {"2.0", "2.1"}:
+                        interface.settings = msg["params"]
+                    else:
+                        interface.UpdateSettings(msg["params"])
                     ret = Reply(
                         success=True,
                         msg="settings received",

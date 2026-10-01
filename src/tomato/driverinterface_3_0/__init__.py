@@ -17,6 +17,7 @@ import pint
 import xarray as xr
 from pydantic import BaseModel, Field
 
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.driverinterface_3_0.decorators import in_devmap, log_errors, to_reply
 from tomato.driverinterface_3_0.types import Type, Val
 from tomato.models import Reply, Task
@@ -51,7 +52,7 @@ class Attr(BaseModel, arbitrary_types_allowed=True):
 
 
 class Status(BaseModel):
-    """A :class:`~pydantic.BaseModel` used to describe component status."""
+    """A :class:`~pydantic.BaseModel` used to describe component status. Returned directly by the :func:`ModelComponent.status` function, as well as the :obj:`Reply.data` object by the :func:`ModelInterface.cmp_status` function."""
 
     connected: bool
     """Indicates whether component is communicating correctly."""
@@ -77,6 +78,16 @@ class Status(BaseModel):
     """Information about the current task. Should be None when ``state != "meas"``."""
 
 
+class Settings(BaseModel, extra="forbid"):
+    """A :class:`~pydantic.BaseModel` used to store :obj:`DriverInterface.settings`. Should be instantiated by the :func:`__init__` function of the :class:`DriverInterface`, merging settings provided by the user with these per-driver defaults."""
+
+    idle_measurement_interval: int | None = None
+    """The interval (in seconds) after which an idle measurement via :func:`DriverInterace.cmp_measure` is to be triggered."""
+
+    lpp_timeout: int = REQ_TIMEOUT
+    """The timeout (in seconds) for communication with this driver."""
+
+
 class ModelInterface(metaclass=ABCMeta):
     """
     An abstract base class specifying the driver interface.
@@ -91,9 +102,6 @@ class ModelInterface(metaclass=ABCMeta):
     version: str = "3.0"
     """Version of the :obj:`DriverInterface`."""
 
-    idle_measurement_interval: int | None = None
-    """The interval (in seconds) after which :func:`self.cmp_measure` will be executed, when idle."""
-
     @property
     def name(self) -> str:
         """Property that should return the name of this driver."""
@@ -106,8 +114,8 @@ class ModelInterface(metaclass=ABCMeta):
     retries: dict[str, int]
     """Map of components which failed to register, with number of retries as values."""
 
-    settings: dict[str, Any]
-    """A settings map to contain driver-specific settings such as ``dllpath`` for BioLogic"""
+    settings: Settings
+    """A :class:`Settings` object containing driver-specific settings such as ``lpp_timeout`` or ``dllpath``."""
 
     constants: dict[str, Any]
     """A map that should be populated with driver-specific run-time constants."""
@@ -115,7 +123,7 @@ class ModelInterface(metaclass=ABCMeta):
     def __init__(self, settings: dict[str, Any] | None = None):
         self.devmap = {}
         self.constants = {}
-        self.settings = settings if settings is not None else {}
+        self.UpdateSettings(settings)
         self.retries = defaultdict(int)
         atexit.register(self.quit)
 
@@ -125,6 +133,12 @@ class ModelInterface(metaclass=ABCMeta):
         """
         mod = importlib.import_module(self.__module__)
         return mod.Component(self, name, **kwargs)
+
+    def UpdateSettings(self, settings: dict[str, Any] | None = None):
+        mod = importlib.import_module(self.__module__)
+        if settings is None:
+            settings = {}
+        self.settings = mod.Settings(**settings)
 
     @log_errors
     @to_reply

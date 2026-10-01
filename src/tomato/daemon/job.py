@@ -675,7 +675,7 @@ def job_thread(
                     if ret.data.can_submit:
                         break
                 else:
-                    if not ret.data.running:
+                    if not ret.data["running"]:
                         break
             logger.warning(
                 "%s: cannot submit onto component %s, waiting", taskid, component.name
