@@ -193,7 +193,7 @@ def kill_tomato_procs():
             capture_output=True,
         )
         logger.debug(f"{ret=}")
-        subprocess.run(
+        ret = subprocess.run(
             ["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"],
             check=False,
             capture_output=True,
