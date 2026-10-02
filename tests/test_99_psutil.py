@@ -32,7 +32,6 @@ NAME = "psutil:psutil-addr:10"
     ],
 )
 def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
-    os.chdir(datadir)
     with open("devices_psutil.json", "r") as inf:
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
@@ -60,7 +59,6 @@ def test_psutil_multidev(casename, npoints, datadir, stop_tomato_daemon):
 
 @pytest.mark.skipif(not _has_psutil, reason="requires tomato-psutil")
 def test_psutil_passata(datadir, stop_tomato_daemon):
-    os.chdir(datadir)
     with open("devices_psutil.json", "r") as inf:
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:

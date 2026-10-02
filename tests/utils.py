@@ -177,3 +177,44 @@ def check_npoints_file(fn: str, npoints: dict[str, int]):
         assert dt[group]["uts"].size >= points
         print(f"{dt[group].attrs=}")
         assert "tomato_Component" in dt[group].attrs
+
+
+def kill_tomato_procs():
+    if psutil.WINDOWS:
+        ret = subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"],
+            check=False,
+            capture_output=True,
+        )
+        logger.debug(f"{ret=}")
+        ret = subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-job.exe"],
+            check=False,
+            capture_output=True,
+        )
+        logger.debug(f"{ret=}")
+        ret = subprocess.run(
+            ["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"],
+            check=False,
+            capture_output=True,
+        )
+        logger.debug(f"{ret=}")
+    else:
+        ret = subprocess.run(
+            ["killall", "tomato-daemon"],
+            check=False,
+            capture_output=True,
+        )
+        logger.debug(f"{ret=}")
+        ret = subprocess.run(
+            ["killall", "tomato-job"],
+            check=False,
+            capture_output=True,
+        )
+        logger.debug(f"{ret=}")
+        ret = subprocess.run(
+            ["killall", "tomato-driver"],
+            check=False,
+            capture_output=True,
+        )
+        logger.debug(f"{ret=}")

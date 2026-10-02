@@ -20,7 +20,7 @@ TOUT = 1
 kwargs = {"port": PORT, "timeout": TOUT}
 
 
-def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
+def test_reload_noop(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]
     assert ret.success
     assert ret.data is not None
@@ -30,7 +30,7 @@ def test_reload_noop(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.components) == 2
 
 
-def test_reload_settings(datadir, start_tomato_daemon, stop_tomato_daemon):
+def test_reload_settings(start_tomato_daemon, stop_tomato_daemon):
     with open("settings.toml", "a") as inf:
         inf.write("example_counter.testparb = 1")
     ret = tomato.reload(**kwargs, appdir=Path())  # ty: ignore[invalid-argument-type]

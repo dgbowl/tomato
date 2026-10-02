@@ -1,4 +1,3 @@
-import os
 import time
 from pathlib import Path
 
@@ -17,7 +16,6 @@ kwargs = {"port": PORT, "timeout": TOUT}
 
 
 def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -44,7 +42,6 @@ def test_stop_with_queued_jobs(datadir, start_tomato_daemon, stop_tomato_daemon)
 
 
 def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -67,7 +64,6 @@ def test_stop_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon
 
 
 def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -110,7 +106,6 @@ def test_restart_with_running_jobs(datadir, start_tomato_daemon, stop_tomato_dae
 
 
 def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -149,7 +144,6 @@ def test_restart_with_complete_jobs(datadir, start_tomato_daemon, stop_tomato_da
 
 
 def test_restart_with_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -194,8 +188,7 @@ def test_restart_with_crashed_jobs(datadir, start_tomato_daemon, stop_tomato_dae
     assert ret.data["pip-counter"]["sampleid"] == "counter_20_5"
 
 
-def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
+def test_crashed_driver_restarts(start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.status(**kwargs, stgrp="drivers")  # ty: ignore[invalid-argument-type]
     assert ret.success
     assert ret.data is not None
@@ -213,7 +206,6 @@ def test_crashed_driver_restarts(datadir, start_tomato_daemon, stop_tomato_daemo
 
 
 def test_crashed_driver_with_jobs(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 

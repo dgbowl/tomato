@@ -27,7 +27,6 @@ PORT = 12345
     ],
 )
 def test_to_rocrate(datapath, make_child, datadir):
-    os.chdir(datadir)
     userid = "userid"
     sampleid = "sampleid"
     to_rocrate(datapath, userid, sampleid, make_child)
@@ -53,8 +52,7 @@ def test_to_rocrate(datapath, make_child, datadir):
         ("rocrate_1_0.1", False),
     ],
 )
-def test_job_rocrate(casename, par, datadir, tmpdir, stop_tomato_daemon):
-    os.chdir(tmpdir)
+def test_job_rocrate(casename, par, datadir, stop_tomato_daemon):
     subprocess.run(
         ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
         check=True,
@@ -72,7 +70,6 @@ def test_job_rocrate(casename, par, datadir, tmpdir, stop_tomato_daemon):
     assert utils.wait_until_tomato_drivers(port=PORT, timeout=3)
     assert utils.wait_until_tomato_components(port=PORT, timeout=5)
 
-    os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
     assert utils.wait_until_ketchup_status(1, "c", PORT, 20)

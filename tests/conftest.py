@@ -1,11 +1,21 @@
+import logging
 import os
 import shutil
 import subprocess
 
-import psutil
 import pytest
 
 from . import utils
+
+logger = logging.getLogger(__name__)
+
+
+@pytest.fixture(autouse=True, scope="function")
+def prepare_test(tmpdir):
+    utils.kill_tomato_procs()
+    os.chdir(tmpdir)
+    logger.debug(f"{tmpdir=}")
+    yield
 
 
 @pytest.fixture
@@ -20,59 +30,36 @@ def datadir(tmpdir, request):
     test_dir, _ = os.path.splitext(filename)
     if os.path.isdir(test_dir):
         shutil.copytree(test_dir, str(tmpdir), dirs_exist_ok=True)
-    base_dir, _ = os.path.split(test_dir)
-    common_dir = os.path.join(base_dir, "common")
-    if os.path.isdir(common_dir):
-        shutil.copytree(common_dir, str(tmpdir), dirs_exist_ok=True)
-    print(f"{tmpdir=}")
+    os.chdir(tmpdir)
     return tmpdir
 
 
 @pytest.fixture(scope="function")
 def start_tomato_daemon(tmpdir: str, port: int = 12345):
-    kill_tomato_procs()
     # setup_stuff
     os.chdir(tmpdir)
-    subprocess.run(
+    ret = subprocess.run(
         ["tomato", "init", "-p", f"{port}", "-A", ".", "-D", ".", "-L", "."],
         check=True,
     )
-    subprocess.run(
+    logger.debug(f"{ret=}")
+    ret = subprocess.run(
         ["tomato", "start", "-p", f"{port}", "-A", ".", "-vv"],
         check=True,
     )
+    logger.debug(f"{ret=}")
     assert utils.wait_until_tomato_running(port=port, timeout=3)
     assert utils.wait_until_tomato_drivers(port=port, timeout=3)
     assert utils.wait_until_tomato_components(port=port, timeout=5)
     yield
-    # teardown_stuff
 
 
 @pytest.fixture(scope="function")
 def stop_tomato_daemon(port: int = 12345):
-    # setup_stuff
     yield
     # teardown_stuff
-    print("stop_tomato_daemon")
-    subprocess.run(["tomato", "stop", "-p", f"{port}"], check=True)
-    kill_tomato_procs()
-
-
-def kill_tomato_procs():
-    if psutil.WINDOWS:
-        subprocess.run(
-            ["taskkill", "/F", "/T", "/IM", "tomato-daemon.exe"],
-            check=False,
-        )
-        subprocess.run(
-            ["taskkill", "/F", "/T", "/IM", "tomato-job.exe"],
-            check=False,
-        )
-        subprocess.run(
-            ["taskkill", "/F", "/T", "/IM", "tomato-driver.exe"],
-            check=False,
-        )
-    else:
-        subprocess.run(["killall", "tomato-daemon"], check=False)
-        subprocess.run(["killall", "tomato-job"], check=False)
-        subprocess.run(["killall", "tomato-driver"], check=False)
+    ret = subprocess.run(
+        ["tomato", "stop", "-p", f"{port}"],
+        check=True,
+    )
+    logger.debug(f"{ret=}")
