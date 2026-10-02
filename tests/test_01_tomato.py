@@ -1,4 +1,3 @@
-import os
 import subprocess
 from pathlib import Path
 
@@ -22,7 +21,7 @@ def test_tomato_status_down():
     assert "tomato not running" in ret.msg
 
 
-def test_tomato_status_up(start_tomato_daemon, stop_tomato_daemon):
+def test_tomato_status_up(datadir, start_tomato_daemon, stop_tomato_daemon):
     ret = tomato.status(**kwargs)  # ty: ignore[invalid-argument-type]
     print(f"{ret=}")
     assert ret.success
@@ -30,8 +29,7 @@ def test_tomato_status_up(start_tomato_daemon, stop_tomato_daemon):
     assert len(ret.data.devicefile.pipelines) == 2
 
 
-def test_tomato_start_no_init(datadir, stop_tomato_daemon):
-    os.chdir(datadir)
+def test_tomato_start_no_init(datadir):
     ret = tomato.start(
         **kwargs,  # ty: ignore[invalid-argument-type]
         appdir=Path(),
@@ -44,7 +42,6 @@ def test_tomato_start_no_init(datadir, stop_tomato_daemon):
 
 
 def test_tomato_start_with_init(datadir, stop_tomato_daemon):
-    os.chdir(datadir)
     ret = tomato.init(appdir=Path(), datadir=Path(), logdir=Path())
     assert ret.success
     ret = tomato.start(
@@ -162,7 +159,6 @@ def test_tomato_pipeline_invalid(datadir, start_tomato_daemon, stop_tomato_daemo
 
 
 def test_tomato_log_verbosity_0(datadir, stop_tomato_daemon):
-    os.chdir(datadir)
     subprocess.run(
         ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
         check=True,
@@ -183,7 +179,6 @@ def test_tomato_log_verbosity_testing(datadir, start_tomato_daemon, stop_tomato_
 
 
 def test_tomato_log_verbosity_default(datadir, stop_tomato_daemon):
-    os.chdir(datadir)
     subprocess.run(
         ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
         check=True,

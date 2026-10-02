@@ -26,7 +26,8 @@ def datadir(tmpdir, request):
     common_dir = os.path.join(base_dir, "common")
     if os.path.isdir(common_dir):
         shutil.copytree(common_dir, str(tmpdir), dirs_exist_ok=True)
-    print(f"{tmpdir=}")
+    os.chdir(tmpdir)
+    logger.debug(f"{tmpdir=}")
     return tmpdir
 
 
