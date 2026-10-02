@@ -290,25 +290,8 @@ def start(
     Failure: required port 1234 is already in use, choose a different one
 
     """
+
     logger = logging.getLogger(f"{__name__}.start")
-    logger.debug("checking for availability of port %d", port)
-    try:
-        rep = context.socket(zmq.REP)
-        rep.setsockopt(zmq.LINGER, 0)
-        rep.bind(f"tcp://127.0.0.1:{port}")
-        stat = status(port=port, timeout=timeout)
-        rep.unbind(f"tcp://127.0.0.1:{port}")
-        rep.close()
-        if stat.success:
-            return Reply(
-                success=False,
-                msg=f"tomato-daemon already running on port {port}",
-            )
-    except zmq.ZMQError:
-        return Reply(
-            success=False,
-            msg=f"required port {port} is already in use, choose a different one",
-        )
 
     if not (Path(appdir) / "settings.toml").exists():
         return Reply(
@@ -319,6 +302,19 @@ def start(
     # TODO: This is read just to make sure database is set-up. Should be maybe on the driver? Or init?
     settings = toml.load(Path(appdir) / "settings.toml")
     setup_db(settings["jobs"]["dbpath"])
+
+    logger.debug("checking for availability of port %d", port)
+    try:
+        rep = context.socket(zmq.REP)
+        rep.setsockopt(zmq.LINGER, 0)
+        rep.bind(f"tcp://127.0.0.1:{port}")
+        rep.unbind(f"tcp://127.0.0.1:{port}")
+        rep.close()
+    except zmq.ZMQError:
+        return Reply(
+            success=False,
+            msg=f"required port {port} is already in use, choose a different one",
+        )
 
     spawn_cmd(
         cmd=[
