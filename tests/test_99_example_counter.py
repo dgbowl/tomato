@@ -29,7 +29,6 @@ TOUT = 1
 def test_counter_npoints_metadata(
     casename, npoints, prefix, datadir, start_tomato_daemon, stop_tomato_daemon
 ):
-    os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
     assert utils.wait_until_ketchup_status(1, "c", PORT, 20)
@@ -52,7 +51,6 @@ def test_counter_npoints_metadata(
     ],
 )
 def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
 
@@ -73,7 +71,6 @@ def test_counter_cancel(casename, datadir, start_tomato_daemon, stop_tomato_daem
 def test_counter_snapshot_metadata(
     casename, external, datadir, start_tomato_daemon, stop_tomato_daemon
 ):
-    os.chdir(datadir)
     utils.run_casenames([casename], [None], ["pip-counter"])
     assert utils.wait_until_ketchup_status(1, "r", PORT, 10)
     if external:
@@ -101,7 +98,6 @@ def test_counter_snapshot_metadata(
     ],
 )
 def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
-    os.chdir(datadir)
     with open("devices_multidev.json", "r") as inf:
         jsdata = json.load(inf)
     with open("devices.yml", "w") as ouf:
@@ -135,7 +131,6 @@ def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):
 
 
 def test_counter_measure_task_measure(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     kwargs = {"port": PORT, "timeout": TOUT}
     ret = tomato.passata.measure(name="example_counter:example-addr:1", **kwargs)
     assert ret.success

@@ -19,7 +19,6 @@ PORT = 12345
     ],
 )
 def test_stresstest(case, nreps, datadir, stop_tomato_daemon):
-    os.chdir(datadir)
     subprocess.run(
         ["tomato", "init", "-p", f"{PORT}", "-A", ".", "-D", ".", "-L", "."],
         check=True,

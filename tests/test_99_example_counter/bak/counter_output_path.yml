@@ -1,0 +1,12 @@
+version: "0.1"
+sample:
+    name: counter_output_path
+method:
+  - device: "counter"
+    technique: "count"
+    time: 1.0
+    delay: 0.05
+tomato:
+    verbosity: "DEBUG"
+    output:
+        path: newfolder

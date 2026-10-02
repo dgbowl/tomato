@@ -10,6 +10,14 @@ from . import utils
 logger = logging.getLogger(__name__)
 
 
+@pytest.fixture(autouse=True, scope="function")
+def prepare_test(tmpdir):
+    utils.kill_tomato_procs()
+    os.chdir(tmpdir)
+    logger.debug(f"{tmpdir=}")
+    yield
+
+
 @pytest.fixture
 def datadir(tmpdir, request):
     """
@@ -22,12 +30,7 @@ def datadir(tmpdir, request):
     test_dir, _ = os.path.splitext(filename)
     if os.path.isdir(test_dir):
         shutil.copytree(test_dir, str(tmpdir), dirs_exist_ok=True)
-    base_dir, _ = os.path.split(test_dir)
-    common_dir = os.path.join(base_dir, "common")
-    if os.path.isdir(common_dir):
-        shutil.copytree(common_dir, str(tmpdir), dirs_exist_ok=True)
     os.chdir(tmpdir)
-    logger.debug(f"{tmpdir=}")
     return tmpdir
 
 
@@ -60,9 +63,3 @@ def stop_tomato_daemon(port: int = 12345):
         check=True,
     )
     logger.debug(f"{ret=}")
-
-
-@pytest.fixture(autouse=True, scope="function")
-def prepare_test():
-    utils.kill_tomato_procs()
-    yield
