@@ -18,7 +18,7 @@ else:
 
 PORT = 12345
 TOUT = 1
-NAME = "psutil:psutil-addr:10"
+NAME = "psutil"
 
 
 @pytest.mark.skipif(not _has_psutil, reason="requires tomato-psutil")
@@ -78,7 +78,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
     ret = tomato.status(port=PORT, timeout=TOUT, stgrp="drivers")
     assert ret.success
     assert ret.data is not None
-    assert ret.data["psutil"]["version"] == "2.1"
+    assert ret.data["psutil"]["version"] == "3.0"
 
     ret = subprocess.run(
         ["passata", "status", NAME, "-p", f"{PORT}"],
@@ -87,7 +87,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         check=True,
     )
     print(f"{ret=}")
-    assert "Success: component ('psutil-addr', '10') is not running" in ret.stdout
+    assert f"Success: component {NAME!r} is connected" in ret.stdout
 
     ret = subprocess.run(
         ["passata", "attrs", NAME, "-p", f"{PORT}"],
@@ -96,7 +96,7 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         check=True,
     )
     print(f"{ret=}")
-    assert "Success: attrs of component ('psutil-addr', '10') are" in ret.stdout
+    assert f"Success: attrs of component {NAME!r} are" in ret.stdout
 
     ret = subprocess.run(
         ["passata", "constants", NAME, "-p", f"{PORT}"],
@@ -105,4 +105,4 @@ def test_psutil_passata(datadir, stop_tomato_daemon):
         check=True,
     )
     print(f"{ret=}")
-    assert "Success: constants of component ('psutil-addr', '10') are" in ret.stdout
+    assert f"Success: constants of component {NAME!r} are" in ret.stdout

@@ -54,7 +54,7 @@ rocrate = [
     "rocrate >= 0.14"
 ]
 psutil = [
-    "tomato-psutil >= 2.1.0",
+    "tomato-psutil >= 3.0.0rc1",
 ]
 
 [project.urls]

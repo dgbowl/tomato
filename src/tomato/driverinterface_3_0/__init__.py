@@ -676,7 +676,6 @@ class ModelComponent(metaclass=ABCMeta):
     def capabilities(self, **kwargs) -> set:
         """Returns a :class:`set` of all supported techniques."""
 
-    @abstractmethod
     def status(self, **kwargs) -> Status:
         """
         Function indicating component status.
@@ -685,6 +684,19 @@ class ModelComponent(metaclass=ABCMeta):
 
         The function should also compile a status report using :class:`Attrs` marked as ``status=True`` and return it as :obj:`Status.attrs`.
         """
+        attrs = {}
+        for attr, props in self.attrs().items():
+            if props.status:
+                attrs[attr] = self.get_attr(attr)
+
+        ret = Status(
+            connected=True,
+            state=self.state,  # ty: ignore[invalid-argument-type]
+            can_submit=not self.task_list.full(),
+            attrs=attrs,
+            task=self.running_task,
+        )
+        return ret
 
     def stop(self, **kwargs) -> None:
         """
