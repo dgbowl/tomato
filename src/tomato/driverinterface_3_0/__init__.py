@@ -18,7 +18,12 @@ import xarray as xr
 from pydantic import BaseModel, Field
 
 from tomato.daemon.lpp import REQ_TIMEOUT
-from tomato.driverinterface_3_0.decorators import in_devmap, log_errors, to_reply
+from tomato.driverinterface_3_0.decorators import (
+    coerce_type,
+    in_devmap,
+    log_errors,
+    to_reply,
+)
 from tomato.driverinterface_3_0.types import Type, Val
 from tomato.models import Reply, Task
 
@@ -399,7 +404,7 @@ class ModelInterface(metaclass=ABCMeta):
 
             if not isinstance(val, props.type):
                 try:
-                    val = props.type(val)
+                    val = coerce_type(val, props.type)
                 except (ValueError, pint.errors.UndefinedUnitError):
                     msg = f"could not coerce {attr!r} to type {props.type}"
                     return (False, msg, None)
@@ -407,18 +412,20 @@ class ModelInterface(metaclass=ABCMeta):
                 msg = f"val {val!r} is not among allowed options {props.options}"
                 return (False, msg, None)
 
-            if isinstance(val, pint.Quantity):
-                if val.dimensionless and props.units is not None:
+            if isinstance(val, pint.Quantity) and props.units is not None:
+                if val.dimensionless:
                     val = pint.Quantity(val.m, props.units)
-                if val.dimensionality != pint.Quantity(props.units).dimensionality:  # ty: ignore[no-matching-overload]
+                dim = pint.Quantity(props.units).dimensionality
+                if val.dimensionality != dim:
                     msg = f"val {val!r} has the wrong dimensionality"
                     return (False, msg, None)
-            if props.minimum is not None and val < props.minimum:
-                msg = f"val {val!r} is smaller than {props.minimum}"
-                return (False, msg, None)
-            if props.maximum is not None and val > props.maximum:
-                msg = f"val {val!r} is greater than {props.maximum}"
-                return (False, msg, None)
+            if isinstance(val, (pint.Quantity, float, int)):
+                if props.minimum is not None and val < props.minimum:
+                    msg = f"val {val!r} is smaller than {props.minimum}"
+                    return (False, msg, None)
+                if props.maximum is not None and val > props.maximum:
+                    msg = f"val {val!r} is greater than {props.maximum}"
+                    return (False, msg, None)
         return (True, "task validated successfully", None)
 
     @log_errors

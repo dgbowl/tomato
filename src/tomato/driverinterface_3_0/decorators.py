@@ -3,7 +3,7 @@ import logging
 import sys
 from functools import wraps
 
-import pint
+from pint import Quantity
 from pydantic import BaseModel
 
 from tomato.driverinterface_3_0.types import Val
@@ -92,20 +92,15 @@ def coerce_val(func):
             raise AttributeError(f"attr {attr!r} is read-only")
 
         if not isinstance(val, props.type):
-            if issubclass(props.type, bool) and not isinstance(val, int):
-                raise TypeError(f"val {val!r} is not of type 'bool' or 'int'")
-            if issubclass(props.type, BaseModel) and isinstance(val, str):
-                val = props.type(**ast.literal_eval(val))
-            # This may raise ValueError or TypeError
-            else:
-                val = props.type(val)
+            val = coerce_type(val, props.type)
         if props.options is not None and val not in props.options:
             raise ValueError(f"val {val!r} is not in allowed options {props.options}")
 
-        if isinstance(val, pint.Quantity):
-            if val.dimensionless and props.units is not None:
-                val: pint.Quantity = pint.Quantity(val.m, props.units)  # ty: ignore[invalid-assignment]
-            if val.dimensionality != pint.Quantity(props.units).dimensionality:
+        if isinstance(val, Quantity) and props.units is not None:
+            if val.dimensionless:
+                val = Quantity(val.m, props.units)  # ty: ignore
+            dim = Quantity(props.units).dimensionality
+            if val.dimensionality != dim:  # ty: ignore
                 raise ValueError(f"val {val!r} has the wrong dimensionality")
         if props.minimum is not None and val < props.minimum:
             raise ValueError(f"val {val!r} is smaller than {props.minimum}")
@@ -115,3 +110,15 @@ def coerce_val(func):
         return func(self, attr=attr, val=val, **kwargs)
 
     return wrapper
+
+
+def coerce_type(val: Val, Type: type) -> Val:
+    if issubclass(Type, bool) and not isinstance(val, int):
+        raise TypeError(f"val {val!r} is not of type 'bool' or 'int'")
+    if issubclass(Type, BaseModel) and isinstance(val, str):
+        return Type(**ast.literal_eval(val))
+    elif issubclass(Type, BaseModel) and isinstance(val, dict):
+        return Type(**val)
+    # This may raise ValueError or TypeError
+    else:
+        return Type(val)
