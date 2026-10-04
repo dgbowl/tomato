@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developing tomato drivers &mdash; tomato 3.0rc5.post1 documentation</title>
+  <title>Developing tomato drivers &mdash; tomato 3.0rc5.post2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=dcb8c012"></script>
+        <script src="_static/documentation_options.js?v=eb404a78"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                3.0rc5.post1
+                3.0rc5.post2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -497,7 +497,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Status" title="tomato.driverinterface_3_0.Status"><span class="pre">Status</span></a></span></span></dt>
+<span class="sig-name descname"><span class="pre">status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Status" title="tomato.driverinterface_3_0.Status"><span class="pre">Status</span></a></span></span></dt>
 <dd><p>Function indicating component status.</p>
 <p>The implementation of this function in the driver module should perform checks whether the components is still reachable (<a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Status.connected" title="tomato.driverinterface_3_0.Status.connected"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Status.connected</span></code></a>) and what state is the component in (<a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Status.state" title="tomato.driverinterface_3_0.Status.state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Status.state</span></code></a>).</p>
 <p>The function should also compile a status report using <code class="xref py py-class docutils literal notranslate"><span class="pre">Attrs</span></code> marked as <code class="docutils literal notranslate"><span class="pre">status=True</span></code> and return it as <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Status.attrs" title="tomato.driverinterface_3_0.Status.attrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Status.attrs</span></code></a>.</p>
@@ -998,7 +998,7 @@ clearing the cache.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 3.0rc5.post1
+      v: 3.0rc5.post2
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
