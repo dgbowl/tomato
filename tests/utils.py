@@ -116,13 +116,14 @@ def wait_until_tomato_stopped(port: int, timeout: int):
 def wait_until_ketchup_status(jobid: int, status: str, port: int, timeout: int):
     t0 = time.perf_counter()
     while (time.perf_counter() - t0) < timeout:
+        logger.debug(f"{time.perf_counter() - t0:5.2f}")
         ret = subprocess.run(
             ["ketchup", "status", "-p", f"{port}", f"{jobid}"],
             capture_output=True,
             text=True,
             check=True,
         )
-        print(f"{ret.stdout=}")
+        logger.debug(f"{ret.stdout=}")
         if f"[{status!r}]" in ret.stdout:
             return True
         time.sleep(0.1)

@@ -31,7 +31,7 @@ Changes from ``tomato-2.2`` include:
   - The abstract class representing the registered components is now called :obj:`~tomato.driverinterface_3_0.ModelComponent`. The name ``"Component"`` (or ``cmp``) should now be used consistently throughout instead of ``"Device"``.
   - The :func:`ModelInterface.ComponentFactory() <tomato.driverinterface_3_0.ModelInterface.ComponentFactory>` is no longer an abstract function. By default it attempts to instantiate the :class:`Component` class in the top level of the driver module. As a consequence, the :class:`~tomato.driverinterface_3_0.ModelInterface` has no abstract methods/functions.
   - The :class:`tomato.models.Component` model now automatically generates its :obj:`Component.name <tomato.models.Component.name>`. As a consequence, the :obj:`ModelInterface.devmap <tomato.driverinterface_3_0.ModelInterface.devmap>` has the :obj:`~tomato.models.Component.name` as a key and the correct :obj:`~tomato.models.Component.name` is returned appropriately throughout the code.
-  - Reworked :func:`ModelComponent.status() <tomato.driverinterface_3_0.ModelComponent.status>`, which is now an abstract function, that should now return :class:`~tomato.driverinterface_3_0.Status` objects.
+  - Reworked :func:`ModelComponent.status() <tomato.driverinterface_3_0.ModelComponent.status>`, which should now return :class:`~tomato.driverinterface_3_0.Status` objects.
   - Reworked :func:`ModelComponent.stop() <tomato.driverinterface_3_0.ModelComponent.stop>`, :func:`~tomato.driverinterface_3_0.ModelComponent.reset`, and :func:`~tomato.driverinterface_3_0.ModelComponent.quit`:
 
     - :func:`~tomato.driverinterface_3_0.ModelComponent.stop` is a helper function that should stop any activity on the component and bring it component into a safe state. It is called as part of :func:`ModelInterface.cmp_stop() <tomato.driverinterface_3_0.ModelInterface.cmp_stop>`, :func:`~tomato.driverinterface_3_0.ModelInterface.cmp_reset`, and  :func:`~tomato.driverinterface_3_0.ModelInterface.cmp_quit`.
@@ -39,6 +39,8 @@ Changes from ``tomato-2.2`` include:
     - :func:`~tomato.driverinterface_3_0.ModelComponent.quit` is an abstract helper function that should ensure the component can be released by **tomato**. It is called after :func:`~tomato.driverinterface_3_0.ModelComponent.stop` in :func:`ModelInterface.cmp_quit() <tomato.driverinterface_3_0.ModelInterface.cmp_quit>`, which is called whenever the driver process exits via an :mod:`atexit` handler.
 
 - Reworked the passing of settings. Each driver should expose a :class:`Settings` class, inheriting from :class:`tomato.driverinterface_3_0.Settings`, in order to document and provide default values for any settings.
+- The ``address`` and ``channel``/``channels`` attributes of :class:`Devices <tomato.models.Device>` and :class:`Components <tomato.models.Component>` are now optional, see the :mod:`tomato-psutil` driver.
+
 
 .. codeauthor::
     Peter Kraus
