@@ -19,6 +19,7 @@ import zmq
 
 import tomato.utils
 from tomato.daemon import drvdb, lpp
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.drivers import ModelInterface, driver_to_interface
 from tomato.models import Daemon, DrvState, Reply
 from tomato.utils import context
@@ -62,7 +63,7 @@ def tomato_driver_bootstrap(
                 continue
             elif (
                 hasattr(interface, "retries")
-                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES  # ty: ignore[unresolved-attribute]
+                and interface.retries.get(key, 0) == MAX_REGISTER_RETRIES
             ):
                 logger.warning(
                     "component %s has exceeded MAX_REGISTER_RETRIES, skipping",
@@ -97,11 +98,10 @@ def perform_idle_measurements(
     """
     if not hasattr(interface, "cmp_measure"):
         return t_last
-
-    if "idle_measurement_interval" in interface.settings:
-        imi = interface.settings["idle_measurement_interval"]
-    elif hasattr(interface, "idle_measurement_interval"):
-        imi = interface.idle_measurement_interval
+    if interface.version in {"3.0"}:
+        imi = interface.settings.idle_measurement_interval  # ty: ignore[unresolved-attribute]
+    elif interface.version in {"2.0", "2.1"}:
+        imi = interface.idle_measurement_interval  # ty: ignore[unresolved-attribute]
     else:
         imi = IDLE_MEASUREMENT_INTERVAL
     if imi is None:
@@ -158,9 +158,11 @@ def kill_tomato_driver(pid: int):
     to_kill.append(proc)
     logger.warning("killing process '%s' with pid %d", proc.name(), proc.pid)
     proc.terminate()
-    gone, alive = psutil.wait_procs([to_kill], timeout=1)
-    logger.debug(f"{gone=}")
-    logger.debug(f"{alive=}")
+    gone, alive = psutil.wait_procs(to_kill, timeout=1)
+    while alive:
+        logger.debug(f"{gone=}")
+        logger.debug(f"{alive=}")
+        gone, alive = psutil.wait_procs(to_kill, timeout=1)
 
 
 def tomato_driver() -> None:
@@ -197,6 +199,12 @@ def tomato_driver() -> None:
         help="Logging directory for the tomato-driver.",
         default=".",
         type=str,
+    )
+    parser.add_argument(
+        "--timeout",
+        help="Timeout for the tomato daemon, in seconds",
+        default=3,
+        type=int,
     )
     parser.add_argument(
         "driver",
@@ -265,7 +273,7 @@ def tomato_driver() -> None:
                     ret = Reply(success=False, msg="received msg without cmd", data=msg)
                 elif msg["cmd"] == "register":
                     try:
-                        req = lpp.socket()
+                        req = lpp.socket(args.timeout)
                         req.connect(f"tcp://127.0.0.1:{args.port}")
                         req.send_pyobj({"cmd": "status"})
                         daemon: Daemon = req.recv_pyobj().data
@@ -298,7 +306,10 @@ def tomato_driver() -> None:
                         data={"status": status, "driver": args.driver},
                     )
                 elif msg["cmd"] == "settings":
-                    interface.settings = msg["params"]
+                    if interface.version in {"2.0", "2.1"}:
+                        interface.settings = msg["params"]
+                    else:
+                        interface.UpdateSettings(msg["params"])
                     ret = Reply(
                         success=True,
                         msg="settings received",
@@ -307,7 +318,7 @@ def tomato_driver() -> None:
                 elif hasattr(interface, msg["cmd"]):
                     try:
                         ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
-                    except (ValueError, AttributeError) as e:
+                    except (ValueError, AttributeError, TypeError) as e:
                         logger.info("above error caught by driver process")
                         ret = Reply(
                             success=False,
@@ -340,7 +351,7 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is quitting", args.driver)
 
 
-def manager(timeout: int = 1000):
+def manager(timeout: int = 1):
     """
     The driver manager thread of `tomato-daemon`.
 
@@ -378,6 +389,29 @@ def manager(timeout: int = 1000):
             logger.debug("%s: state: %s", d.name, d)
             if first_loop:
                 d.spawn_count = 0
+            if d.pid is not None:
+                try:
+                    dproc = psutil.Process(d.pid)
+                    dstat = dproc.status()
+                except psutil.NoSuchProcess:
+                    logger.warning("%s: driver pid %d does not exist", d.name, d.pid)
+                    ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
+                    if ret is None:
+                        logger.info("%s: driver removed from db", d.name)
+                    else:
+                        logger.error("%s: could not delete driver", d.name)
+                    continue
+                if dstat in {psutil.STATUS_ZOMBIE}:
+                    logger.warning("%s: driver pid is '%s', reaping", d.name, dstat)
+                    dproc.wait(timeout=1)
+                    ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
+                    if ret is None:
+                        logger.info("%s: driver removed from db", d.name)
+                    else:
+                        logger.error("%s: could not delete driver", d.name)
+                    continue
+                elif dstat in {psutil.STATUS_DEAD, psutil.STATUS_STOPPED}:
+                    logger.error("%s: driver pid is '%s', this is a bug", d.name, dstat)
             if d.name not in daemon.devicefile.drivers:
                 if d.port is not None:
                     logger.warning("%s: stopping driver", d.name)
@@ -386,7 +420,7 @@ def manager(timeout: int = 1000):
                         logger.warning("%s: failed to stop driver: %s", d.name, ret.msg)
                 ret = drvdb.del_drv(name=d.name, dbpath=dbpath)
                 if ret is None:
-                    logger.warning("%s: removed driver", d.name)
+                    logger.warning("%s: driver removed from db", d.name)
                 else:
                     logger.error("%s: could not delete driver", d.name)
             elif d.port is not None:
@@ -398,13 +432,14 @@ def manager(timeout: int = 1000):
                     logger.debug("%s: checking driver on port %d", d.name, d.port)
                     settings = daemon.devicefile.drivers[d.name].settings
                     try:
-                        dreq = lpp.socket(settings.get("lpp_timeout", 1) * 1000)
+                        dreq = lpp.socket(settings.get("lpp_timeout", REQ_TIMEOUT))
                         dreq.connect(f"tcp://127.0.0.1:{d.port}")
                         dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()
                         params = {"heartbeat_time": tN}
                         if ret.success and len(ret.data) == 0:
                             logger.info("%s: registering components", d.name)
+                            dreq.RCVTIMEO = -1
                             dreq.send_pyobj({"cmd": "register", "sender": sender})
                             ret = dreq.recv_pyobj()
                             if ret.success:
@@ -447,6 +482,14 @@ def manager(timeout: int = 1000):
                 }
                 drvdb.update_drv(name=d.name, params=params, dbpath=dbpath)
                 spawned_drivers.add(d.name)
+
+        for dname in daemon.devicefile.drivers:
+            ds = DrvState(name=dname)
+            drv = drvdb.get_drv(name=dname, dbpath=dbpath)
+            if drv is None:
+                drv = drvdb.insert_drv(drv=ds, dbpath=dbpath)
+                logger.info("%s: inserted driver into db", dname)
+            assert drv is not None
 
         time.sleep(1 if len(spawned_drivers) > 0 else 0.1)
         first_loop = False

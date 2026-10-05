@@ -17,10 +17,17 @@ import pint
 import xarray as xr
 from pydantic import BaseModel, Field
 
-from tomato.driverinterface_3_0.decorators import in_devmap, log_errors, to_reply
+from tomato.daemon.lpp import REQ_TIMEOUT
+from tomato.driverinterface_3_0.decorators import (
+    coerce_type,
+    in_devmap,
+    log_errors,
+    to_reply,
+)
 from tomato.driverinterface_3_0.types import Type, Val
 from tomato.models import Reply, Task
 
+pint.set_application_registry(pint.UnitRegistry(autoconvert_offset_to_baseunit=True))
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +57,7 @@ class Attr(BaseModel, arbitrary_types_allowed=True):
 
 
 class Status(BaseModel):
-    """A :class:`~pydantic.BaseModel` used to describe component status."""
+    """A :class:`~pydantic.BaseModel` used to describe component status. Returned directly by the :func:`ModelComponent.status` function, as well as the :obj:`Reply.data` object by the :func:`ModelInterface.cmp_status` function."""
 
     connected: bool
     """Indicates whether component is communicating correctly."""
@@ -72,6 +79,19 @@ class Status(BaseModel):
     attrs: dict[str, Any] = Field(default_factory=dict)
     """Container for any attrs that are returned as part of a status."""
 
+    task: Task | None = None
+    """Information about the current task. Should be None when ``state != "meas"``."""
+
+
+class Settings(BaseModel, extra="forbid"):
+    """A :class:`~pydantic.BaseModel` used to store :obj:`DriverInterface.settings`. Should be instantiated by the :func:`__init__` function of the :class:`DriverInterface`, merging settings provided by the user with these per-driver defaults."""
+
+    idle_measurement_interval: int | None = None
+    """The interval (in seconds) after which an idle measurement via :func:`DriverInterace.cmp_measure` is to be triggered."""
+
+    lpp_timeout: int = REQ_TIMEOUT
+    """The timeout (in seconds) for communication with this driver."""
+
 
 class ModelInterface(metaclass=ABCMeta):
     """
@@ -87,9 +107,6 @@ class ModelInterface(metaclass=ABCMeta):
     version: str = "3.0"
     """Version of the :obj:`DriverInterface`."""
 
-    idle_measurement_interval: int | None = None
-    """The interval (in seconds) after which :func:`self.cmp_measure` will be executed, when idle."""
-
     @property
     def name(self) -> str:
         """Property that should return the name of this driver."""
@@ -102,8 +119,8 @@ class ModelInterface(metaclass=ABCMeta):
     retries: dict[str, int]
     """Map of components which failed to register, with number of retries as values."""
 
-    settings: dict[str, Any]
-    """A settings map to contain driver-specific settings such as ``dllpath`` for BioLogic"""
+    settings: Settings
+    """A :class:`Settings` object containing driver-specific settings such as ``lpp_timeout`` or ``dllpath``."""
 
     constants: dict[str, Any]
     """A map that should be populated with driver-specific run-time constants."""
@@ -111,7 +128,7 @@ class ModelInterface(metaclass=ABCMeta):
     def __init__(self, settings: dict[str, Any] | None = None):
         self.devmap = {}
         self.constants = {}
-        self.settings = settings if settings is not None else {}
+        self.UpdateSettings(settings)
         self.retries = defaultdict(int)
         atexit.register(self.quit)
 
@@ -121,6 +138,12 @@ class ModelInterface(metaclass=ABCMeta):
         """
         mod = importlib.import_module(self.__module__)
         return mod.Component(self, name, **kwargs)
+
+    def UpdateSettings(self, settings: dict[str, Any] | None = None):
+        mod = importlib.import_module(self.__module__)
+        if settings is None:
+            settings = {}
+        self.settings = mod.Settings(**settings)
 
     @log_errors
     @to_reply
@@ -324,21 +347,6 @@ class ModelInterface(metaclass=ABCMeta):
     @log_errors
     @to_reply
     @in_devmap
-    def task_status(self, name: str, **kwargs: dict) -> tuple[bool, str, dict]:
-        status = self.devmap[name].status(**kwargs)
-        data = {
-            "running": status.state in {"task"},
-            "can_submit": status.can_submit,
-            "task": self.devmap[name].running_task,
-        }
-        if data["running"] is False:
-            return (True, "component is idle", data)
-        else:
-            return (True, "component has a running task", data)
-
-    @log_errors
-    @to_reply
-    @in_devmap
     def task_stop(self, name: str, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
         """
         Stops a running task and returns any collected data.
@@ -396,7 +404,7 @@ class ModelInterface(metaclass=ABCMeta):
 
             if not isinstance(val, props.type):
                 try:
-                    val = props.type(val)
+                    val = coerce_type(val, props.type)
                 except (ValueError, pint.errors.UndefinedUnitError):
                     msg = f"could not coerce {attr!r} to type {props.type}"
                     return (False, msg, None)
@@ -404,18 +412,20 @@ class ModelInterface(metaclass=ABCMeta):
                 msg = f"val {val!r} is not among allowed options {props.options}"
                 return (False, msg, None)
 
-            if isinstance(val, pint.Quantity):
-                if val.dimensionless and props.units is not None:
+            if isinstance(val, pint.Quantity) and props.units is not None:
+                if val.dimensionless:
                     val = pint.Quantity(val.m, props.units)
-                if val.dimensionality != pint.Quantity(props.units).dimensionality:  # ty: ignore[no-matching-overload]
+                dim = pint.Quantity(props.units).dimensionality
+                if val.dimensionality != dim:
                     msg = f"val {val!r} has the wrong dimensionality"
                     return (False, msg, None)
-            if props.minimum is not None and val < props.minimum:
-                msg = f"val {val!r} is smaller than {props.minimum}"
-                return (False, msg, None)
-            if props.maximum is not None and val > props.maximum:
-                msg = f"val {val!r} is greater than {props.maximum}"
-                return (False, msg, None)
+            if isinstance(val, (pint.Quantity, float, int)):
+                if props.minimum is not None and val < props.minimum:
+                    msg = f"val {val!r} is smaller than {props.minimum}"
+                    return (False, msg, None)
+                if props.maximum is not None and val > props.maximum:
+                    msg = f"val {val!r} is greater than {props.maximum}"
+                    return (False, msg, None)
         return (True, "task validated successfully", None)
 
     @log_errors
@@ -570,10 +580,12 @@ class ModelComponent(metaclass=ABCMeta):
                     logger.info("%s: task '%s' is done", self.name, task.technique_name)
                 elif task == "measure":
                     self.state = "meas"
+                    self.running_task = None
                     self.do_measure()
                     logger.debug("%s: measurement is done", self.name)
                 else:
                     self.state = "idle"
+                    self.running_task = None
                     logger.critical("%s: unknown task received: '%s'", self.name, task)
                     setattr(thread, "do_run", False)  # noqa: B010
                     break
@@ -664,7 +676,6 @@ class ModelComponent(metaclass=ABCMeta):
     def capabilities(self, **kwargs) -> set:
         """Returns a :class:`set` of all supported techniques."""
 
-    @abstractmethod
     def status(self, **kwargs) -> Status:
         """
         Function indicating component status.
@@ -673,6 +684,19 @@ class ModelComponent(metaclass=ABCMeta):
 
         The function should also compile a status report using :class:`Attrs` marked as ``status=True`` and return it as :obj:`Status.attrs`.
         """
+        attrs = {}
+        for attr, props in self.attrs().items():
+            if props.status:
+                attrs[attr] = self.get_attr(attr)
+
+        ret = Status(
+            connected=True,
+            state=self.state,  # ty: ignore[invalid-argument-type]
+            can_submit=not self.task_list.full(),
+            attrs=attrs,
+            task=self.running_task,
+        )
+        return ret
 
     def stop(self, **kwargs) -> None:
         """

@@ -32,6 +32,7 @@ import zmq
 
 from tomato.daemon import drvdb, lpp, pipdb
 from tomato.daemon.db import setup_db
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.models import Daemon, Reply
 from tomato.utils import context, spawn_cmd
 
@@ -226,7 +227,7 @@ def status(
                 continue
             settings = daemon.devicefile.drivers[cval.driver].settings
             try:
-                dreq = lpp.socket(settings.get("lpp_timeout", timeout))
+                dreq = lpp.socket(settings.get("lpp_timeout", REQ_TIMEOUT))
                 dreq.connect(f"tcp://127.0.0.1:{drv.port}")
                 params = cval.model_dump()
                 dreq.send_pyobj({"cmd": "cmp_capabilities", "params": params})
@@ -289,25 +290,8 @@ def start(
     Failure: required port 1234 is already in use, choose a different one
 
     """
+
     logger = logging.getLogger(f"{__name__}.start")
-    logger.debug("checking for availability of port %d", port)
-    try:
-        rep = context.socket(zmq.REP)
-        rep.setsockopt(zmq.LINGER, 0)
-        rep.bind(f"tcp://127.0.0.1:{port}")
-        stat = status(port=port, timeout=1000)
-        rep.unbind(f"tcp://127.0.0.1:{port}")
-        rep.close()
-        if stat.success:
-            return Reply(
-                success=False,
-                msg=f"tomato-daemon already running on port {port}",
-            )
-    except zmq.ZMQError:
-        return Reply(
-            success=False,
-            msg=f"required port {port} is already in use, choose a different one",
-        )
 
     if not (Path(appdir) / "settings.toml").exists():
         return Reply(
@@ -318,6 +302,19 @@ def start(
     # TODO: This is read just to make sure database is set-up. Should be maybe on the driver? Or init?
     settings = toml.load(Path(appdir) / "settings.toml")
     setup_db(settings["jobs"]["dbpath"])
+
+    logger.debug("checking for availability of port %d", port)
+    try:
+        rep = context.socket(zmq.REP)
+        rep.setsockopt(zmq.LINGER, 0)
+        rep.bind(f"tcp://127.0.0.1:{port}")
+        rep.unbind(f"tcp://127.0.0.1:{port}")
+        rep.close()
+    except zmq.ZMQError:
+        return Reply(
+            success=False,
+            msg=f"required port {port} is already in use, choose a different one",
+        )
 
     spawn_cmd(
         cmd=[
@@ -331,9 +328,7 @@ def start(
         ],
         logger=logger,
     )
-
-    kwargs = {"port": port, "timeout": max(timeout, 5000)}
-    return status(**kwargs)  # ty: ignore[invalid-argument-type]
+    return status(port=port, timeout=max(timeout, 3))
 
 
 def stop(

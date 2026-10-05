@@ -14,7 +14,7 @@ import zmq
 from tomato.models import Reply
 from tomato.utils import context
 
-REQ_TIMEOUT = 1000
+REQ_TIMEOUT = 1
 REQ_RETRIES = 3
 
 
@@ -39,7 +39,7 @@ def comm(
     req.send_pyobj(data)
 
     while True:
-        if (req.poll(timeout) & zmq.POLLIN) != 0:
+        if (req.poll(timeout * 1000) & zmq.POLLIN) != 0:
             ret = req.recv_pyobj()
             break
 
@@ -61,10 +61,10 @@ def comm(
     return ret, req
 
 
-def socket(timeout: int = 1000) -> zmq.Socket:
+def socket(timeout: int = REQ_TIMEOUT) -> zmq.Socket:
     sock = context.socket(zmq.REQ)
     sock.setsockopt(zmq.LINGER, 0)
-    sock.setsockopt(zmq.RCVTIMEO, timeout)
+    sock.setsockopt(zmq.RCVTIMEO, timeout * 1000)
     return sock
 
 
@@ -73,10 +73,10 @@ def comm_or_exit(
     port: int,
     logger: logging.Logger,
     exc_msg: str,
-    timeout: int = 1000,
+    timeout: int = REQ_TIMEOUT,
 ) -> Reply:
     try:
-        req = socket(timeout)
+        req = socket(timeout * 1000)
         req.connect(f"tcp://127.0.0.1:{port}")
         req.send_pyobj(pyobj)
         return req.recv_pyobj()

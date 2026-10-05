@@ -41,7 +41,7 @@ dependencies = [
 testing = [
     "pytest",
     "pytest-env",
-    "tomato-example-counter >= 3.0.0rc1",
+    "tomato-example-counter >= 3.0.0rc4",
     "tomato-example-trig >= 2.1.1, < 3.0",
 ]
 docs = [
@@ -54,7 +54,7 @@ rocrate = [
     "rocrate >= 0.14"
 ]
 psutil = [
-    "tomato-psutil >= 2.1.0",
+    "tomato-psutil >= 3.0.0rc1",
 ]
 
 [project.urls]

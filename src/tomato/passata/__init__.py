@@ -24,19 +24,18 @@ import zmq
 
 from tomato import tomato
 from tomato.daemon import drvdb, lpp
+from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.driverinterface_3_0 import Status
 from tomato.models import Component, DrvState, Reply
 
 logger = logging.getLogger(__name__)
-
-RCVTIMEO = 3000
 
 
 def _name_to_cmp(
     name: str,
     port: int,
     timeout: int,
-) -> tuple[Component, DrvState] | Reply:
+) -> tuple[Component, DrvState, dict] | Reply:
     ret = tomato.status(port=port, timeout=timeout, stgrp="tomato", yaml=True)
     if ret.success is False or ret.data is None:
         return ret
@@ -51,8 +50,9 @@ def _name_to_cmp(
     cmp = daemon.devicefile.components[name]
     drv = drvdb.get_drv(name=cmp.driver, dbpath=dbpath)
     assert drv is not None
+    dsettings = daemon.devicefile.drivers[drv.name].settings
 
-    return cmp, drv
+    return cmp, drv, dsettings
 
 
 def _running_or_force(
@@ -91,13 +91,13 @@ def status(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_status", "params": {**kwargs}})
         ret = req.recv_pyobj()
@@ -118,11 +118,11 @@ def register(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_register", "params": kwargs})
         ret = req.recv_pyobj()
@@ -143,13 +143,13 @@ def attrs(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_attrs", "params": kwargs})
         ret = req.recv_pyobj()
@@ -170,13 +170,13 @@ def capabilities(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_capabilities", "params": kwargs})
         ret = req.recv_pyobj()
@@ -197,13 +197,13 @@ def constants(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_constants", "params": kwargs})
         ret = req.recv_pyobj()
@@ -225,13 +225,13 @@ def get_attrs(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         data = {}
         msg = ""
@@ -269,7 +269,7 @@ def set_attr(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
@@ -279,7 +279,7 @@ def set_attr(
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj(
             {"cmd": "cmp_set_attr", "params": {"attr": attr, "val": val, **kwargs}}
@@ -303,7 +303,7 @@ def reset(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
@@ -313,7 +313,7 @@ def reset(
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_reset", "params": kwargs})
         ret = req.recv_pyobj()
@@ -334,13 +334,13 @@ def get_last_data(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_last_data", "params": kwargs})
         ret = req.recv_pyobj()
@@ -361,13 +361,13 @@ def measure(
     ret = _name_to_cmp(name, port, timeout)
     if isinstance(ret, Reply):
         return ret
-    cmp, drv = ret
+    cmp, drv, dsett = ret
     if drv.port is None:
         return Reply(success=False, msg=f"driver {drv.name!r} has no registered port")
 
     kwargs = cmp.model_dump()
     try:
-        req = lpp.socket(RCVTIMEO)
+        req = lpp.socket(dsett.get("lpp_timeout", REQ_TIMEOUT))
         req.connect(f"tcp://127.0.0.1:{drv.port}")
         req.send_pyobj({"cmd": "cmp_measure", "params": kwargs})
         ret = req.recv_pyobj()

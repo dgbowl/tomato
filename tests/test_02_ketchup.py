@@ -7,8 +7,9 @@ from tomato import ketchup, tomato
 from . import utils
 
 PORT = 12345
+TOUT = 2
 
-kwargs = {"port": PORT, "timeout": 1000}
+kwargs = {"port": PORT, "timeout": TOUT}
 
 
 @pytest.mark.parametrize(
@@ -19,12 +20,11 @@ kwargs = {"port": PORT, "timeout": 1000}
     ],
 )
 def test_ketchup_submit_one(pl, jn, datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ret = ketchup.submit(payload=pl, jobname=jn, daemon=daemon)
-    assert utils.wait_until_ketchup_status(1, "qw", PORT, 1000)
+    assert utils.wait_until_ketchup_status(1, "qw", PORT, TOUT)
 
     print(f"{ret=}")
     assert ret.success
@@ -34,13 +34,12 @@ def test_ketchup_submit_one(pl, jn, datadir, start_tomato_daemon, stop_tomato_da
 
 
 def test_ketchup_submit_two(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", daemon=daemon)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", daemon=daemon)
-    assert utils.wait_until_ketchup_status(2, "qw", PORT, 1000)
+    assert utils.wait_until_ketchup_status(2, "qw", PORT, 2)
 
     print(f"{ret=}")
     assert ret.success
@@ -60,13 +59,12 @@ def test_ketchup_status_empty(start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_ketchup_status_all_queued(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", daemon=daemon)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", daemon=daemon)
-    assert utils.wait_until_ketchup_status(2, "qw", PORT, 1000)
+    assert utils.wait_until_ketchup_status(2, "qw", PORT, TOUT)
 
     ret = ketchup.status(jobids=[], daemon=daemon)
     print(f"{ret=}")
@@ -77,13 +75,12 @@ def test_ketchup_status_all_queued(datadir, start_tomato_daemon, stop_tomato_dae
 
 
 def test_ketchup_status_one_queued(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", daemon=daemon)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", daemon=daemon)
-    assert utils.wait_until_ketchup_status(2, "qw", PORT, 1000)
+    assert utils.wait_until_ketchup_status(2, "qw", PORT, TOUT)
 
     ret = ketchup.status(jobids=[2], daemon=daemon)
     print(f"{ret=}")
@@ -95,13 +92,12 @@ def test_ketchup_status_one_queued(datadir, start_tomato_daemon, stop_tomato_dae
 
 
 def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
     ret = ketchup.submit(payload="counter_1_0.1.yml", jobname="job-1", daemon=daemon)
     ret = ketchup.submit(payload="counter_5_0.2.yml", jobname="job-2", daemon=daemon)
-    assert utils.wait_until_ketchup_status(2, "qw", PORT, 1000)
+    assert utils.wait_until_ketchup_status(2, "qw", PORT, TOUT)
 
     ret = ketchup.status(jobids=[1, 2], daemon=daemon)
     print(f"{ret=}")
@@ -114,9 +110,8 @@ def test_ketchup_status_two_queued(datadir, start_tomato_daemon, stop_tomato_dae
 
 
 def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     utils.run_casenames(["counter_5_0.2"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
 
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
@@ -131,11 +126,10 @@ def test_ketchup_status_running(datadir, start_tomato_daemon, stop_tomato_daemon
 
 
 def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     utils.run_casenames(["counter_1_0.1"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
 
-    assert utils.wait_until_ketchup_status(1, "c", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "c", PORT, 5)
 
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
@@ -149,11 +143,10 @@ def test_ketchup_status_complete(datadir, start_tomato_daemon, stop_tomato_daemo
 
 
 def test_ketchup_cancel_running(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     utils.run_casenames(["counter_60_0.1"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
 
-    assert utils.wait_until_pickle(jobid=1, timeout=2000)
+    assert utils.wait_until_pickle(jobid=1, timeout=2)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -163,7 +156,7 @@ def test_ketchup_cancel_running(datadir, start_tomato_daemon, stop_tomato_daemon
     assert ret.data is not None
     assert ret.data[0].status == "rd"
 
-    assert utils.wait_until_ketchup_status(1, "cd", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "cd", PORT, 5)
     ret = ketchup.status(jobids=[1], daemon=daemon)
     print(f"{ret=}")
     print(f"{os.listdir()=}")
@@ -175,7 +168,6 @@ def test_ketchup_cancel_running(datadir, start_tomato_daemon, stop_tomato_daemon
 
 
 def test_ketchup_cancel_queued(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -185,7 +177,7 @@ def test_ketchup_cancel_queued(datadir, start_tomato_daemon, stop_tomato_daemon)
         pipeline="pip-counter",
         sampleid="counter_60_0.1",
     )
-    assert utils.wait_until_ketchup_status(1, "qw", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "qw", PORT, 5)
 
     ret = ketchup.cancel(jobids=[1], daemon=daemon)
     print(f"{ret=}")
@@ -195,11 +187,10 @@ def test_ketchup_cancel_queued(datadir, start_tomato_daemon, stop_tomato_daemon)
 
 
 def test_ketchup_snapshot(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     utils.run_casenames(["counter_60_0.1"], [None], ["pip-counter"])
-    assert utils.wait_until_ketchup_status(1, "r", PORT, 5000)
+    assert utils.wait_until_ketchup_status(1, "r", PORT, 5)
 
-    assert utils.wait_until_pickle(jobid=1, timeout=2000)
+    assert utils.wait_until_pickle(jobid=1, timeout=TOUT)
 
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
@@ -211,7 +202,6 @@ def test_ketchup_snapshot(datadir, start_tomato_daemon, stop_tomato_daemon):
 
 
 def test_ketchup_search(datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -245,7 +235,6 @@ def test_ketchup_search(datadir, start_tomato_daemon, stop_tomato_daemon):
     ],
 )
 def test_ketchup_validation(pl, jn, datadir, start_tomato_daemon, stop_tomato_daemon):
-    os.chdir(datadir)
     daemon = tomato.status(**kwargs).data  # ty: ignore[invalid-argument-type]
     assert daemon is not None
 
@@ -256,5 +245,5 @@ def test_ketchup_validation(pl, jn, datadir, start_tomato_daemon, stop_tomato_da
     assert ret.data.id == 1
     with pytest.raises(AssertionError):
         assert utils.wait_until_ketchup_status(
-            jobid=1, status="qw", port=PORT, timeout=1000
+            jobid=1, status="qw", port=PORT, timeout=TOUT
         )

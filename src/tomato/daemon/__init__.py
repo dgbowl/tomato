@@ -53,49 +53,55 @@ def tomato_daemon():
     logger.info("logging set up with verbosity %s", daemon.verbosity)
 
     cmd.reload(msg={}, daemon=daemon)
-    rep = context.socket(zmq.REP)
-    logger.debug("binding zmq.REP socket on port %d", daemon.port)
-    rep.bind(f"tcp://127.0.0.1:{daemon.port}")
-    rep.bind("inproc://daemon")
-    poller = zmq.Poller()
-    poller.register(rep, zmq.POLLIN)
+    with context.socket(zmq.REP) as rep:
+        rep.setsockopt(zmq.LINGER, 0)
+        logger.debug("binding zmq.REP socket on port %d", daemon.port)
+        rep.bind(f"tcp://127.0.0.1:{daemon.port}")
+        rep.bind("inproc://daemon")
+        poller = zmq.Poller()
+        poller.register(rep, zmq.POLLIN)
 
-    logger.debug("entering main loop")
-    pmgr = Thread(target=tomato.daemon.pip.manager, daemon=True)
-    setattr(pmgr, "do_run", True)  # noqa:B010
-    pmgr.start()
-    jmgr = Thread(target=tomato.daemon.job.manager, daemon=True)
-    setattr(jmgr, "do_run", True)  # noqa:B010
-    jmgr.start()
-    dmgr = Thread(target=tomato.daemon.driver.manager, daemon=True)
-    setattr(dmgr, "do_run", True)  # noqa:B010
-    dmgr.start()
-    while True:
-        socks = dict(poller.poll(1000))
-        if rep in socks:
-            msg = rep.recv_pyobj()
-            logger.debug("received msg: %s", msg)
-            if "cmd" not in msg:
-                logger.error("received msg without cmd: %s", msg)
-                ret = Reply(success=False, msg="received msg without cmd", data=msg)
-            elif hasattr(cmd, msg["cmd"]):
-                ret = getattr(cmd, msg["cmd"])(msg, daemon)
+        logger.debug("entering main loop")
+        threads = {}
+        managers = {"pip", "job", "driver"}
+        while True:
+            socks = dict(poller.poll(1000))
+            if rep in socks:
+                msg = rep.recv_pyobj()
+                logger.debug("received msg: %s", msg)
+                if "cmd" not in msg:
+                    logger.error("received msg without cmd: %s", msg)
+                    ret = Reply(success=False, msg="received msg without cmd", data=msg)
+                elif hasattr(cmd, msg["cmd"]):
+                    ret = getattr(cmd, msg["cmd"])(msg, daemon)
+                else:
+                    logger.error("received msg with an invalid cmd: %s", msg["cmd"])
+                logger.debug("reply: %s", ret)
+                rep.send_pyobj(ret)
+
+            if daemon.status == "stop":
+                end = True
+                for mgr, thread in threads.items():
+                    if getattr(thread, "do_run"):  # noqa:B009
+                        logger.debug("stopping %s manager thread", mgr)
+                        setattr(thread, "do_run", False)  # noqa:B010
+                    if mgr is not None and thread.is_alive():
+                        end = False
+                if end:
+                    for mgr in threads.values():
+                        assert mgr.is_alive() is False
+                    logger.info("all manager threads joined")
+                    break
             else:
-                logger.error("received msg with an invalid cmd: %s", msg["cmd"])
-            logger.debug("reply: %s", ret)
-            rep.send_pyobj(ret)
-        if daemon.status == "stop":
-            end = True
-            for mgr, label in [(jmgr, "job"), (dmgr, "driver"), (pmgr, "pip")]:
-                if getattr(mgr, "do_run"):  # noqa:B009
-                    logger.debug("stopping %s manager thread", label)
-                    setattr(mgr, "do_run", False)  # noqa:B010
-                if mgr.is_alive():
-                    end = False
-            if end:
-                assert dmgr.is_alive() is False
-                assert jmgr.is_alive() is False
-                assert pmgr.is_alive() is False
-                logger.info("all manager threads joined")
-                break
+                for mgr in managers:
+                    thread = threads.get(mgr)
+                    if thread is None or not thread.is_alive():
+                        if thread is None:
+                            logger.info("starting %s manager thread", mgr)
+                        else:
+                            logger.warning("restarting %s manager thread", mgr)
+                        target = getattr(tomato.daemon, mgr).manager
+                        threads[mgr] = Thread(target=target, daemon=True)
+                        setattr(threads[mgr], "do_run", True)  # noqa: B010
+                        threads[mgr].start()
     logger.critical("tomato-daemon on port %d is exiting", daemon.port)

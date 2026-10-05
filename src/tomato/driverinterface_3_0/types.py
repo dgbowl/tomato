@@ -1,7 +1,7 @@
 from typing import TypeAlias
 
-import pint
+from pint import Quantity
+from pydantic import BaseModel
 
 Type: TypeAlias = type
-Val = str | int | float | pint.Quantity
-Key: TypeAlias = tuple[str, str]
+Val = str | int | float | Quantity | BaseModel

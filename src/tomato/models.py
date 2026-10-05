@@ -153,8 +153,8 @@ class Component(BaseModel):
 class Device(BaseModel):
     name: str
     driver: str
-    address: str
-    channels: Sequence[str]
+    address: str | None = None
+    channels: Sequence[str] = Field(default_factory=list)
     pollrate: int = 1
 
 
@@ -228,16 +228,16 @@ class DeviceFile(BaseModel):
                         f"device {comp['device']!r} is not specified."
                     )
                     dev = self.devices[comp["device"]]
-                    # TODO: implement optional channels here
-                    assert comp["channel"] in dev.channels, (
-                        f"channel {comp['channel']} is not among "
-                        f"device channels {dev.channels}."
-                    )
+                    if "channel" in comp:
+                        assert comp["channel"] in dev.channels, (
+                            f"channel {comp['channel']} is not among "
+                            f"device channels {dev.channels}."
+                        )
                     cobj = Component(
                         device=dev.name,
                         driver=dev.driver,
                         address=dev.address,
-                        channel=comp["channel"],
+                        channel=comp.get("channel"),
                     )
                     self.components[cobj.name] = cobj
                     cmps[comp["role"]] = cobj.name
