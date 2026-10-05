@@ -79,7 +79,7 @@ def submit(
     else:
         return Reply(success=False, msg=f"payload file {payload} not found")
 
-    with payload.open() as inf:
+    with payload.open(encoding="utf-8-sig") as inf:
         if payload.suffix == ".json":
             pldict = json.load(inf)
         elif payload.suffix in {".yml", ".yaml"}:
