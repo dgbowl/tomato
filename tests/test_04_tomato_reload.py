@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 import codecs
-=======
 import importlib.util
->>>>>>> upstream/main
 import json
 from pathlib import Path
 
