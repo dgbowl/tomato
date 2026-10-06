@@ -1,4 +1,4 @@
-version: "0.2"
+﻿version: "0.2"
 sample:
     name: counter_1_0.1
 method:

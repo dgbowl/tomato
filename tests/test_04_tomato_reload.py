@@ -1,3 +1,4 @@
+import codecs
 import importlib.util
 import json
 from pathlib import Path
@@ -6,6 +7,7 @@ import pytest
 import yaml
 
 from tomato import tomato
+from tomato.models import DeviceFile
 
 from . import utils
 
@@ -198,3 +200,18 @@ def test_reload_running(datadir, start_tomato_daemon, stop_tomato_daemon):
     assert ret.success is False
     assert ret.msg is not None
     assert "reload would modify components of a running pipeline" in ret.msg
+
+
+def test_devicefile_with_bom(datadir):
+    with open(Path(datadir) / "devices_counter.json", "r") as inf:
+        jsdata = json.load(inf)
+    devfile = Path(datadir) / "devices.yml"
+    # utf-8-sig puts a BOM at the start of the file, like some Windows editors do
+    with devfile.open("w", encoding="utf-8-sig") as ouf:
+        yaml.dump(jsdata, ouf)
+    assert devfile.read_bytes().startswith(codecs.BOM_UTF8)
+
+    devicefile = DeviceFile(filename=devfile)
+    assert len(devicefile.devices) == 1
+    assert len(devicefile.pipelines) == 4
+    assert len(devicefile.components) == 4
