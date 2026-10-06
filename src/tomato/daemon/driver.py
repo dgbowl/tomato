@@ -102,7 +102,7 @@ def perform_idle_measurements(
         imi = interface.settings.idle_measurement_interval  # ty: ignore[unresolved-attribute]
     elif "idle_measurement_interval" in interface.settings:
         imi = interface.settings["idle_measurement_interval"]
-    elif hasattr(interface, "idle_measurement_interval")
+    elif hasattr(interface, "idle_measurement_interval"):
         imi = interface.idle_measurement_interval
     else:
         imi = IDLE_MEASUREMENT_INTERVAL
