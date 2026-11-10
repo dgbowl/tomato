@@ -264,12 +264,12 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is entering main loop", args.driver)
     status = "running"
     t_last = None
-    try:
-        while True:
-            socks = dict(poller.poll(100))
-            if rep in socks:
-                msg = rep.recv_pyobj()
-                logger.debug("received msg=%s", msg)
+    while True:
+        socks = dict(poller.poll(100))
+        if rep in socks:
+            msg = rep.recv_pyobj()
+            logger.debug("received msg=%s", msg)
+            try:
                 if "cmd" not in msg:
                     logger.error(f"received msg without cmd: {msg=}")
                     ret = Reply(success=False, msg="received msg without cmd", data=msg)
@@ -321,7 +321,9 @@ def tomato_driver() -> None:
                     try:
                         ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
                     except (ValueError, AttributeError, TypeError) as e:
-                        logger.info("above error caught by driver process")
+                        logger.exception(
+                            "Exception caught by driver process", exc_info=e
+                        )
                         ret = Reply(
                             success=False,
                             msg=f"{type(e)}: {e!r}",
@@ -335,17 +337,18 @@ def tomato_driver() -> None:
                         data=None,
                     )
                 logger.debug("replying %s", ret)
-                rep.send_pyobj(ret)
+            except Exception as e:
+                logger.exception(
+                    "msg '%s' caused an Exception, uncaught by driver process:",
+                    msg,
+                    exc_info=e,
+                )
+                ret = Reply(success=False, msg=f"{type(e)}: {e!r}", data=None)
+            rep.send_pyobj(ret)
             if status == "stop":
                 break
             elif status == "running":
-                try:
-                    t_last = perform_idle_measurements(interface, t_last)
-                except (RuntimeError, ValueError, AttributeError):
-                    logger.info("above error caught by driver process")
-    except Exception as e:
-        logger.critical("uncaught exception %s", type(e), exc_info=True)
-        raise RuntimeError(str(e))
+                t_last = perform_idle_measurements(interface, t_last)
 
     logger.info("driver '%s' is beginning to quit", args.driver)
     interface.quit()

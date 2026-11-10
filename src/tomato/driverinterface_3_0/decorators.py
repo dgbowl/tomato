@@ -1,6 +1,5 @@
 import ast
 import logging
-import sys
 from functools import wraps
 
 from pint import Quantity
@@ -58,15 +57,11 @@ def log_errors(func):
     def wrapper(self, **kwargs):
         try:
             return func(self, **kwargs)
-        # We want to preserve TypeErrors, ValueErrors and AttributeErrors for testing.
-        # These should be then caught in the tomato-driver process.
-        except (ValueError, AttributeError, TypeError) as e:
-            logger.exception("caught below Error, continuing", exc_info=e)
-            raise e  # noqa: TRY201
-        # Other kinds of errors we abort the driver process
+        # Exceptions are logged and reraised, in order to be captured
+        # in the tomato-driver process.
         except Exception as e:
-            logger.exception("caught below Error, quitting", exc_info=e)
-            sys.exit(str(e))
+            logger.exception("caught below Error, continuing", exc_info=e)
+            raise
 
     return wrapper
 
