@@ -136,6 +136,7 @@ class ModelInterface(metaclass=ABCMeta):
         A factory function which is used to pass this instance of the :class:`ModelInterface` to the new :class:`ModelDevice` instance.
         """
         mod = importlib.import_module(self.__module__)
+        kwargs.pop("driver", None)
         return mod.Component(self, name, **kwargs)
 
     def UpdateSettings(self, settings: dict[str, Any] | None = None):
