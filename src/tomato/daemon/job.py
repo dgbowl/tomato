@@ -391,18 +391,6 @@ def tomato_job() -> None:
         type=int,
     )
     parser.add_argument(
-        "--timeout",
-        help="Timeout [ms] for driver actions.",
-        default=1000,
-        type=int,
-    )
-    parser.add_argument(
-        "--retries",
-        help="Number of retries for driver actions.",
-        default=10,
-        type=int,
-    )
-    parser.add_argument(
         "--verbosity",
         help="Verbosity of the tomato-job.",
         default=logging.INFO,
