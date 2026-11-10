@@ -264,12 +264,12 @@ def tomato_driver() -> None:
     logger.info("driver '%s' is entering main loop", args.driver)
     status = "running"
     t_last = None
-    try:
-        while True:
-            socks = dict(poller.poll(100))
-            if rep in socks:
-                msg = rep.recv_pyobj()
-                logger.debug("received msg=%s", msg)
+    while True:
+        socks = dict(poller.poll(100))
+        if rep in socks:
+            msg = rep.recv_pyobj()
+            logger.debug("received msg=%s", msg)
+            try:
                 if "cmd" not in msg:
                     logger.error(f"received msg without cmd: {msg=}")
                     ret = Reply(success=False, msg="received msg without cmd", data=msg)
@@ -318,15 +318,7 @@ def tomato_driver() -> None:
                         data=msg.get("params"),
                     )
                 elif hasattr(interface, msg["cmd"]):
-                    try:
-                        ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
-                    except (ValueError, AttributeError, TypeError) as e:
-                        logger.info("above error caught by driver process")
-                        ret = Reply(
-                            success=False,
-                            msg=f"{type(e)}: {e!r}",
-                            data=None,
-                        )
+                    ret = getattr(interface, msg["cmd"])(**msg.get("params", {}))
                 else:
                     logger.critical("unknown command: '%s'", msg["cmd"])
                     ret = Reply(
@@ -335,17 +327,18 @@ def tomato_driver() -> None:
                         data=None,
                     )
                 logger.debug("replying %s", ret)
-                rep.send_pyobj(ret)
+            except Exception as e:
+                logger.exception(
+                    "msg: %s caused an Exception, ignored by tomato-driver process:",
+                    msg,
+                    exc_info=e,
+                )
+                ret = Reply(success=False, msg=f"{type(e)}")
+            rep.send_pyobj(ret)
             if status == "stop":
                 break
             elif status == "running":
-                try:
-                    t_last = perform_idle_measurements(interface, t_last)
-                except (RuntimeError, ValueError, AttributeError):
-                    logger.info("above error caught by driver process")
-    except Exception as e:
-        logger.critical("uncaught exception %s", type(e), exc_info=True)
-        raise RuntimeError(str(e))
+                t_last = perform_idle_measurements(interface, t_last)
 
     logger.info("driver '%s' is beginning to quit", args.driver)
     interface.quit()
@@ -367,6 +360,7 @@ def manager(timeout: int = 1):
     req.connect("inproc://daemon")
 
     first_loop = True
+    reg_retries = {}
     while getattr(thread, "do_run"):  # noqa:B009
         spawned_drivers = set()
         msg = {"cmd": "status", "sender": sender}
@@ -383,7 +377,6 @@ def manager(timeout: int = 1):
             logger.critical(ret.msg)
             setattr(thread, "do_run", False)  # noqa:B010
             break
-
         dbpath = daemon.settings["jobs"]["dbpath"]
         drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
         for d in drivers:
@@ -391,6 +384,8 @@ def manager(timeout: int = 1):
             logger.debug("%s: state: %s", d.name, d)
             if first_loop:
                 d.spawn_count = 0
+            if d.name not in reg_retries:
+                reg_retries[d.name] = 0
             if d.pid is not None:
                 try:
                     dproc = psutil.Process(d.pid)
@@ -439,7 +434,11 @@ def manager(timeout: int = 1):
                         dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()
                         params = {"heartbeat_time": tN}
-                        if ret.success and len(ret.data) == 0:
+                        if (
+                            ret.success
+                            and len(ret.data) == 0
+                            and reg_retries[d.name] < MAX_REGISTER_RETRIES
+                        ):
                             logger.info("%s: registering components", d.name)
                             dreq.RCVTIMEO = -1
                             dreq.send_pyobj({"cmd": "register", "sender": sender})
@@ -451,6 +450,13 @@ def manager(timeout: int = 1):
                             else:
                                 logger.warning(
                                     "%s: component registration failed: %s", d.name, ret
+                                )
+                            reg_retries[d.name] += 1
+                            if reg_retries[d.name] == MAX_REGISTER_RETRIES:
+                                logger.error(
+                                    "%s: exceeded maximum cmp registration tries (%d)",
+                                    d.name,
+                                    MAX_REGISTER_RETRIES,
                                 )
                     except zmq.Again:
                         logger.warning("%s: check of driver failed, resetting", d.name)

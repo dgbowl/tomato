@@ -21,7 +21,6 @@ from tomato.daemon.lpp import REQ_TIMEOUT
 from tomato.driverinterface_3_0.decorators import (
     coerce_type,
     in_devmap,
-    log_errors,
     to_reply,
 )
 from tomato.driverinterface_3_0.types import Type, Val
@@ -137,6 +136,7 @@ class ModelInterface(metaclass=ABCMeta):
         A factory function which is used to pass this instance of the :class:`ModelInterface` to the new :class:`ModelDevice` instance.
         """
         mod = importlib.import_module(self.__module__)
+        kwargs.pop("driver", None)
         return mod.Component(self, name, **kwargs)
 
     def UpdateSettings(self, settings: dict[str, Any] | None = None):
@@ -145,7 +145,6 @@ class ModelInterface(metaclass=ABCMeta):
             settings = {}
         self.settings = mod.Settings(**settings)
 
-    @log_errors
     @to_reply
     def cmp_register(
         self, name: str, address: str | None, channel: str | None, **kwargs: dict
@@ -167,7 +166,6 @@ class ModelInterface(metaclass=ABCMeta):
             self.retries[name] += 1
             return (False, f"failed to register {name!r}: {e!s}", None)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_stop(self, name: str, **kwargs: dict) -> tuple[bool, str, None]:
@@ -179,7 +177,6 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap[name].stop(**kwargs)
         return (True, f"component {name!r} stopped", None)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_quit(self, name: str, **kwargs: dict) -> tuple[bool, str, None]:
@@ -195,7 +192,6 @@ class ModelInterface(metaclass=ABCMeta):
         del self.devmap[name]
         return (True, f"component {name!r} quit", None)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_reset(self, name: str, **kwargs: dict) -> tuple[bool, str, None]:
@@ -210,7 +206,6 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap[name].reset(**kwargs)
         return (True, f"component {name!r} reset successfully", None)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_set_attr(
@@ -224,7 +219,6 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[name].set_attr(attr=attr, val=val, **kwargs)
         return (True, f"attr {attr!r} of component {name!r} set to {ret}", ret)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_get_attr(
@@ -239,7 +233,6 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[name].get_attr(attr=attr, **kwargs)
         return (True, f"attr {attr!r} of component {name!r} is: {ret}", ret)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_status(self, name: str, **kwargs: dict) -> tuple[bool, str, Status]:
@@ -254,7 +247,6 @@ class ModelInterface(metaclass=ABCMeta):
         msg = f"component {name!r} is{' ' if ret.connected else ' not '}connected"
         return (True, msg, ret)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_capabilities(self, name: str, **kwargs) -> tuple[bool, str, set]:
@@ -266,7 +258,6 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[name].capabilities(**kwargs)
         return (True, f"capabilities supported by component {name!r} are: {ret}", ret)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_attrs(self, name: str, **kwargs: dict) -> tuple[bool, str, dict]:
@@ -278,7 +269,6 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.devmap[name].attrs(**kwargs)
         return (True, f"attrs of component {name!r} are: {ret}", ret)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_constants(self, name: str, **kwargs: dict) -> tuple[bool, str, dict]:
@@ -290,7 +280,6 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.constants | self.devmap[name].constants
         return (True, f"constants of component {name!r} are: {ret}", ret)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_last_data(
@@ -307,7 +296,6 @@ class ModelInterface(metaclass=ABCMeta):
         else:
             return (True, f"last datapoint on component {name!r} at {ret.uts}", ret)
 
-    @log_errors
     @to_reply
     @in_devmap
     def cmp_measure(self, name: str, **kwargs: dict) -> tuple[bool, str, None]:
@@ -325,7 +313,6 @@ class ModelInterface(metaclass=ABCMeta):
             self.devmap[name].task_list.put("measure")
             return (True, f"measurement started on component {name!r}", None)
 
-    @log_errors
     @to_reply
     @in_devmap
     def task_start(
@@ -344,7 +331,6 @@ class ModelInterface(metaclass=ABCMeta):
         self.devmap[name].task_list.put(task)
         return (True, f"task {task!r} started successfully", task)
 
-    @log_errors
     @to_reply
     @in_devmap
     def task_stop(self, name: str, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
@@ -359,7 +345,6 @@ class ModelInterface(metaclass=ABCMeta):
         ret = self.task_data(name=name)
         return (True, f"task stopped, {ret.msg}", ret.data)
 
-    @log_errors
     @to_reply
     @in_devmap
     def task_data(self, name: str, **kwargs) -> tuple[bool, str, xr.Dataset | None]:
@@ -376,7 +361,6 @@ class ModelInterface(metaclass=ABCMeta):
         else:
             return (True, f"found {len(data)} new datapoints", data)
 
-    @log_errors
     @to_reply
     @in_devmap
     def task_validate(self, name: str, task: Task, **kwargs) -> tuple[bool, str, None]:
@@ -428,7 +412,6 @@ class ModelInterface(metaclass=ABCMeta):
                     return (False, msg, None)
         return (True, "task validated successfully", None)
 
-    @log_errors
     def status(self) -> Reply:
         """
         Returns the driver status. Currently that is the names of the components in the `devmap`.
@@ -468,7 +451,6 @@ class ModelInterface(metaclass=ABCMeta):
                 data=self.devmap,
             )
 
-    @log_errors
     def reset(self) -> Reply:
         """
         Resets the driver.
