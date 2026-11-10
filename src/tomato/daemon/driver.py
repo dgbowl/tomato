@@ -370,6 +370,7 @@ def manager(timeout: int = 1):
     req.connect("inproc://daemon")
 
     first_loop = True
+    reg_retries = {}
     while getattr(thread, "do_run"):  # noqa:B009
         spawned_drivers = set()
         msg = {"cmd": "status", "sender": sender}
@@ -386,7 +387,6 @@ def manager(timeout: int = 1):
             logger.critical(ret.msg)
             setattr(thread, "do_run", False)  # noqa:B010
             break
-
         dbpath = daemon.settings["jobs"]["dbpath"]
         drivers = drvdb.get_drvs_where(where="name IS NOT NULL", dbpath=dbpath)
         for d in drivers:
@@ -394,6 +394,8 @@ def manager(timeout: int = 1):
             logger.debug("%s: state: %s", d.name, d)
             if first_loop:
                 d.spawn_count = 0
+            if d.name not in reg_retries:
+                reg_retries[d.name] = 0
             if d.pid is not None:
                 try:
                     dproc = psutil.Process(d.pid)
@@ -442,7 +444,11 @@ def manager(timeout: int = 1):
                         dreq.send_pyobj({"cmd": "status"})
                         ret = dreq.recv_pyobj()
                         params = {"heartbeat_time": tN}
-                        if ret.success and len(ret.data) == 0:
+                        if (
+                            ret.success
+                            and len(ret.data) == 0
+                            and reg_retries[d.name] < MAX_REGISTER_RETRIES
+                        ):
                             logger.info("%s: registering components", d.name)
                             dreq.RCVTIMEO = -1
                             dreq.send_pyobj({"cmd": "register", "sender": sender})
@@ -454,6 +460,13 @@ def manager(timeout: int = 1):
                             else:
                                 logger.warning(
                                     "%s: component registration failed: %s", d.name, ret
+                                )
+                            reg_retries[d.name] += 1
+                            if reg_retries[d.name] == MAX_REGISTER_RETRIES:
+                                logger.error(
+                                    "%s: exceeded maximum cmp registration tries (%d)",
+                                    d.name,
+                                    MAX_REGISTER_RETRIES,
                                 )
                     except zmq.Again:
                         logger.warning("%s: check of driver failed, resetting", d.name)
