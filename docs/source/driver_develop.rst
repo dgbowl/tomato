@@ -30,7 +30,7 @@ The following keywords in the driver-specific settings in the |setfile|_ are res
 - ``idle_measurement_interval``: Specifies the interval (in seconds) after which the :func:`cmp_measure` function of all *components* registered on the *driver* should be called. The :func:`cmp_measure` checks that *components* are idle, i.e. without a running :class:`Task`. Defaults to ``None``, meaning that no idle measurements will be performed.
 - ``lpp_timeout``: Specifies the timeout (in seconds) after which the communication with this *driver* interface will be retried. When unset, defaults to :obj:`tomato.daemon.lpp.REQ_TIMEOUT` (in seconds).
 
-Each *driver* should implement a :class:`Settings` class, which inherits from :class:`tomato.driverinterface_3_0.Settings`, and describes the type, purpose, and a default value of each setting.
+Each *driver* should implement a :class:`Settings` class, which inherits from :class:`tomato.driverinterface_3_0.Settings`, and describes the type, purpose, and a default value of each setting. The defaults (if any) provided in such :class:`Settings` class can be overridden by the values provided via the |setfile|_. Any required configuration (e.g. ``dllpath``) can also be easily specified in this way, and is validated whenever the |setfile|_ is parsed (i.e. during ``tomato start`` or ``tomato reload``).
 
 Communication between *jobs* and *drivers*
 ``````````````````````````````````````````
