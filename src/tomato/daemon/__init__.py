@@ -10,6 +10,7 @@ from pathlib import Path
 from threading import Thread
 
 import zmq
+from pydantic import ValidationError
 
 import tomato.daemon.driver
 import tomato.daemon.job
@@ -48,7 +49,11 @@ def tomato_daemon():
 
     args = parser.parse_args()
 
-    daemon = Daemon(**vars(args), status="bootstrap")
+    try:
+        daemon = Daemon(**vars(args), status="bootstrap")
+    except (ValidationError, ModuleNotFoundError):
+        return
+
     setup_logging(daemon)
     logger.info("logging set up with verbosity %s", daemon.verbosity)
 

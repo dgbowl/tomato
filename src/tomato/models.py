@@ -5,6 +5,7 @@
     Peter Kraus
 """
 
+import importlib
 import logging
 import pickle
 from collections.abc import Sequence
@@ -81,6 +82,15 @@ class Job(BaseModel):
         return v
 
 
+def driver_to_settings(drivername: str):  # -> None | Settings:
+    modname = f"tomato_{drivername.replace('-', '_')}"
+    mod = importlib.import_module(modname)
+    if hasattr(mod, "Settings"):
+        return mod.Settings
+    else:
+        return None
+
+
 class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
     status: Literal["bootstrap", "running", "stop"]
     port: int
@@ -111,9 +121,21 @@ class Daemon(BaseModel, arbitrary_types_allowed=True, validate_assignment=True):
 
     @model_validator(mode="after")
     def device_settings(self) -> Self:
-        for drv, settings in self.settings["drivers"].items():
-            if drv in self.devicefile.drivers:
-                self.devicefile.drivers[drv].settings.update(settings)
+        for drv in self.devicefile.drivers:
+            settings = self.settings["drivers"].get(drv, {})
+            try:
+                Settings = driver_to_settings(drv)
+            except ModuleNotFoundError as e:
+                logger.error("Error loading driver '%s':\n%s", drv, e)
+                raise
+
+            if Settings:
+                try:
+                    settings = Settings(**settings)
+                except Exception as e:
+                    logger.error("Error parsing Settings of driver '%s':\n%s", drv, e)
+                    raise
+            self.devicefile.drivers[drv].settings.update(settings)
         return self
 
 
