@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developing tomato drivers &mdash; tomato 3.0rc6.post4 documentation</title>
+  <title>Developing tomato drivers &mdash; tomato 3.0rc6.post5 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=b47e17fe"></script>
+        <script src="_static/documentation_options.js?v=100693e7"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                3.0rc6.post4
+                3.0rc6.post5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -135,7 +135,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">idle_measurement_interval</span></code>: Specifies the interval (in seconds) after which the <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_measure()</span></code> function of all <em>components</em> registered on the <em>driver</em> should be called. The <code class="xref py py-func docutils literal notranslate"><span class="pre">cmp_measure()</span></code> checks that <em>components</em> are idle, i.e. without a running <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning that no idle measurements will be performed.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lpp_timeout</span></code>: Specifies the timeout (in seconds) after which the communication with this <em>driver</em> interface will be retried. When unset, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">tomato.daemon.lpp.REQ_TIMEOUT</span></code> (in seconds).</p></li>
 </ul>
-<p>Each <em>driver</em> should implement a <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class, which inherits from <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Settings" title="tomato.driverinterface_3_0.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">tomato.driverinterface_3_0.Settings</span></code></a>, and describes the type, purpose, and a default value of each setting.</p>
+<p>Each <em>driver</em> should implement a <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class, which inherits from <a class="reference internal" href="apidoc/tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Settings" title="tomato.driverinterface_3_0.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">tomato.driverinterface_3_0.Settings</span></code></a>, and describes the type, purpose, and a default value of each setting. The defaults (if any) provided in such <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class can be overridden by the values provided via the <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a>. Any required configuration (e.g. <code class="docutils literal notranslate"><span class="pre">dllpath</span></code>) can also be easily specified in this way, and is validated whenever the <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a> is parsed (i.e. during <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">start</span></code> or <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">reload</span></code>).</p>
 </section>
 <section id="communication-between-jobs-and-drivers">
 <h2>Communication between <em>jobs</em> and <em>drivers</em><a class="headerlink" href="#communication-between-jobs-and-drivers" title="Link to this heading"></a></h2>
@@ -998,7 +998,7 @@ clearing the cache.</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 3.0rc6.post4
+      v: 3.0rc6.post5
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 
