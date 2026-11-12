@@ -108,8 +108,8 @@ Consider the below diagram:
           j2
       end
 
-      j1[complex] --- |payload: 0-9 + a-z| pip1
-      j2[simple] --- |payload: 0-9| pip3
+      j1[complex] --- |payload:<br/>0-9<br/>a-z| pip1
+      j2[simple] --- |payload:<br/>0-9| pip3
 
       pip1[pipeline a1] -.-> c1
       pip1[pipeline a1] -.-> a100
