@@ -21,7 +21,7 @@ version = get_version("tomato")
 # -- Project information -----------------------------------------------------
 
 project = "tomato"
-copyright = "2021 - 2024, dgbowl authors"
+copyright = "2021 - 2026, dgbowl authors"
 author = "Peter Kraus"
 release = version
 
@@ -62,7 +62,6 @@ html_css_files = [
     "custom_theme.css",
 ]
 html_theme_options = {
-    "body_max_width": "none",
     "sticky_navigation": True,
     "navigation_depth": 6,
 }
@@ -97,4 +96,8 @@ rst_epilog = """
 .. |devfile| replace:: *devices file*
 
 .. _devfile: quickstart.html#devices-file
+
+.. |payfile| replace:: *payload file*
+
+.. _payfile: quickstart.html#payload-file
 """
