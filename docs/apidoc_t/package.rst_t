@@ -19,6 +19,8 @@
 {{- "**tomato.daemon**: Functions and modules comprising the tomato daemon" | heading }}
 {% elif 'tomato.driverinterface_2_1' == pkgname %}
 {{- "**tomato.DriverInterface**: version 2.1" | heading }}
+{% elif 'tomato.driverinterface_3_0' == pkgname %}
+{{- "**tomato.DriverInterface**: version 3.0" | heading }}
 {% elif 'tomato.ketchup' == pkgname %}
 {{- "**tomato.ketchup**: CLI and API for the tomato job queue" | heading }}
 {% elif 'tomato.tomato' == pkgname %}

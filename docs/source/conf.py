@@ -62,7 +62,6 @@ html_css_files = [
     "custom_theme.css",
 ]
 html_theme_options = {
-    "body_max_width": "none",
     "sticky_navigation": True,
     "navigation_depth": 6,
 }
@@ -97,4 +96,8 @@ rst_epilog = """
 .. |devfile| replace:: *devices file*
 
 .. _devfile: quickstart.html#devices-file
+
+.. |payfile| replace:: *payload file*
+
+.. _payfile: quickstart.html#payload-file
 """

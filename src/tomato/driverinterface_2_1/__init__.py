@@ -1,4 +1,7 @@
 """
+.. warning::
+    This driver interface is deprecated as of **tomato** version 3.0 and will likely be removed in the next minor release.
+
 .. codeauthor::
     Peter Kraus
 """
