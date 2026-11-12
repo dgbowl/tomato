@@ -10,97 +10,53 @@ First time set-up
 
     This section assumes that **tomato** has been successfully :ref:`installed<installation>`.
 
-To prepare **tomato** before its first run, a *settings file* containing the basic configuration for the :mod:`tomato.daemon` needs to be placed in **tomato's** *appdir* folder. By default, the *appdir* path is:
-
-- ``$env:localappdata\dgbowl\tomato\<version>`` on Windows,
-- ``$HOME/.config/tomato/<version>`` on Linux.
-
-The easiest way to do create this file is using the provided ``tomato init`` command:
+The easiest way to set-up **tomato** for its first run is to run ``tomato init``:
 
 .. code-block::
    :linenos:
    :emphasize-lines: 2
 
-    kraus@dorje:/home/kraus/$ tomato init
-    Success: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
+    kraus@dorje:~$ tomato init
+    Success: wrote default settings into /home/kraus/.config/tomato/3.0rc6/settings.toml
 
-Where *appdir* is ``/home/kraus/.config/tomato/1.0a1/``. A custom *appdir* can be specified using the ``--appdir`` argument to **tomato**.
+This will create a |setfile|_ and a |devfile|_ in **tomato's** *appdir* folder. By default, the *appdir* path is:
 
+- ``$env:localappdata\dgbowl\tomato\<version>`` on Windows,
+- ``$HOME/.config/tomato/<version>`` on Linux.
 
-**tomato** program flowchart
-````````````````````````````
-**tomato** currently contains three command line user-facing utilities/executables:
+.. tip::
 
-- :mod:`~tomato.tomato`, responsible for management of the daemon process,
-- :mod:`~tomato.ketchup`, responsible for job submission and management, and
-- :mod:`~tomato.passata`, providing an interface to the hardware via drivers and components.
-
-These executables then internally spawn other processes, including the state daemon process ``tomato-daemon``, a ``tomato-job`` process for every running job, and a ``tomato-driver`` process for each driver type, managing all devices of a that type.
-
-.. mermaid::
-
-  flowchart TB
-      subgraph daemon[tomato-daemon]
-          cmd{{port:cmd}} <==> cfg[(config)]
-          cfg --> jm([job manager])
-          cfg --> pm([pip manager])
-          cfg --> dm([driver manager])
-
-      end
-
-      jm -.-> job
-
-      subgraph job[tomato-job]
-          mp([main loop]) --> tp>task process]
-      end
-
-      jm <-.-> jobdb[(job db\nsqlite)]
-      mp -.-> jobdb
-
-      jm <-.-> pipdb[(pip db\nsqlite)]
-      pm <-.-> pipdb
-      mp -.-> pipdb
-
-      dm <-.-> drvdb[(drv db\nsqlite)]
-      drvdb <-.-> dst
-
-      setf[settings file\ndevices file] ---> cfg
-
-      t>tomato] -.-> cmd
-      k>ketchup] -.-> cmd
-
-      dst -.-> driver
-      dm -..-> driver
-      tp -.-> dcmd
-
-      subgraph driver[tomato-driver]
-          dcmd{{port:cmd}} ==>  dst[(state)]
-      end
-
-      dst o-.-o h1[hardware]
-
-      p>passata] -.-> cmd
-      p -.-> dcmd
+    In the above example, the *appdir* is ``/home/kraus/.config/tomato/3.0rc6/``, as highlighted on line 2. A custom *appdir* can be specified using the ``--appdir`` argument to **tomato** via ``tomato init`` and ``tomato start``.
 
 .. note::
 
-    Note that the :mod:`tomato.daemon` process is stateless, only responsible for reading of the configuration files and spawning the *job*, *driver* and *pipeline*--management threads. All configuration and state information that should be persistently stored (i.e. survive restart of the components) is stored in a :mod:`sqlite3` database.
+    Any existing |setfile|_ and/or |devfile|_ within the *appdir* will **not** be overwritten when ``tomato init`` is called. If you have corrupted either of the two configuration files, make a backup, delete the files, and run ``tomato init`` again.
+
+You can now start **tomato** using ``tomato start``:
+
+.. code-block::
+
+    kraus@dorje:~$ tomato start
+    Success: tomato running on port 1234
 
 .. _concepts:
 
-**tomato** concepts flowchart
-`````````````````````````````
-The following concepts are used in **tomato**:
+Key **tomato** concepts
+```````````````````````
+Before you start configuring your **tomato** instance, you should be familiar with the following concepts, that are used in **tomato** and in this documentation:
 
 - *devices*, which represent separately addressable (and optionally multichannel) instruments in the lab,
-- *components*, which represent the individual channels of each *device*, describing the role of this *component* and its associated capabilities,
+- *components*, which represent the individual channels or components of each *device*, describing the role of this *component* and its associated capabilities,
 - *pipelines*, which represent the real world organisation of device *components* into independent experimental set-ups, containing *components* from one or more *device*,
-- *jobs*, which are processes that carry out a *payload* (i.e. a set of experimental instructions) on a *pipeline* by instructing its *components* to perform individual *tasks*, and
-- *drivers*, which are separate processes, each managing all defined *devices* of a certain driver type as well as their *components*:
+- *jobs*, which are processes that carry out a set of *tasks* (set of experimental instructions, i.e. a *payload*) on a *pipeline* by instructing its *components* to perform individual *tasks*, and
+- *drivers*, which are processes talking to the hardware, with each *driver* managing all defined *devices* of a certain driver type, including all their *components*.
+
+Consider the below diagram:
 
 .. mermaid::
+    :caption: Diagram of **tomato** concepts.
 
-  flowchart LR
+    flowchart LR
 
       c1 --- drv1[driver 123]
       c2 --- drv1
@@ -132,24 +88,28 @@ The following concepts are used in **tomato**:
           pip3
       end
 
+      pipelines:::config
+
       subgraph drivers
           drv1
           drv2
       end
 
       subgraph devices
-          d1
-          a
-          b
+          d1:::config
+          a:::config
+          b:::config
       end
+
+      devices:::config
 
       subgraph jobs
           j1
           j2
       end
 
-      j1[complex] --- |two part payload| pip1
-      j2[simple] --- |simple payload| pip3
+      j1[complex] --- |payload:<br/>0-9<br/>a-z| pip1
+      j2[simple] --- |payload:<br/>0-9| pip3
 
       pip1[pipeline a1] -.-> c1
       pip1[pipeline a1] -.-> a100
@@ -158,6 +118,12 @@ The following concepts are used in **tomato**:
       pip2[pipeline b2] -.-> b100
 
       pip3[pipeline 3] -.-> c3
+
+      classDef config fill:#fff,stroke:#5c5
+
+Here, three *devices* are defined in the |devfile|_ (``device 1``, ``device a``, and ``device b``). The three *pipelines* (``pipeline a1``, ``pipeline b2``, and ``pipeline 3``) as well as the links to the *components* is also defined in the |devfile|_. Based on this information, the ``tomato-daemon`` process knows it needs to launch two *drivers*, one for ``device 1``, and a second one for ``device a`` and ``device b``.
+
+*Jobs* are also managed in separate processes. They are matched against *pipelines* based on the contents of their |payfile|_. In the above example, the **simple** *job*, requiring ``0-9`` in its *payload*, could match against any of the three configured *pipelines*, as each *pipeline* contains a "numerical" *component* from ``device 1``. The **complex** *job*, requiring both ``0-9`` as well as ``a-z`` in its *payload*, can only be matched against ``pipeline a1`` or ``pipeline b2``.
 
 .. _settings-file:
 
@@ -253,51 +219,29 @@ The ``devices`` section of the default |devfile|_ is shown below:
         channels: ["1"]
         pollrate: 1
 
-Here, we define a single device using the :mod:`~tomato.drivers.example_counter` driver. The definition includes the ``address`` of the device (:class:`str` type) as well as an enumeration of individually-addressable channels the device has (:class:`list[str]`).
-
-For example, the devices shown in the :ref:`concepts flowchart <concepts>` above would be defined as:
-
-.. code-block:: yaml
-   :linenos:
-
-    devices:
-      - name: device 1
-        driver: "driver 123"
-        address: "192.168.1.1"
-        channels: ["1", "2", "3"]
-        pollrate: 1
-      - name: device a
-        driver: "driver abc"
-        address: "COM1"
-        channels: ["100"]
-        pollrate: 5
-      - name: device b
-        driver: "driver abc"
-        address: "COM2"
-        channels: ["100"]
-        pollrate: 5
-
+Here, we define a single device using the :mod:`~tomato.drivers.example_counter` driver. The definition includes the ``address`` of the device (:class:`str` type) as well as an enumeration of individually-addressable channels the device has (:class:`list[str]`). The ``address`` and each of the ``channels`` will then be used to define the *components* on this *device*.
 
 .. note::
 
-    The ``pollrate`` here is an internal setting for **tomato**. It is the frequency with which the *job* interacting with the device *driver* asks the *driver* for data, **not** the frequency with which the *driver* asks the hardware for data! This latter "sampling" frequency can be defined in each individual *task* submitted as a *payload* of a *job*.
+    What needs to be specified as *device* ``address``/``channels``, or if anything has to be specified at all, depends on each of the **tomato** drivers. Please refer to the **tomato** driver library in the sidebar.
+
 
 **pipelines** section
 *********************
 The default ``pipelines`` section looks as follows:
 
 .. code-block:: yaml
-   :linenos:
-   :emphasize-lines: 5
+    :linenos:
+    :emphasize-lines: 5
 
     pipelines:
-      - name: pip-counter
+        - name: pip-counter
         components:
-          - role: counter
+            - role: counter
             device: dev-counter
             channel: "1"
 
-Here, a single *pipeline* called ``pip-counter`` is defined to contain the one available channel of the ``dev-counter`` device (defined on line 5) shown further above. For multi channel devices, it is also possible to define a *pipeline* for each channel automatically, e.g. using the following definition:
+Here, a single *pipeline* called ``pip-counter`` is defined. It contains the one available channel of the ``dev-counter`` device (defined on line 5) shown further above. For multi channel devices, it is also possible to define a *pipeline* for each channel automatically, e.g. using the following definition:
 
 .. code-block:: yaml
    :linenos:
@@ -310,43 +254,72 @@ Here, a single *pipeline* called ``pip-counter`` is defined to contain the one a
             device: dev-counter
             channel: each
 
-Here, a set of pipelines would be created using each of the available channels in ``dev-counter``, replacing the ``*`` in line 2 using the channel. Therefore, one *pipeline*  with name ``pip-counter-1`` would be created. However, if the ``dev-counter`` were to contain more than one channel, a *pipeline* would be generated for each channel.
+Here, a set of pipelines would be created using each of the available channels in ``dev-counter``, replacing the ``*`` in line 2 using the channel. Therefore, when coupled with the above *devices* section, one *pipeline*  with name ``pip-counter-1`` would be created. However, if the ``dev-counter`` were to contain more than one channel, a *pipeline* would be generated for each channel.
 
-Finally, a definition for the pipelines shown in the :ref:`concepts flowchart <concepts>` above can be defined as:
+.. tip::
 
-.. code-block:: yaml
-   :linenos:
+    For example, the *devices* shown in the :ref:`concepts diagram <concepts>` above could be defined as:
 
-    pipelines:
-      - name: pipeline a1
-        components:
-          - role: dev 123
-            device: device 1
-            channel: "1"
-          - role: dev abc
-            device: device a
-            channel: "100"
-      - name: pipeline b2
-        components:
-          - role: dev 123
-            device: device 1
-            channel: "2"
-          - role: dev abc
-            device: device b
-            channel: "100"
-      - name: pipeline 3
-        components:
-          - role: dev 123
-            device: device 1
-            channel: "3"
+    .. code-block:: yaml
+        :linenos:
 
-.. _payfile:
+        devices:
+          - name: device 1
+            driver: "driver 123"
+            address: "192.168.1.1"
+            channels: ["1", "2", "3"]
+            pollrate: 1
+          - name: device a
+            driver: "driver abc"
+            address: "COM1"
+            channels: ["100"]
+            pollrate: 5
+          - name: device b
+            driver: "driver abc"
+            address: "COM2"
+            channels: ["100"]
+            pollrate: 5
+
+    The *pipelines* from the same :ref:`concepts diagram <concepts>` can be defined using:
+
+    .. code-block:: yaml
+        :linenos:
+
+        pipelines:
+          - name: pipeline a1
+            components:
+              - role: dev 123
+                device: device 1
+                channel: "1"
+              - role: dev abc
+                device: device a
+                channel: "100"
+          - name: pipeline b2
+            components:
+              - role: dev 123
+                device: device 1
+                channel: "2"
+              - role: dev abc
+                device: device b
+                channel: "100"
+          - name: pipeline 3
+            components:
+              - role: dev 123
+                device: device 1
+                channel: "3"
+
+.. note::
+
+    The ``pollrate`` here is an internal setting for **tomato**. It is the frequency with which the *job* interacting with the device *driver* asks the *driver* for data, **not** the frequency with which the *driver* asks the hardware for data! This latter "sampling" frequency can be defined in each individual *task* submitted as a *payload* of a *job*.
+
+
+.. _payload-file:
 
 Payload file
 ````````````
 The *payload* file contains all information required to enter a *job* into the queue and allow its assignment onto a *pipeline*. The overall schema of the *payload* is defined in the :mod:`dgbowl_schemas.tomato` module, and is parsed using :func:`dgbowl_schemas.tomato.to_payload`.
 
-Of particular importance here is the specification of the individual :class:`Tasks` within the :obj:`Payload.method` field. The :class:`Tasks` are distributed onto individual *components* of the *pipeline* (as matched by the :obj:`component_role` field), and then executed in sequence. Some general :class:`Task` parameters are abstracted by **tomato**, such as the ``max_duration``, ``sampling_interval`` and ``polling_interval``. The other are *driver* or *component* specific, and can be specified using the :obj:`task_params` field.
+Of particular importance here is the specification of the individual :class:`Tasks` within the :obj:`Payload.method` field. The :class:`Tasks` are distributed onto individual *components* of the *pipeline*, by matching the :obj:`component_role` field with the :obj:`pipeline.component.role` field, and then executed in sequence. Some general :class:`Task` parameters are abstracted by **tomato**, such as the ``max_duration``, ``sampling_interval`` and ``polling_interval``. The other are *driver* or *component* specific, and can be specified using the :obj:`task_params` field.
 
 .. warning::
 

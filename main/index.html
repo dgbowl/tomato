@@ -1,24 +1,24 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato: au-tomation without the pain! &mdash; tomato 3.0rc6.post5 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
-      <link rel="stylesheet" href="_static/custom_theme.css" type="text/css" />
-    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>tomato: au-tomation without the pain! &mdash; tomato 3.0rc6.post6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom_theme.css?v=67cc0e79" />
+
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=100693e7"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=27fe198d"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +37,6 @@
             tomato
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                3.0rc6.post5
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -53,7 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_tomato.html">Developing <strong>tomato</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_driver.html">Developing <strong>tomato</strong> drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
@@ -98,9 +96,12 @@
              
   <section id="tomato-au-tomation-without-the-pain">
 <h1><strong>tomato</strong>: au-tomation without the pain!<a class="headerlink" href="#tomato-au-tomation-without-the-pain" title="Link to this heading"></a></h1>
-<a class="reference external image-reference" href="https://dgbowl.github.io/tomato"><img alt="https://badgen.net/badge/docs/dgbowl.github.io/grey?icon=firefox" src="https://badgen.net/badge/docs/dgbowl.github.io/grey?icon=firefox" /></a>
-<a class="reference external image-reference" href="https://pypi.org/project/tomato"><img alt="https://badgen.net/pypi/v/tomato/?icon=pypi" src="https://badgen.net/pypi/v/tomato/?icon=pypi" /></a>
-<a class="reference external image-reference" href="https://github.com/dgbowl/tomato"><img alt="https://badgen.net/github/tag/dgbowl/tomato/?icon=github" src="https://badgen.net/github/tag/dgbowl/tomato/?icon=github" /></a>
+<a class="reference external image-reference" href="https://dgbowl.github.io/tomato"><img alt="https://badgen.net/badge/docs/dgbowl.github.io/grey?icon=firefox" src="https://badgen.net/badge/docs/dgbowl.github.io/grey?icon=firefox" />
+</a>
+<a class="reference external image-reference" href="https://pypi.org/project/tomato"><img alt="https://badgen.net/pypi/v/tomato/?icon=pypi" src="https://badgen.net/pypi/v/tomato/?icon=pypi" />
+</a>
+<a class="reference external image-reference" href="https://github.com/dgbowl/tomato"><img alt="https://badgen.net/github/tag/dgbowl/tomato/?icon=github" src="https://badgen.net/github/tag/dgbowl/tomato/?icon=github" />
+</a>
 <p><strong>tomato</strong> is an instrument automation package, currently developed at the
 <a class="reference external" href="https://tu.berlin/en/concat/">ConCat lab</a>, and previously in the
 <a class="reference external" href="https://www.empa.ch/web/s501">Materials for Energy Conversion</a> lab at Empa.</p>
@@ -129,7 +130,8 @@ Loris Ercole,</em></p>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_tomato.html">Developing <strong>tomato</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_driver.html">Developing <strong>tomato</strong> drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
 </ul>
 </div>
@@ -160,7 +162,7 @@ Loris Ercole,</em></p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021 - 2024, dgbowl authors.</p>
+    <p>&#169; Copyright 2021 - 2026, dgbowl authors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -176,7 +178,7 @@ Loris Ercole,</em></p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 3.0rc6.post5
+      v: 3.0rc6.post6
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

@@ -116,7 +116,7 @@ Using :mod:`~tomato.ketchup`
 
 The :mod:`tomato.ketchup` executable is used to submit *payloads* to the daemon, and to check the status of and to cancel *jobs* in the queue.
 
-    #.  **To submit** a *job* using a *payload* contained in a :ref:`payfile`, run:
+    #.  **To submit** a *job* using a *payload* contained in a |payfile|_, run:
 
         .. code-block:: bash
 

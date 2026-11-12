@@ -3,8 +3,8 @@
 
 .. automodule:: tomato.driverinterface_2_1
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------
@@ -12,11 +12,11 @@ Submodules
 
 .. automodule:: tomato.driverinterface_2_1.decorators
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 
 .. automodule:: tomato.driverinterface_2_1.types
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

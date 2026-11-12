@@ -3,8 +3,8 @@ tomato package
 
 .. automodule:: tomato
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------
@@ -25,17 +25,17 @@ Submodules
 
 .. automodule:: tomato.drivers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 
 .. automodule:: tomato.models
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 
 .. automodule:: tomato.utils
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -3,5 +3,5 @@
 
 .. automodule:: tomato.tomato
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

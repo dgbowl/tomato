@@ -1,24 +1,24 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tomato package &mdash; tomato 3.0rc6.post5 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom_theme.css" type="text/css" />
-    <link rel="shortcut icon" href="../_static/tomato_ico.png"/>
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>tomato package &mdash; tomato 3.0rc6.post6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom_theme.css?v=67cc0e79" />
+
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=100693e7"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="shortcut icon" href="../_static/tomato_ico.png"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=27fe198d"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -38,9 +38,6 @@
             tomato
               <img src="../_static/tomato.png" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                3.0rc6.post5
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -54,7 +51,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick start guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../develop_tomato.html">Developing <strong>tomato</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../develop_driver.html">Developing <strong>tomato</strong> drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../version.html">Version history</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
@@ -79,7 +77,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tomato.daemon.html"><strong>tomato.daemon</strong>: Functions and modules comprising the tomato daemon</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_2_1.html"><strong>tomato.DriverInterface</strong>: version 2.1</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_3_0.html">tomato.driverinterface_3_0 package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_3_0.html"><strong>tomato.DriverInterface</strong>: version 3.0</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.ketchup.html"><strong>tomato.ketchup</strong>: CLI and API for the tomato job queue</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.passata.html"><strong>tomato.passata</strong>: CLI and API for tomato drivers and components</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.tomato.html"><strong>tomato.tomato</strong>: CLI and API for the tomato daemon</a></li>
@@ -178,6 +176,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tomato.models.Task"><code class="docutils literal notranslate"><span class="pre">Task</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.convert_str_to_seconds"><code class="docutils literal notranslate"><span class="pre">Task.convert_str_to_seconds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.task_names_cannot_be_same"><code class="docutils literal notranslate"><span class="pre">Task.task_names_cannot_be_same</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.component_role"><code class="docutils literal notranslate"><span class="pre">Task.component_role</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.max_duration"><code class="docutils literal notranslate"><span class="pre">Task.max_duration</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.sampling_interval"><code class="docutils literal notranslate"><span class="pre">Task.sampling_interval</span></code></a></li>
@@ -187,8 +187,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.task_params"><code class="docutils literal notranslate"><span class="pre">Task.task_params</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.start_with_task_name"><code class="docutils literal notranslate"><span class="pre">Task.start_with_task_name</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.stop_with_task_name"><code class="docutils literal notranslate"><span class="pre">Task.stop_with_task_name</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.task_names_cannot_be_same"><code class="docutils literal notranslate"><span class="pre">Task.task_names_cannot_be_same</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#tomato.models.Task.convert_str_to_seconds"><code class="docutils literal notranslate"><span class="pre">Task.convert_str_to_seconds</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tomato.utils.spawn_cmd"><code class="docutils literal notranslate"><span class="pre">spawn_cmd()</span></code></a></li>
@@ -390,7 +388,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tomato.driverinterface_3_0.html">tomato.driverinterface_3_0 package</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="tomato.driverinterface_3_0.html"><strong>tomato.DriverInterface</strong>: version 3.0</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Attr"><code class="docutils literal notranslate"><span class="pre">Attr</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Attr.type"><code class="docutils literal notranslate"><span class="pre">Attr.type</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="tomato.driverinterface_3_0.html#tomato.driverinterface_3_0.Attr.rw"><code class="docutils literal notranslate"><span class="pre">Attr.rw</span></code></a></li>
@@ -586,7 +584,7 @@
 </div>
 </details></p><dl class="py property">
 <dt class="sig sig-object py" id="tomato.models.Component.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tomato.models.Component.name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tomato.models.Component.name" title="Link to this definition"></a></dt>
 <dd><p>The component name, derived from the address, channel, and driver of this component.</p>
 </dd></dl>
 
@@ -1204,7 +1202,7 @@
 </dl>
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.DeviceFile.filename">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Path</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.DeviceFile.filename" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">PlainSerializer</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">return_type</span></span><span class="o"><span class="pre">=</span></span><span class="pre">PydanticUndefined</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">when_used</span></span><span class="o"><span class="pre">=</span></span><span class="pre">always</span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.DeviceFile.filename" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Constraints<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2211,6 +2209,16 @@ provided via the <a class="reference internal" href="#tomato.models.Task.techniq
 </ul>
 </dd>
 </dl>
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="tomato.models.Task.convert_str_to_seconds">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><a class="headerlink" href="#tomato.models.Task.convert_str_to_seconds" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="tomato.models.Task.task_names_cannot_be_same">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">task_names_cannot_be_same</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#tomato.models.Task.task_names_cannot_be_same" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="tomato.models.Task.component_role">
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">component_role</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#tomato.models.Task.component_role" title="Link to this definition"></a></dt>
@@ -2341,16 +2349,6 @@ will be stopped</p>
 </dl>
 </dd></dl>
 
-<dl class="py method pydantic_validator">
-<dt class="sig sig-object py" id="tomato.models.Task.task_names_cannot_be_same">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">task_names_cannot_be_same</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#tomato.models.Task.task_names_cannot_be_same" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method pydantic_validator">
-<dt class="sig sig-object py" id="tomato.models.Task.convert_str_to_seconds">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><a class="headerlink" href="#tomato.models.Task.convert_str_to_seconds" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py function" id="module-tomato.utils">
@@ -2382,7 +2380,7 @@ will be stopped</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021 - 2024, dgbowl authors.</p>
+    <p>&#169; Copyright 2021 - 2026, dgbowl authors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -2398,7 +2396,7 @@ will be stopped</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 3.0rc6.post5
+      v: 3.0rc6.post6
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

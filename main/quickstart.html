@@ -1,26 +1,382 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick start guide &mdash; tomato 3.0rc6.post5 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
-      <link rel="stylesheet" href="_static/custom_theme.css" type="text/css" />
-    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Quick start guide &mdash; tomato 3.0rc6.post6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom_theme.css?v=67cc0e79" />
+
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=100693e7"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-        <script>mermaid.initialize({startOnLoad:true});</script>
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=27fe198d"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,9 +396,6 @@
             tomato
               <img src="_static/tomato.png" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                3.0rc6.post5
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -56,8 +409,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quick start guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#first-time-set-up">First time set-up</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tomato-program-flowchart"><strong>tomato</strong> program flowchart</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tomato-concepts-flowchart"><strong>tomato</strong> concepts flowchart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-tomato-concepts">Key <strong>tomato</strong> concepts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#settings-file">Settings file</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#jobs-section"><strong>jobs</strong> section</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#devices-section"><strong>devices</strong> section</a></li>
@@ -74,7 +426,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="driver_develop.html">Developing <strong>tomato</strong> drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_tomato.html">Developing <strong>tomato</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_driver.html">Developing <strong>tomato</strong> drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
@@ -125,145 +478,114 @@
 <p class="admonition-title">Note</p>
 <p>This section assumes that <strong>tomato</strong> has been successfully <a class="reference internal" href="installation.html#installation"><span class="std std-ref">installed</span></a>.</p>
 </div>
-<p>To prepare <strong>tomato</strong> before its first run, a <em>settings file</em> containing the basic configuration for the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> needs to be placed in <strong>tomato’s</strong> <em>appdir</em> folder. By default, the <em>appdir</em> path is:</p>
+<p>The easiest way to set-up <strong>tomato</strong> for its first run is to run <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> kraus@dorje:~$ tomato init
+<span class="hll"><span class="linenos">2</span> Success: wrote default settings into /home/kraus/.config/tomato/3.0rc6/settings.toml
+</span></pre></div>
+</div>
+<p>This will create a <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a> and a <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a> in <strong>tomato’s</strong> <em>appdir</em> folder. By default, the <em>appdir</em> path is:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">$env:localappdata\dgbowl\tomato\&lt;version&gt;</span></code> on Windows,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">$HOME/.config/tomato/&lt;version&gt;</span></code> on Linux.</p></li>
 </ul>
-<p>The easiest way to do create this file is using the provided <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> kraus@dorje:/home/kraus/$ tomato init
-<span class="hll"><span class="linenos">2</span> Success: wrote default settings into /home/kraus/.config/tomato/1.0a1/settings.toml
-</span></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>In the above example, the <em>appdir</em> is <code class="docutils literal notranslate"><span class="pre">/home/kraus/.config/tomato/3.0rc6/</span></code>, as highlighted on line 2. A custom <em>appdir</em> can be specified using the <code class="docutils literal notranslate"><span class="pre">--appdir</span></code> argument to <strong>tomato</strong> via <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> and <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">start</span></code>.</p>
 </div>
-<p>Where <em>appdir</em> is <code class="docutils literal notranslate"><span class="pre">/home/kraus/.config/tomato/1.0a1/</span></code>. A custom <em>appdir</em> can be specified using the <code class="docutils literal notranslate"><span class="pre">--appdir</span></code> argument to <strong>tomato</strong>.</p>
-</section>
-<section id="tomato-program-flowchart">
-<h2><strong>tomato</strong> program flowchart<a class="headerlink" href="#tomato-program-flowchart" title="Link to this heading"></a></h2>
-<p><strong>tomato</strong> currently contains three command line user-facing utilities/executables:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>, responsible for management of the daemon process,</p></li>
-<li><p><a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>, responsible for job submission and management, and</p></li>
-<li><p><a class="reference internal" href="apidoc/tomato.passata.html#module-tomato.passata" title="tomato.passata"><code class="xref py py-mod docutils literal notranslate"><span class="pre">passata</span></code></a>, providing an interface to the hardware via drivers and components.</p></li>
-</ul>
-<p>These executables then internally spawn other processes, including the state daemon process <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process for every running job, and a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process for each driver type, managing all devices of a that type.</p>
-<div class="mermaid">
-            flowchart TB
-    subgraph daemon[tomato-daemon]
-        cmd{{port:cmd}} &lt;==&gt; cfg[(config)]
-        cfg --&gt; jm([job manager])
-        cfg --&gt; pm([pip manager])
-        cfg --&gt; dm([driver manager])
-
-    end
-
-    jm -.-&gt; job
-
-    subgraph job[tomato-job]
-        mp([main loop]) --&gt; tp&gt;task process]
-    end
-
-    jm &lt;-.-&gt; jobdb[(job db\nsqlite)]
-    mp -.-&gt; jobdb
-
-    jm &lt;-.-&gt; pipdb[(pip db\nsqlite)]
-    pm &lt;-.-&gt; pipdb
-    mp -.-&gt; pipdb
-
-    dm &lt;-.-&gt; drvdb[(drv db\nsqlite)]
-    drvdb &lt;-.-&gt; dst
-
-    setf[settings file\ndevices file] ---&gt; cfg
-
-    t&gt;tomato] -.-&gt; cmd
-    k&gt;ketchup] -.-&gt; cmd
-
-    dst -.-&gt; driver
-    dm -..-&gt; driver
-    tp -.-&gt; dcmd
-
-    subgraph driver[tomato-driver]
-        dcmd{{port:cmd}} ==&gt;  dst[(state)]
-    end
-
-    dst o-.-o h1[hardware]
-
-    p&gt;passata] -.-&gt; cmd
-    p -.-&gt; dcmd
-        </div><div class="admonition note">
+<div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Note that the <a class="reference internal" href="apidoc/tomato.daemon.html#module-tomato.daemon" title="tomato.daemon"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.daemon</span></code></a> process is stateless, only responsible for reading of the configuration files and spawning the <em>job</em>, <em>driver</em> and <em>pipeline</em>–management threads. All configuration and state information that should be persistently stored (i.e. survive restart of the components) is stored in a <code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite3</span></code> database.</p>
+<p>Any existing <a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a> and/or <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a> within the <em>appdir</em> will <strong>not</strong> be overwritten when <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> is called. If you have corrupted either of the two configuration files, make a backup, delete the files, and run <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> again.</p>
+</div>
+<p>You can now start <strong>tomato</strong> using <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">start</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>kraus@dorje:~$ tomato start
+Success: tomato running on port 1234
+</pre></div>
 </div>
 </section>
-<section id="tomato-concepts-flowchart">
-<span id="concepts"></span><h2><strong>tomato</strong> concepts flowchart<a class="headerlink" href="#tomato-concepts-flowchart" title="Link to this heading"></a></h2>
-<p>The following concepts are used in <strong>tomato</strong>:</p>
+<section id="key-tomato-concepts">
+<span id="concepts"></span><h2>Key <strong>tomato</strong> concepts<a class="headerlink" href="#key-tomato-concepts" title="Link to this heading"></a></h2>
+<p>Before you start configuring your <strong>tomato</strong> instance, you should be familiar with the following concepts, that are used in <strong>tomato</strong> and in this documentation:</p>
 <ul class="simple">
 <li><p><em>devices</em>, which represent separately addressable (and optionally multichannel) instruments in the lab,</p></li>
-<li><p><em>components</em>, which represent the individual channels of each <em>device</em>, describing the role of this <em>component</em> and its associated capabilities,</p></li>
+<li><p><em>components</em>, which represent the individual channels or components of each <em>device</em>, describing the role of this <em>component</em> and its associated capabilities,</p></li>
 <li><p><em>pipelines</em>, which represent the real world organisation of device <em>components</em> into independent experimental set-ups, containing <em>components</em> from one or more <em>device</em>,</p></li>
-<li><p><em>jobs</em>, which are processes that carry out a <em>payload</em> (i.e. a set of experimental instructions) on a <em>pipeline</em> by instructing its <em>components</em> to perform individual <em>tasks</em>, and</p></li>
-<li><p><em>drivers</em>, which are separate processes, each managing all defined <em>devices</em> of a certain driver type as well as their <em>components</em>:</p></li>
+<li><p><em>jobs</em>, which are processes that carry out a set of <em>tasks</em> (set of experimental instructions, i.e. a <em>payload</em>) on a <em>pipeline</em> by instructing its <em>components</em> to perform individual <em>tasks</em>, and</p></li>
+<li><p><em>drivers</em>, which are processes talking to the hardware, with each <em>driver</em> managing all defined <em>devices</em> of a certain driver type, including all their <em>components</em>.</p></li>
 </ul>
-<div class="mermaid">
-            flowchart LR
+<p>Consider the below diagram:</p>
+<figure class="align-default" id="id5">
+<pre  class="mermaid">
+        flowchart LR
 
-    c1 --- drv1[driver 123]
-    c2 --- drv1
-    c3 --- drv1
+  c1 --- drv1[driver 123]
+  c2 --- drv1
+  c3 --- drv1
 
-    a100 --- drv2[driver abc]
-    b100 --- drv2
+  a100 --- drv2[driver abc]
+  b100 --- drv2
 
-    subgraph d1[device 1]
-        ip1[address: 192.168.1.1]
-        c1[channel 1]
-        c2[channel 2]
-        c3[channel 3]
-    end
+  subgraph d1[device 1]
+      ip1[address: 192.168.1.1]
+      c1[channel 1]
+      c2[channel 2]
+      c3[channel 3]
+  end
 
-    subgraph a[device a]
-        com1[address: COM1]
-        a100[channel 100]
-    end
+  subgraph a[device a]
+      com1[address: COM1]
+      a100[channel 100]
+  end
 
-    subgraph b[device b]
-        com2[address: COM2]
-        b100[channel 100]
-    end
+  subgraph b[device b]
+      com2[address: COM2]
+      b100[channel 100]
+  end
 
-    subgraph pipelines
-        pip1
-        pip2
-        pip3
-    end
+  subgraph pipelines
+      pip1
+      pip2
+      pip3
+  end
 
-    subgraph drivers
-        drv1
-        drv2
-    end
+  pipelines:::config
 
-    subgraph devices
-        d1
-        a
-        b
-    end
+  subgraph drivers
+      drv1
+      drv2
+  end
 
-    subgraph jobs
-        j1
-        j2
-    end
+  subgraph devices
+      d1:::config
+      a:::config
+      b:::config
+  end
 
-    j1[complex] --- |two part payload| pip1
-    j2[simple] --- |simple payload| pip3
+  devices:::config
 
-    pip1[pipeline a1] -.-&gt; c1
-    pip1[pipeline a1] -.-&gt; a100
+  subgraph jobs
+      j1
+      j2
+  end
 
-    pip2[pipeline b2] -.-&gt; c2
-    pip2[pipeline b2] -.-&gt; b100
+  j1[complex] --- |payload:&lt;br/&gt;0-9&lt;br/&gt;a-z| pip1
+  j2[simple] --- |payload:&lt;br/&gt;0-9| pip3
 
-    pip3[pipeline 3] -.-&gt; c3
-        </div></section>
+  pip1[pipeline a1] -.-&gt; c1
+  pip1[pipeline a1] -.-&gt; a100
+
+  pip2[pipeline b2] -.-&gt; c2
+  pip2[pipeline b2] -.-&gt; b100
+
+  pip3[pipeline 3] -.-&gt; c3
+
+  classDef config fill:#fff,stroke:#5c5
+    </pre><figcaption>
+<p><span class="caption-text">Diagram of <strong>tomato</strong> concepts.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Here, three <em>devices</em> are defined in the <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a> (<code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">a</span></code>, and <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">b</span></code>). The three <em>pipelines</em> (<code class="docutils literal notranslate"><span class="pre">pipeline</span> <span class="pre">a1</span></code>, <code class="docutils literal notranslate"><span class="pre">pipeline</span> <span class="pre">b2</span></code>, and <code class="docutils literal notranslate"><span class="pre">pipeline</span> <span class="pre">3</span></code>) as well as the links to the <em>components</em> is also defined in the <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a>. Based on this information, the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process knows it needs to launch two <em>drivers</em>, one for <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">1</span></code>, and a second one for <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">b</span></code>.</p>
+<p><em>Jobs</em> are also managed in separate processes. They are matched against <em>pipelines</em> based on the contents of their <a class="reference external" href="quickstart.html#payload-file"><em>payload file</em></a>. In the above example, the <strong>simple</strong> <em>job</em>, requiring <code class="docutils literal notranslate"><span class="pre">0-9</span></code> in its <em>payload</em>, could match against any of the three configured <em>pipelines</em>, as each <em>pipeline</em> contains a “numerical” <em>component</em> from <code class="docutils literal notranslate"><span class="pre">device</span> <span class="pre">1</span></code>. The <strong>complex</strong> <em>job</em>, requiring both <code class="docutils literal notranslate"><span class="pre">0-9</span></code> as well as <code class="docutils literal notranslate"><span class="pre">a-z</span></code> in its <em>payload</em>, can only be matched against <code class="docutils literal notranslate"><span class="pre">pipeline</span> <span class="pre">a1</span></code> or <code class="docutils literal notranslate"><span class="pre">pipeline</span> <span class="pre">b2</span></code>.</p>
+</section>
 <section id="settings-file">
 <span id="id1"></span><h2>Settings file<a class="headerlink" href="#settings-file" title="Link to this heading"></a></h2>
 <p>The <em>settings file</em> contains the basic information required to start the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>. The filename is hard-coded to be a <code class="docutils literal notranslate"><span class="pre">settings.toml</span></code> file, which has to be located in the <em>appdir</em>. The default file generated by <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code> looks similar to the below example:</p>
@@ -344,43 +666,24 @@
 <span class="linenos">6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
-<p>Here, we define a single device using the <code class="xref py py-mod docutils literal notranslate"><span class="pre">example_counter</span></code> driver. The definition includes the <code class="docutils literal notranslate"><span class="pre">address</span></code> of the device (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> type) as well as an enumeration of individually-addressable channels the device has (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>).</p>
-<p>For example, the devices shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a> above would be defined as:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">devices</span><span class="p">:</span>
-<span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
-<span class="linenos"> 3</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"driver</span><span class="nv"> </span><span class="s">123"</span>
-<span class="linenos"> 4</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">"192.168.1.1"</span>
-<span class="linenos"> 5</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"1"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"2"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"3"</span><span class="p p-Indicator">]</span>
-<span class="linenos"> 6</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="linenos"> 7</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
-<span class="linenos"> 8</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"driver</span><span class="nv"> </span><span class="s">abc"</span>
-<span class="linenos"> 9</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">"COM1"</span>
-<span class="linenos">10</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"100"</span><span class="p p-Indicator">]</span>
-<span class="linenos">11</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="linenos">12</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
-<span class="linenos">13</span><span class="w">     </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"driver</span><span class="nv"> </span><span class="s">abc"</span>
-<span class="linenos">14</span><span class="w">     </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">"COM2"</span>
-<span class="linenos">15</span><span class="w">     </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"100"</span><span class="p p-Indicator">]</span>
-<span class="linenos">16</span><span class="w">     </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-</pre></div>
-</div>
+<p>Here, we define a single device using the <code class="xref py py-mod docutils literal notranslate"><span class="pre">example_counter</span></code> driver. The definition includes the <code class="docutils literal notranslate"><span class="pre">address</span></code> of the device (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> type) as well as an enumeration of individually-addressable channels the device has (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>). The <code class="docutils literal notranslate"><span class="pre">address</span></code> and each of the <code class="docutils literal notranslate"><span class="pre">channels</span></code> will then be used to define the <em>components</em> on this <em>device</em>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> here is an internal setting for <strong>tomato</strong>. It is the frequency with which the <em>job</em> interacting with the device <em>driver</em> asks the <em>driver</em> for data, <strong>not</strong> the frequency with which the <em>driver</em> asks the hardware for data! This latter “sampling” frequency can be defined in each individual <em>task</em> submitted as a <em>payload</em> of a <em>job</em>.</p>
+<p>What needs to be specified as <em>device</em> <code class="docutils literal notranslate"><span class="pre">address</span></code>/<code class="docutils literal notranslate"><span class="pre">channels</span></code>, or if anything has to be specified at all, depends on each of the <strong>tomato</strong> drivers. Please refer to the <strong>tomato</strong> driver library in the sidebar.</p>
 </div>
 </section>
 <section id="pipelines-section">
 <h3><strong>pipelines</strong> section<a class="headerlink" href="#pipelines-section" title="Link to this heading"></a></h3>
 <p>The default <code class="docutils literal notranslate"><span class="pre">pipelines</span></code> section looks as follows:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
-<span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-counter</span>
-<span class="linenos">3</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
-<span class="linenos">4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">counter</span>
-<span class="hll"><span class="linenos">5</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
-</span><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="nt">pipelines</span><span class="p">:</span>
+<span class="linenos">2</span><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-counter</span>
+<span class="linenos">3</span><span class="w">    </span><span class="nt">components</span><span class="p">:</span>
+<span class="linenos">4</span><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">counter</span>
+<span class="hll"><span class="linenos">5</span><span class="w">        </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev-counter</span>
+</span><span class="linenos">6</span><span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
 </pre></div>
 </div>
-<p>Here, a single <em>pipeline</em> called <code class="docutils literal notranslate"><span class="pre">pip-counter</span></code> is defined to contain the one available channel of the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> device (defined on line 5) shown further above. For multi channel devices, it is also possible to define a <em>pipeline</em> for each channel automatically, e.g. using the following definition:</p>
+<p>Here, a single <em>pipeline</em> called <code class="docutils literal notranslate"><span class="pre">pip-counter</span></code> is defined. It contains the one available channel of the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> device (defined on line 5) shown further above. For multi channel devices, it is also possible to define a <em>pipeline</em> for each channel automatically, e.g. using the following definition:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
 <span class="hll"><span class="linenos">2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-counter-*</span>
 </span><span class="linenos">3</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
@@ -389,38 +692,64 @@
 <span class="hll"><span class="linenos">6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">each</span>
 </span></pre></div>
 </div>
-<p>Here, a set of pipelines would be created using each of the available channels in <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code>, replacing the <code class="docutils literal notranslate"><span class="pre">*</span></code> in line 2 using the channel. Therefore, one <em>pipeline</em>  with name <code class="docutils literal notranslate"><span class="pre">pip-counter-1</span></code> would be created. However, if the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> were to contain more than one channel, a <em>pipeline</em> would be generated for each channel.</p>
-<p>Finally, a definition for the pipelines shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts flowchart</span></a> above can be defined as:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w"> </span><span class="nt">pipelines</span><span class="p">:</span>
-<span class="linenos"> 2</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline a1</span>
-<span class="linenos"> 3</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
-<span class="linenos"> 4</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
-<span class="linenos"> 5</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
-<span class="linenos"> 6</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
-<span class="linenos"> 7</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
-<span class="linenos"> 8</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
-<span class="linenos"> 9</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"100"</span>
-<span class="linenos">10</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline b2</span>
-<span class="linenos">11</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
-<span class="linenos">12</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
-<span class="linenos">13</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
-<span class="linenos">14</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span>
-<span class="linenos">15</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
-<span class="linenos">16</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
-<span class="linenos">17</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"100"</span>
-<span class="linenos">18</span><span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline 3</span>
-<span class="linenos">19</span><span class="w">     </span><span class="nt">components</span><span class="p">:</span>
-<span class="linenos">20</span><span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
-<span class="linenos">21</span><span class="w">         </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
-<span class="linenos">22</span><span class="w">         </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<p>Here, a set of pipelines would be created using each of the available channels in <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code>, replacing the <code class="docutils literal notranslate"><span class="pre">*</span></code> in line 2 using the channel. Therefore, when coupled with the above <em>devices</em> section, one <em>pipeline</em>  with name <code class="docutils literal notranslate"><span class="pre">pip-counter-1</span></code> would be created. However, if the <code class="docutils literal notranslate"><span class="pre">dev-counter</span></code> were to contain more than one channel, a <em>pipeline</em> would be generated for each channel.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For example, the <em>devices</em> shown in the <a class="reference internal" href="#concepts"><span class="std std-ref">concepts diagram</span></a> above could be defined as:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">devices</span><span class="p">:</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"driver</span><span class="nv"> </span><span class="s">123"</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">"192.168.1.1"</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"1"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"2"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"3"</span><span class="p p-Indicator">]</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="linenos"> 7</span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"driver</span><span class="nv"> </span><span class="s">abc"</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">"COM1"</span>
+<span class="linenos">10</span><span class="w">    </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"100"</span><span class="p p-Indicator">]</span>
+<span class="linenos">11</span><span class="w">    </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="linenos">12</span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
+<span class="linenos">13</span><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"driver</span><span class="nv"> </span><span class="s">abc"</span>
+<span class="linenos">14</span><span class="w">    </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">"COM2"</span>
+<span class="linenos">15</span><span class="w">    </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"100"</span><span class="p p-Indicator">]</span>
+<span class="linenos">16</span><span class="w">    </span><span class="nt">pollrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 </pre></div>
+</div>
+<p>The <em>pipelines</em> from the same <a class="reference internal" href="#concepts"><span class="std std-ref">concepts diagram</span></a> can be defined using:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nt">pipelines</span><span class="p">:</span>
+<span class="linenos"> 2</span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline a1</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="nt">components</span><span class="p">:</span>
+<span class="linenos"> 4</span><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
+<span class="linenos"> 5</span><span class="w">        </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos"> 6</span><span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
+<span class="linenos"> 7</span><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device a</span>
+<span class="linenos"> 9</span><span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"100"</span>
+<span class="linenos">10</span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline b2</span>
+<span class="linenos">11</span><span class="w">    </span><span class="nt">components</span><span class="p">:</span>
+<span class="linenos">12</span><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
+<span class="linenos">13</span><span class="w">        </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos">14</span><span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span>
+<span class="linenos">15</span><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev abc</span>
+<span class="linenos">16</span><span class="w">        </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device b</span>
+<span class="linenos">17</span><span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"100"</span>
+<span class="linenos">18</span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pipeline 3</span>
+<span class="linenos">19</span><span class="w">    </span><span class="nt">components</span><span class="p">:</span>
+<span class="linenos">20</span><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev 123</span>
+<span class="linenos">21</span><span class="w">        </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">device 1</span>
+<span class="linenos">22</span><span class="w">        </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pollrate</span></code> here is an internal setting for <strong>tomato</strong>. It is the frequency with which the <em>job</em> interacting with the device <em>driver</em> asks the <em>driver</em> for data, <strong>not</strong> the frequency with which the <em>driver</em> asks the hardware for data! This latter “sampling” frequency can be defined in each individual <em>task</em> submitted as a <em>payload</em> of a <em>job</em>.</p>
 </div>
 </section>
 </section>
 <section id="payload-file">
-<span id="payfile"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Link to this heading"></a></h2>
+<span id="id4"></span><h2>Payload file<a class="headerlink" href="#payload-file" title="Link to this heading"></a></h2>
 <p>The <em>payload</em> file contains all information required to enter a <em>job</em> into the queue and allow its assignment onto a <em>pipeline</em>. The overall schema of the <em>payload</em> is defined in the <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#module-dgbowl_schemas.tomato" title="(in dgbowl-schemas v126.dev3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato</span></code></a> module, and is parsed using <a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.html#dgbowl_schemas.tomato.to_payload" title="(in dgbowl-schemas v126.dev3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dgbowl_schemas.tomato.to_payload()</span></code></a>.</p>
-<p>Of particular importance here is the specification of the individual <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> within the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Payload.method</span></code> field. The <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> are distributed onto individual <em>components</em> of the <em>pipeline</em> (as matched by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">component_role</span></code> field), and then executed in sequence. Some general <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> parameters are abstracted by <strong>tomato</strong>, such as the <code class="docutils literal notranslate"><span class="pre">max_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">sampling_interval</span></code> and <code class="docutils literal notranslate"><span class="pre">polling_interval</span></code>. The other are <em>driver</em> or <em>component</em> specific, and can be specified using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">task_params</span></code> field.</p>
+<p>Of particular importance here is the specification of the individual <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> within the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Payload.method</span></code> field. The <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> are distributed onto individual <em>components</em> of the <em>pipeline</em>, by matching the <code class="xref py py-obj docutils literal notranslate"><span class="pre">component_role</span></code> field with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">pipeline.component.role</span></code> field, and then executed in sequence. Some general <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code> parameters are abstracted by <strong>tomato</strong>, such as the <code class="docutils literal notranslate"><span class="pre">max_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">sampling_interval</span></code> and <code class="docutils literal notranslate"><span class="pre">polling_interval</span></code>. The other are <em>driver</em> or <em>component</em> specific, and can be specified using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">task_params</span></code> field.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Currently, <strong>tomato</strong> does not check whether the <code class="docutils literal notranslate"><span class="pre">sampling_interval</span></code> is realistic. However, such validation is planned for a future release, see <a class="reference external" href="https://github.com/dgbowl/tomato/issues/127">https://github.com/dgbowl/tomato/issues/127</a>.</p>
@@ -1059,7 +1388,7 @@ will be stopped</p>
 
 <dl class="py method pydantic_validator">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a></dt>
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_str_to_seconds</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.polling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">polling_interval</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.max_duration" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">max_duration</span></em></a><em class="property"><span class="pre">,</span> </em><a class="reference external" href="https://dgbowl.github.io/dgbowl-schemas/main/apidoc/dgbowl_schemas.tomato.payload_2_2.html#dgbowl_schemas.tomato.payload_2_2.task.Task.sampling_interval" title="(in dgbowl-schemas v126.dev3)"><em class="xref py py-obj"><span class="pre">sampling_interval</span></em></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1078,7 +1407,7 @@ will be stopped</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021 - 2024, dgbowl authors.</p>
+    <p>&#169; Copyright 2021 - 2026, dgbowl authors.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
@@ -1094,7 +1423,7 @@ will be stopped</p>
   <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
       <span class="fa fa-book"> Other Versions</span>
-      v: 3.0rc6.post5
+      v: 3.0rc6.post6
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions"> 

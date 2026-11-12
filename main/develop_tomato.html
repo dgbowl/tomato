@@ -1,0 +1,671 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developing tomato &mdash; tomato 3.0rc6.post6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom_theme.css?v=67cc0e79" />
+
+  
+    <link rel="shortcut icon" href="_static/tomato_ico.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=27fe198d"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developing tomato drivers" href="develop_driver.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tomato
+              <img src="_static/tomato.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">tomato user manual</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick start guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developing <strong>tomato</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-program-flowchart"><strong>tomato</strong> program flowchart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-utility"><code class="docutils literal notranslate"><span class="pre">tomato</span></code> utility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ketchup-utility"><code class="docutils literal notranslate"><span class="pre">ketchup</span></code> utility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#passata-utility"><code class="docutils literal notranslate"><span class="pre">passata</span></code> utility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-daemon-process"><code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tomato-daemon-driver-manager-thread"><code class="docutils literal notranslate"><span class="pre">tomato.daemon.driver.manager</span></code> thread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tomato-daemon-job-manager-thread"><code class="docutils literal notranslate"><span class="pre">tomato.daemon.job.manager</span></code> thread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tomato-daemon-pip-manager-thread"><code class="docutils literal notranslate"><span class="pre">tomato.daemon.pip.manager</span></code> thread</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-job-process"><code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tomato-driver-process"><code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="develop_driver.html">Developing <strong>tomato</strong> drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="version.html">Version history</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato driver library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-example-counter">tomato-example-counter</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-example-trig">tomato-example-trig</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-psutil">tomato-psutil</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-alicat">tomato-alicat</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-bronkhorst">tomato-bronkhorst</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-jumo">tomato-jumo</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-mcc">tomato-mcc</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/dgbowl/tomato-picovna">tomato-picovna</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">tomato autodocs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidoc/tomato.html">tomato package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tomato</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Developing <strong>tomato</strong></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/develop_tomato.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="developing-tomato">
+<h1>Developing <strong>tomato</strong><a class="headerlink" href="#developing-tomato" title="Link to this heading"></a></h1>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<blockquote>
+<div><p>No LLM / No generative AI policy. This means:</p>
+<ul class="simple">
+<li><p>Do not generate issues using LLMs.</p></li>
+<li><p>Do not use LLMs for patches / pull requests.</p></li>
+<li><p>Do not submit LLM-generated comments on the issue tracker.</p></li>
+</ul>
+</div></blockquote>
+<p>For further reasoning, please refer to <a class="reference external" href="https://blog.johanneslink.net/2025/11/04/to-gen-or-not-to-gen/">Johannes Link’s excellent blog on this issue</a>.</p>
+</div>
+<section id="tomato-program-flowchart">
+<h2><strong>tomato</strong> program flowchart<a class="headerlink" href="#tomato-program-flowchart" title="Link to this heading"></a></h2>
+<p><strong>tomato</strong> currently contains three command line user-facing utilities/executables:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="apidoc/tomato.tomato.html#module-tomato.tomato" title="tomato.tomato"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato</span></code></a>, responsible for management of the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process,</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.ketchup.html#module-tomato.ketchup" title="tomato.ketchup"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ketchup</span></code></a>, responsible for job submission and management, and</p></li>
+<li><p><a class="reference internal" href="apidoc/tomato.passata.html#module-tomato.passata" title="tomato.passata"><code class="xref py py-mod docutils literal notranslate"><span class="pre">passata</span></code></a>, providing an interface to the hardware by communicating to drivers and components.</p></li>
+</ul>
+<p>These executables then internally spawn other processes, including the state daemon process <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process for every running job, and a <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process for each driver type, managing all devices of a that type. An incomplete program flowchart is shown below, with the individual components discussed further below.</p>
+<pre  class="mermaid">
+        flowchart TB
+    subgraph daemon[tomato-daemon]
+        cmd{{port:cmd}} &lt;==&gt; cfg[(config)]
+        cfg --&gt; jm([job manager])
+        cfg --&gt; pm([pip manager])
+        cfg --&gt; dm([driver manager])
+
+    end
+
+    jm -.-&gt; job
+
+    subgraph job[tomato-job]
+        mp([main loop]) --&gt; tp&gt;task process]
+    end
+
+    jm &lt;-.-&gt; jobdb[(job db&lt;br/&gt;sqlite)]
+    mp -.-&gt; jobdb
+
+    jm &lt;-.-&gt; pipdb[(pip db&lt;br/&gt;sqlite)]
+    pm &lt;-.-&gt; pipdb
+    mp -.-&gt; pipdb
+
+    dm &lt;-.-&gt; drvdb[(drv db&lt;br/&gt;sqlite)]
+    drvdb &lt;-.-&gt; dst
+
+    setf[settings file&lt;br/&gt;devices file] ---&gt; cfg
+
+    t&gt;tomato] -.-&gt; cmd
+    k&gt;ketchup] -.-&gt; cmd
+
+    dst -.-&gt; driver
+    dm -..-&gt; driver
+    tp -.-&gt; dcmd
+
+    subgraph driver[tomato-driver]
+        dcmd{{port:cmd}} ==&gt;  dst[(state)]
+    end
+
+    dst o-.-o h1[hardware]
+
+    p&gt;passata] -.-&gt; cmd
+    p -.-&gt; dcmd
+    </pre></section>
+<section id="tomato-utility">
+<h2><code class="docutils literal notranslate"><span class="pre">tomato</span></code> utility<a class="headerlink" href="#tomato-utility" title="Link to this heading"></a></h2>
+<p>This utility can:</p>
+<ul class="simple">
+<li><p>manage the <strong>tomato</strong> installation by creating default configuration files (<a class="reference external" href="quickstart.html#settings-file"><em>settings file</em></a>, <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a>) via <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">init</span></code>,</p></li>
+<li><p>start the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process or trigger its configuration reload via <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">reload</span></code>,</p></li>
+<li><p>manage the pipeline <code class="docutils literal notranslate"><span class="pre">sample</span></code> and <code class="docutils literal notranslate"><span class="pre">ready</span></code> state by interacting with the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code> via <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">pipeline</span></code>,</p></li>
+<li><p>retrieve the status of the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process (i.e. its configuration) via <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">status</span> <span class="pre">tomato</span></code>,</p></li>
+<li><p>retrieve the status of pipelines, drivers, devices, or components by querying the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code>, <code class="docutils literal notranslate"><span class="pre">drv</span> <span class="pre">db</span></code>, and <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> processes via <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">status</span> <span class="pre">pipelines</span></code> etc.</p></li>
+</ul>
+</section>
+<section id="ketchup-utility">
+<h2><code class="docutils literal notranslate"><span class="pre">ketchup</span></code> utility<a class="headerlink" href="#ketchup-utility" title="Link to this heading"></a></h2>
+<p>The utility first retrieves configuration from a running <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, in order to find locations of the necessary files. Then, it can:</p>
+<ul class="simple">
+<li><p>manage the job submission, status, cancellation by interacting with <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code>,</p></li>
+<li><p>manage job snapshotting by traversing the job storage folder.</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>This utility is modelled after common HPC queueing software, including the sub-commands (<code class="docutils literal notranslate"><span class="pre">submit</span></code>, <code class="docutils literal notranslate"><span class="pre">cancel</span></code>, <code class="docutils literal notranslate"><span class="pre">status</span></code>) and status codes (e.g. <code class="docutils literal notranslate"><span class="pre">q</span></code>, <code class="docutils literal notranslate"><span class="pre">r</span></code>, etc.).</p>
+</div>
+</section>
+<section id="passata-utility">
+<h2><code class="docutils literal notranslate"><span class="pre">passata</span></code> utility<a class="headerlink" href="#passata-utility" title="Link to this heading"></a></h2>
+<p>The utility first retrieves configuration from a running <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, in order to find ports of running <code class="docutils literal notranslate"><span class="pre">tomato-drivers</span></code>. Then, it can:</p>
+<ul class="simple">
+<li><p>register a new component on a driver,</p></li>
+<li><p>query the status of a component,</p></li>
+<li><p>query attributes, capabilities, constants on a component,</p></li>
+<li><p>get and set attribute values on a component,</p></li>
+<li><p>trigger measurements on a component,</p></li>
+<li><p>fetch the last measured data from a component</p></li>
+<li><p>trigger a reset on a component.</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The <a class="reference external" href="https://github.com/dgbowl/marinara/">marinara</a> package, which is the web dashboard of the <strong>tomato</strong> ecosystem, uses the <a class="reference internal" href="apidoc/tomato.passata.html#module-tomato.passata" title="tomato.passata"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tomato.passata</span></code></a> API extensively. The CLI interface is currently not as flexible as the API.</p>
+</div>
+</section>
+<section id="tomato-daemon-process">
+<h2><code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process<a class="headerlink" href="#tomato-daemon-process" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process is stateless, only responsible for reading of the configuration files, validating driver settings, and spawning the <em>job</em>, <em>driver</em> and <em>pipeline</em>–management threads. All configuration and state information that should be persistently stored (i.e. survive restart of these components) is stored in a <code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite3</span></code> database.</p>
+<section id="tomato-daemon-driver-manager-thread">
+<h3><code class="docutils literal notranslate"><span class="pre">tomato.daemon.driver.manager</span></code> thread<a class="headerlink" href="#tomato-daemon-driver-manager-thread" title="Link to this heading"></a></h3>
+<p>This thread ensures that the drivers, as specified in the <a class="reference external" href="quickstart.html#devices-file"><em>devices file</em></a> and parsed by <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code>, have corresponding <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process launched, re-spawned as necessary, and terminated (gracefully or forcefully) once the <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> process is about to quit. It also ensures the <code class="docutils literal notranslate"><span class="pre">drv</span> <span class="pre">db</span></code> is consistent with the running <code class="docutils literal notranslate"><span class="pre">tomato-daemon</span></code> processes.</p>
+<p>The individual driver state, as stored in the <code class="docutils literal notranslate"><span class="pre">drv</span> <span class="pre">db</span></code>, is also managed in this thread, taking care of heartbeating, <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> spawn retries, or pruning of the <code class="docutils literal notranslate"><span class="pre">drv</span> <span class="pre">db</span></code> entries if necessary.</p>
+<p>Finally, once a new <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process sets its <code class="docutils literal notranslate"><span class="pre">port</span></code> and <code class="docutils literal notranslate"><span class="pre">pid</span></code>, this thread instructs the <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> to register its components, if there are none registered so far.</p>
+</section>
+<section id="tomato-daemon-job-manager-thread">
+<h3><code class="docutils literal notranslate"><span class="pre">tomato.daemon.job.manager</span></code> thread<a class="headerlink" href="#tomato-daemon-job-manager-thread" title="Link to this heading"></a></h3>
+<p>This thread ensures that the <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code> and the <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> processes are consistent:</p>
+<ul class="simple">
+<li><p>New jobs, submitted via <code class="docutils literal notranslate"><span class="pre">ketchup</span></code> and stored in <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code>, are matched against the existing pipelines considering the capabilities of the components and the sample in the pipeline. The job status is updated to <code class="docutils literal notranslate"><span class="pre">qw</span></code> accordingly.</p></li>
+<li><p>If an appropriate pipeline becomes ready, new <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> processes are launched, and the pipeline is “reserved” for this job by storing its <code class="docutils literal notranslate"><span class="pre">jobid</span></code> in the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code>.</p></li>
+<li><p>Running jobs with inconsistent entries in the <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code>, (e.g. missing <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process with a known <code class="docutils literal notranslate"><span class="pre">pid</span></code>) are cleared appropriately, by resetting their <code class="docutils literal notranslate"><span class="pre">pid</span></code> in the <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code>.</p></li>
+<li><p>Jobs flagged for cancellation by <code class="docutils literal notranslate"><span class="pre">ketchup</span></code> are terminated appropriately and their <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code> entry is updated accordingly.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The manager thread acts on a snapshot of the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code> state, which is updated once per manager main loop, in order to ensure sequential jobs targetting the same pipeline are submitted in the correct order.</p>
+</div>
+</section>
+<section id="tomato-daemon-pip-manager-thread">
+<h3><code class="docutils literal notranslate"><span class="pre">tomato.daemon.pip.manager</span></code> thread<a class="headerlink" href="#tomato-daemon-pip-manager-thread" title="Link to this heading"></a></h3>
+<p>This thread ensures that the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code> state is consistent with the running <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> processes. As mentioned above, the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code> stores a <code class="docutils literal notranslate"><span class="pre">jobid</span></code> for every job that should be running. Using the <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code>, this <code class="docutils literal notranslate"><span class="pre">jobid</span></code> allows a lookup of job <code class="docutils literal notranslate"><span class="pre">pids</span></code> for all jobs that occupy a pipeline. If a <code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process under this stored <code class="docutils literal notranslate"><span class="pre">pid</span></code> no longer exists, or exists and is a zombie, the individual components of that pipeline are reset via their <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> processes, and the <code class="docutils literal notranslate"><span class="pre">jobid</span></code> in <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code> is cleared. The pipeline is then available for further jobs, once marked as <code class="docutils literal notranslate"><span class="pre">ready</span></code> via the <code class="docutils literal notranslate"><span class="pre">tomato</span> <span class="pre">pipeline</span> <span class="pre">ready</span></code> command.</p>
+</section>
+</section>
+<section id="tomato-job-process">
+<h2><code class="docutils literal notranslate"><span class="pre">tomato-job</span></code> process<a class="headerlink" href="#tomato-job-process" title="Link to this heading"></a></h2>
+<p>This process manages the execution of a single job. It performs the following actions:</p>
+<ul class="simple">
+<li><p>store its own <code class="docutils literal notranslate"><span class="pre">pid</span></code>, set the <code class="docutils literal notranslate"><span class="pre">connected_at</span></code> timestamp, and set the <code class="docutils literal notranslate"><span class="pre">status</span></code> to <code class="docutils literal notranslate"><span class="pre">r</span></code> in the <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code>,</p></li>
+<li><p>determine and create paths for snapshots, results, and temporary job files, storing them in the <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code>,</p></li>
+<li><p>if necessary, wait for all required <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> processes to launch,</p></li>
+<li><p>plan the job, reorganising tasks by component roles, creating a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Thread</span></code> for each component role, and pushing those plans to these threads,</p>
+<ul>
+<li><p>the individual job threads then execute the <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> within the plan as specified, each thread communicating with a single <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process,</p></li>
+<li><p>the <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> are started and stopped as appropriate by the job thread,</p></li>
+<li><p>once all <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> in a job thread are completed, a reset of the component is triggered via <code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code>,</p></li>
+</ul>
+</li>
+<li><p>the main thread performs any snapshotting (acting on the temporary job files), message passing of completed and started <code class="xref py py-class docutils literal notranslate"><span class="pre">Tasks</span></code> between threads, and waits for all job threads to join the main thread,</p></li>
+<li><p>the job data is collated into a NetCDF file and an optional RO-crate,</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">job</span> <span class="pre">db</span></code> is updated to indicate job completion,</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">db</span></code> is updated to free the used pipeline.</p></li>
+</ul>
+</section>
+<section id="tomato-driver-process">
+<h2><code class="docutils literal notranslate"><span class="pre">tomato-driver</span></code> process<a class="headerlink" href="#tomato-driver-process" title="Link to this heading"></a></h2>
+<p>This is a process, spawned by the driver manager, that handles all interactions with a single type of devices and their components. These processes are the <strong>only</strong> processes that touch hardware within the <strong>tomato</strong> framework. Please refer to the <a class="reference external" href="develop_driver.html">tomato driver documentation</a> for more info.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="develop_driver.html" class="btn btn-neutral float-right" title="Developing tomato drivers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021 - 2026, dgbowl authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Other Versions</span>
+      v: 3.0rc6.post6
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"> 
+      <script src="../versions.js"></script>
+    </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
