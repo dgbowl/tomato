@@ -21,7 +21,7 @@ version = get_version("tomato")
 # -- Project information -----------------------------------------------------
 
 project = "tomato"
-copyright = "2021 - 2024, dgbowl authors"
+copyright = "2021 - 2026, dgbowl authors"
 author = "Peter Kraus"
 release = version
 
