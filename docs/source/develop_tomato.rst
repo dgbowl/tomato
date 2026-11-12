@@ -117,7 +117,7 @@ Finally, once a new ``tomato-driver`` process sets its ``port`` and ``pid``, thi
 This thread ensures that the ``job db`` and the ``tomato-job`` processes are consistent:
 
 - New jobs, submitted via ``ketchup`` and stored in ``job db``, are matched against the existing pipelines considering the capabilities of the components and the sample in the pipeline. The job status is updated to ``qw`` accordingly.
-- If an appropriate pipeline becomes ready, new ``tomato-job`` processes are launched,  the pipeline is "reserved" for this job by storing its ``jobid`` in the ``pip db``, and the job status is updated to ``r`` in the ``job db`` accordingly.
+- If an appropriate pipeline becomes ready, new ``tomato-job`` processes are launched, and the pipeline is "reserved" for this job by storing its ``jobid`` in the ``pip db``.
 - Running jobs with inconsistent entries in the ``job db``, (e.g. missing ``tomato-job`` process with a known ``pid``) are cleared appropriately, by resetting their ``pid`` in the ``job db``.
 - Jobs flagged for cancellation by ``ketchup`` are terminated appropriately and their ``job db`` entry is updated accordingly.
 
@@ -126,4 +126,26 @@ This thread ensures that the ``job db`` and the ``tomato-job`` processes are con
 
 ``tomato.daemon.pip.manager`` thread
 ....................................
-This thread ensures that the ``pip db`` state is consistent with the running ``tomato-job`` processes. As mentioned above, the ``pip db`` stores a ``jobid`` for every job that should be running. Using the ``job db``, this ``jobid`` allows a lookup of job ``pids`` for all jobs that occupy a pipeline. If a ``tomato-job`` process under this stored ``pid`` no longer exists, or exists and is a zombie, the individual components of that pipeline are reset via their ``tomato-driver`` processes and the ``jobid`` in ``pip db`` is cleared.
+This thread ensures that the ``pip db`` state is consistent with the running ``tomato-job`` processes. As mentioned above, the ``pip db`` stores a ``jobid`` for every job that should be running. Using the ``job db``, this ``jobid`` allows a lookup of job ``pids`` for all jobs that occupy a pipeline. If a ``tomato-job`` process under this stored ``pid`` no longer exists, or exists and is a zombie, the individual components of that pipeline are reset via their ``tomato-driver`` processes, and the ``jobid`` in ``pip db`` is cleared. The pipeline is then available for further jobs, once marked as ``ready`` via the ``tomato pipeline ready`` command.
+
+``tomato-job`` process
+``````````````````````
+This process manages the execution of a single job. It performs the following actions:
+
+- store its own ``pid``, set the ``connected_at`` timestamp, and set the ``status`` to ``r`` in the ``job db``,
+- determine and create paths for snapshots, results, and temporary job files, storing them in the ``job db``,
+- if necessary, wait for all required ``tomato-driver`` processes to launch,
+- plan the job, reorganising tasks by component roles, creating a :obj:`Thread` for each component role, and pushing those plans to these threads,
+
+  - the individual job threads then execute the :class:`Tasks` within the plan as specified, each thread communicating with a single ``tomato-driver`` process,
+  - the :class:`Tasks` are started and stopped as appropriate by the job thread,
+  - once all :class:`Tasks` in a job thread are completed, a reset of the component is triggered via ``tomato-driver``,
+
+- the main thread performs any snapshotting (acting on the temporary job files), message passing of completed and started :class:`Tasks` between threads, and waits for all job threads to join the main thread,
+- the job data is collated into a NetCDF file and an optional RO-crate,
+- the ``job db`` is updated to indicate job completion,
+- the ``pip db`` is updated to free the used pipeline.
+
+``tomato-driver`` process
+`````````````````````````
+This is a process, spawned by the driver manager, that handles all interactions with a single type of devices and their components. These processes are the **only** processes that touch hardware within the **tomato** framework. Please refer to the `tomato driver documentation <develop_driver.html>`_ for more info.
