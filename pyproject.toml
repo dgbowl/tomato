@@ -8,6 +8,7 @@ name = "tomato"
 authors = [
     {name = "Peter Kraus"},
     {name = "Graham Kimbell"},
+    {name = "Gül Akbulut"},
 ]
 maintainers = [
     {name = "Peter Kraus", email = "peter.kraus@tu-berlin.de"},
