@@ -20,11 +20,16 @@ import zmq
 import tomato.utils
 from tomato.daemon import drvdb, lpp
 from tomato.daemon.lpp import REQ_TIMEOUT
-from tomato.drivers import ModelInterface, driver_to_interface
+from tomato.drivers import (
+    DEPRECATED_DRIVER_INTERFACES,
+    ModelInterface,
+    driver_to_interface,
+)
 from tomato.models import Daemon, DrvState, Reply
 from tomato.utils import context
 
 logger = logging.getLogger(__name__)
+
 
 IDLE_MEASUREMENT_INTERVAL = None
 MAX_REGISTER_RETRIES = 3
@@ -458,6 +463,13 @@ def manager(timeout: int = 1):
                                     d.name,
                                     MAX_REGISTER_RETRIES,
                                 )
+                            if d.version in DEPRECATED_DRIVER_INTERFACES:
+                                logger.warning(
+                                    "%s: DriverInterface is using a deprecated version of ModelInterface: '%s'",
+                                    d.name,
+                                    d.version,
+                                )
+
                     except zmq.Again:
                         logger.warning("%s: check of driver failed, resetting", d.name)
                         params = vars(DrvState(name=d.name))

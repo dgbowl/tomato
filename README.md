@@ -22,15 +22,15 @@ See the [Documentation](https://dgbowl.github.io/tomato) for more detailed info.
 
 ## Contributors:
 - [Peter Kraus](http://github.com/PeterKraus)
+- [Gül Akbulut](https://github.com/gulakbulut)
+- [Graham Kimbell](http://github.com/g-kimbell)
 - [Alexandre Gbocho](https://github.com/AlexN7-Shepard)
 - [Loris Ercole](http://github.com/lorisercole)
-- [Graham Kimbell](http://github.com/g-kimbell)
 
 ## Acknowledgements
-
 This project has received funding from:
-- the European Union’s Horizon 2020 research and innovation programme under grant agreement No 957189.
-- the Emmy Noether Programme of the Deutsche Forschungsgemeinschaft (DFG) under project No 490703766.
+- the European Union’s Horizon 2020 research and innovation programme under grant agreement No 957189,
+- the Emmy Noether Programme of the Deutsche Forschungsgemeinschaft (DFG) under project No 490703766,
 - the Priority Programme (SPP) 2419 HyCAM of the Deutsche Forschungsemeinschaft (DFG) under project No 523873650.
 
 The project is part of BATTERY 2030+, the large-scale European research initiative for inventing the sustainable batteries of the future.

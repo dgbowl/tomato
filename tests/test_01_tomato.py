@@ -164,7 +164,7 @@ def test_tomato_log_verbosity_0(stop_tomato_daemon):
         check=True,
     )
     subprocess.run(
-        ["tomato", "start", "-p", f"{PORT}", "-A", ".", "--quiet"],
+        ["tomato", "start", "-p", f"{PORT}", "-A", ".", "--quiet", "--quiet"],
         check=True,
     )
     assert utils.wait_until_tomato_running(port=PORT, timeout=5)
