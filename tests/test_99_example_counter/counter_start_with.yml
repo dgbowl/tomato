@@ -1,0 +1,29 @@
+version: "2.2"
+sample:
+    identifier: counter_start_with
+user:
+    identifier: test
+method:
+  - component_role: "counter-1"
+    technique_name: "count"
+    max_duration: 2.0
+    sampling_interval: 0.2
+    task_name: task-1
+  - component_role: "counter-1"
+    technique_name: "count"
+    max_duration: 2.0
+    sampling_interval: 0.2
+    task_name: task-2
+  - component_role: "counter-1"
+    technique_name: "count"
+    max_duration: 2.0
+    sampling_interval: 0.2
+    task_name: task-3
+  - component_role: "counter-2"
+    technique_name: "random"
+    max_duration: 300.0
+    sampling_interval: 1.5
+    start_with_task_name: task-2
+    stop_with_task_name: task-3
+settings:
+    verbosity: "DEBUG"
