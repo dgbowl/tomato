@@ -518,8 +518,7 @@ def tomato_job() -> None:
             daemon=False,
         )
         setattr(threads[crole], "crashed", False)  # noqa: B010
-        setattr(threads[crole], "completed_tasks", [])  # noqa: B010
-        setattr(threads[crole], "current_task", None)  # noqa: B010
+        setattr(threads[crole], "current_task_name", None)  # noqa: B010
         setattr(threads[crole], "started_task_names", set())  # noqa: B010
         threads[crole].start()
 
@@ -538,9 +537,9 @@ def tomato_job() -> None:
 
         # Collect and push task names
         for t in threads.values():
-            current_task = getattr(t, "current_task")  # noqa: B009
-            if current_task is not None and current_task.task_name is not None:
-                started_task_names.add(current_task.task_name)
+            current_task_name = getattr(t, "current_task_name")  # noqa: B009
+            if current_task_name is not None:
+                started_task_names.add(current_task_name)
         for t in threads.values():
             stn = getattr(t, "started_task_names")  # noqa: B009
             stn.update(started_task_names)
@@ -622,7 +621,7 @@ def job_thread(
         exc_msg = f"{taskid}: could not communicate with driver on port {dport}"
         if task.task_name is not None:
             taskid += f":{task.task_name!r}"
-        setattr(thread, "current_task", task)  # noqa: B010
+        setattr(thread, "current_task_name", task.task_name)  # noqa: B010
         logger.info("%s: processing task", taskid)
 
         req = lpp.socket(timeout)
@@ -764,7 +763,8 @@ def job_thread(
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
                     data_to_pickle(ds, datapath, role=role)
-                tP += device.pollrate
+                while tP + device.pollrate < tN:
+                    tP += device.pollrate
 
             # Poll for completion and correct task status
             logger.debug("%s: polling task for completion", taskid)
@@ -840,9 +840,7 @@ def job_thread(
             ds: xr.Dataset = ret.data
             ds.attrs["tomato_Component"] = component.model_dump_json()
             data_to_pickle(ds, datapath, role=role)
-        ct = getattr(thread, "completed_tasks").append(task)  # noqa: B009
-        setattr(thread, "completed_tasks", ct)  # noqa: B010
-        setattr(thread, "current_task", None)  # noqa: B010
+        setattr(thread, "current_task_name", None)  # noqa: B010
 
     # Reset component at the end of the job
     logger.info("%s: all tasks done on component %s, resetting", role, component.name)

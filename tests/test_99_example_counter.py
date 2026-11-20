@@ -95,6 +95,7 @@ def test_counter_snapshot_metadata(
     [
         ("counter_multidev", {"counter-1": 10, "counter-2": 5}),
         ("counter_multistep_multidev", {"counter-1": 10, "counter-2": 20}),
+        ("counter_start_with", {"counter-1": 30, "counter-2": 1}),
     ],
 )
 def test_counter_multidev(casename, npoints, datadir, stop_tomato_daemon):

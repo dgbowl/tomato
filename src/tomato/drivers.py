@@ -13,6 +13,7 @@ from tomato.driverinterface_2_1 import ModelInterface as MI_2_1
 from tomato.driverinterface_3_0 import ModelInterface as MI_3_0
 
 ModelInterface = MI_2_1 | MI_3_0
+DEPRECATED_DRIVER_INTERFACES = {"2.1"}
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,12 @@ def driver_to_interface(drivername: str) -> None | ModelInterface:
         return None
     else:
         if hasattr(mod, "DriverInterface"):
+            if mod.DriverInterface.version in DEPRECATED_DRIVER_INTERFACES:
+                logger.warning(
+                    "DriverInterface of driver '%s' is using a deprecated version of ModelInterface: '%s'",
+                    drivername,
+                    mod.DriverInterface.version,
+                )
             return mod.DriverInterface
         else:
             return None
