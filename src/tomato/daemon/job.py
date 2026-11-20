@@ -763,7 +763,8 @@ def job_thread(
                     ds: xr.Dataset = ret.data
                     ds.attrs["tomato_Component"] = component.model_dump_json()
                     data_to_pickle(ds, datapath, role=role)
-                tP += device.pollrate
+                while tP + device.pollrate < tN:
+                    tP += device.pollrate
 
             # Poll for completion and correct task status
             logger.debug("%s: polling task for completion", taskid)

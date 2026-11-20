@@ -543,8 +543,7 @@ class ModelDevice(metaclass=ABCMeta):
                     while getattr(thread, "do_run_task") and getattr(thread, "do_run"):  # noqa: B009
                         t_n = time.perf_counter()
                         if t_n - t_p > task.sampling_interval:
-                            with self.datalock:
-                                self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)  # ty: ignore[invalid-argument-type]
+                            self.do_task(task, t_start=t_0, t_now=t_n, t_prev=t_p)  # ty: ignore[invalid-argument-type]
                             t_p += task.sampling_interval
                         if t_n - t_0 > task.max_duration:
                             setattr(thread, "do_run_task", False)  # noqa: B010
@@ -591,14 +590,15 @@ class ModelDevice(metaclass=ABCMeta):
         so that the component status is consistent with the cached data.
         """
         self.do_measure(**kwargs)
-        if self.data is None:
-            self.data = self.last_data
-        elif self.last_data is None:
-            logger.warning("last data point is not set after measurement!")
-        else:
-            self.data = xr.concat(
-                [self.data, self.last_data], dim="uts", data_vars="minimal"
-            )
+        with self.datalock:
+            if self.data is None:
+                self.data = self.last_data
+            elif self.last_data is None:
+                logger.warning("last data point is not set after measurement!")
+            else:
+                self.data = xr.concat(
+                    [self.data, self.last_data], dim="uts", data_vars="minimal"
+                )
 
     @abstractmethod
     def do_measure(self, **kwargs: dict) -> None:
