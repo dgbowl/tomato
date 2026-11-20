@@ -614,6 +614,9 @@ class ModelComponent(metaclass=ABCMeta):
         One shot execution worker function.
 
         This function is performs a measurement using the current configuration of :obj:`self.attrs`, and stores the result in :obj:`self.last_data`.
+
+        .. warning::
+            This function should **not** touch :obj:`self.data`.
         """
 
     def stop_task(self, **kwargs: dict) -> None:
